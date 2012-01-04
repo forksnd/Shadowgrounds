@@ -20,6 +20,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "storm3dv2", "..\storm\storm3dv2\storm3dv2.vcxproj", "{E51E797B-E20E-476C-8206-7AA9CF270541}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shadowgrounds", "shadowgrounds.vcxproj", "{5C78ED70-84DB-4568-AD42-A5142199F9F5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E51E797B-E20E-476C-8206-7AA9CF270541} = {E51E797B-E20E-476C-8206-7AA9CF270541}
+		{9EE0ADDB-144B-4E3E-BA47-4750214526E2} = {9EE0ADDB-144B-4E3E-BA47-4750214526E2}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "viewer", "..\editor\workspace\viewer\viewer.vcxproj", "{1AF46AE6-AF6B-4F7B-BA1F-2D473A345F57}"
 EndProject

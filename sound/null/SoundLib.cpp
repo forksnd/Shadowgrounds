@@ -97,8 +97,9 @@ int Sound::getLength() const { return 1; }
 SoundLib::SoundLib() {}
 
 
-struct StormStream : public IStorm3D_Stream
+class StormStream : public IStorm3D_Stream
 {
+public:
 	void activate()
 	{
 	}

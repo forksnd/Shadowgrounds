@@ -81,10 +81,10 @@
 
 #ifdef _MSC_VER
 
-#pragma comment(lib, "storm3dv2.lib")
+//#pragma comment(lib, "storm3dv2.lib")
 
 #ifndef USE_DSOUND
-#pragma comment(lib, "fmodvc.lib")
+//#pragma comment(lib, "fmodvc.lib")
 #endif
 
 #endif

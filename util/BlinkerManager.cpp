@@ -12,7 +12,7 @@ namespace util {
 
 struct BlinkerManager::Data
 {
-	vector<shared_ptr<BuildingBlinker> > blinkers;
+	vector<boost::shared_ptr<BuildingBlinker> > blinkers;
 
 	void update(int timeDelta)
 	{
@@ -30,7 +30,7 @@ BlinkerManager::~BlinkerManager()
 {
 }
 
-void BlinkerManager::addBlinker(shared_ptr<BuildingBlinker> blinker)
+void BlinkerManager::addBlinker(boost::shared_ptr<BuildingBlinker> blinker)
 {
 	if(!blinker)
 	{

@@ -280,6 +280,9 @@
     <Filter Include="ogui">
       <UniqueIdentifier>{6e99d54a-e24b-4be2-9d18-129d1cfc69fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\filesys\detail">
+      <UniqueIdentifier>{c0ab2674-5352-4b72-bea2-21cc499be67d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\ui\ElaborateHintMessageWindow.cpp">
@@ -1332,9 +1335,6 @@
     <ClCompile Include="..\sound\playlistdefs.cpp">
       <Filter>Source Files\sound</Filter>
     </ClCompile>
-    <ClCompile Include="..\sound\fmod\SoundLib.cpp">
-      <Filter>Source Files\sound</Filter>
-    </ClCompile>
     <ClCompile Include="..\sound\SoundLooper.cpp">
       <Filter>Source Files\sound</Filter>
     </ClCompile>
@@ -1499,6 +1499,15 @@
     </ClCompile>
     <ClCompile Include="..\ogui\orvgui2.cpp">
       <Filter>ogui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sound\null\SoundLib.cpp">
+      <Filter>Source Files\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\detail\ioapi.cpp">
+      <Filter>Source Files\filesys\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\detail\unzip.cpp">
+      <Filter>Source Files\filesys\detail</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2731,6 +2740,12 @@
     </ClInclude>
     <ClInclude Include="..\util\RLEBlockMap.h">
       <Filter>Header Files\drafts h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filesystem\detail\ioapi.h">
+      <Filter>Source Files\filesys\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filesystem\detail\unzip.h">
+      <Filter>Source Files\filesys\detail</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

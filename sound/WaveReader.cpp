@@ -55,7 +55,7 @@ struct WaveReader::Data
 {
 	string fileName;
 
-	shared_ptr<WAVEFORMATEX> waveFormat;
+	boost::shared_ptr<WAVEFORMATEX> waveFormat;
 	HMMIO ioHandle;
 	MMCKINFO riffChunk;
 

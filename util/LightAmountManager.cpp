@@ -23,7 +23,7 @@ LightAmountManager *LightAmountManager::instance = NULL;
 
 struct LightAmountManager::Data
 {
-	mutable vector<weak_ptr<SpotLightCalculator> > spots;
+	mutable vector<boost::weak_ptr<SpotLightCalculator> > spots;
 	const game::GameMap *gameMap;
 	const IStorm3D_Terrain *terrain;
 
@@ -48,10 +48,10 @@ struct LightAmountManager::Data
 	{
 		float result = 0;
 
-		vector<weak_ptr<SpotLightCalculator> >::iterator it = spots.begin();
+		vector<boost::weak_ptr<SpotLightCalculator> >::iterator it = spots.begin();
 		while(it != spots.end())
 		{
-			shared_ptr<SpotLightCalculator> spot = it->lock();
+			boost::shared_ptr<SpotLightCalculator> spot = it->lock();
 			if(!spot)
 			{
 				it = spots.erase(it);

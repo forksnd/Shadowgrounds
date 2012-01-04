@@ -67,7 +67,7 @@
 #define VERBOSE_BUILD 1
 
 // physics selection
-//#define PHYSICS_NONE
+#define PHYSICS_NONE
 
 //#define PHYSICS_ODE
 //#define PHYSICS_ODE_BOTTOM_TRANSFORM
