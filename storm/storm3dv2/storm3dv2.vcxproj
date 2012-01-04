@@ -97,8 +97,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)bin\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)tmp\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">.\Profile\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">.\Profile\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">$(SolutionDir)bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">$(SolutionDir)tmp\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Legacy debug|Win32'">C:\Program Files\Shadowgrounds Survivor\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Legacy debug|Win32'">$(Configuration)\</IntDir>
@@ -109,6 +109,23 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">$(SolutionDir)bin\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">$(SolutionDir)tmp\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">false</LinkIncremental>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DXSDK_DIR)include;$(SolutionDir)SDK\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DXSDK_DIR)lib\x86;$(SolutionDir)SDK\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Legacy debug|Win32'">$(DXSDK_DIR)include;$(SolutionDir)SDK\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Legacy debug|Win32'">$(DXSDK_DIR)lib\x86;$(SolutionDir)SDK\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Legacy release|Win32'">$(DXSDK_DIR)include;$(SolutionDir)SDK\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Legacy release|Win32'">$(DXSDK_DIR)lib\x86;$(SolutionDir)SDK\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">$(DXSDK_DIR)include;$(SolutionDir)SDK\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">$(DXSDK_DIR)lib\x86;$(SolutionDir)SDK\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DXSDK_DIR)include;$(SolutionDir)SDK\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DXSDK_DIR)lib\x86;$(SolutionDir)SDK\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">$(DXSDK_DIR)include;$(SolutionDir)SDK\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">$(DXSDK_DIR)lib\x86;$(SolutionDir)SDK\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)_d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Legacy debug|Win32'">$(ProjectName)_ld</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Legacy release|Win32'">$(ProjectName)_lr</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">$(ProjectName)_p</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">$(ProjectName)_nph</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -146,7 +163,7 @@
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)(TargetName).pdb</ProgramDatabaseFile>
-      <ImportLibrary>.\Debug/storm3dv2.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)SDK\lib\$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Bscmake>
@@ -154,10 +171,8 @@
       <OutputFile>.\Debug/storm3dv2.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy debug\storm3dv2.dll ..\lib
-copy debug\storm3dv2.lib ..\lib
-..\lib\copywinnt.bat
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -200,7 +215,7 @@ copy debug\storm3dv2.lib ..\lib
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)(TargetName).pdb</ProgramDatabaseFile>
-      <ImportLibrary>.\Release/storm3dv2.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)SDK\lib\$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Bscmake>
@@ -208,10 +223,8 @@ copy debug\storm3dv2.lib ..\lib
       <OutputFile>.\Release/storm3dv2.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy release\storm3dv2.dll ..\lib
-copy release\storm3dv2.lib ..\lib
-..\lib\copywinnt.bat
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">
@@ -254,7 +267,7 @@ copy release\storm3dv2.lib ..\lib
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)(TargetName).pdb</ProgramDatabaseFile>
-      <ImportLibrary>.\Profile/storm3dv2.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)SDK\lib\$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Bscmake>
@@ -262,10 +275,8 @@ copy release\storm3dv2.lib ..\lib
       <OutputFile>.\Profile/storm3dv2.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy profile\storm3dv2.dll ..\lib
-copy profile\storm3dv2.lib ..\lib
-..\lib\copywinnt.bat
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Legacy debug|Win32'">
@@ -304,7 +315,7 @@ copy profile\storm3dv2.lib ..\lib
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)(TargetName).pdb</ProgramDatabaseFile>
-      <ImportLibrary>.\Debug/storm3dv2.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)SDK\lib\$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Bscmake>
@@ -312,11 +323,8 @@ copy profile\storm3dv2.lib ..\lib
       <OutputFile>.\Debug/storm3dv2.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy debug\storm3dv2.dll ..\lib
-copy debug\storm3dv2.dll C:\claw
-copy debug\storm3dv2.lib ..\lib
-..\lib\copywinnt.bat
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Legacy release|Win32'">
@@ -360,7 +368,7 @@ copy debug\storm3dv2.lib ..\lib
       <ProgramDatabaseFile>$(OutDir)(TargetName).pdb</ProgramDatabaseFile>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <ImportLibrary>.\Release/storm3dv2.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)SDK\lib\$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Bscmake>
@@ -368,11 +376,8 @@ copy debug\storm3dv2.lib ..\lib
       <OutputFile>.\Release/storm3dv2.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy release\storm3dv2.dll ..\lib
-copy release\storm3dv2.dll C:\claw
-copy release\storm3dv2.lib ..\lib
-..\lib\copywinnt.bat
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">
@@ -417,7 +422,7 @@ copy release\storm3dv2.lib ..\lib
       <ProgramDatabaseFile>$(OutDir)(TargetName).pdb</ProgramDatabaseFile>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <ImportLibrary>.\Release/storm3dv2.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)SDK\lib\$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Bscmake>
@@ -425,10 +430,8 @@ copy release\storm3dv2.lib ..\lib
       <OutputFile>.\Release/storm3dv2.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy release\storm3dv2.dll ..\lib
-copy release\storm3dv2.lib ..\lib
-..\lib\copywinnt.bat
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -1261,6 +1264,7 @@ copy release\storm3dv2.lib ..\lib
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="wmvsync\rostream.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1275,6 +1279,7 @@ copy release\storm3dv2.lib ..\lib
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

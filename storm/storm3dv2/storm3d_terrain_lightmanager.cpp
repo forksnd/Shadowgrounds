@@ -23,8 +23,8 @@
 using namespace std;
 using namespace boost;
 
-typedef vector<shared_ptr<Storm3D_Spotlight> > SpotList;
-typedef vector<shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
+typedef vector<boost::shared_ptr<Storm3D_Spotlight> > SpotList;
+typedef vector<boost::shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
 typedef vector<Storm3D_LightTexture> FakeLightList;
 
 namespace {

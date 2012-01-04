@@ -16,7 +16,9 @@
 #include <atlbase.h>
 #include <boost/shared_ptr.hpp>
 
-#ifndef __GNUC__
+//TODO: FIX ME!!!!!!!! VIDEOSTREAMING NOT IMPLEMENTED!!!!!
+#if 0
+//#ifndef __GNUC__
 #include <wmsdkidl.h>
 #include "wmvsync/rostream.h"
 #include "wmvsync/reader.h"

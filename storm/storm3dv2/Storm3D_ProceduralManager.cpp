@@ -85,13 +85,13 @@ using namespace std;
 	struct ProceduralEffect
 	{
 		Storm3D_ProceduralManager::Effect effect;
-		shared_ptr<Storm3D_Texture> texture1;
-		shared_ptr<Storm3D_Texture> texture2;
-		shared_ptr<Storm3D_Texture> offset1;
-		shared_ptr<Storm3D_Texture> offset2;
-		shared_ptr<Storm3D_Texture> distortion1;
-		shared_ptr<Storm3D_Texture> distortion2;
-		shared_ptr<Storm3D_Texture> fallback;
+		boost::shared_ptr<Storm3D_Texture> texture1;
+		boost::shared_ptr<Storm3D_Texture> texture2;
+		boost::shared_ptr<Storm3D_Texture> offset1;
+		boost::shared_ptr<Storm3D_Texture> offset2;
+		boost::shared_ptr<Storm3D_Texture> distortion1;
+		boost::shared_ptr<Storm3D_Texture> distortion2;
+		boost::shared_ptr<Storm3D_Texture> fallback;
 
 		TexCoord coord1;
 		TexCoord coord2;
@@ -204,7 +204,7 @@ struct Storm3D_ProceduralManager::Data
 	bool hasDistortion;
 
 	bool useFallback;
-	shared_ptr<Storm3D_Texture> fallback;
+	boost::shared_ptr<Storm3D_Texture> fallback;
 
 	Data(Storm3D &storm_)
 	:	storm(storm_),

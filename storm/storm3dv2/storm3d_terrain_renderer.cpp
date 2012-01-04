@@ -35,8 +35,8 @@ using namespace boost;
 
 namespace {
 
-	typedef vector<shared_ptr<Storm3D_Spotlight> > SpotList;
-	typedef vector<shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
+	typedef vector<boost::shared_ptr<Storm3D_Spotlight> > SpotList;
+	typedef vector<boost::shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
 	typedef vector<Storm3D_LightTexture> FakeLightList;
 
 	static const int MAX_SIZES = 2;
