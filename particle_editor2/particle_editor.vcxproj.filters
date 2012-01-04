@@ -1,0 +1,454 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{7294883f-5ff9-4d20-ad93-28af9e67ebfa}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{148bf590-963c-477c-8a0f-ff89b9c083ff}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{1e985a42-4f19-4a2a-9207-f6285c99b46d}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="editor">
+      <UniqueIdentifier>{10e7615a-42a1-4d32-bc90-5c4f0b4bc057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{5ab140de-7be8-495b-98af-351b0a2223da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="filesystem">
+      <UniqueIdentifier>{7bbbc77e-dc93-4cac-9e7a-de69a755bcd4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="physics">
+      <UniqueIdentifier>{da441eb5-12ce-4c34-9581-64802a3ecfaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="physics\physics_header">
+      <UniqueIdentifier>{0d807155-19a7-4e48-8a33-6744ff917e9d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cloudparticlesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="crappyfont.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\Debug_MemoryManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="floattrack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\GameObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\GameObjectList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\GameRandom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\input_stream_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\container\LinkedList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modelparticlesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="paramUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parseutil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="particle_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="particleeffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="particleforces.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticlePhysics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="particlesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pointarrayparticlesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\SaveData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sprayparticlesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vectortrack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vectortrackdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\align_units.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\camera.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\color_component.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\color_picker.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\command_list.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\common_dialog.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\dialog.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\dialog_utils.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\gui.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\mouse.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\name_dialog.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\parser.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\storm.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\window.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\AreaMap.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\assert.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\viewer\bone_items.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\ColorMap.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\file_list.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\LightManager.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\LightMap.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\system\Logger.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\viewer\model.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\procedural_applier.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\procedural_properties.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\SelfIlluminationChanger.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\SoundMaterialParser.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor\storm_model_utils.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\convert\str2int.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\file_package_manager.cpp">
+      <Filter>filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\input_file_stream.cpp">
+      <Filter>filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\input_stream.cpp">
+      <Filter>filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\memory_stream.cpp">
+      <Filter>filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\output_file_stream.cpp">
+      <Filter>filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\output_stream.cpp">
+      <Filter>filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\standard_package.cpp">
+      <Filter>filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\filesystem\zip_package.cpp">
+      <Filter>filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\actor_base.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\box_actor.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\capsule_actor.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\convex_actor.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\cooker.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\file_stream.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\fluid.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\heightmap_actor.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\joint_base.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\physics_lib.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\rack_actor.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\spherical_joint.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\static_mesh_actor.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\physics\visualizer.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cloudparticlesystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="crappyfont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iparticlearea.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iparticlecollision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modelparticlesystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="orbitcamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="paramUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parseutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particleeffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particleforces.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particlerandom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particlesystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particletiming.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pointarrayparticlesystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sprayparticlesystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="track.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vectortrackdialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\align_units.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\camera.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\color_component.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\color_picker.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\command_list.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\common_dialog.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\dialog.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\dialog_utils.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\gui.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\icommand.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\idlg_handler.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\imode.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\mouse.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\name_dialog.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\parser.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\storm.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\string_conversions.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor\window.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filesystem\convert_type.h">
+      <Filter>filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filesystem\file_package_manager.h">
+      <Filter>filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filesystem\ifile_package.h">
+      <Filter>filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filesystem\input_file_stream.h">
+      <Filter>filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filesystem\memory_stream.h">
+      <Filter>filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filesystem\output_file_stream.h">
+      <Filter>filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filesystem\standard_package.h">
+      <Filter>filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filesystem\zip_package.h">
+      <Filter>filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\actor_base.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\box_actor.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\capsule_actor.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\convex_actor.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\cooker.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\fluid.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\heightmap_actor.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\joint_base.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticlePhysics.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\physics_lib.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\rack_actor.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\sphere_actor.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\spherical_joint.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\static_mesh_actor.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\physics\visualizer.h">
+      <Filter>physics\physics_header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icon1.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="viewer.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

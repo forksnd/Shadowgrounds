@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{9376436c-9a6f-4fcd-afa5-2ef1dcf15a72}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Source Files\editor source">
+      <UniqueIdentifier>{28786ae4-3458-42ae-bd7f-350f88030178}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{12b88409-88cc-4724-9b6d-c9f88560afe6}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{fa2c356a-186b-4446-8c02-44b8029c7e56}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\unitcreator\Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\assert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\Debug_MemoryManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\executables\doorcreator\DoorCreator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\system\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\unitcreator\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\convert\str2int.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\TextFileModifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\command_list.cpp">
+      <Filter>Source Files\editor source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common_dialog.cpp">
+      <Filter>Source Files\editor source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dialog.cpp">
+      <Filter>Source Files\editor source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dialog_utils.cpp">
+      <Filter>Source Files\editor source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mouse.cpp">
+      <Filter>Source Files\editor source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\window.cpp">
+      <Filter>Source Files\editor source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\unitcreator\icon1.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\..\unitcreator\Script1.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

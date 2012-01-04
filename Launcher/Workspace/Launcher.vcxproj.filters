@@ -1,0 +1,337 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{686d063e-a189-4078-9bc1-9071598f1f90}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Source Files\launcher">
+      <UniqueIdentifier>{fe36bf27-cd10-47cb-863b-b45eadc46fd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{dda552cb-533c-4101-965b-5f718ec3b2bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\system">
+      <UniqueIdentifier>{0dbc8b00-80a2-4a20-9d15-cd41b0e8aec1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\game">
+      <UniqueIdentifier>{00c4445f-6576-4d40-9418-3c4e4666161a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\game\options">
+      <UniqueIdentifier>{6f536588-bd04-48d6-a783-22542919159e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\filesystem">
+      <UniqueIdentifier>{6ccae3ec-738f-4808-b793-c91818156f01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\editor">
+      <UniqueIdentifier>{d55a5caa-87d8-4de3-9261-38392765d038}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\convert">
+      <UniqueIdentifier>{2296441b-258c-4899-9d67-7eafdd9e0911}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\container">
+      <UniqueIdentifier>{0b7efeec-ed35-4a42-ac5c-57c6d456d5b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{2e58625e-280e-4329-beca-787b4716ddd6}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{dc0e4514-dcfa-4f44-bd07-e2fbe35716e7}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\launcher_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\advanced_dialog.cpp">
+      <Filter>Source Files\launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\application.cpp">
+      <Filter>Source Files\launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dialog_data.cpp">
+      <Filter>Source Files\launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlghandlerimpl.cpp">
+      <Filter>Source Files\launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\launch_dialog.cpp">
+      <Filter>Source Files\launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\launcher_window.cpp">
+      <Filter>Source Files\launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\options_value.cpp">
+      <Filter>Source Files\launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\options_value_list.cpp">
+      <Filter>Source Files\launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\options_value_manager.cpp">
+      <Filter>Source Files\launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\window.cpp">
+      <Filter>Source Files\launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\util\Debug_MemoryManager.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\util\hiddencommand.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\util\LocaleManager.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\util\LocaleResource.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\util\mod_selector.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\system\Logger.cpp">
+      <Filter>Source Files\system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\game\DHLocaleManager.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\game\GameConfigs.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\game\GameOption.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\game\GameOptionManager.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\filesystem\file_list.cpp">
+      <Filter>Source Files\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\filesystem\file_package_manager.cpp">
+      <Filter>Source Files\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\filesystem\input_file_stream.cpp">
+      <Filter>Source Files\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\filesystem\input_stream.cpp">
+      <Filter>Source Files\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\filesystem\output_file_stream.cpp">
+      <Filter>Source Files\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\filesystem\output_stream.cpp">
+      <Filter>Source Files\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\filesystem\standard_package.cpp">
+      <Filter>Source Files\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\filesystem\zip_package.cpp">
+      <Filter>Source Files\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\editor\parser.cpp">
+      <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\convert\str2int.cpp">
+      <Filter>Source Files\convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\container\LinkedList.cpp">
+      <Filter>Source Files\container</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\advanced_dialog.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\application.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dialog_data.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dlghandlerimpl.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\idlghandler.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\launch_dialog.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\launcher_window.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\options_value.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\options_value_list.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\options_value_manager.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\window.h">
+      <Filter>Source Files\launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\util\Debug_MemoryManager.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\util\hiddencommand.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\util\LocaleManager.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\util\LocaleResource.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\util\mod_selector.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\system\Logger.h">
+      <Filter>Source Files\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\DHLocaleManager.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\GameConfigs.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\GameOption.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\GameOptionManager.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\IScriptVariable.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\SimpleOptions.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_all.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_camera.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_cheats.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_controllers.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_custom.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_debug.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_display.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_effects.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_game.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_graphics.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_gui.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_locale.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_memory.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_players.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_plugins.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_precalc.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_sounds.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_tactical.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game\options\options_video.h">
+      <Filter>Source Files\game\options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\filesystem\convert_type.h">
+      <Filter>Source Files\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\filesystem\empty_buffer.h">
+      <Filter>Source Files\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\filesystem\file_list.h">
+      <Filter>Source Files\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\filesystem\file_package_manager.h">
+      <Filter>Source Files\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\filesystem\ifile_list.h">
+      <Filter>Source Files\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\filesystem\ifile_package.h">
+      <Filter>Source Files\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\filesystem\input_stream.h">
+      <Filter>Source Files\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\filesystem\standard_package.h">
+      <Filter>Source Files\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\filesystem\zip_package.h">
+      <Filter>Source Files\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\editor\FindFileWrapper.h">
+      <Filter>Source Files\editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\editor\parser.h">
+      <Filter>Source Files\editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\editor\string_conversions.h">
+      <Filter>Source Files\editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\convert\str2int.h">
+      <Filter>Source Files\convert</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\container\EmptyIteratorException.h">
+      <Filter>Source Files\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\container\EmptyLinkedListException.h">
+      <Filter>Source Files\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\container\LinkedList.h">
+      <Filter>Source Files\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Resource\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resource\bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Resource\icon3.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\Resource\LaunchDialog.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\storm\lib\zlib.lib" />
+  </ItemGroup>
+</Project>

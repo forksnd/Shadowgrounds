@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{8963807f-595e-4f1a-9805-f6059d33f57e}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Lighwave">
+      <UniqueIdentifier>{5f8d816c-7ede-4965-922d-e650bffdb4a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\external">
+      <UniqueIdentifier>{6b3e8014-ba07-4821-b2b6-5cdc4a555481}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{e9270995-91cf-45e3-a7f5-5bef8b1cb87c}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{673405dd-7693-4cb7-bef1-006cfa0ece7e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="LWExport_Bone.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LWExport_Helper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LWExport_Lightwave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LWExport_Manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LWExport_Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LWExport_Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LWExport_Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LWExport_Transform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\LightWave_3D\SDK\source\servmain.c">
+      <Filter>Source Files\Lighwave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\LightWave_3D\SDK\source\shutdown.c">
+      <Filter>Source Files\Lighwave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\LightWave_3D\SDK\source\startup.c">
+      <Filter>Source Files\Lighwave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\LightWave_3D\SDK\source\username.c">
+      <Filter>Source Files\Lighwave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\Debug_MemoryManager.cpp">
+      <Filter>Source Files\external</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LWExport_Bone.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LWExport_Helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LWExport_Manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LWExport_Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LWExport_Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LWExport_Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LWExport_Transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\Shared\Resources\shared.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Shared\Resources\bp.ico" />
+  </ItemGroup>
+</Project>
