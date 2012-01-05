@@ -5679,10 +5679,10 @@ if (unit->isPhysicsObjectLock() && !unit->isDestroyed()
 						if (x > 0)
 						{
 							//  0 < angle < 180
-							angle = ((M_PI * 0.5) + asinf(dir.y)) * 180.0 / M_PI;
+							angle = ((M_PI * 0.5f) + asinf(dir.y)) * 180.0f / M_PI;
 						} else {
 							// 180 < angle < 360
-							angle = (2*M_PI + -(M_PI * 0.5 + asinf(dir.y))) * 180.0 / M_PI;
+							angle = (2*M_PI + -(M_PI * 0.5f + asinf(dir.y))) * 180.0f / M_PI;
 						}
 
 						LOG_DEBUG(strPrintf("joystick x y angle: %d %d %f", x, y, angle).c_str());

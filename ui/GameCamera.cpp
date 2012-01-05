@@ -1087,10 +1087,10 @@ namespace ui
 						if (mdx > 0)
 						{
 							//  0 < angle < 180
-							alphaAngle = ((M_PI * 0.5) + asinf(dir.y)) * 180.0 / M_PI;
+							alphaAngle = ((M_PI * 0.5f) + asinf(dir.y)) * 180.0f / M_PI;
 						} else {
 							// 180 < angle < 360
-							alphaAngle = (2*M_PI + -(M_PI * 0.5 + asinf(dir.y))) * 180.0 / M_PI;
+							alphaAngle = (2*M_PI + -(M_PI * 0.5f + asinf(dir.y))) * 180.0f / M_PI;
 						}
 					}
 				}
