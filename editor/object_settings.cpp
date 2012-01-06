@@ -35,7 +35,7 @@ struct ObjectSettingsData
 	typedef std::map<std::string, std::string> ValueMap;
 	ValueMap defaultValues;
 
-	Parser parser;
+	EditorParser parser;
 	Storm &storm;
 
 	ObjectSettingsData(Storm &storm_)

@@ -694,7 +694,7 @@ struct MouseTracker: public IUpdate
 	Shared &shared;
 	Mouse &mouse;
 
-	shared_ptr<IStorm3D_Model> model;
+	boost::shared_ptr<IStorm3D_Model> model;
 	float rotation;
 	float heightOffset;
 

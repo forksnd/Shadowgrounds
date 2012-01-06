@@ -161,10 +161,10 @@ bool Mouse::cursorRayTrace(Storm3D_CollisionInfo &ci, VC3 *position, VC3 *direct
 	VC2I screen(getX(), getY());
 	storm->scene->GetEyeVectors(screen, *position, *direction);
 
-	set<weak_ptr<IStorm3D_Model> >::iterator it = storm->floorModels.begin();
+	set<boost::weak_ptr<IStorm3D_Model> >::iterator it = storm->floorModels.begin();
 	for(; it != storm->floorModels.end(); ++it)
 	{
-		shared_ptr<IStorm3D_Model> m = it->lock();
+		boost::shared_ptr<IStorm3D_Model> m = it->lock();
 		if(!m)
 			continue;
 

@@ -35,7 +35,7 @@ bool shadows = true;
 
 struct Visualization
 {
-	shared_ptr<IStorm3D_Model> model;
+	boost::shared_ptr<IStorm3D_Model> model;
 };
 
 struct Spot
@@ -289,9 +289,9 @@ struct TerrainLights::Data
 		Inactive
 	};
 
-	shared_ptr<IStorm3D_Model> getModel(const SpotProperties &properties, const COL &colorMul, VisualizationType type) const
+	boost::shared_ptr<IStorm3D_Model> getModel(const SpotProperties &properties, const COL &colorMul, VisualizationType type) const
 	{
-		shared_ptr<IStorm3D_Model> model(storm.storm->CreateNewModel());
+		boost::shared_ptr<IStorm3D_Model> model(storm.storm->CreateNewModel());
 		model->CastShadows(false);
 		model->SetNoCollision(true);
 
@@ -532,7 +532,7 @@ int TerrainLights::addSpot(const VC2 &position, const SpotProperties &properties
 	return index;
 }
 
-shared_ptr<IStorm3D_Model> TerrainLights::getModel(const SpotProperties &properties, const COL &colorMul) const
+boost::shared_ptr<IStorm3D_Model> TerrainLights::getModel(const SpotProperties &properties, const COL &colorMul) const
 {
 	return data->getModel(properties, colorMul, Data::Active);
 }

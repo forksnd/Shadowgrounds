@@ -253,17 +253,17 @@ struct UnitScriptsData
 	std::vector<ScriptConfig> scriptConfigs;
 	std::map<std::string, std::vector<Script> > scripts;
 
-	void parseUnits(const Parser &parser)
+	void parseUnits(const EditorParser &parser)
 	{
 		parseBlocks(parser.getGlobals(), units, "Unit");
 	}
 
-	void parseConfigs(const Parser &parser)
+	void parseConfigs(const EditorParser &parser)
 	{
 		parseBlocks(parser.getGlobals(), scriptConfigs, "Config");
 	}
 
-	void parseScripts(const Parser &parser)
+	void parseScripts(const EditorParser &parser)
 	{
 		const ParserGroup &parserGroup = parser.getGlobals();
 
@@ -284,9 +284,9 @@ struct UnitScriptsData
 		scripts.clear();
 		scriptConfigs.clear();
 
-		Parser unitParser(true, false);
-		Parser configParser(true, false);
-		Parser scriptParser(true, false);
+		EditorParser unitParser(true, false);
+		EditorParser configParser(true, false);
+		EditorParser scriptParser(true, false);
 
 		//std::ifstream(unitName) >> unitParser;
 		//std::ifstream(configName) >> configParser;

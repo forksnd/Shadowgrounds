@@ -61,7 +61,7 @@ struct GroupList::Data
 
 	void load(const string &name)
 	{
-		Parser parser(true, false);
+		EditorParser parser(true, false);
 		//ifstream(name.c_str()) >> parser;
 		filesystem::FilePackageManager::getInstance().getFile(name) >> parser;
 
@@ -291,7 +291,7 @@ void GroupList::reload()
 
 void GroupList::addObjectGroup(const string &group, const string &subgroup, const ObjectGroup &objectGroup)
 {
-	Parser parser(true, false);
+	EditorParser parser(true, false);
 	ParserGroup &root = parser.getGlobals();
 	root.setValue("group", group);
 	root.setValue("subgroup", subgroup);

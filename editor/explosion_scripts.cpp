@@ -102,12 +102,12 @@ struct ExplosionScripts::Data
 
 	void reload()
 	{
-		Parser sParser(true, false);
-		Parser pParser(true, false);
-		Parser eParser(true, false);
-		Parser soParser(true, false);
-		Parser mParser(true, false);
-		Parser aParser(true, false);
+		EditorParser sParser(true, false);
+		EditorParser pParser(true, false);
+		EditorParser eParser(true, false);
+		EditorParser soParser(true, false);
+		EditorParser mParser(true, false);
+		EditorParser aParser(true, false);
 		//ifstream("Editor/ExplosionScripts.fbt") >> sParser;
 		//ifstream("Editor/ExplosionProjectiles.fbt") >> pParser;
 		//ifstream("Editor/ExplosionEffects.fbt") >> eParser;
