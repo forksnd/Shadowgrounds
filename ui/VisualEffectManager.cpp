@@ -1,11 +1,10 @@
-#include <fstream>
-
 #include "precompiled.h"
 
 #include "VisualEffectManager.h"
 
 #include <Storm3D_UI.h>
 
+#include <fstream>
 #include <assert.h>
 #include "VisualEffect.h"
 #include "VisualEffectType.h"

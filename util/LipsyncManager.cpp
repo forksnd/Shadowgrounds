@@ -1,10 +1,10 @@
-#include <boost/shared_ptr.hpp>
-#include <fstream>
-#include <map>
-
 #include "precompiled.h"
 
 // Copyright 2002-2004 Frozenbyte Ltd.
+
+#include <boost/shared_ptr.hpp>
+#include <fstream>
+#include <map>
 
 #include "LipsyncManager.h"
 #include "../sound/LipsyncManager.h"

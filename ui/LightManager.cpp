@@ -1,5 +1,3 @@
-#include <boost/lexical_cast.hpp>
-
 #include "precompiled.h"
 
 #ifdef _MSC_VER
@@ -7,6 +5,7 @@
 #pragma warning(disable:4786)
 #endif
 
+#include <boost/lexical_cast.hpp>
 #include "LightManager.h"
 #include <istorm3D_terrain_renderer.h>
 #include <istorm3d_spotlight.h>

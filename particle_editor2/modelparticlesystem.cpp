@@ -1,9 +1,8 @@
-#include <boost/lexical_cast.hpp>
-
 #include "precompiled.h"
 
 // Copyright 2002-2004 Frozenbyte Ltd.
 
+#include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <vector>

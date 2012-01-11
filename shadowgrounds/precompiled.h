@@ -16,6 +16,14 @@
 #include <string.h>
 #include <string>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <map>
+
 #include "../util/Debug_MemoryManager.h"
 
 //#include <Storm3D_UI.h>

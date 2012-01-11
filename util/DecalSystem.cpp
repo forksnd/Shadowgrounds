@@ -1,10 +1,10 @@
+#include "precompiled.h"
+
 #include <boost/shared_ptr.hpp>
 #include <fstream>
 #include <vector>
 #include <string>
 #include <stdlib.h>
-
-#include "precompiled.h"
 
 #include "DecalSystem.h"
 #include "DecalManager.h"
