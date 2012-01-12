@@ -483,12 +483,17 @@ Storm3D_Texture::Storm3D_Texture(Storm3D *s2,const char *_filename,DWORD _texloa
 		//HRESULT hr=D3DXCreateCubeTextureFromFileExA(Storm3D2->D3DDevice,filename,D3DX_DEFAULT,
 		//	D3DX_DEFAULT,0,D3DFMT_UNKNOWN,D3DPOOL_MANAGED,D3DX_FILTER_TRIANGLE|D3DX_FILTER_DITHER,
 		//	D3DX_FILTER_BOX,0,NULL,NULL,&dx_handle_cube);
-		HRESULT hr=D3DXCreateCubeTextureFromFileInMemoryEx(Storm3D2->D3DDevice,data,data_size,D3DX_DEFAULT,
-			mipmaps,0,D3DFMT_UNKNOWN,D3DPOOL_MANAGED,D3DX_FILTER_TRIANGLE|D3DX_FILTER_DITHER,
-			D3DX_FILTER_BOX,0,NULL,NULL,&dx_handle_cube);
+		HRESULT hr=E_FAIL;
+
+        if (imageInfo.ResourceType == D3DRTYPE_CUBETEXTURE)
+        {
+            hr = D3DXCreateCubeTextureFromFileInMemoryEx(Storm3D2->D3DDevice,data,data_size,D3DX_DEFAULT,
+			    mipmaps,0,D3DFMT_UNKNOWN,D3DPOOL_MANAGED,D3DX_FILTER_TRIANGLE|D3DX_FILTER_DITHER,
+			    D3DX_FILTER_BOX,0,NULL,NULL,&dx_handle_cube);
+        }
 
 		// Test if succeeded
-		if (!FAILED(hr))
+		if (SUCCEEDED(hr))
 		{
 			// Set texture LOD level
 			// -jpk

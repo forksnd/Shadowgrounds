@@ -7,25 +7,31 @@
 #define INCLUDED_STRING
 #include <string>
 #endif
-#ifndef INCLUDED_BOOST_LEXICAL_CAST_HPP
-#define INCLUDED_BOOST_LEXICAL_CAST_HPP
-#include <boost/lexical_cast.hpp>
-#endif
 
 namespace frozenbyte {
 namespace editor {
 
-template<class T>
-T convertFromString(const std::string &string, T defaultValue)
+template<class T> inline T convertFromString(const std::string &string, T defaultValue);
+
+template<> inline float convertFromString(const std::string &string, float defaultValue)
 {
-	try
-	{
-		return boost::lexical_cast<T> (string);
-	}
-	catch(...)
-	{
-		return defaultValue;
-	}
+    float value = defaultValue;
+    sscanf(string.c_str(), "%f", &value);
+    return value;
+}
+
+template<> inline int convertFromString(const std::string &string, int defaultValue)
+{
+    int value = defaultValue;
+    sscanf(string.c_str(), "%d", &value);
+    return value;
+}
+
+template<> inline bool convertFromString(const std::string &string, bool defaultValue)
+{
+    int value = defaultValue;
+    sscanf(string.c_str(), "%d", &value);
+    return value!=0;
 }
 
 template<class T>
