@@ -1500,14 +1500,14 @@
     <ClCompile Include="..\ogui\orvgui2.cpp">
       <Filter>ogui</Filter>
     </ClCompile>
-    <ClCompile Include="..\sound\null\SoundLib.cpp">
-      <Filter>Source Files\sound</Filter>
-    </ClCompile>
     <ClCompile Include="..\filesystem\detail\ioapi.cpp">
       <Filter>Source Files\filesys\detail</Filter>
     </ClCompile>
     <ClCompile Include="..\filesystem\detail\unzip.cpp">
       <Filter>Source Files\filesys\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sound\fmod\SoundLib.cpp">
+      <Filter>Source Files\sound</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
