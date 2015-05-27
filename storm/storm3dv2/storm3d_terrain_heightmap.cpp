@@ -61,14 +61,13 @@
 	// Sort passes for better coherency
 	bool operator < (const TexturePass &a, const TexturePass &b)
 	{
-		if(a.textureA < b.textureA)
-			return true;
-		if(a.textureB < b.textureB)
-			return true;
-		if(a.subMask < b.subMask)
-			return true;
+		if(a.textureA != b.textureA)
+			return a.textureA < b.textureA;
 
-		return false;
+		if(a.textureB != b.textureB)
+			return a.textureB < b.textureB;
+
+		return a.subMask < b.subMask;
 	}
 
 	void getPosition(VC3 &result, int xIndex, int yIndex, const unsigned short *buffer, const VC3 &size, const VC2I &resolution, const VC3 &scale)
