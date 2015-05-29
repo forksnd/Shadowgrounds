@@ -1189,7 +1189,6 @@ try {
 			builder = soundMixer->getStreamBuilder();
 
 		ui::GameVideoPlayer::playVideo(disposable_scene, "Data\\Videos\\logo.wmv", builder);
-		ui::GameVideoPlayer::playVideo(disposable_scene, "Data\\Videos\\ig_logo_full_audio.wmv", builder);
 	}
 	
 	gameUI->startCommandWindow( 0 );

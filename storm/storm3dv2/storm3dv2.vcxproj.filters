@@ -237,6 +237,9 @@
     <ClCompile Include="wmvsync\rostream.cpp">
       <Filter>Source Files\wmvsync</Filter>
     </ClCompile>
+    <ClCompile Include="treader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Clipper.h">
@@ -505,6 +508,9 @@
     </ClInclude>
     <ClInclude Include="wmvsync\StdAfx.h">
       <Filter>Header Files\wmvsync.h</Filter>
+    </ClInclude>
+    <ClInclude Include="treader.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
