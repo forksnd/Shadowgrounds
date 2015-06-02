@@ -35,16 +35,13 @@ struct Storm3D_TerrainData
 	Storm3D_TerrainDecalSystem decalSystem;
 	Storm3D_TerrainRenderer renderer;
 
-	bool ps13;
-
 	Storm3D_TerrainData(Storm3D &storm_, bool ps13_, bool ps14_, bool ps20_)
 	:	storm(storm_),
 		heightMap(storm, ps13_),
 		models(storm),
 		modelGroups(storm, models, ps14_),
 		decalSystem(storm),
-		renderer(storm, heightMap, modelGroups, models, decalSystem, ps14_, ps20_),
-		ps13(ps13_)
+		renderer(storm, heightMap, modelGroups, models, decalSystem, ps14_, ps20_)
 	{
 	}
 
@@ -132,14 +129,6 @@ void Storm3D_Terrain::resetBlends(int blockIndex)
 void Storm3D_Terrain::setLightMap(int blockIndex, IStorm3D_Texture &map_)
 {
 	data->heightMap.setLightMap(blockIndex, static_cast<Storm3D_Texture &> (map_));
-}
-
-bool Storm3D_Terrain::legacyTexturing() const
-{
-	if(data->ps13)
-		return false;
-
-	return true;
 }
 
 int Storm3D_Terrain::addModel(boost::shared_ptr<IStorm3D_Model> model, boost::shared_ptr<IStorm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation)
