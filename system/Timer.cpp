@@ -8,8 +8,6 @@
 #include <windows.h>
 #include <boost/cstdint.hpp>
 
-using namespace boost;
-
 #else  // _WIN32
 
 #include <SDL.h>

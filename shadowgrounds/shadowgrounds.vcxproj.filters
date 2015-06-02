@@ -277,11 +277,11 @@
       <UniqueIdentifier>{ca0db2aa-6b51-4056-95c5-f9253461a9bc}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
-    <Filter Include="ogui">
-      <UniqueIdentifier>{6e99d54a-e24b-4be2-9d18-129d1cfc69fa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\filesys\detail">
       <UniqueIdentifier>{c0ab2674-5352-4b72-bea2-21cc499be67d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ogui">
+      <UniqueIdentifier>{6e99d54a-e24b-4be2-9d18-129d1cfc69fa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1441,64 +1441,64 @@
       <Filter>Source Files\chat</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\Ogui.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiButton.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiButtonEvent.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiButtonStyle.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiCheckBox.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiEffectEvent.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiException.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiFormattedCommandImg.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiFormattedCommandImpl.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiFormattedText.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiLocaleWrapper.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiSelectList.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiSelectListEvent.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiSelectListStyle.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiSlider.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiStormDriver.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiTextLabel.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiTypeEffectListener.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\OguiWindow.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\orvgui2.cpp">
-      <Filter>ogui</Filter>
+      <Filter>Source Files\ogui</Filter>
     </ClCompile>
     <ClCompile Include="..\filesystem\detail\ioapi.cpp">
       <Filter>Source Files\filesys\detail</Filter>

@@ -1363,7 +1363,7 @@ void Storm3D_Texture::Copy32BitSysMembufferToTexture(DWORD *sysbuffer)
 		if ((sdesc.Format==D3DFMT_A8R8G8B8)||(sdesc.Format==D3DFMT_X8R8G8B8))
 		{
 			BYTE *dp=(BYTE*)lrect.pBits;
-			//if (lrect.Pitch!=width*4) MessageBox(NULL,"Error in SYSMEM (P)","Storm3D Error",0);
+			assert(lrect.Pitch==width*4);
 			//int siz=width*height;
 			//memcpy(dp,sysbuffer,sizeof(DWORD)*siz);
 
@@ -1381,7 +1381,7 @@ void Storm3D_Texture::Copy32BitSysMembufferToTexture(DWORD *sysbuffer)
 		if ((sdesc.Format==D3DFMT_R8G8B8))
 		{
 			BYTE *dp=(BYTE*)lrect.pBits;
-			//if (lrect.Pitch!=width*3) MessageBox(NULL,"Error in SYSMEM (P)","Storm3D Error",0);
+			assert(lrect.Pitch==width*3);
 			int siz=width*height;
 			BYTE *sb=(BYTE*)sysbuffer;
 			int ip=0;
@@ -1394,26 +1394,28 @@ void Storm3D_Texture::Copy32BitSysMembufferToTexture(DWORD *sysbuffer)
 				ip+=4;
 			}
 		}
-		else
-		if ((sdesc.Format==D3DFMT_R5G6B5))
-		{
-			WORD *dp=(WORD*)lrect.pBits;
-			//if (lrect.Pitch!=width*2) MessageBox(NULL,"Error in SYSMEM (P)","Storm3D Error",0);
-			int siz=width*height;
-			BYTE *sb=(BYTE*)sysbuffer;
-			int ip=0;
-			for (int i=0;i<siz;i++)
-			{
-				// ip+0 = alphachannel (ARGB)
-				*dp++=((sb[ip+2]>>3)<<11)+((sb[ip+1]>>2)<<5)+(sb[ip+0]>>3);
-				ip+=4;
-			}
-		}
+        else
+        if ((sdesc.Format == D3DFMT_R5G6B5))
+        {
+            uint8_t* dp = (uint8_t*)lrect.pBits;
+            uint8_t* sb = (uint8_t*)sysbuffer;
+
+            uint8_t* memEnd = dp + height * lrect.Pitch;
+            for (; dp < memEnd; dp += lrect.Pitch)
+            {
+                uint16_t* mem = (uint16_t*)dp;
+                uint8_t*  rowEnd = sb + width * 4;
+                for (; sb < rowEnd; sb += 4)
+                {
+                    *mem++=((sb[2]>>3)<<11)+((sb[1]>>2)<<5)+(sb[0]>>3);
+                }
+            }
+        }
 		else
 		if ((sdesc.Format==D3DFMT_X1R5G5B5)||(sdesc.Format==D3DFMT_A1R5G5B5))
 		{
 			WORD *dp=(WORD*)lrect.pBits;
-			//if (lrect.Pitch!=width*2) MessageBox(NULL,"Error in SYSMEM (P)","Storm3D Error",0);
+			assert(lrect.Pitch==width*2);
 			int siz=width*height;
 			BYTE *sb=(BYTE*)sysbuffer;
 			int ip=0;

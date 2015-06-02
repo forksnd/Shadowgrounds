@@ -738,7 +738,7 @@ try {
 		if (SimpleOptions::getBool(DH_OPT_B_WINDOWED)) windowedMode = true;
 		else windowedMode = false;
 	} else {
-		SimpleOptions::setBool(DH_OPT_B_WINDOWED, windowedMode);
+		SimpleOptions::setBool(DH_OPT_B_WINDOWED, windowedMode != 0);
 		GameOptionManager::getInstance()->save();
 	}
 
