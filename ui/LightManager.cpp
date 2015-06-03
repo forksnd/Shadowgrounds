@@ -32,9 +32,6 @@
 
 #include <string>
 
-using namespace std;
-using namespace boost;
-
 //std::vector<VC2> fakeMin;
 //std::vector<VC2> fakeSize;
 
@@ -734,11 +731,11 @@ namespace ui {
 		return 1.f;
 	}
 */
-	typedef vector<SpotImp> SpotList;
-	typedef map<int, SpotList> SpotGroups;
-	typedef vector<int> IntList;
+	typedef std::vector<SpotImp> SpotList;
+	typedef std::map<int, SpotList> SpotGroups;
+	typedef std::vector<int> IntList;
 
-	typedef vector<Light> LightList;
+	typedef std::vector<Light> LightList;
 
 SpotProperties::SpotProperties()
 :	type(Lighting),
@@ -799,7 +796,7 @@ Light::Light()
 		}
 	};
 
-	typedef vector<LightPoint> PointList;
+	typedef std::vector<LightPoint> PointList;
 
 
 struct LightManager::Data
@@ -1379,12 +1376,12 @@ for(i = 0; i < LIGHTING_FAKE_SPOT_AMOUNT; ++i)
 
 				for(int i = 0; i < 8; ++i)
 				{
-					bbox.mmin.x = min(bbox.mmin.x, v[i].x);
-					bbox.mmin.y = min(bbox.mmin.y, v[i].y);
-					bbox.mmin.z = min(bbox.mmin.z, v[i].z);
-					bbox.mmax.x = max(bbox.mmax.x, v[i].x);
-					bbox.mmax.y = max(bbox.mmax.y, v[i].y);
-					bbox.mmax.z = max(bbox.mmax.z, v[i].z);
+					bbox.mmin.x = std::min(bbox.mmin.x, v[i].x);
+					bbox.mmin.y = std::min(bbox.mmin.y, v[i].y);
+					bbox.mmin.z = std::min(bbox.mmin.z, v[i].z);
+					bbox.mmax.x = std::max(bbox.mmax.x, v[i].x);
+					bbox.mmax.y = std::max(bbox.mmax.y, v[i].y);
+					bbox.mmax.z = std::max(bbox.mmax.z, v[i].z);
 				}
 			}
 
@@ -1568,7 +1565,7 @@ for(int i = STATIC_LIGHT_LIMIT; i < LIGHT_MAX_AMOUNT; ++i)
 			pointLights.ambient *= f0;
 #ifdef PROJECT_SHADOWGROUNDS
 		} else {
-			pointLights.ambient *= .8;
+			pointLights.ambient *= .8f;
 #endif
 		}
 
@@ -1805,7 +1802,7 @@ for(int i = STATIC_LIGHT_LIMIT; i < LIGHT_MAX_AMOUNT; ++i)
 		VC3 updatePos = light.updatePosition - light.position;
 		updatePos *= 0.5f;
 
-		float updateRadius = updatePos.GetLength() + max(light.range, light.updateRange);
+		float updateRadius = updatePos.GetLength() + std::max(light.range, light.updateRange);
 		updatePos += light.position;
 
 updateRadius += 2.f;
@@ -1824,9 +1821,7 @@ updateRadius += 2.f;
 
 LightManager::LightManager(IStorm3D &storm, IStorm3D_Scene &scene, IStorm3D_Terrain &terrain, util::LightMap *lightMap, Terrain *uiTerrain)
 {
-	scoped_ptr<Data> tempData(new Data(storm, scene, terrain, lightMap, uiTerrain));
-	data.swap(tempData);
-
+	data = new Data(storm, scene, terrain, lightMap, uiTerrain);
 	// TEST: ...
 	/*
 	Light red;
@@ -1854,6 +1849,8 @@ LightManager::LightManager(IStorm3D &storm, IStorm3D_Scene &scene, IStorm3D_Terr
 
 LightManager::~LightManager()
 {
+    assert(data);
+    delete data;
 }
 
 void LightManager::addBuildingLight(const VC3 &position, const COL &color, float range)

@@ -36,12 +36,13 @@ struct OutputFileStreamBufferData
 
 OutputFileStreamBuffer::OutputFileStreamBuffer(const std::string &fileName)
 {
-	boost::scoped_ptr<OutputFileStreamBufferData> tempData(new OutputFileStreamBufferData(fileName));
-	data.swap(tempData);
+	data = new OutputFileStreamBufferData(fileName);
 }
 
 OutputFileStreamBuffer::~OutputFileStreamBuffer()
 {
+    assert(data);
+    delete data;
 }
 
 void OutputFileStreamBuffer::putByte(unsigned char c)

@@ -1568,7 +1568,7 @@ IStorm3D_Texture *Storm3D::CreateNewTexture(const char *originalFilename, DWORD 
 //logger->debug("Trying to find before conversion");
 //logger->debug(originalString.c_str());
 
-		for (set<IStorm3D_Texture*>::iterator it=textures.begin();it!=textures.end();it++)
+		for (std::set<IStorm3D_Texture*>::iterator it=textures.begin();it!=textures.end();it++)
 		{
 			// Typecast to simplify code
 			Storm3D_Texture *tx=(Storm3D_Texture*)*it;
@@ -1593,7 +1593,7 @@ IStorm3D_Texture *Storm3D::CreateNewTexture(const char *originalFilename, DWORD 
 //logger->debug("Trying to find after conversion");
 //logger->debug(filename);
 
-		for (set<IStorm3D_Texture*>::iterator it=textures.begin();it!=textures.end();it++)
+		for (std::set<IStorm3D_Texture*>::iterator it=textures.begin();it!=textures.end();it++)
 		{
 			// Typecast to simplify code
 			Storm3D_Texture *tx=(Storm3D_Texture*)*it;
@@ -2130,7 +2130,7 @@ void Storm3D::Empty()
 	{
 		bool found = false;
 
-		set<IStorm3D_Texture *>::iterator it = textures.begin();
+		std::set<IStorm3D_Texture *>::iterator it = textures.begin();
 		for(; it != textures.end(); ++it)
 		{
 			Storm3D_Texture *t = static_cast<Storm3D_Texture *> (*it);
@@ -2595,27 +2595,27 @@ void Storm3D::ReleaseDynamicResources()
 	if(valueTarget)
 		valueTarget.Release();
 
-	for(set<IStorm3D_Line*>::iterator il=lines.begin();il!=lines.end();++il)
+	for(std::set<IStorm3D_Line*>::iterator il=lines.begin();il!=lines.end();++il)
 	{
 		((Storm3D_Line*)(*il))->releaseDynamicResources();
 	}
 
-	for(set<IStorm3D_Terrain*>::iterator itt=terrains.begin();itt!=terrains.end();++itt)
+	for(std::set<IStorm3D_Terrain*>::iterator itt=terrains.begin();itt!=terrains.end();++itt)
 	{
 		((Storm3D_Terrain*)(*itt))->releaseDynamicResources();
 	}
 
-	for(set<IStorm3D_Font *>::iterator itf = fonts.begin(); itf != fonts.end(); ++itf)
+	for(std::set<IStorm3D_Font *>::iterator itf = fonts.begin(); itf != fonts.end(); ++itf)
 		((Storm3D_Font*)(*itf))->ReleaseDynamicBuffers();
 
 	// Release scenes' particle-vbuffers
-	for(set<IStorm3D_Scene*>::iterator is=scenes.begin();is!=scenes.end();++is)
+	for(std::set<IStorm3D_Scene*>::iterator is=scenes.begin();is!=scenes.end();++is)
 	{
 		((Storm3D_Scene*)(*is))->ReleaseDynamicDXBuffers();
 	}
 
 	// Release dynamic textures' dx-buffers
-	for(set<IStorm3D_Texture*>::iterator it=textures.begin();it!=textures.end();++it)
+	for(std::set<IStorm3D_Texture*>::iterator it=textures.begin();it!=textures.end();++it)
 	{
 		((Storm3D_Texture*)(*it))->ReleaseDynamicDXBuffers();
 	}	
@@ -2642,27 +2642,27 @@ void Storm3D::RecreateDynamicResources()
 	Storm3D_Spotlight::createShadowBuffers(*this, *D3D, *D3DDevice, ps14, ps20, shadow_quality);
 	Storm3D_FakeSpotlight::createBuffers(*this, *D3D, *D3DDevice, fake_shadow_quality);
 
-	for(set<IStorm3D_Line*>::iterator il=lines.begin();il!=lines.end();++il)
+	for(std::set<IStorm3D_Line*>::iterator il=lines.begin();il!=lines.end();++il)
 	{
 		((Storm3D_Line*)(*il))->recreateDynamicResources();
 	}
 
-	for(set<IStorm3D_Terrain*>::iterator itt=terrains.begin();itt!=terrains.end();++itt)
+	for(std::set<IStorm3D_Terrain*>::iterator itt=terrains.begin();itt!=terrains.end();++itt)
 	{
 		((Storm3D_Terrain*)(*itt))->recreateDynamicResources();
 	}
 
-	for(set<IStorm3D_Font *>::iterator itf = fonts.begin(); itf != fonts.end(); ++itf)
+	for(std::set<IStorm3D_Font *>::iterator itf = fonts.begin(); itf != fonts.end(); ++itf)
 		((Storm3D_Font*)(*itf))->CreateDynamicBuffers();
 
 	// Release scenes' particle-vbuffers
-	for(set<IStorm3D_Scene*>::iterator is=scenes.begin();is!=scenes.end();is++)
+	for(std::set<IStorm3D_Scene*>::iterator is=scenes.begin();is!=scenes.end();is++)
 	{
 		((Storm3D_Scene*)(*is))->ReCreateDynamicDXBuffers();
 	}
 
 	// Release dynamic textures' dx-buffers
-	for(set<IStorm3D_Texture*>::iterator it=textures.begin();it!=textures.end();it++)
+	for(std::set<IStorm3D_Texture*>::iterator it=textures.begin();it!=textures.end();it++)
 	{
 		((Storm3D_Texture*)(*it))->ReCreateDynamicDXBuffers();
 	}	

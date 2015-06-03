@@ -6,7 +6,6 @@
 
 #include <queue>
 #include <vector>
-#include <boost/scoped_ptr.hpp>
 #include <c2_common.h>
 #include <c2_qtree.h>
 #include <c2_oobb.h>
@@ -26,6 +25,7 @@
 #include "Storm3D_ShaderManager.h"
 #include "storm3d.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "../../util/Debug_MemoryManager.h"
 
@@ -136,7 +136,7 @@ int active_visibility = 0;
 	};
 
 	struct SolidObjectSorter:
-		binary_function<Storm3D_Model_Object *, Storm3D_Model_Object *, bool>
+		std::binary_function<Storm3D_Model_Object *, Storm3D_Model_Object *, bool>
 	{
 		VC3 camera;
 
@@ -185,7 +185,7 @@ int active_visibility = 0;
 	};
 
 	struct AlphaObjectSorter:
-		binary_function<Storm3D_Model_Object *, Storm3D_Model_Object *, bool>
+		std::binary_function<Storm3D_Model_Object *, Storm3D_Model_Object *, bool>
 	{
 		VC3 camera;
 
@@ -656,7 +656,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 		lastRealFrustum[active_visibility] = realFrustum;
 
 		float timeDelta = timeDelta_ / 1000.f;
-		string activeEffect;
+		std::string activeEffect;
 		float closestEffect = 100000000000000000.f;
 
 		VC3 cameraPosition = camera.GetPosition();
@@ -1922,12 +1922,13 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 Storm3D_TerrainModels::Storm3D_TerrainModels(Storm3D &storm)
 {
-	boost::scoped_ptr<Storm3D_TerrainModelsData> tempData(new Storm3D_TerrainModelsData(storm));
-	data.swap(tempData);
+	data = new Storm3D_TerrainModelsData(storm);
 }
 
 Storm3D_TerrainModels::~Storm3D_TerrainModels()
 {
+    assert(data);
+    delete data;
 }
 
 void Storm3D_TerrainModels::addModel(IStorm3D_Model &model_)
@@ -2009,7 +2010,7 @@ void Storm3D_TerrainModels::buildTree(const VC3 &size)
 
 bool Storm3D_TerrainModels::hasTree() const
 {
-	return data->tree;
+	return (bool)data->tree;
 }
 
 void Storm3D_TerrainModels::RayTrace(const VC3 &position, const VC3 &direction, float rayLength, Storm3D_CollisionInfo &info, bool accurate) const
@@ -2227,7 +2228,7 @@ void Storm3D_TerrainModels::renderBackground(Storm3D_Model *model)
 	Storm3D_ShaderManager *shaderManager = Storm3D_ShaderManager::GetSingleton();
 	shaderManager->SetTextureOffset(VC2());
 
-	set<IStorm3D_Model_Object *>::iterator it = model->objects.begin();
+	std::set<IStorm3D_Model_Object *>::iterator it = model->objects.begin();
 	for(; it != model->objects.end(); ++it)
 	{
 		Storm3D_Model_Object *object = static_cast<Storm3D_Model_Object *> (*it);

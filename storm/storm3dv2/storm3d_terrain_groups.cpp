@@ -29,14 +29,12 @@
 
 #include "../../util/Debug_MemoryManager.h"
 
-using namespace std;
-using namespace boost;
-
+#include <boost/scoped_ptr.hpp>
 
 	struct SharedModel;
 	struct Instance;
-	typedef vector<SharedModel> ModelList;
-	typedef vector<boost::shared_ptr<Instance> > InstanceList;
+	typedef std::vector<SharedModel> ModelList;
+	typedef std::vector<boost::shared_ptr<Instance> > InstanceList;
 
 	struct AnimationDeleter
 	{
@@ -68,7 +66,7 @@ using namespace boost;
 			radius(0),
 			radius2d(0)
 		{
-			boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(model->ITObject->Begin());
+			Iterator<IStorm3D_Model_Object*>* objectIterator = model->ITObject->Begin();
 			for(; !objectIterator->IsEnd(); objectIterator->Next())
 			{
 				IStorm3D_Model_Object *object = objectIterator->GetCurrent();
@@ -107,7 +105,9 @@ using namespace boost;
 
 			if(!bones.empty())
 				model->LoadBones(bones.c_str());
-		}
+
+            delete objectIterator;
+	    }
 	};
 
 	struct Instance
@@ -212,7 +212,7 @@ using namespace boost;
 	};
 
 	typedef Quadtree<Instance> Tree;
-	typedef map<IStorm3D_Model *, InstanceInfo> InstanceMap;
+	typedef std::map<IStorm3D_Model *, InstanceInfo> InstanceMap;
 
 
 struct Storm3D_TerrainGroupData
@@ -310,12 +310,13 @@ namespace {
 
 Storm3D_TerrainGroup::Storm3D_TerrainGroup(Storm3D &storm, Storm3D_TerrainModels &models, bool ps14)
 {
-	boost::scoped_ptr<Storm3D_TerrainGroupData> tempData(new Storm3D_TerrainGroupData(storm, models, ps14));
-	data.swap(tempData);
+	data = new Storm3D_TerrainGroupData(storm, models, ps14);
 }
 
 Storm3D_TerrainGroup::~Storm3D_TerrainGroup()
 {
+    assert(data);
+    delete data;
 }
 
 int Storm3D_TerrainGroup::addModel(boost::shared_ptr<Storm3D_Model> model, boost::shared_ptr<Storm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation)
@@ -370,7 +371,7 @@ int Storm3D_TerrainGroup::addInstance(int modelId, const VC3 &position, const QU
 		mf->SetNoCollision(true);
 		static_cast<Storm3D_Model *> (mf.get())->terrain_object = true;
 
-		boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(mf->ITObject->Begin());
+		Iterator<IStorm3D_Model_Object*>* objectIterator(mf->ITObject->Begin());
 		for(; !objectIterator->IsEnd(); objectIterator->Next())
 		{
 			IStorm3D_Model_Object *object = objectIterator->GetCurrent();
@@ -380,6 +381,7 @@ int Storm3D_TerrainGroup::addInstance(int modelId, const VC3 &position, const QU
 			object->SetForceAlpha(0);
 		}
 
+        delete objectIterator;
 	}
 
 	if(original.animation)
@@ -584,7 +586,7 @@ void Storm3D_TerrainGroup::setInstanceFade(int modelId, int instanceId, float fa
 */
 	if(instance.fadeModel)
 	{
-		boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(instance.fadeModel->ITObject->Begin());
+		Iterator<IStorm3D_Model_Object *>* objectIterator(instance.fadeModel->ITObject->Begin());
 		for(; !objectIterator->IsEnd(); objectIterator->Next())
 		{
 			IStorm3D_Model_Object *object = objectIterator->GetCurrent();
@@ -595,6 +597,8 @@ void Storm3D_TerrainGroup::setInstanceFade(int modelId, int instanceId, float fa
 		}
 
 		data->terrainModels.addModel(*instance.fadeModel);
+
+        delete objectIterator;
 	}
 }
 

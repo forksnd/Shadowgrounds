@@ -1,6 +1,5 @@
 #include "precompiled.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <assert.h>
 #include <vector>
 #include <map>

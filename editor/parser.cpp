@@ -335,25 +335,24 @@ struct ParserGroupData
 
 ParserGroup::ParserGroup()
 {
-	boost::scoped_ptr<ParserGroupData> tempData(new ParserGroupData());
-	data.swap(tempData);
+	data = new ParserGroupData();
 }
 
 ParserGroup::ParserGroup(const ParserGroup &rhs)
 {
-	boost::scoped_ptr<ParserGroupData> tempData(new ParserGroupData());
-	tempData->copy(*rhs.data.get());
-
-	data.swap(tempData);
+	data = new ParserGroupData();
+	data->copy(*rhs.data);
 }
 
 ParserGroup::~ParserGroup()
 {
+    assert(data);
+    delete data;
 }
 
 ParserGroup &ParserGroup::operator = (const ParserGroup &rhs)
 {
-	data->copy(*rhs.data.get());
+	data->copy(*rhs.data);
 	return *this;
 }
 
@@ -496,7 +495,7 @@ void ParserGroup::addSubGroup(const std::string &name, ParserGroup &group)
 	assert(!name.empty());
 
 	boost::shared_ptr<ParserGroup> g(new ParserGroup());
-	g->data->copy(*group.data.get());
+	g->data->copy(*group.data);
 
 	g->data->flags = data->flags;
 
@@ -568,8 +567,7 @@ static void parser_unreferenced_check_walk(const ParserGroup &pg)
 
 EditorParser::EditorParser(bool logUnreferenced, bool logNonExisting)
 {
-	boost::scoped_ptr<ParserData> tempData(new ParserData());
-	data.swap(tempData);
+	data = new ParserData();
 	data->logUnreferenced = logUnreferenced;
 	data->logNonExisting = logNonExisting;
 }
@@ -580,6 +578,8 @@ EditorParser::~EditorParser()
 	{
 		parser_unreferenced_check_walk(data->globals);
 	}
+    assert(data);
+    delete data;
 }
 
 const ParserGroup &EditorParser::getGlobals() const

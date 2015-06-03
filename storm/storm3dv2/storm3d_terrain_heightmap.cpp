@@ -8,7 +8,6 @@
 #include <vector>
 #include <fstream>
 #include <boost/scoped_array.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include "storm3d_terrain_heightmap.h"
 #include "storm3d_terrain_lod.h"
@@ -706,12 +705,13 @@ struct Storm3D_TerrainHeightmapData
 
 Storm3D_TerrainHeightmap::Storm3D_TerrainHeightmap(Storm3D &storm, bool ps13)
 {
-	boost::scoped_ptr<Storm3D_TerrainHeightmapData> tempData(new Storm3D_TerrainHeightmapData(storm, ps13));
-	data.swap(tempData);
+	data = new Storm3D_TerrainHeightmapData(storm, ps13);
 }
 
 Storm3D_TerrainHeightmap::~Storm3D_TerrainHeightmap()
 {
+    assert(data);
+    delete data;
 }
 
 void Storm3D_TerrainHeightmap::setHeightMap(const unsigned short *buffer, const VC2I &resolution, const VC3 &size, int textureDetail, unsigned short *forceMap, int heightmapMultiplier, int obstaclemapMultiplier)

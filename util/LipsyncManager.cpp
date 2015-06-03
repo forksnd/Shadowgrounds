@@ -19,8 +19,6 @@
 #include <IStorm3D_Scene.h>
 #include <IStorm3D_Texture.h>
 
-using namespace boost;
-using namespace std;
 using namespace frozenbyte;
 using namespace frozenbyte::editor;
 
@@ -131,7 +129,7 @@ namespace util {
 		}
 	};
 
-	typedef map<string, Character> CharacterMap;
+	typedef std::map<std::string, Character> CharacterMap;
 
 
 struct LipsyncManager::Data
@@ -241,7 +239,7 @@ struct LipsyncManager::Data
 				
 				if(!texture)
 				{
-					string msg = "Cannot find lipsync picture: ";
+					std::string msg = "Cannot find lipsync picture: ";
 					msg += picture;
 					Logger::getInstance()->error(msg.c_str());
 				}
@@ -258,14 +256,14 @@ struct LipsyncManager::Data
 				IStorm3D_Model *m = storm->CreateNewModel();
 				if(!m->LoadS3D(model.c_str()))
 				{
-					string msg = "Cannot find lipsync model: ";
+					std::string msg = "Cannot find lipsync model: ";
 					msg += model;
 					Logger::getInstance()->error(msg.c_str());
 				}
 
 				if(!m->LoadBones(bones.c_str()))
 				{
-					string msg = "Cannot find lipsync model bones: ";
+					std::string msg = "Cannot find lipsync model bones: ";
 					msg += bones;
 					Logger::getInstance()->error(msg.c_str());
 				}
@@ -275,7 +273,7 @@ struct LipsyncManager::Data
 		}
 	}
 
-	void setCharacter(CharPosition position, const string &id)
+	void setCharacter(CharPosition position, const std::string &id)
 	{
 		ActiveCharacter &ac = activeCharacters[position];
 		if(ac.scene && ac.model)
@@ -305,7 +303,7 @@ struct LipsyncManager::Data
 		}
 	}
 
-	void setIdle(const string &id, const string &data, int fadeTime)
+	void setIdle(const std::string &id, const std::string &data, int fadeTime)
 	{
 		FB_ASSERT(!id.empty() && !data.empty());
 		IStorm3D_Model *m = characters[id].model.get();
@@ -314,7 +312,7 @@ struct LipsyncManager::Data
 			manager.setIdle(m, data, fadeTime);
 	}
 
-	void setExpression(const string &id, const string &data, int fadeTime)
+	void setExpression(const std::string &id, const std::string &data, int fadeTime)
 	{
 		FB_ASSERT(!id.empty() && !data.empty());
 		IStorm3D_Model *m = characters[id].model.get();
@@ -323,7 +321,7 @@ struct LipsyncManager::Data
 			manager.setExpression(m, data, fadeTime);
 	}
 
-	void play(const string &id, const boost::shared_ptr<sfx::AmplitudeArray> &amplitudes, int time)
+	void play(const std::string &id, const boost::shared_ptr<sfx::AmplitudeArray> &amplitudes, int time)
 	{
 		FB_ASSERT(!id.empty());
 		IStorm3D_Model *m = characters[id].model.get();
@@ -360,14 +358,14 @@ struct LipsyncManager::Data
 
 LipsyncManager::LipsyncManager(IStorm3D *storm, IStorm3D_Terrain *terrain)
 {
-	scoped_ptr<Data> tempData(new Data(storm, terrain));
-	tempData->init();
-
-	data.swap(tempData);
+	data =  new Data(storm, terrain);
+	data->init();
 }
 
 LipsyncManager::~LipsyncManager()
 {
+    assert(data);
+    delete data;
 }
 
 const std::string &LipsyncManager::getCharacter(CharPosition position) const

@@ -40,12 +40,13 @@ struct InputFileStreamBufferData
 
 InputFileStreamBuffer::InputFileStreamBuffer(const std::string &fileName)
 {
-	boost::scoped_ptr<InputFileStreamBufferData> tempData(new InputFileStreamBufferData(fileName));
-	data.swap(tempData);
+	data = new InputFileStreamBufferData(fileName);
 }
 
 InputFileStreamBuffer::~InputFileStreamBuffer()
 {
+    assert(data);
+    delete data;
 }
 
 unsigned char InputFileStreamBuffer::popByte()

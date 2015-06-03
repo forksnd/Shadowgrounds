@@ -12,9 +12,7 @@
 #include <IStorm3D_Logger.h>
 #include <d3d9.h>
 #include <boost/shared_ptr.hpp>
-
-using namespace boost;
-using namespace std;
+#include <boost/scoped_ptr.hpp>
 
 	struct NullDeleter
 	{
@@ -182,7 +180,7 @@ using namespace std;
 		}
 	};
 
-	typedef map<string, ProceduralEffect> ProceduralEffectList;
+	typedef std::map<std::string, ProceduralEffect> ProceduralEffectList;
 
 struct Storm3D_ProceduralManager::Data
 {
@@ -191,14 +189,14 @@ struct Storm3D_ProceduralManager::Data
 	CComPtr<IDirect3DTexture9> offsetTarget;
 
 	ProceduralEffectList effects;
-	string active;
+	std::string active;
 
 	IStorm3D_Logger *logger;
-	scoped_ptr<frozenbyte::storm::VertexShader> vshader;
-	scoped_ptr<frozenbyte::storm::PixelShader> pshader;
-	scoped_ptr<frozenbyte::storm::PixelShader> poffsetShader;
-	scoped_ptr<frozenbyte::storm::VertexBuffer> vbuffer;
-	scoped_ptr<frozenbyte::storm::IndexBuffer> ibuffer;
+	boost::scoped_ptr<frozenbyte::storm::VertexShader> vshader;
+	boost::scoped_ptr<frozenbyte::storm::PixelShader> pshader;
+	boost::scoped_ptr<frozenbyte::storm::PixelShader> poffsetShader;
+	boost::scoped_ptr<frozenbyte::storm::VertexBuffer> vbuffer;
+	boost::scoped_ptr<frozenbyte::storm::IndexBuffer> ibuffer;
 
 	bool distortionMode;
 	bool hasDistortion;
@@ -216,7 +214,7 @@ struct Storm3D_ProceduralManager::Data
 	{
 	}
 
-	void addEffect(const string &name, const Effect &effect)
+	void addEffect(const std::string &name, const Effect &effect)
 	{
 		ProceduralEffect result;
 		result.effect = effect;
@@ -226,7 +224,7 @@ struct Storm3D_ProceduralManager::Data
 			effects[name] = result;
 		else if(logger)
 		{
-			string message = "Cannot find both textures for procedural effect: ";
+			std::string message = "Cannot find both textures for procedural effect: ";
 			message += name;
 			logger->error(message.c_str());
 
@@ -266,10 +264,10 @@ struct Storm3D_ProceduralManager::Data
 
 				float buffer[] = 
 				{
-					-width, height,         1.f, 1.f,   0.f, 1.f, 0.f, 1.f,
+					-width, height,   1.f, 1.f,   0.f, 1.f, 0.f, 1.f,
 					-width, -height,  1.f, 1.f,   0.f, 0.f, 0.f, 0.f,
-					width, height,                 1.f, 1.f,   1.f, 1.f, 1.f, 1.f,
-					width, -height,          1.f, 1.f,   1.f, 0.f, 1.f, 0.f
+					width, height,    1.f, 1.f,   1.f, 1.f, 1.f, 1.f,
+					width, -height,   1.f, 1.f,   1.f, 0.f, 1.f, 0.f
 				};
 
 				memcpy(ptr, buffer, 8 * 4 * sizeof(float));
@@ -296,7 +294,7 @@ struct Storm3D_ProceduralManager::Data
 		}
 	}
 
-	void setActive(const string &name)
+	void setActive(const std::string &name)
 	{
 		if(name.empty())
 		{
@@ -468,12 +466,13 @@ struct Storm3D_ProceduralManager::Data
 
 Storm3D_ProceduralManager::Storm3D_ProceduralManager(Storm3D &storm)
 {
-	scoped_ptr<Data> tempData(new Data(storm));
-	data.swap(tempData);
+	data = new Data(storm);
 }
 
 Storm3D_ProceduralManager::~Storm3D_ProceduralManager()
 {
+    assert(data);
+    delete data;
 }
 
 void Storm3D_ProceduralManager::setLogger(IStorm3D_Logger *logger)
@@ -486,7 +485,7 @@ void Storm3D_ProceduralManager::setTarget(CComPtr<IDirect3DTexture9> &target, CC
 	data->init(target, offsetTarget);
 }
 
-void Storm3D_ProceduralManager::addEffect(const string &name, const Effect &effect)
+void Storm3D_ProceduralManager::addEffect(const std::string &name, const Effect &effect)
 {
 	data->addEffect(name, effect);
 }

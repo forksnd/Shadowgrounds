@@ -26,7 +26,6 @@
 
 #include "../game/options/options_gui.h"
 
-using namespace boost;
 using namespace game;
 
 namespace ui {
@@ -87,10 +86,10 @@ namespace ui {
 typedef std::vector<MapEntity> EntityList;
 typedef std::map<std::string, ObjectivePoint> ObjectivePoints;
 typedef std::vector<Objective> ObjectiveList;
-typedef std::vector<shared_ptr<OguiTextLabel> > LabelList;
-typedef std::vector<shared_ptr<OguiButton> > ButtonList;
+typedef std::vector<boost::shared_ptr<OguiTextLabel> > LabelList;
+typedef std::vector<boost::shared_ptr<OguiButton> > ButtonList;
 
-typedef std::vector<shared_ptr<OguiCheckBox> > CheckboxList;
+typedef std::vector<boost::shared_ptr<OguiCheckBox> > CheckboxList;
 
 struct MapWindow::Data : private IOguiButtonListener, private IOguiEffectListener
 {
@@ -104,28 +103,28 @@ struct MapWindow::Data : private IOguiButtonListener, private IOguiEffectListene
 	float playerRotation;
 	int currentObjective;
 	
-	shared_ptr<Map> map;
+	boost::shared_ptr<Map> map;
 
 	bool visible;
-	scoped_ptr<GUIEffectWindow> effectWindow;
-	scoped_ptr<OguiWindow> window;
-	scoped_ptr<OguiButton> closeButton;
-	scoped_ptr<OguiButton> mapBackground;
-	scoped_ptr<OguiButton> mapOverlay;
-	scoped_ptr<OguiButton> mapButton;
-	scoped_ptr<IOguiImage> mapImage;
+	boost::scoped_ptr<GUIEffectWindow> effectWindow;
+	boost::scoped_ptr<OguiWindow> window;
+	boost::scoped_ptr<OguiButton> closeButton;
+	boost::scoped_ptr<OguiButton> mapBackground;
+	boost::scoped_ptr<OguiButton> mapOverlay;
+	boost::scoped_ptr<OguiButton> mapButton;
+	boost::scoped_ptr<IOguiImage> mapImage;
 	// scoped_ptr<OguiTextLabel> missionLabel;
 	// scoped_ptr<OguiTextLabel> primaryLabel;
 	// scoped_ptr<OguiTextLabel> secondaryLabel;
-	scoped_ptr<OguiTextLabel> exitLabel;
-	scoped_ptr<OguiButton> playerButton;
-	scoped_ptr<OguiButton> checkpointButton;
-	scoped_ptr<OguiButton> primaryBackground;
+	boost::scoped_ptr<OguiTextLabel> exitLabel;
+	boost::scoped_ptr<OguiButton> playerButton;
+	boost::scoped_ptr<OguiButton> checkpointButton;
+	boost::scoped_ptr<OguiButton> primaryBackground;
 	// scoped_ptr<OguiButton> secondaryBackground;
-	scoped_ptr<OguiButton> highlight;
+	boost::scoped_ptr<OguiButton> highlight;
 	// scoped_ptr<OguiFormattedText> description;	// by Pete
-	scoped_ptr<IOguiFont> boldFont;				// by Pete
-	scoped_ptr<IOguiFont> bigObjectiveFont;		// by Pete
+	boost::scoped_ptr<IOguiFont> boldFont;				// by Pete
+	boost::scoped_ptr<IOguiFont> bigObjectiveFont;		// by Pete
 
 #ifdef PROJECT_SURVIVOR
 	scoped_ptr<IOguiFont> normalFont;
@@ -176,7 +175,7 @@ struct MapWindow::Data : private IOguiButtonListener, private IOguiEffectListene
 	std::vector<DWORD> mapBuffer;
 	std::vector<DWORD> mapBufferOutput;
 
-	Data(game::Game &game_, Ogui &ogui_, shared_ptr<Map> &map_)
+	Data(game::Game &game_, Ogui &ogui_, boost::shared_ptr<Map> &map_)
 	:	game(game_),
 		ogui(ogui_),
 		playerRotation(0),
@@ -1232,7 +1231,7 @@ struct MapWindow::Data : private IOguiButtonListener, private IOguiEffectListene
 						highlight.reset(ogui.CreateSimpleTextButton(window.get(), x, y, xs, ys, fname, fname, fname, 0));
 					}
 					
-					shared_ptr<OguiCheckBox> checkbox( new OguiCheckBox( window.get(), &ogui, getLocaleGuiInt( "gui_map_checkbox_position_x", 0 ), yPos, getLocaleGuiInt( "gui_map_checkbox_size_x", 0 ), getLocaleGuiInt( "gui_map_checkbox_size_y", 0 ), 
+					boost::shared_ptr<OguiCheckBox> checkbox( new OguiCheckBox( window.get(), &ogui, getLocaleGuiInt( "gui_map_checkbox_position_x", 0 ), yPos, getLocaleGuiInt( "gui_map_checkbox_size_x", 0 ), getLocaleGuiInt( "gui_map_checkbox_size_y", 0 ), 
 						getLocaleGuiString("gui_map_checkbox_image"), "", "", 
 						getLocaleGuiString("gui_map_checkbox_done_image"), "", "", 0, it->completed, false )  );
 
@@ -1550,16 +1549,16 @@ struct MapWindow::Data : private IOguiButtonListener, private IOguiEffectListene
 	}
 };
 
-MapWindow::MapWindow(game::Game &game, Ogui &ogui, shared_ptr<Map> &map)
+MapWindow::MapWindow(game::Game &game, Ogui &ogui, boost::shared_ptr<Map> &map)
 {
-	scoped_ptr<Data> tempData(new Data(game, ogui, map));
-	tempData->init();
-
-	data.swap(tempData);
+	data = new Data(game, ogui, map);
+	data->init();
 }
 
 MapWindow::~MapWindow()
 {
+    assert(data);
+    delete data;
 }
 
 void MapWindow::setEntity(Entity entity, const VC2 &position, float rotation)

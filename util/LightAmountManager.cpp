@@ -14,16 +14,13 @@
 
 #include <vector>
 
-using namespace std;
-using namespace boost;
-
 namespace util {
 
 LightAmountManager *LightAmountManager::instance = NULL;
 
 struct LightAmountManager::Data
 {
-	mutable vector<boost::weak_ptr<SpotLightCalculator> > spots;
+	mutable std::vector<boost::weak_ptr<SpotLightCalculator> > spots;
 	const game::GameMap *gameMap;
 	const IStorm3D_Terrain *terrain;
 
@@ -48,7 +45,7 @@ struct LightAmountManager::Data
 	{
 		float result = 0;
 
-		vector<boost::weak_ptr<SpotLightCalculator> >::iterator it = spots.begin();
+		std::vector<boost::weak_ptr<SpotLightCalculator> >::iterator it = spots.begin();
 		while(it != spots.end())
 		{
 			boost::shared_ptr<SpotLightCalculator> spot = it->lock();
@@ -107,8 +104,8 @@ void LightAmountManager::cleanInstance()
 
 
 LightAmountManager::LightAmountManager()
-:	data(new Data())
 {
+    data = new Data();
 	// just to be sure...
 	data->gameMap = 0;
 	data->terrain = 0;
@@ -116,6 +113,8 @@ LightAmountManager::LightAmountManager()
 
 LightAmountManager::~LightAmountManager()
 {
+    assert(data);
+    delete data;
 }
 
 void LightAmountManager::add(boost::weak_ptr<SpotLightCalculator> light)

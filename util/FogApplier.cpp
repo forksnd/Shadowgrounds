@@ -5,18 +5,15 @@
 #include <IStorm3D_Scene.h>
 #include <map>
 
-using namespace std;
-using namespace boost;
-
 namespace util {
 
-typedef map<string, FogApplier::Fog> FogMap;
+typedef std::map<std::string, FogApplier::Fog> FogMap;
 static const float CAMERA_FUDGE = 40.f;
 
 struct FogApplier::Data
 {
 	FogMap fogMap;
-	string active;
+	std::string active;
 
 	IStorm3D_Scene *scene;
 
@@ -36,7 +33,7 @@ struct FogApplier::Data
 	{
 	}
 
-	void setActive(const string &id)
+	void setActive(const std::string &id)
 	{
 		const Fog &fog = fogMap[id];
 		if(active.empty())
@@ -126,12 +123,14 @@ struct FogApplier::Data
 };
 
 FogApplier::FogApplier()
-:	data(new Data())
 {
+    data = new Data();
 }
 
 FogApplier::~FogApplier()
 {
+    assert(data);
+    delete data;
 }
 
 void FogApplier::setScene(IStorm3D_Scene &scene)

@@ -3,7 +3,6 @@
 #ifndef INCLUDED_STORM3D_TERRAIN_DECALSYSTEM_H
 #define INCLUDED_STORM3D_TERRAIN_DECALSYSTEM_H
 
-#include <boost/scoped_ptr.hpp>
 #include <istorm3d_terrain_decalsystem.h>
 
 class Storm3D;
@@ -13,7 +12,7 @@ class Storm3D_Spotlight;
 class Storm3D_TerrainDecalSystem: public IStorm3D_TerrainDecalSystem
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	Storm3D_TerrainDecalSystem(Storm3D &storm);

@@ -13,7 +13,6 @@
 
 #include <Storm3D_UI.h>
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <vector>
 #include <string>
 #include <map>

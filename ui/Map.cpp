@@ -22,10 +22,6 @@
 
 #include "../game/scripting/GameScripting.h"
 
-
-
-using namespace std;
-using namespace boost;
 using namespace game;
 using namespace util;
 using namespace frozenbyte;
@@ -39,10 +35,10 @@ namespace {
 	static const int MAX_READ_CHUNK = 1024 * 30;
 	static const float MAP_SMALLEST_BLOCK = 3.f;
 
-	typedef vector<TColor<unsigned char> > ColorList;
-	typedef vector<char> VisibilityList;
+	typedef std::vector<TColor<unsigned char> > ColorList;
+	typedef std::vector<char> VisibilityList;
 
-	void makeName(const string &dir, const string &id, string &result)
+	void makeName(const std::string &dir, const std::string &id, std::string &result)
 	{
 		if(dir.empty())
 			return;
@@ -57,7 +53,7 @@ namespace {
 		result += id;
 	}
 
-	bool fileExists(const string &fileName)
+	bool fileExists(const std::string &fileName)
 	{
 		filesystem::FB_FILE *fp = filesystem::fb_fopen(fileName.c_str(), "rb");
 		if(!fp)
@@ -73,7 +69,7 @@ namespace {
 		After
 	};
 
-	void generateFile(const string &fileName, const VC2 &start, const VC2 &size, const VC2 &start_, const VC2 &size_, Game &game, FileType type)
+	void generateFile(const std::string &fileName, const VC2 &start, const VC2 &size, const VC2 &start_, const VC2 &size_, Game &game, FileType type)
 	{
 		GameMap *map = game.gameMap;
 		AreaMap *areaMap = map->getAreaMap();
@@ -85,7 +81,7 @@ namespace {
 
 	}
 
-	void loadFile(const string &fileName, ColorList &result)
+	void loadFile(const std::string &fileName, ColorList &result)
 	{
 		/*
 		ifstream stream(fileName.c_str(), std::ios::binary);
@@ -102,7 +98,7 @@ namespace {
 		if(!fileStream.isEof())
 		{
 			int rawSize = MAP_RESOLUTION * MAP_RESOLUTION * 3;
-			vector<unsigned char> buffer(rawSize);
+			std::vector<unsigned char> buffer(rawSize);
 			char *ptr = reinterpret_cast<char *> (&buffer[0]);
 			fileStream.read(ptr, rawSize);
 
@@ -126,12 +122,12 @@ namespace {
 		bool dataDone;
 		bool asyncDone;
 
-		vector<unsigned char> buffer;
+		std::vector<unsigned char> buffer;
 		ColorList &result;
-		string fileName;
+		std::string fileName;
 		int offset;
 
-		FileReader(const string &fileName_, ColorList &result_)
+		FileReader(const std::string &fileName_, ColorList &result_)
 		:	dataDone(false),
 			asyncDone(false),
 			buffer(RAW_SIZE),
@@ -323,11 +319,11 @@ namespace {
 		VC2 areaEnd;
 		VC2 areaSize;
 
-		string layerFile1;
-		string layerFile2;
+		std::string layerFile1;
+		std::string layerFile2;
 
-		scoped_ptr<FileReader> fileReader1;
-		scoped_ptr<FileReader> fileReader2;
+		boost::scoped_ptr<FileReader> fileReader1;
+		boost::scoped_ptr<FileReader> fileReader2;
 
 		ColorList layer1;
 		ColorList layer2;
@@ -336,7 +332,7 @@ namespace {
 		bool drawAll;
 
 
-		void generate(Game &game, const string &dir, const string &id)
+		void generate(Game &game, const std::string &dir, const std::string &id)
 		{
 			if(end.x < start.x)
 				std::swap(end.x, start.x);
@@ -438,7 +434,7 @@ namespace {
 				fileReader2->update();
 		}
 
-		void load(Game &game, const string &dir, const string &id)
+		void load(Game &game, const std::string &dir, const std::string &id)
 		{
 			if(layerFile1.empty() || layerFile2.empty())
 				return;
@@ -463,12 +459,12 @@ namespace {
 				fileReader2->forceDataReady();
 
 			Storm3D_SurfaceInfo info = t.GetSurfaceInfo();
-			vector<DWORD> colorBuffer(info.height * info.width);
+			std::vector<DWORD> colorBuffer(info.height * info.width);
 
 			if(!visibility.empty())
 			{
-				vector<float> buffer(info.height * info.width);
-				vector<float> bufferH(info.height * info.width);
+				std::vector<float> buffer(info.height * info.width);
+				std::vector<float> bufferH(info.height * info.width);
 
 				// Create screen-size visibility buffer
 				{
@@ -606,14 +602,14 @@ namespace {
 	};
 
 
-typedef map<string, boost::shared_ptr<Layer> > Layers;
+typedef std::map<std::string, boost::shared_ptr<Layer> > Layers;
 
 struct Map::Data
 {
 	Game &game;
-	string dir;
+	std::string dir;
 
-	string activeLayer;
+	std::string activeLayer;
 	Layers layers;
 
 	bool initialized;
@@ -626,7 +622,7 @@ struct Map::Data
 	{
 	}
 
-	void insertLayer(const string &id)
+	void insertLayer(const std::string &id)
 	{
 		if(layers.find(id) == layers.end())
 		{
@@ -635,14 +631,14 @@ struct Map::Data
 		}
 	}
 
-	void loadLayer(const string &id)
+	void loadLayer(const std::string &id)
 	{
 		if(!activeLayer.empty())
 			layers[activeLayer]->free();
 
 		if(layers.find(id) == layers.end())
 		{
-			string message = "Unable to find map layer ";
+			std::string message = "Unable to find map layer ";
 			message += id;
 			Logger::getInstance()->error(message.c_str());
 			return;
@@ -715,12 +711,13 @@ struct Map::Data
 
 Map::Map(Game &game)
 {
-	scoped_ptr<Data> tempData(new Data(game));
-	data.swap(tempData);
+	data = new Data(game);
 }
 
 Map::~Map()
 {
+    assert(data);
+    delete data;
 }
 
 void Map::setMission(const std::string &dir)

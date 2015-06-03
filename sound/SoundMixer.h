@@ -1,7 +1,6 @@
 #ifndef SOUNDMIXER_H
 #define SOUNDMIXER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
 
@@ -55,7 +54,7 @@ public:
 class SoundMixer
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	enum SoundStreamType

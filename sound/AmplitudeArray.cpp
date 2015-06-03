@@ -5,11 +5,9 @@
 #include "AmplitudeArray.h"
 #include "../util/assert.h"
 
-using namespace std;
-
 namespace sfx {
 
-typedef vector<unsigned char> AmpSampleList;
+typedef std::vector<unsigned char> AmpSampleList;
 
 AmplitudeArray::AmplitudeArray()
 :	maxValue(0),

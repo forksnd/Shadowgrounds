@@ -3,7 +3,6 @@
 #ifndef INCLUDEDE_LIPSYNC_PROPERTIES_H
 #define INCLUDEDE_LIPSYNC_PROPERTIES_H
 
-#include <boost/scoped_ptr.hpp>
 #include <string>
 
 namespace sfx {
@@ -11,7 +10,7 @@ namespace sfx {
 class LipsyncProperties
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	LipsyncProperties();

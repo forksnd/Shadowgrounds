@@ -84,12 +84,14 @@ struct SpotLightCalculator::Data
 };
 
 SpotLightCalculator::SpotLightCalculator(float fov, float range, ui::IVisualObjectData *visualData)
-:	data(new Data(fov * .5f, range, visualData))
 {
+    data = new Data(fov * .5f, range, visualData);
 }
 
 SpotLightCalculator::~SpotLightCalculator()
 {
+    assert(data);
+    delete data;
 }
 
 void SpotLightCalculator::update(const VC3 &position, const VC3 &direction)

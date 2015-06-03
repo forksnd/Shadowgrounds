@@ -18,14 +18,13 @@
 namespace frozenbyte {
 
 using namespace editor;
-using namespace std;
 
 namespace filesystem {
 namespace {
 
 void getFiles(const std::string &dir, const std::string &extension, IFileList &result)
 {
-	string searchString = dir;
+	std::string searchString = dir;
 	searchString += "/";
 	searchString += extension;
 
@@ -41,7 +40,7 @@ void iterateDir(const std::string &dir, const std::string &extension, IFileList 
 {
 	getFiles(dir, extension, result);
 
-	string searchString = dir;
+	std::string searchString = dir;
 	searchString += "/*";
 
 	editor::FindFileWrapper wrapper(searchString.c_str(), editor::FindFileWrapper::Dir);

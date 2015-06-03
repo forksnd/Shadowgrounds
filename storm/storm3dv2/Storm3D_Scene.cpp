@@ -252,7 +252,7 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 
 	// Put each model in set into the list
 	if(terrains.empty())
-	for (set<IStorm3D_Model*>::iterator mit=models.begin();mit!=models.end();++mit)
+	for (std::set<IStorm3D_Model*>::iterator mit=models.begin();mit!=models.end();++mit)
 	{
 		// Typecast (to simplify code)
 		Storm3D_Model *mod=(Storm3D_Model*)*mit;
@@ -299,7 +299,7 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 		if (flip)
 		{
 			// Apply animation to helpers
-			for(set<IStorm3D_Helper*>::iterator ih=mod->helpers.begin();ih!=mod->helpers.end();++ih)
+			for(std::set<IStorm3D_Helper*>::iterator ih=mod->helpers.begin();ih!=mod->helpers.end();++ih)
 			{
 				// Typecast (to simplify code)
 				IStorm3D_Helper *hlp=(IStorm3D_Helper*)*ih;
@@ -329,7 +329,7 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 		}
 
 		// Put each object in set into the list
-		for(set<IStorm3D_Model_Object*>::iterator io=mod->objects.begin();io!=mod->objects.end();++io)
+		for(std::set<IStorm3D_Model_Object*>::iterator io=mod->objects.begin();io!=mod->objects.end();++io)
 		{	
 			// Typecast (to simplify code)
 			Storm3D_Model_Object *obj=(Storm3D_Model_Object*)*io;
@@ -496,7 +496,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 
 	// Update terrain render targets
 	{
-		for(set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
+		for(std::set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
 		{
 			// Typecast (to simplify code)
 			Storm3D_Terrain *terra=(Storm3D_Terrain*)*itr;
@@ -580,7 +580,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 	// Render terrains
 	//if (flip) // Does not render to mirrors
 	{
-		for(set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
+		for(std::set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
 		{
 			// Typecast (to simplify code)
 			Storm3D_Terrain *terra=(Storm3D_Terrain*)*itr;
@@ -986,7 +986,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 		D3DXMatrixIdentity(&dm);
 		Storm3D2->D3DDevice->SetTransform(D3DTS_WORLD,&dm);
 
-		for(set<IStorm3D_Model *>::iterator mit=models.begin();mit!=models.end();++mit)
+		for(std::set<IStorm3D_Model *>::iterator mit=models.begin();mit!=models.end();++mit)
 		{
 			// Typecast (to simplify code)
 			Storm3D_Model *mod=(Storm3D_Model*)*mit;
@@ -1101,7 +1101,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 	// CHANGED: was set
 	if(!render_mirrored)
 	{
-		for (list<Storm3D_Scene_PicList*>::iterator ip=piclist.begin();ip!=piclist.end();++ip)
+		for (std::list<Storm3D_Scene_PicList*>::iterator ip=piclist.begin();ip!=piclist.end();++ip)
 		{
 			// Typecast to simplify code
 			Storm3D_Scene_PicList *pl=*ip;
@@ -1289,7 +1289,7 @@ void Storm3D_Scene::SetBackGround(IStorm3D_Model *mod)
 	bg_model=(Storm3D_Model*)mod;
 	//((Storm3D_TerrainRenderer &) terrain->getRenderer()).setSkyBox(bg_model);
 
-	for(set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
+	for(std::set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
 	{
 		Storm3D_Terrain *terrain = static_cast<Storm3D_Terrain *> (*itr);
 		((Storm3D_TerrainRenderer &) terrain->getRenderer()).setSkyBox(bg_model);
@@ -1302,7 +1302,7 @@ void Storm3D_Scene::RemoveBackGround()
 	bg_model=NULL;
 	//((Storm3D_TerrainRenderer &) terrain->getRenderer()).setSkyBox(0);
 
-	for(set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
+	for(std::set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
 	{
 		Storm3D_Terrain *terrain = static_cast<Storm3D_Terrain *> (*itr);
 		((Storm3D_TerrainRenderer &) terrain->getRenderer()).setSkyBox(0);
@@ -1407,7 +1407,7 @@ void Storm3D_Scene::RayTrace(const VC3 &position,const VC3 &direction_normalized
 	}
 
 	// Raytrace to each model
-	for(set<IStorm3D_Model*>::iterator im=models.begin();im!=models.end();im++)
+	for(std::set<IStorm3D_Model*>::iterator im=models.begin();im!=models.end();im++)
 	{
 		// Typecast (to simplify code)
 		//IStorm3D_Model *md=*im;
@@ -1441,7 +1441,7 @@ void Storm3D_Scene::SphereCollision(const VC3 &position,float radius,Storm3D_Col
 	}
 
 	// Spherecollide to each model
-	for(set<IStorm3D_Model*>::iterator im=models.begin();im!=models.end();im++)
+	for(std::set<IStorm3D_Model*>::iterator im=models.begin();im!=models.end();im++)
 	{
 		// Typecast (to simplify code)
 		IStorm3D_Model *md=*im;
@@ -1535,7 +1535,7 @@ void Storm3D_Scene::SetAmbientLight(const COL &color)
 	this->ambient=color;
 	Storm3D_ShaderManager::GetSingleton()->SetAmbient(color);
 
-	for(set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
+	for(std::set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
 		static_cast<Storm3D_Terrain *> (*itr)->setAmbient(color);
 }
 
@@ -1544,7 +1544,7 @@ void Storm3D_Scene::SetBackgroundColor(const COL &color)
 {
 	this->bgcolor=color;
 
-	for(set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
+	for(std::set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
 		static_cast<Storm3D_Terrain *> (*itr)->setClearColor(color);
 }
 
@@ -1559,7 +1559,7 @@ void Storm3D_Scene::SetFogParameters(bool _fog_active,const COL &color,float fog
 	Storm3D_ShaderManager::GetSingleton()->SetFog(fog_start, fog_end);
 	*/
 
-	for(set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
+	for(std::set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
 		static_cast<Storm3D_TerrainRenderer &> ((*itr)->getRenderer()).setFog(_fog_active, fog_start_range, fog_end_range, color);
 }
 
@@ -1805,13 +1805,13 @@ void Storm3D_Scene::RenderSceneToAllDynamicCubeTexturesInScene()
 	Storm3D_Camera camback=camera;
 
 	// Loop models
-	for (set<IStorm3D_Model*>::iterator mit=models.begin();mit!=models.end();mit++)
+	for (std::set<IStorm3D_Model*>::iterator mit=models.begin();mit!=models.end();mit++)
 	{
 		// Typecast (to simplify code)
 		Storm3D_Model *mod=(Storm3D_Model*)*mit;
 
 		// Loop objects
-		for(set<IStorm3D_Model_Object*>::iterator io=mod->objects.begin();io!=mod->objects.end();io++)
+		for(std::set<IStorm3D_Model_Object*>::iterator io=mod->objects.begin();io!=mod->objects.end();io++)
 		{	
 			// Typecast (to simplify code)
 			Storm3D_Model_Object *obj=(Storm3D_Model_Object*)*io;

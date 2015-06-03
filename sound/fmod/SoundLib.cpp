@@ -1,13 +1,5 @@
 #include "precompiled.h"
 
-#ifdef _WIN32
-#include <windows.h>
-
-#else  // _WIN32
-#include <wincompat.h>
-
-#endif  // _WIN32
-
 #include <SDL.h>
 
 #include <assert.h>
@@ -18,8 +10,7 @@
 #include <fmod.h>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "../SoundLib.h"
 #include <istorm3d_streambuffer.h>
@@ -44,8 +35,6 @@
 extern bool isThisDeveloper();
 #endif
 
-using namespace std;
-using namespace boost;
 using namespace frozenbyte::editor;
 using namespace frozenbyte;
 
@@ -56,7 +45,7 @@ namespace sfx {
 */
 
 
-struct Sound::Data : public boost::noncopyable {
+struct Sound::Data {
 	Data(const char *file, int flags);
 	~Data();
 
@@ -73,14 +62,14 @@ struct Sound::Data : public boost::noncopyable {
 };
 
 
-struct SoundStream::Data : public boost::noncopyable {
+struct SoundStream::Data {
 	Data(const char *file);
 	~Data();
 
 	FSOUND_STREAM *stream;
 	int channel;
 
-	boost::shared_array<char> buffer;
+	std::vector<char> buffer;
 	std::string filename;
 
 	float baseVolume;
@@ -89,7 +78,7 @@ struct SoundStream::Data : public boost::noncopyable {
 };
 
 
-struct SoundLib::Data : public boost::noncopyable {
+struct SoundLib::Data {
 	Data();
 	~Data();
 
@@ -153,7 +142,7 @@ Sound::Data::Data(const char *file, int flags)
 	}
 
 	//sample = FSOUND_Sample_Load(FSOUND_UNMANAGED, file, flags, 0, 0);
-	vector<char> buffer(stream.getSize());
+	std::vector<char> buffer(stream.getSize());
 	stream.read(&buffer[0], buffer.size());
 	sample = FSOUND_Sample_Load(FSOUND_UNMANAGED, &buffer[0], flags | FSOUND_LOADMEMORY, 0, buffer.size());
 }
@@ -161,6 +150,8 @@ Sound::Data::Data(const char *file, int flags)
 
 Sound::~Sound()
 {
+    assert(data);
+    delete data;
 }
 
 
@@ -209,13 +200,6 @@ const std::string &Sound::getFileName() const
   SoundStream
 */
 
-
-SoundStream::SoundStream(Data *data_)
-: data(data_)
-{
-}
-
-
 SoundStream::Data::Data(const char *file)
 : stream(0)
 , channel(-1)
@@ -232,19 +216,14 @@ SoundStream::Data::Data(const char *file)
 
 	//stream = FSOUND_Stream_Open(file, 0, 0, 0);
 
-	buffer.reset(new char[fileStream.getSize()]);
-	fileStream.read(buffer.get(), fileStream.getSize());
-	stream = FSOUND_Stream_Open(buffer.get(), FSOUND_LOADMEMORY, 0, fileStream.getSize());
+	buffer.resize(fileStream.getSize());
+	fileStream.read(&buffer[0], fileStream.getSize());
+	stream = FSOUND_Stream_Open(&buffer[0], FSOUND_LOADMEMORY, 0, buffer.size());
 
 	if(stream)
 		channel = FSOUND_Stream_PlayEx(FSOUND_FREE, stream, 0, TRUE);
 
 	type = 0;
-}
-
-
-SoundStream::~SoundStream()
-{
 }
 
 
@@ -256,6 +235,18 @@ SoundStream::Data::~Data()
 		stream = NULL;
 	}
 }
+
+SoundStream::SoundStream(Data *data_)
+{
+    data = data_;
+}
+
+SoundStream::~SoundStream()
+{
+    assert(data);
+    delete data;
+}
+
 
 void SoundStream::setBaseVolume(float value)
 {
@@ -394,6 +385,8 @@ SoundLib::Data::Data()
 
 SoundLib::~SoundLib()
 {
+    assert(data);
+    delete data;
 }
 
 
@@ -457,11 +450,11 @@ bool SoundLib::initialize()
 					eax = true;
 			}
 
-			string foo = "Driver ";
-			foo += lexical_cast<string> (i);
+			std::string foo = "Driver ";
+			foo += boost::lexical_cast<std::string> (i);
 			foo += "(";
 
-			string name = "Null";
+			std::string name = "Null";
 			const char *ptr = FSOUND_GetDriverName(i);
 			if(ptr)
 				name = ptr;
@@ -495,8 +488,8 @@ bool SoundLib::initialize()
 
 		int hwchans = 0;
 		FSOUND_GetNumHWChannels(0, &hwchans, 0);
-		string foo = "Hardware sound channels initialized: ";
-		foo += lexical_cast<string> (hwchans);
+		std::string foo = "Hardware sound channels initialized: ";
+		foo += boost::lexical_cast<std::string> (hwchans);
 		Logger::getInstance()->debug(foo.c_str());
 
 		if(hwchans && data->useEax)
@@ -506,8 +499,8 @@ bool SoundLib::initialize()
 				Logger::getInstance()->debug("Does not use DSOUND!");
 
 			int driver = FSOUND_GetDriver();
-			string foo = "Selected sound driver ";
-			foo += lexical_cast<string> (driver);
+			std::string foo = "Selected sound driver ";
+			foo += boost::lexical_cast<std::string> (driver);
 			Logger::getInstance()->debug(foo.c_str());
 
 			{
@@ -589,8 +582,7 @@ Sound *SoundLib::loadSample(const char *file)
 
 	if (file == NULL)
 	{
-		string message = "SoundLib::loadSample - Null filename parameter.";
-		Logger::getInstance()->warning(message.c_str());
+		Logger::getInstance()->warning("SoundLib::loadSample - Null filename parameter.");
 		return 0;
 	}
 
@@ -601,7 +593,7 @@ Sound *SoundLib::loadSample(const char *file)
 	{
 		if (lastFailedSampleLoad == file)
 		{
-			string message = "SoundLib::loadSample - Failsafe, this sample needs to be fixed: ";
+			std::string message = "SoundLib::loadSample - Failsafe, this sample needs to be fixed: ";
 			message += file;
 			Logger::getInstance()->error(message.c_str());
 
@@ -640,7 +632,7 @@ Sound *SoundLib::loadSample(const char *file)
 #ifndef PROJECT_VIEWER
 		if (game::SimpleOptions::getBool(DH_OPT_B_SOUND_MISSING_WARNING))
 		{
-			string message = "SoundLib::loadSample - Sound sample not found: ";
+			std::string message = "SoundLib::loadSample - Sound sample not found: ";
 			message += file;
 			Logger::getInstance()->warning(message.c_str());
 		}
@@ -648,7 +640,7 @@ Sound *SoundLib::loadSample(const char *file)
 	} else {
 		lastFailedSampleLoad = file;
 
-		string message = "SoundLib::loadSample - Sound sample loading failure: ";
+		std::string message = "SoundLib::loadSample - Sound sample loading failure: ";
 		message += file;
 		Logger::getInstance()->warning(message.c_str());
 	}
@@ -860,10 +852,10 @@ void SoundLib::setSoundArea(const std::string &name)
 		return;
 
 	const std::string &alias = data->areaAlias[name];
-	map<string, FSOUND_REVERB_PROPERTIES>::iterator it = data->soundAreas.find(alias);
+	std::map<std::string, FSOUND_REVERB_PROPERTIES>::iterator it = data->soundAreas.find(alias);
 	if(it == data->soundAreas.end())
 	{
-		string foo = "Sound reverb area not found: ";
+		std::string foo = "Sound reverb area not found: ";
 		foo += name;
 
 		Logger::getInstance()->warning(foo.c_str());
@@ -1102,4 +1094,3 @@ boost::shared_ptr<IStorm3D_Stream> SoundLib::createStormStream(bool stereo_, int
 
 
 } // sfx
-

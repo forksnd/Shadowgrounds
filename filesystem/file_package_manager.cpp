@@ -131,12 +131,13 @@ struct FilePackageManagerData
 
 FilePackageManager::FilePackageManager()
 {
-	boost::scoped_ptr<FilePackageManagerData> tempData(new FilePackageManagerData());
-	data.swap(tempData);
+	data = new FilePackageManagerData();
 }
 
 FilePackageManager::~FilePackageManager()
 {
+    assert(data);
+    delete data;
 }
 
 void FilePackageManager::addPackage(boost::shared_ptr<IFilePackage> filePackage, int priority)

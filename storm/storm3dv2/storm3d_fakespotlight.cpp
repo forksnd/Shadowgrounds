@@ -19,8 +19,6 @@
 
 #include "../../util/Debug_MemoryManager.h"
 
-using namespace boost;
-
 // FIXME since using shared color texture
 // - SetViewport
 // - Scale texcoords for reading
@@ -394,12 +392,13 @@ frozenbyte::storm::PixelShader *Storm3D_FakeSpotlight::Data::shadowPixelShader =
 
 Storm3D_FakeSpotlight::Storm3D_FakeSpotlight(Storm3D &storm, IDirect3D9 &d3d, IDirect3DDevice9 &device)
 {
-	scoped_ptr<Data> tempData(new Data(storm, d3d, device));
-	data.swap(tempData);
+	data = new Data(storm, d3d, device);
 }
 
 Storm3D_FakeSpotlight::~Storm3D_FakeSpotlight()
 {
+    assert(data);
+    delete data;
 }
 
 void Storm3D_FakeSpotlight::testVisibility(Storm3D_Camera &camera)

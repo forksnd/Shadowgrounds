@@ -1,7 +1,6 @@
 #ifndef INCLUDED_DECALSPAWNER_H
 #define INCLUDED_DECALSPAWNER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <DatatypeDef.h>
 
 class IStorm3D_Material;
@@ -15,7 +14,7 @@ class DecalManager;
 class DecalSpawner
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	DecalSpawner(DecalManager &manager, IStorm3D_Material &material);

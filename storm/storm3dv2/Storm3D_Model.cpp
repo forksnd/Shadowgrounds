@@ -36,9 +36,6 @@
 #include "WorldFold.h"
 #endif
 
-using namespace std;
-
-
 #if defined BONE_MODEL_SPHERE_TRANSFORM && defined _MSC_VER
 #pragma message("--- NOTICE!!! Bounding sphere transform enabled for models with bones! ---") 
 #pragma message("---           This may cause inaccuracies to raytraces. (optimization) ---") 
@@ -2054,14 +2051,14 @@ void Storm3D_Model::Empty(bool leave_geometry, bool leave_bones)
 	if(leave_geometry == false)
 	{
 		// Delete objects
-		for(set<IStorm3D_Model_Object*>::reverse_iterator io=objects.rbegin();io!=objects.rend();io++)
+		for(std::set<IStorm3D_Model_Object*>::reverse_iterator io=objects.rbegin();io!=objects.rend();io++)
 		{
 			delete (*io);
 			storm3d_model_objects_created--;
 		}
 
 		// Delete helpers
-		for(set<IStorm3D_Helper*>::iterator ih=helpers.begin();ih!=helpers.end();ih++)
+		for(std::set<IStorm3D_Helper*>::iterator ih=helpers.begin();ih!=helpers.end();ih++)
 		{
 			delete (*ih);
 		}
@@ -2104,7 +2101,7 @@ IStorm3D_Model *Storm3D_Model::GetClone(bool cloneGeometry, bool cloneHelpers, b
 
 	if(cloneGeometry)
 	{
-		set<IStorm3D_Model_Object *>::const_iterator it = objects.begin();
+		std::set<IStorm3D_Model_Object *>::const_iterator it = objects.begin();
 		for(; it != objects.end(); ++it)
 		{
 			Storm3D_Model_Object *object = static_cast<Storm3D_Model_Object *> (*it);
@@ -2136,7 +2133,7 @@ IStorm3D_Model *Storm3D_Model::GetClone(bool cloneGeometry, bool cloneHelpers, b
 
 	if(cloneBones)
 	{
-		vector<Storm3D_Bone *>::const_iterator it = bones.begin();
+		std::vector<Storm3D_Bone *>::const_iterator it = bones.begin();
 		for(; it != bones.end(); ++it)
 		{
 			const Storm3D_Bone *bone = *it;
@@ -2160,7 +2157,7 @@ IStorm3D_Model *Storm3D_Model::GetClone(bool cloneGeometry, bool cloneHelpers, b
 
 	if(cloneHelpers)
 	{
-		set<IStorm3D_Helper *>::const_iterator it = helpers.begin();
+		std::set<IStorm3D_Helper *>::const_iterator it = helpers.begin();
 		for(; it != helpers.end(); ++it)
 		{
 			IStorm3D_Helper *originalHelper = *it;
@@ -2199,7 +2196,7 @@ IStorm3D_Model *Storm3D_Model::GetClone(bool cloneGeometry, bool cloneHelpers, b
 				{
 					const char *name = parentBone->GetName();
 
-					vector<Storm3D_Bone *>::iterator it = clone->bones.begin();
+					std::vector<Storm3D_Bone *>::iterator it = clone->bones.begin();
 					for(; it != clone->bones.end(); ++it)
 					{
 						if(strcmp((**it).name, name) == 0)
@@ -2264,7 +2261,7 @@ void Storm3D_Model::GetVolume(VC3 &min_, VC3 &max_)
 
 	bool setValues = false;
 
-	set<IStorm3D_Model_Object *>::iterator it = objects.begin();
+	std::set<IStorm3D_Model_Object *>::iterator it = objects.begin();
 	for(; it != objects.end(); ++it)
 	{
 		IStorm3D_Model_Object *o = *it;
@@ -2318,7 +2315,7 @@ void Storm3D_Model::GetVolumeApproximation(VC3 &min_, VC3 &max_)
 
 	bool setValues = false;
 
-	set<IStorm3D_Model_Object *>::iterator it = objects.begin();
+	std::set<IStorm3D_Model_Object *>::iterator it = objects.begin();
 	for(; it != objects.end(); ++it)
 	{
 		Storm3D_Model_Object *o = static_cast<Storm3D_Model_Object *> (*it);
@@ -2377,7 +2374,7 @@ void Storm3D_Model::Object_Delete(IStorm3D_Model_Object *iobject)
 	//Storm3D_Model_Object *object=(Storm3D_Model_Object*)iobject;
 
 	// First check if this object exists in model
-	set<IStorm3D_Model_Object*>::iterator it;
+	std::set<IStorm3D_Model_Object*>::iterator it;
 	it=objects.find(iobject);
 	if(it != objects.end())
 	{
@@ -2493,7 +2490,7 @@ IStorm3D_Helper_Sphere *Storm3D_Model::Helper_Sphere_New(const char *name, const
 void Storm3D_Model::Helper_Delete(IStorm3D_Helper *help)
 {
 	// First check if this light exists in model
-	set<IStorm3D_Helper*>::iterator it;
+	std::set<IStorm3D_Helper*>::iterator it;
 	it=helpers.find(help);
 	if (it!=helpers.end())
 	{
@@ -2512,7 +2509,7 @@ void Storm3D_Model::Helper_Delete(IStorm3D_Helper *help)
 void Storm3D_Model::InformChangeToChilds()
 {
 	// Objects
-	for(set<IStorm3D_Model_Object*>::iterator io=objects.begin();io!=objects.end();++io)
+	for(std::set<IStorm3D_Model_Object*>::iterator io=objects.begin();io!=objects.end();++io)
 	{
 		((Storm3D_Model_Object*)(*io))->mxg_update=true;
 		((Storm3D_Model_Object*)(*io))->gpos_update_needed=true;
@@ -2674,7 +2671,7 @@ void Storm3D_Model::SetScale(const VC3 &_scale)
 
 void Storm3D_Model::ResetObjectLights() 
 { 
-	for(set<IStorm3D_Model_Object*>::iterator io=objects.begin();io!=objects.end();++io)
+	for(std::set<IStorm3D_Model_Object*>::iterator io=objects.begin();io!=objects.end();++io)
 	{
 		Storm3D_Model_Object *o = ((Storm3D_Model_Object*)(*io));
 		//o->light_index1 = -1;
@@ -3189,7 +3186,7 @@ real_bone_direction.Normalize();
 
 		// Raytrace to each object	
 		//for(set<IStorm3D_Model_Object*>::iterator io=objects.begin();io!=objects.end();++io)
-		for(set<Storm3D_Model_Object*>::iterator io = collision_objects.begin(); io != collision_objects.end(); ++io)
+		for(std::set<Storm3D_Model_Object*>::iterator io = collision_objects.begin(); io != collision_objects.end(); ++io)
 		{
 			// Typecast (to simplify code)
 			//Storm3D_Model_Object *obj=(Storm3D_Model_Object*)*io;
@@ -3218,7 +3215,7 @@ void Storm3D_Model::SphereCollision(const VC3 &position,float radius,Storm3D_Col
 
 	// Spherecollide to each object	
 	//for(set<IStorm3D_Model_Object*>::iterator io=objects.begin();io!=objects.end();++io)
-	for(set<Storm3D_Model_Object*>::iterator io = collision_objects.begin(); io != collision_objects.end(); ++io)
+	for(std::set<Storm3D_Model_Object*>::iterator io = collision_objects.begin(); io != collision_objects.end(); ++io)
 	{
 		// Typecast (to simplify code)
 		//Storm3D_Model_Object *obj=(Storm3D_Model_Object*)*io;
@@ -3237,7 +3234,7 @@ void Storm3D_Model::SphereCollision(const VC3 &position,float radius,Storm3D_Col
 IStorm3D_Model_Object *Storm3D_Model::SearchObject(const char *name)
 {
 	// Search for named object
-	for(set<IStorm3D_Model_Object*>::iterator io=objects.begin();io!=objects.end();++io)
+	for(std::set<IStorm3D_Model_Object*>::iterator io=objects.begin();io!=objects.end();++io)
 	{
 		// Typecast (to simplify code)
 		IStorm3D_Model_Object *obj=*io;
@@ -3265,7 +3262,7 @@ void Storm3D_Model::FreeMemoryResources()
 	GetRadius();
 	GetBoundingBox();
 
-	for(set<IStorm3D_Model_Object*>::iterator io = objects.begin(); io != objects.end(); ++io)
+	for(std::set<IStorm3D_Model_Object*>::iterator io = objects.begin(); io != objects.end(); ++io)
 	{
 		Storm3D_Model_Object *obj = static_cast<Storm3D_Model_Object *> (*io);
 		Storm3D_Mesh *m = obj->mesh;
@@ -3296,7 +3293,7 @@ void Storm3D_Model::FreeMemoryResources()
 IStorm3D_Helper *Storm3D_Model::SearchHelper(const char *name)
 {
 	// Search for named helper
-	for(set<IStorm3D_Helper*>::iterator ih=helpers.begin();ih!=helpers.end();++ih)
+	for(std::set<IStorm3D_Helper*>::iterator ih=helpers.begin();ih!=helpers.end();++ih)
 	{
 		// Typecast (to simplify code)
 		IStorm3D_Helper *help=*ih;

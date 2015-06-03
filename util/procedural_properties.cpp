@@ -18,8 +18,6 @@
 
 using namespace frozenbyte;
 using namespace frozenbyte::editor;
-using namespace boost;
-using namespace std;
 
 namespace util {
 
@@ -40,7 +38,7 @@ ProceduralProperties::Effect::Effect()
 
 // ...
 
-typedef map<string, ProceduralProperties::Effect> Effects;
+typedef std::map<std::string, ProceduralProperties::Effect> Effects;
 
 struct ProceduralProperties::Data
 {
@@ -117,7 +115,7 @@ struct ProceduralProperties::Data
 		int effectAmount = root.getSubGroupAmount();
 		for(int i = 0; i < effectAmount; ++i)
 		{
-			const string &name = root.getSubGroupName(i);
+			const std::string &name = root.getSubGroupName(i);
 			const ParserGroup &group = root.getSubGroup(name);
 
 			Effect effect;
@@ -140,14 +138,14 @@ struct ProceduralProperties::Data
 
 ProceduralProperties::ProceduralProperties()
 {
-	scoped_ptr<Data> tempData(new Data());
-	tempData->parse();
-
-	data.swap(tempData);
+	data = new Data();
+	data->parse();
 }
 
 ProceduralProperties::~ProceduralProperties()
 {
+    assert(data);
+    delete data;
 }
 
 const VC2I &ProceduralProperties::getTextureSize() const

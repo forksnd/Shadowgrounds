@@ -38,15 +38,15 @@ private:
 	Storm3D_Texture *CreateNewTextureInstance(int width,int height,IStorm3D_Texture::TEXTYPE textype);
 
 	// Loaded resources
-	set<IStorm3D_Texture*> textures;
-	set<IStorm3D_Model*> models;
-	set<IStorm3D_Scene*> scenes;
-	set<IStorm3D_Font*> fonts;
-	set<IStorm3D_LensFlare*> lflares;
-	set<IStorm3D_Terrain*> terrains;
-	set<IStorm3D_Material*> materials;
-	set<IStorm3D_Mesh*> meshes;
-	set<IStorm3D_Line*> lines;
+	std::set<IStorm3D_Texture*> textures;
+	std::set<IStorm3D_Model*> models;
+	std::set<IStorm3D_Scene*> scenes;
+	std::set<IStorm3D_Font*> fonts;
+	std::set<IStorm3D_LensFlare*> lflares;
+	std::set<IStorm3D_Terrain*> terrains;
+	std::set<IStorm3D_Material*> materials;
+	std::set<IStorm3D_Mesh*> meshes;
+	std::set<IStorm3D_Line*> lines;
 	
 	Storm3D_ResourceManager resourceManager;
 	IStorm3D_Logger *logger;

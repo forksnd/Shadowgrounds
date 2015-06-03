@@ -1,8 +1,6 @@
 #ifndef INCLUDED_UTIL_BUILDING_BLINKER_H
 #define INCLUDED_UTIL_BUILDING_BLINKER_H
 
-#include <boost/scoped_ptr.hpp>
-
 namespace frozenbyte {
 	class TextureCache;
 }
@@ -12,7 +10,7 @@ namespace util {
 class BuildingBlinker 
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	BuildingBlinker(frozenbyte::TextureCache &cache);

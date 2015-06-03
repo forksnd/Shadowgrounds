@@ -5,8 +5,6 @@
 #include "DecalManager.h"
 #include <istorm3d_terrain_decalsystem.h>
 
-using namespace boost;
-
 namespace frozenbyte {
 
 struct DecalSpawner::Data
@@ -41,12 +39,13 @@ struct DecalSpawner::Data
 
 DecalSpawner::DecalSpawner(DecalManager &manager, IStorm3D_Material &material)
 {
-	scoped_ptr<Data> tempData(new Data(manager, material));
-	data.swap(tempData);
+	data = new Data(manager, material);
 }
 
 DecalSpawner::~DecalSpawner()
 {
+    assert(data);
+    delete data;
 }
 
 void DecalSpawner::setType(Type type)

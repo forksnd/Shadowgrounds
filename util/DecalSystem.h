@@ -1,7 +1,6 @@
 #ifndef INCLUDED_DECALSYSTEM_H
 #define INCLUDED_DECALSYSTEM_H
 
-#include <boost/scoped_ptr.hpp>
 #include <DatatypeDef.h>
 
 class IStorm3D;
@@ -14,7 +13,7 @@ struct DecalIdentifier;
 class DecalSystem
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	DecalSystem(IStorm3D &storm, IStorm3D_TerrainDecalSystem &system);

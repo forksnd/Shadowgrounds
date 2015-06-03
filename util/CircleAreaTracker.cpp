@@ -10,9 +10,6 @@
 #include <c2_qtree.h>
 #include <vector>
 
-using namespace boost;
-using namespace std;
-
 namespace util {
 
 	struct Trackable
@@ -27,7 +24,7 @@ namespace util {
 		}
 	};
 
-	typedef vector<boost::shared_ptr<Trackable> > TrackableList;
+	typedef std::vector<boost::shared_ptr<Trackable> > TrackableList;
 
 	struct Trigger
 	{
@@ -63,7 +60,7 @@ namespace util {
 		}
 	};
 
-	typedef vector<boost::shared_ptr<Trigger> > TriggerList;
+	typedef std::vector<boost::shared_ptr<Trigger> > TriggerList;
 	typedef Quadtree<Trigger> QTree;
 
 	static const int UPDATE_INTERVAL = 200;
@@ -98,7 +95,7 @@ namespace util {
 
 struct CircleAreaTracker::Data
 {
-	scoped_ptr<QTree> tree;
+	boost::scoped_ptr<QTree> tree;
 	TriggerList triggers;
 	TrackableList trackables;
 
@@ -219,7 +216,7 @@ struct CircleAreaTracker::Data
 			return;
 		time -= UPDATE_INTERVAL;
 
-		vector<Trigger *> activated;
+		std::vector<Trigger *> activated;
 
 		// Find triggers under trackables
 		{
@@ -230,7 +227,7 @@ struct CircleAreaTracker::Data
 				VC3 position = t->ptr->getTrackablePosition();
 				position.y = HEIGHT;
 
-				vector<Trigger *> foundTriggers;
+				std::vector<Trigger *> foundTriggers;
 				tree->collectSphere(foundTriggers, position, t->ptr->getTrackableRadius2d());
 
 				// Test if those really track given entity
@@ -258,7 +255,7 @@ struct CircleAreaTracker::Data
 			}
 		}
 
-		vector<Trigger *>::iterator it = activated.begin();
+		std::vector<Trigger *>::iterator it = activated.begin();
 		for(; it != activated.end(); ++it)
 			(*it)->listener->activate((*it)->id, (*it)->triggerData);
 	}
@@ -266,14 +263,14 @@ struct CircleAreaTracker::Data
 
 CircleAreaTracker::CircleAreaTracker(const VC2 &size)
 {
-	scoped_ptr<Data> tempData(new Data());
-	tempData->init(size);
-
-	data.swap(tempData);
+	data = new Data();
+	data->init(size);
 }
 
 CircleAreaTracker::~CircleAreaTracker()
 {
+    assert(data);
+    delete data;
 }
 
 int CircleAreaTracker::addCircleTrigger(const ClippedCircle &circle, ITriggerListener *listener, void *triggerData)

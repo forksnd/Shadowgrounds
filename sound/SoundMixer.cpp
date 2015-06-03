@@ -39,9 +39,6 @@ static const int MAX_SAMPLE_PLAY_COUNT = 4;
 
 SOUNDMIXER_PLAY_ERRORCODE soundmixer_play_errorcode = SOUNDMIXER_PLAY_ERRORCODE_NONE;
 
-using namespace std;
-using namespace boost;
-
 namespace sfx {
 
 	struct Song;
@@ -83,14 +80,14 @@ namespace sfx {
 		}
 	};
 
-	typedef map<string, SoundSample *> SampleList;
-	typedef map<int, SoundInstance> SoundList;
-	typedef vector<Song> SongList;
-	typedef vector<FadeMusic> FadeMusicList;
+	typedef std::map<std::string, SoundSample *> SampleList;
+	typedef std::map<int, SoundInstance> SoundList;
+	typedef std::vector<Song> SongList;
+	typedef std::vector<FadeMusic> FadeMusicList;
 
 	struct Song
 	{
-		string file;
+		std::string file;
 		int fadeTime;
 
 		Song()
@@ -194,7 +191,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 	VC3 cameraPosition;
 	VC3 listenerPosition;
 
-	vector<boost::shared_ptr<SoundStream> > streamedSounds;
+	std::vector<boost::shared_ptr<SoundStream> > streamedSounds;
 	StreamList streamList;
 
 	std::vector<SoundEvent> soundEvents;
@@ -351,7 +348,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 
 	}
 
-	SoundSample *loadSample(string filename, bool temporaryCache)
+	SoundSample *loadSample(std::string filename, bool temporaryCache)
 	{
 		assert(soundLib != NULL);
 
@@ -401,7 +398,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 		int handle = soundLib->createSound(sample->data, priority);
 		if(handle < 0)
 		{
-			string message = "play -- Failed to create sound handle ";
+			std::string message = "play -- Failed to create sound handle ";
 			message += sample->filename;
 
 			Logger::getInstance()->warning(message.c_str());
@@ -652,7 +649,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 		}
 
 		{
-			vector<boost::shared_ptr<SoundStream> >::iterator it = streamedSounds.begin();
+			std::vector<boost::shared_ptr<SoundStream> >::iterator it = streamedSounds.begin();
 			for(; it != streamedSounds.end(); )
 			{
 				if((*it)->hasEnded())
@@ -898,12 +895,13 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 
 SoundMixer::SoundMixer(SoundLib *soundLib)
 {
-	scoped_ptr<Data> tempData(new Data(soundLib));
-	data.swap(tempData);
+	data = new Data(soundLib);
 }
 
 SoundMixer::~SoundMixer()
 {
+    assert(data);
+    delete data;
 }
 
 void SoundMixer::stopAllSounds()
@@ -1096,7 +1094,7 @@ boost::shared_ptr<SoundStream> SoundMixer::getStream(const char *filename, Sound
 
 IStorm3D_StreamBuilder *SoundMixer::getStreamBuilder()
 {
-	return data.get();
+	return data;
 }
 
 int SoundMixer::playSoundEffect(SoundSample *sample, bool loop, float range, int priority)

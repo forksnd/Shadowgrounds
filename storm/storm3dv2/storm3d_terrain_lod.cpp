@@ -431,12 +431,13 @@ struct Storm3D_TerrainLodData
 
 Storm3D_TerrainLod::Storm3D_TerrainLod(Storm3D &storm)
 {
-	boost::scoped_ptr<Storm3D_TerrainLodData> tempData(new Storm3D_TerrainLodData(storm));
-	data.swap(tempData);
+	data = new Storm3D_TerrainLodData(storm);
 }
 
 Storm3D_TerrainLod::~Storm3D_TerrainLod()
 {
+    assert(data);
+    delete data;
 }
 
 void Storm3D_TerrainLod::generate(int resolution, unsigned char *clipBuffer)

@@ -3,10 +3,6 @@
 #ifndef INCLUDED_EDITOR_EDITOR_PARSER
 #define INCLUDED_EDITOR_EDITOR_PARSER
 
-#ifndef INCLUDED_BOOST_SCOPED_PTR_HPP
-#define INCLUDED_BOOST_SCOPED_PTR_HPP
-#include <boost/scoped_ptr.hpp>
-#endif
 #ifndef INCLUDED_STRING
 #define INCLUDED_STRING
 #include <string>
@@ -30,7 +26,7 @@ struct ParserData;
 
 class ParserGroup
 {
-	boost::scoped_ptr<ParserGroupData> data;
+	ParserGroupData* data;
 
 public:
 	ParserGroup();
@@ -78,7 +74,7 @@ inline filesystem::InputStream &operator >> (filesystem::InputStream &stream, Pa
 
 class EditorParser
 {
-	boost::scoped_ptr<ParserData> data;
+	ParserData* data;
 
 public:
 	// the new error whine to get rid of the f*ed up "silently ignore errors" feature. --jpk

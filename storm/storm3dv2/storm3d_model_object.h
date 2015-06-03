@@ -39,8 +39,8 @@ class Storm3D_Model_Object : public IStorm3D_Model_Object
 	Storm3D_Mesh *mesh;
 
 	// Sets of child objects, lights and helpers
-	set<IStorm3D_Model_Object*> child_objects;
-	set<IStorm3D_Helper*> child_helpers;
+	std::set<IStorm3D_Model_Object*> child_objects;
+	std::set<IStorm3D_Helper*> child_helpers;
 
 	void InformChangeToChilds();	// Called when object changes
 

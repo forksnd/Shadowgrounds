@@ -130,13 +130,13 @@ class Storm3D_Model : public IStorm3D_Model
 	bool no_collision;
 
 	// Sets of objects, lights, helpers & bones in model
-	set<IStorm3D_Model_Object*> objects;
-	set<IStorm3D_Helper*> helpers;
-	vector<Storm3D_Bone*> bones;
+	std::set<IStorm3D_Model_Object*> objects;
+	std::set<IStorm3D_Helper*> helpers;
+	std::vector<Storm3D_Bone*> bones;
 
-	set<Storm3D_Model_Object *> collision_objects;
-	vector<Storm3D_Model_Object *> objects_array;
-	set<IStorm3D_Model_Object *> light_objects;
+	std::set<Storm3D_Model_Object *> collision_objects;
+	std::vector<Storm3D_Model_Object *> objects_array;
+	std::set<IStorm3D_Model_Object *> light_objects;
 
 	// Bone animations
 	//Model_BoneAnimation current_animation;

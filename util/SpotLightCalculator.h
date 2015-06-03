@@ -1,7 +1,6 @@
 #ifndef INCLUDED_SPOTLIGHTCALCULATOR_H
 #define INCLUDED_SPOTLIGHTCALCULATOR_H
 
-#include <boost/scoped_ptr.hpp>
 #include <DatatypeDef.h>
 
 class IStorm3D_Terrain;
@@ -14,7 +13,7 @@ namespace util {
 class SpotLightCalculator
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	SpotLightCalculator(float fov, float range, ui::IVisualObjectData *visualData);

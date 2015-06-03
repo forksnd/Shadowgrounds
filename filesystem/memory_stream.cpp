@@ -23,12 +23,13 @@ struct MemoryStreamBufferData
 
 MemoryStreamBuffer::MemoryStreamBuffer()
 {
-	boost::scoped_ptr<MemoryStreamBufferData> tempData(new MemoryStreamBufferData());
-	data.swap(tempData);
+	data = new MemoryStreamBufferData();
 }
 
 MemoryStreamBuffer::~MemoryStreamBuffer()
 {
+    assert(data);
+    delete data;
 }
 
 unsigned char MemoryStreamBuffer::popByte()

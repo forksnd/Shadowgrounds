@@ -17,19 +17,17 @@
 #pragma warning(disable: 4786)
 #endif
 
-using namespace boost;
-using namespace std;
 using namespace frozenbyte::editor;
 using namespace frozenbyte;
 
 namespace sfx {
 namespace {
 
-	typedef map<string, string> StringMap;
-	typedef vector<LipsyncProperties::Phonem> PhonemList;
-	string empty;
+	typedef std::map<std::string, std::string> StringMap;
+	typedef std::vector<LipsyncProperties::Phonem> PhonemList;
+	std::string empty;
 
-	const string &get(const StringMap &m, int index)
+	const std::string &get(const StringMap &m, int index)
 	{
 		int i = 0;
 		for(StringMap::const_iterator it = m.begin(); it != m.end(); ++it)
@@ -41,7 +39,7 @@ namespace {
 		return empty;
 	}
 
-	const string &getFirst(const StringMap &m, int index)
+	const std::string &getFirst(const StringMap &m, int index)
 	{
 		int i = 0;
 		for(StringMap::const_iterator it = m.begin(); it != m.end(); ++it)
@@ -118,14 +116,14 @@ struct LipsyncProperties::Data
 
 LipsyncProperties::LipsyncProperties()
 {
-	scoped_ptr<Data> tempData(new Data());
-	tempData->load();
-
-	data.swap(tempData);
+	data = new Data();
+	data->load();
 }
 
 LipsyncProperties::~LipsyncProperties()
 {
+    assert(data);
+    delete data;
 }
 
 int LipsyncProperties::getPropertyValue(Property property) const

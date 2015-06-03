@@ -23,9 +23,6 @@
     <Filter Include="Source Files\collision">
       <UniqueIdentifier>{40dd2a9e-e3de-40e6-99b3-e5818c369136}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\wmvsync">
-      <UniqueIdentifier>{48952c9f-99cb-4530-acd7-8667f015eb2d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{94ed7fed-0bdc-4ceb-885c-165f4d529707}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
@@ -230,12 +227,6 @@
     </ClCompile>
     <ClCompile Include="Storm3D_Mesh_CollisionTable.cpp">
       <Filter>Source Files\collision</Filter>
-    </ClCompile>
-    <ClCompile Include="wmvsync\reader.cpp">
-      <Filter>Source Files\wmvsync</Filter>
-    </ClCompile>
-    <ClCompile Include="wmvsync\rostream.cpp">
-      <Filter>Source Files\wmvsync</Filter>
     </ClCompile>
     <ClCompile Include="treader.cpp">
       <Filter>Source Files</Filter>

@@ -18,8 +18,6 @@
 #include <IStorm3D_Texture.h>
 #include <IStorm3D_Material.h>
 
-using namespace std;
-using namespace boost;
 using namespace frozenbyte;
 using namespace frozenbyte::editor;
 
@@ -31,12 +29,12 @@ namespace frozenbyte {
 	static const char *fileName = "data/effect/decals.txt";
 #endif
 
-	typedef vector<Effect> EffectList;
-	typedef vector<boost::shared_ptr<DecalSpawner> > SpawnerList;
+	typedef std::vector<Effect> EffectList;
+	typedef std::vector<boost::shared_ptr<DecalSpawner> > SpawnerList;
 
 	struct Effect
 	{
-		string name;
+		std::string name;
 
 		DecalSpawner::Type type;
 		int waitTime;
@@ -65,19 +63,19 @@ namespace frozenbyte {
 		}
 	};
 
-	static Effect parseEffectProperties(const string &name, const ParserGroup &properties)
+	static Effect parseEffectProperties(const std::string &name, const ParserGroup &properties)
 	{
 		Effect result;
 		result.name = name;
 
-		const string &type = properties.getValue("type");
+		const std::string &type = properties.getValue("type");
 		if(type == "static")
 			result.type = DecalSpawner::Static;
 		else if(type == "dynamic")
 			result.type = DecalSpawner::Dynamic;
 		result.waitTime = convertFromString<int> (properties.getValue("wait_time"), 0);
 
-		const string &fadeType = properties.getValue("fade_type");
+		const std::string &fadeType = properties.getValue("fade_type");
 		if(fadeType == "scale")
 			result.fadeType = DecalSpawner::Scale;
 		else if(fadeType == "blend")
@@ -101,7 +99,7 @@ namespace frozenbyte {
 		{
 			Logger::getInstance()->warning("Decal texture not found.");
 
-			string message = effect.name;
+			std::string message = effect.name;
 			message += ": ";
 			message += textureName;
 
@@ -165,7 +163,7 @@ struct DecalSystem::Data
 			int lineCount = textures.getLineCount();
 			for(int j = 0; j < lineCount; ++j)
 			{
-				const string &texture = textures.getLine(j);
+				const std::string &texture = textures.getLine(j);
 				addSpawner(effect, manager, texture, storm);
 			}
 
@@ -207,7 +205,7 @@ struct DecalSystem::Data
 		}
 	}
 
-	int getId(const string &name) const
+	int getId(const std::string &name) const
 	{
 		EffectList::const_iterator it = effects.begin();
 		for(; it != effects.end(); ++it)
@@ -228,14 +226,14 @@ struct DecalSystem::Data
 
 DecalSystem::DecalSystem(IStorm3D &storm, IStorm3D_TerrainDecalSystem &system)
 {
-	scoped_ptr<Data> tempData(new Data(storm, system));
-	tempData->parseEffects();
-
-	data.swap(tempData);
+	data = new Data(storm, system);
+	data->parseEffects();
 }
 
 DecalSystem::~DecalSystem()
 {
+    assert(data);
+    delete data;
 }
 
 int DecalSystem::getEffectId(const char *name) const

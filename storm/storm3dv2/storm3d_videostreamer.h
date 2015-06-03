@@ -1,7 +1,6 @@
 #ifndef INCLUDED_STORM3D_VIDEOSTREAMER_H
 #define INCLUDED_STORM3D_VIDEOSTREAMER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <istorm3d_videostreamer.h>
 
 class Storm3D;
@@ -10,7 +9,7 @@ class IStorm3D_StreamBuilder;
 class Storm3D_VideoStreamer: public IStorm3D_VideoStreamer
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	Storm3D_VideoStreamer(Storm3D &storm, const char *fileName, IStorm3D_StreamBuilder *streamBuilder, bool loop, bool downscale, bool higherColorRange);

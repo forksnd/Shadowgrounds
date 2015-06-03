@@ -1,7 +1,6 @@
 #ifndef INCLUDED_UTIL_SELF_ILLUMINATION_CHANGER_H
 #define INCLUDED_UTIL_SELF_ILLUMINATION_CHANGER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <DatatypeDef.h>
 
 class IStorm3D_Model;
@@ -12,7 +11,7 @@ namespace util {
 class SelfIlluminationChanger
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	SelfIlluminationChanger();

@@ -5,11 +5,7 @@
 #include "../system/Logger.h"
 #include <IStorm3D_Model.h>
 #include <IStorm3D_Bone.h>
-#include <boost/scoped_ptr.hpp>
 #include <cstdio>
-
-using namespace std;
-using namespace boost;
 
 namespace util {
 

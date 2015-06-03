@@ -3,7 +3,6 @@
 #ifndef INCLUDED_WAVEREADER_H
 #define INCLUDED_WAVEREADER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <string>
 
 namespace sfx {
@@ -13,7 +12,7 @@ class AmplitudeArray;
 class WaveReader
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	WaveReader(const std::string &file);

@@ -1,7 +1,5 @@
 #include "precompiled.h"
 
-#include <boost/scoped_ptr.hpp>
-
 #include "Ogui.h"
 #include "orvgui2.h"
 
@@ -810,8 +808,8 @@ void Ogui::UpdateEffects(int timeDelta)
 				if (win->effectListener != NULL)
 				{
 					{
-						boost::scoped_ptr<OguiEffectEvent> eve(new OguiEffectEvent(eveType, win));
-						win->effectListener->EffectEvent(eve.get());
+						OguiEffectEvent effectEvent(eveType, win);
+						win->effectListener->EffectEvent(&effectEvent);
 					}
 
 					// Make sure the above event has not deleted this window!

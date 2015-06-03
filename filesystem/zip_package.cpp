@@ -529,14 +529,15 @@ struct ZipPackageData
 
 ZipPackage::ZipPackage(const std::string &archiveName)
 {
-	boost::scoped_ptr<ZipPackageData> tempData(new ZipPackageData());
-	tempData->archiveName = archiveName;
-	tempData->load();
-	data.swap(tempData);
+	data = new ZipPackageData();
+	data->archiveName = archiveName;
+	data->load();
 }
 
 ZipPackage::~ZipPackage()
 {
+    assert(data);
+    delete data;
 }
 
 void ZipPackage::findFiles(const std::string &dir, const std::string &extension, IFileList &result)

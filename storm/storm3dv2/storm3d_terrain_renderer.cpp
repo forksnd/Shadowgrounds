@@ -30,14 +30,11 @@
 #include <atlbase.h>
 #include "../../util/Debug_MemoryManager.h"
 
-using namespace std;
-using namespace boost;
-
 namespace {
 
-	typedef vector<boost::shared_ptr<Storm3D_Spotlight> > SpotList;
-	typedef vector<boost::shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
-	typedef vector<Storm3D_LightTexture> FakeLightList;
+	typedef std::vector<boost::shared_ptr<Storm3D_Spotlight> > SpotList;
+	typedef std::vector<boost::shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
+	typedef std::vector<Storm3D_LightTexture> FakeLightList;
 
 	static const int MAX_SIZES = 2;
 };
@@ -909,8 +906,7 @@ VC2I Storm3D_TerrainRendererData::glowSize;
 
 Storm3D_TerrainRenderer::Storm3D_TerrainRenderer(Storm3D &storm, Storm3D_TerrainHeightmap &heightMap, Storm3D_TerrainGroup &groups, Storm3D_TerrainModels &models, Storm3D_TerrainDecalSystem &decalSystem, bool ps14, bool ps20)
 {
-	boost::scoped_ptr<Storm3D_TerrainRendererData> tempData(new Storm3D_TerrainRendererData(storm, *this, heightMap, groups, models, decalSystem, ps14, ps20));
-	data.swap(tempData);
+	data = new Storm3D_TerrainRendererData(storm, *this, heightMap, groups, models, decalSystem, ps14, ps20);
 
 	setFog(false, 150.f, -50.f, COL(1.f, 0.5f, 0.5f));
 
@@ -920,6 +916,8 @@ Storm3D_TerrainRenderer::Storm3D_TerrainRenderer(Storm3D &storm, Storm3D_Terrain
 
 Storm3D_TerrainRenderer::~Storm3D_TerrainRenderer()
 {
+    assert(data);
+    delete data;
 }
 
 boost::shared_ptr<IStorm3D_Spotlight> Storm3D_TerrainRenderer::createSpot()

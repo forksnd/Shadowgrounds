@@ -9,8 +9,6 @@
 #include <string>
 #include <map>
 
-using namespace std;
-using namespace boost;
 using namespace frozenbyte;
 
 namespace util {
@@ -18,18 +16,18 @@ namespace util {
 struct TextureSwitcher::Data
 {
 	TextureCache &cache;
-	map<string, IStorm3D_Texture *> textures;
+	std::map<std::string, IStorm3D_Texture *> textures;
 
 	Data(TextureCache &cache_)
 	:	cache(cache_)
 	{
 	}
 
-	map<string, IStorm3D_Texture *>::iterator getTexture(const char *name)
+	std::map<std::string, IStorm3D_Texture *>::iterator getTexture(const char *name)
 	{
-		string fileName = name;
+		std::string fileName = name;
 
-		map<string, IStorm3D_Texture *>::iterator it = textures.find(fileName);
+		std::map<std::string, IStorm3D_Texture *>::iterator it = textures.find(fileName);
 		if(it == textures.end())
 		{
 			textures[fileName] = cache.getTexture(name);
@@ -47,15 +45,15 @@ struct TextureSwitcher::Data
 			return;
 		}
 
-		map<string, IStorm3D_Texture *>::iterator fromIt = getTexture(fromName);
-		map<string, IStorm3D_Texture *>::iterator toIt = getTexture(toName);
+		std::map<std::string, IStorm3D_Texture *>::iterator fromIt = getTexture(fromName);
+		std::map<std::string, IStorm3D_Texture *>::iterator toIt = getTexture(toName);
 
 		IStorm3D_Texture *from = fromIt->second;
 		IStorm3D_Texture *to = toIt->second;
 
 		if(!from || !to)
 		{
-			string message = "TextureSwitcher: Can't swap ";
+			std::string message = "TextureSwitcher: Can't swap ";
 			message += fromName;
 			message += " and ";
 			message += toName;
@@ -72,12 +70,14 @@ struct TextureSwitcher::Data
 };
 
 TextureSwitcher::TextureSwitcher(TextureCache &cache)
-:	data(new Data(cache))
 {
+	data = new Data(cache);
 }
 
 TextureSwitcher::~TextureSwitcher()
 {
+    assert(data);
+    delete data;
 }
 
 void TextureSwitcher::switchTexture(const char *from, const char *to)

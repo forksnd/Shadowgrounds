@@ -3,7 +3,6 @@
 #ifndef INCLUDED_LIPSYNC_MANAGER_H
 #define INCLUDED_LIPSYNC_MANAGER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
 
@@ -20,7 +19,7 @@ namespace util {
 class LipsyncManager
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	LipsyncManager(IStorm3D *storm, IStorm3D_Terrain *terrain);

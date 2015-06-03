@@ -80,12 +80,13 @@ struct TerrainLegacyData
 
 TerrainLegacy::TerrainLegacy()
 {
-	boost::scoped_ptr<TerrainLegacyData> tempData(new TerrainLegacyData());
-	data.swap(tempData);
+	data = new TerrainLegacyData();
 }
 
 TerrainLegacy::~TerrainLegacy()
 {
+    assert(data);
+    delete data;
 }
 
 void TerrainLegacy::setTexturing(int baseIndex, int *indexArray)

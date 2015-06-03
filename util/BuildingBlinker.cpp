@@ -7,8 +7,6 @@
 #include <map>
 #include <cassert>
 
-using namespace std;
-
 namespace util {
 namespace {
 
@@ -25,15 +23,15 @@ namespace {
 	{
 		int time;
 
-		string texture;
-		vector<MaterialData> materials;
+		std::string texture;
+		std::vector<MaterialData> materials;
 
 		BlinkData()
 		:	time(0)
 		{
 		}
 
-		BlinkData(int time_, const string &texture_)
+		BlinkData(int time_, const std::string &texture_)
 		:	time(time_),
 			texture(texture_)
 		{
@@ -43,7 +41,7 @@ namespace {
 	struct Blinks
 	{
 		int currentTime;
-		vector<BlinkData> blinkList;
+		std::vector<BlinkData> blinkList;
 
 		Blinks()
 		:	currentTime(0)
@@ -55,7 +53,7 @@ namespace {
 struct BuildingBlinker::Data
 {
 	frozenbyte::TextureCache &cache;
-	map<string, Blinks> textureBlinks;
+	std::map<std::string, Blinks> textureBlinks;
 
 	Data(frozenbyte::TextureCache &cache_)
 	:	cache(cache_)
@@ -65,7 +63,7 @@ struct BuildingBlinker::Data
 	void addBlinkTexture(const char *original, const char *to, int delta)
 	{
 		Blinks &blinks = textureBlinks[original];
-		vector<BlinkData> &blinkList = blinks.blinkList;
+		std::vector<BlinkData> &blinkList = blinks.blinkList;
 
 		BlinkData blink(delta, to);
 		if(!blinkList.empty())
@@ -76,17 +74,17 @@ struct BuildingBlinker::Data
 		blinkList.push_back(blink);
 	}
 
-	void switchTo(const string &texture, BlinkData &blink)
+	void switchTo(const std::string &texture, BlinkData &blink)
 	{
 	}
 
 	void update(int timeDelta)
 	{
-		map<string, Blinks>::iterator it = textureBlinks.begin();
+		std::map<std::string, Blinks>::iterator it = textureBlinks.begin();
 		for(; it != textureBlinks.end(); ++it)
 		{
 			Blinks &blinks = it->second;
-			vector<BlinkData> blinkList = blinks.blinkList;
+			std::vector<BlinkData> blinkList = blinks.blinkList;
 
 		}
 
@@ -95,7 +93,7 @@ struct BuildingBlinker::Data
 
 	int getIndex(const Blinks &blinks, int time) const
 	{
-		vector<BlinkData> blinkList = blinks.blinkList;
+		std::vector<BlinkData> blinkList = blinks.blinkList;
 
 		for(unsigned int i = 1; i < blinkList.size(); ++i)
 		{
@@ -111,12 +109,14 @@ struct BuildingBlinker::Data
 };
 
 BuildingBlinker::BuildingBlinker(frozenbyte::TextureCache &cache)
-:	data(new Data(cache))
 {
+    data = new Data(cache);
 }
 
 BuildingBlinker::~BuildingBlinker()
 {
+    assert(data);
+    delete data;
 }
 
 void BuildingBlinker::addBlinkTexture(const char *original, const char *to, int delta)

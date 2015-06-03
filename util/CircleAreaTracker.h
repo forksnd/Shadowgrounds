@@ -38,7 +38,6 @@
 #ifndef INCLUDED_CIRCLEAREATRACKER_H
 #define INCLUDED_CIRCLEAREATRACKER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <DatatypeDef.h>
 
 namespace util {
@@ -50,7 +49,7 @@ class ClippedCircle;
 class CircleAreaTracker
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	explicit CircleAreaTracker(const VC2 &size);

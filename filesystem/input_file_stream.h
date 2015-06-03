@@ -3,10 +3,6 @@
 #ifndef INCLUDED_FILESYSTEM_INPUT_FILE_STREAM_H
 #define INCLUDED_FILESYSTEM_INPUT_FILE_STREAM_H
 
-#ifndef INCLUDED_BOOST_SCOPED_PTR_HPP
-#define INCLUDED_BOOST_SCOPED_PTR_HPP
-#include <boost/scoped_ptr.hpp>
-#endif
 #ifndef INCLUDED_FILESYSTEM_INPUT_STREAM_H
 #include "input_stream.h"
 #endif
@@ -18,7 +14,7 @@ struct InputFileStreamBufferData;
 
 class InputFileStreamBuffer: public IInputStreamBuffer
 {
-	boost::scoped_ptr<InputFileStreamBufferData> data;
+	InputFileStreamBufferData* data;
 
 public:
 	InputFileStreamBuffer(const std::string &fileName);

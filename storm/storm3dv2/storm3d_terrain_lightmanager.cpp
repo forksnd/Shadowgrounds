@@ -20,12 +20,9 @@
 
 #include "../../util/Debug_MemoryManager.h"
 
-using namespace std;
-using namespace boost;
-
-typedef vector<boost::shared_ptr<Storm3D_Spotlight> > SpotList;
-typedef vector<boost::shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
-typedef vector<Storm3D_LightTexture> FakeLightList;
+typedef std::vector<boost::shared_ptr<Storm3D_Spotlight> > SpotList;
+typedef std::vector<boost::shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
+typedef std::vector<Storm3D_LightTexture> FakeLightList;
 
 namespace {
 
@@ -456,12 +453,13 @@ struct Storm3D_TerrainLightManager::Data
 
 Storm3D_TerrainLightManager::Storm3D_TerrainLightManager(Storm3D &storm, IStorm3D_TerrainRendererBase &renderer, SpotList &spots, FakeSpotList &fakeSpots, FakeLightList &fakeLights)
 {
-	scoped_ptr<Data> tempData(new Data(storm, renderer, spots, fakeSpots, fakeLights));
-	data.swap(tempData);
+	data = new Data(storm, renderer, spots, fakeSpots, fakeLights);
 }
 
 Storm3D_TerrainLightManager::~Storm3D_TerrainLightManager()
 {
+    assert(data);
+    delete data;
 }
 
 void Storm3D_TerrainLightManager::setFog(float start, float end)

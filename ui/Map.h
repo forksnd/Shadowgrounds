@@ -2,7 +2,6 @@
 #define INCLUDED_UI_MAP_H
 
 #include <DatatypeDef.h>
-#include <boost/scoped_ptr.hpp>
 #include <string>
 
 class IStorm3D_Texture;
@@ -16,7 +15,7 @@ namespace ui {
 class Map
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	explicit Map(game::Game &game);

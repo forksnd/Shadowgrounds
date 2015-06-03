@@ -13,8 +13,6 @@
 #include "../filesystem/input_stream.h"
 #include <windows.h>
 
-using namespace boost;
-using namespace std;
 using namespace frozenbyte;
 
 namespace sfx {
@@ -53,7 +51,7 @@ namespace {
 
 struct WaveReader::Data
 {
-	string fileName;
+	std::string fileName;
 
 	boost::shared_ptr<WAVEFORMATEX> waveFormat;
 	HMMIO ioHandle;
@@ -71,7 +69,7 @@ struct WaveReader::Data
 		free();
 	}
 
-	void open(const string &file)
+	void open(const std::string &file)
 	{
 		fileName = file;
 
@@ -92,7 +90,7 @@ struct WaveReader::Data
 
 		if(!ioHandle)
 		{
-			string errorString = "Cannot open wave file: ";
+			std::string errorString = "Cannot open wave file: ";
 			errorString += file;
 
 			Logger::getInstance()->warning(errorString.c_str());
@@ -250,7 +248,7 @@ struct WaveReader::Data
 		int loopIndex = 0;
 
 		//vector<unsigned char> sampleBuffer(1000);
-		vector<unsigned char> sampleBuffer(amplitudeSampleDelta / 2);
+		std::vector<unsigned char> sampleBuffer(amplitudeSampleDelta / 2);
 		int sampleIndex = 0;
 
 		while(bytesRead < riffChunk.cksize)
@@ -364,10 +362,9 @@ struct WaveReader::Data
 	}
 };
 
-WaveReader::WaveReader(const string &file)
+WaveReader::WaveReader(const std::string &file)
 {
-	scoped_ptr<Data> newData(new Data());
-	data.swap(newData);
+	data = new Data();
 
 	data->open(file);
 	data->findPosition();
@@ -376,6 +373,8 @@ WaveReader::WaveReader(const string &file)
 
 WaveReader::~WaveReader()
 {
+    assert(data);
+    delete data;
 }
 
 void WaveReader::readAmplitudeArray(int tickTime, AmplitudeArray &array)

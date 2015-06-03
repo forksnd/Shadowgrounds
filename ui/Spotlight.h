@@ -2,7 +2,6 @@
 #ifndef SPOTLIGHT_H
 #define SPOTLIGHT_H
 
-#include <boost/scoped_ptr.hpp>
 #include <DatatypeDef.h>
 #include <string>
 
@@ -85,7 +84,7 @@ namespace ui
 
 	class Spotlight
 	{
-		boost::scoped_ptr<SpotlightData> data;
+		SpotlightData* data;
 
 		public:
 			Spotlight(IStorm3D &storm, IStorm3D_Terrain &terrain,

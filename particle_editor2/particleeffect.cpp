@@ -14,8 +14,6 @@
 #include <istream>
 #include <ostream>
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <Storm3D_UI.h>
 #include "../editor/string_conversions.h"
 #include "../editor/parser.h"

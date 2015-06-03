@@ -2874,28 +2874,29 @@ Terrain::Terrain(IStorm3D *storm, IStorm3D_Scene *scene, const char *dirName, co
 {
 	init_terrain_object_variables();
 
-	boost::scoped_ptr<TerrainData> tempData(new TerrainData());
-	tempData->storm = storm;
-	tempData->scene = scene;
-	tempData->gameMap = gameMap;
-	tempData->areaMap = areaMap;
-	tempData->lightManager = lightManager;
-	tempData->ambientSoundManager = ambientSoundManager;
+	data = new TerrainData();
+	data->storm = storm;
+	data->scene = scene;
+	data->gameMap = gameMap;
+	data->areaMap = areaMap;
+	data->lightManager = lightManager;
+	data->ambientSoundManager = ambientSoundManager;
 
 	if (dirName == NULL)
 	{
 		fb_assert(!"Terrain - Null dirName parameter given.");
 	} else {
-		tempData->dirName = dirName;
+		data->dirName = dirName;
 	}
 
-	tempData->load(forceMapName);
-	data.swap(tempData);
+	data->load(forceMapName);
 }
 
 Terrain::~Terrain()
 {
 	uninit_terrain_object_variables();
+    assert(data);
+    delete data;
 }
 
 IStorm3D_Terrain *Terrain::GetTerrain()

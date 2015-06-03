@@ -25,14 +25,14 @@ class Storm3D_Scene : public IStorm3D_Scene
 	Storm3D *Storm3D2;
 
 	// "Models in scene" - set
-	set<IStorm3D_Model*> models;
+	std::set<IStorm3D_Model*> models;
 
 	// "Terrains in scene" - set
-	set<IStorm3D_Terrain*> terrains;
+	std::set<IStorm3D_Terrain*> terrains;
 
 	// "Pictures to render" - set
 	// CHANGED: was set
-	list<Storm3D_Scene_PicList*> piclist;
+	std::list<Storm3D_Scene_PicList*> piclist;
 
 	// Background model
 	Storm3D_Model *bg_model;

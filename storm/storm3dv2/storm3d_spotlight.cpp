@@ -732,12 +732,13 @@ frozenbyte::storm::VertexShader *Storm3D_SpotlightData::coneStencilVertexShader 
 
 Storm3D_Spotlight::Storm3D_Spotlight(Storm3D &storm, IDirect3D9 &d3d, IDirect3DDevice9 &device, bool ps14, bool ps20)
 {
-	boost::scoped_ptr<Storm3D_SpotlightData> tempData(new Storm3D_SpotlightData(storm, d3d, device, ps14, ps20));
-	data.swap(tempData);
+	data = new Storm3D_SpotlightData(storm, d3d, device, ps14, ps20);
 }
 
 Storm3D_Spotlight::~Storm3D_Spotlight()
 {
+    assert(data);
+    delete data;
 }
 
 void Storm3D_Spotlight::testVisibility(Storm3D_Camera &camera)
@@ -902,7 +903,7 @@ void Storm3D_Spotlight::setConeTexture(boost::shared_ptr<IStorm3D_Texture> textu
 
 bool Storm3D_Spotlight::hasConeTexture() const
 {
-	return data->coneTexture;
+	return (bool)data->coneTexture;
 }
 
 void Storm3D_Spotlight::setColorMultiplier(const COL &color)

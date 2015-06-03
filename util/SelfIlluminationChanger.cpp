@@ -13,9 +13,6 @@
 #include <IStorm3D_Material.h>
 #include <IStorm3D_Mesh.h>
 
-using namespace std;
-using namespace boost;
-
 namespace util {
 
 struct Material
@@ -35,7 +32,7 @@ struct Material
 	}
 };
 
-typedef map<IStorm3D_Material *, Material> MaterialList;
+typedef std::map<IStorm3D_Material *, Material> MaterialList;
 
 
 struct SelfIlluminationChanger::Data
@@ -44,7 +41,7 @@ struct SelfIlluminationChanger::Data
 
 	void add(IStorm3D_Model *model)
 	{
-		scoped_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(model->ITObject->Begin());
+		Iterator<IStorm3D_Model_Object *>* objectIterator(model->ITObject->Begin());
 		for(; !objectIterator->IsEnd(); objectIterator->Next())
 		{
 			IStorm3D_Model_Object *object = objectIterator->GetCurrent();
@@ -74,6 +71,7 @@ struct SelfIlluminationChanger::Data
 
 			materials[material] = Material(illum, glow);
 		}
+        delete objectIterator;
 	}
 
 	void setFactor(const COL &color)
@@ -94,12 +92,13 @@ struct SelfIlluminationChanger::Data
 
 SelfIlluminationChanger::SelfIlluminationChanger()
 {
-	scoped_ptr<Data> tempData(new Data());
-	data.swap(tempData);
+	data = new Data();
 }
 
 SelfIlluminationChanger::~SelfIlluminationChanger()
 {
+    assert(data);
+    delete data;
 }
 
 void SelfIlluminationChanger::addModel(IStorm3D_Model *model)
@@ -113,12 +112,13 @@ void SelfIlluminationChanger::addAllModels(IStorm3D_Scene *scene)
 	if(!scene)
 		return;
 
-	scoped_ptr<Iterator<IStorm3D_Model *> > modelIterator(scene->ITModel->Begin());
+	Iterator<IStorm3D_Model *>* modelIterator(scene->ITModel->Begin());
 	for(; !modelIterator->IsEnd(); modelIterator->Next())
 	{
 		IStorm3D_Model *model = modelIterator->GetCurrent();
 		addModel(model);
 	}
+    delete modelIterator;
 }
 
 void SelfIlluminationChanger::clearModels()

@@ -4,7 +4,6 @@
 #define INCLUDED_PROCEDURAL_PROPERTIES_H
 
 #include <DatatypeDef.h>
-#include <boost/scoped_ptr.hpp>
 #include <string>
 
 namespace util {
@@ -12,7 +11,7 @@ namespace util {
 class ProceduralProperties
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	ProceduralProperties();

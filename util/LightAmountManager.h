@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LIGHTAMOUNTMANAGER_H
 #define INCLUDED_LIGHTAMOUNTMANAGER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <DatatypeDef.h>
 
@@ -22,7 +21,7 @@ class SpotLightCalculator;
 class LightAmountManager
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 	static LightAmountManager *instance;
 

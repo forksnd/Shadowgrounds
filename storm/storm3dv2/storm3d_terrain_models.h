@@ -3,7 +3,6 @@
 #ifndef INCLUDED_STORM3D_TERRAIN_MODELS_H
 #define INCLUDED_STORM3D_TERRAIN_MODELS_H
 
-#include <boost/scoped_ptr.hpp>
 #include <c2_vectors.h>
 #include <DatatypeDef.h>
 
@@ -31,7 +30,7 @@ struct Light
 
 class Storm3D_TerrainModels
 {
-	boost::scoped_ptr<Storm3D_TerrainModelsData> data;
+	Storm3D_TerrainModelsData* data;
 
 public:
 	Storm3D_TerrainModels(Storm3D &storm);

@@ -8,6 +8,7 @@
 #endif
 
 #include "file_list.h"
+#include <assert.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -17,9 +18,6 @@
 #ifndef __GNUC__
 #pragma warning(disable: 4786)
 #endif
-
-using namespace std;
-using namespace boost;
 
 namespace frozenbyte {
 namespace filesystem {
@@ -78,9 +76,9 @@ void FileList::getAllFiles(vector<string> &result) const
 */
 
 struct Dir;
-typedef vector<string> StringList;
-typedef map<string, Dir> DirList;
-typedef vector<DirList::iterator> IteratorList;
+typedef std::vector<std::string> StringList;
+typedef std::map<std::string, Dir> DirList;
+typedef std::vector<DirList::iterator> IteratorList;
 
 struct Dir
 {
@@ -92,7 +90,7 @@ struct Dir
 		subDirs()
 	{}
 
-	void addFile(const string &file)
+	void addFile(const std::string &file)
 	{
 		for(unsigned int i = 0; i < files.size(); ++i)
 		{
@@ -113,12 +111,12 @@ static void haxFile(std::string &str)
 	}
 }
 
-static void getDirPart(const string &file, string &dir)
+static void getDirPart(const std::string &file, std::string &dir)
 {
-	string::size_type index = file.find_last_of("\\/");
+	std::string::size_type index = file.find_last_of("\\/");
 	if(index == file.npos)
 	{
-		dir = string();
+		dir = std::string();
 		return;
 	}
 
@@ -139,7 +137,7 @@ static int getDirAmountImp(const IteratorList &list)
 	return result;
 }
 
-static int getDirNameImp(const IteratorList &list, string &result, int currentIndex, int findIndex)
+static int getDirNameImp(const IteratorList &list, std::string &result, int currentIndex, int findIndex)
 {
 	int original = currentIndex;
 	for(IteratorList::const_iterator it = list.begin(); it != list.end(); ++it)
@@ -160,7 +158,7 @@ static int getDirNameImp(const IteratorList &list, string &result, int currentIn
 	return currentIndex - original;
 }
 
-static string empty;
+static std::string empty;
 
 
 struct FileList::Data
@@ -238,7 +236,7 @@ struct FileList::Data
 	}
 	*/
 
-	void addDir(const string &dir)
+	void addDir(const std::string &dir)
 	{
 		DirList::iterator it;
 		if(!findDir(it, dir))
@@ -248,12 +246,12 @@ struct FileList::Data
 
 			// Add to parent list
 
-			string current = dir;
+			std::string current = dir;
 			DirList::iterator currentIt = it;
 
 			for(int i = 0; ; ++i)
 			{
-				string parent;
+				std::string parent;
 				getDirPart(current, parent);
 				if(parent.empty())
 					break;
@@ -278,7 +276,7 @@ struct FileList::Data
 		}
 	}
 
-	bool findDir(DirList::iterator &it, const string &dir)
+	bool findDir(DirList::iterator &it, const std::string &dir)
 	{
 		it = dirs.find(dir);
 		if(it == dirs.end())
@@ -288,15 +286,15 @@ struct FileList::Data
 	}
 };
 
-FileList::FileList() :
-	data(NULL)
+FileList::FileList()
 {
-	scoped_ptr<Data> tempData(new Data());
-	data.swap(tempData);
+	data = new Data();
 }
 
 FileList::~FileList()
 {
+    assert(data);
+    delete data;
 }
 
 void FileList::setCaseSensitivity(bool enable)
@@ -306,7 +304,7 @@ void FileList::setCaseSensitivity(bool enable)
 
 void FileList::addDir(const std::string &dir_)
 {
-	string dir = dir_;
+	std::string dir = dir_;
 	if(!data->caseSensitive)
 		convertLower(dir);
 
@@ -316,12 +314,12 @@ void FileList::addDir(const std::string &dir_)
 
 void FileList::addFile(const std::string &file_)
 {
-	string file = file_;
+	std::string file = file_;
 	if(!data->caseSensitive)
 		convertLower(file);
 	haxFile(file);
 
-	string dir;
+	std::string dir;
 	getDirPart(file, dir);
 	data->addDir(dir);
 
@@ -332,7 +330,7 @@ void FileList::addFile(const std::string &file_)
 
 int FileList::getDirAmount(const std::string &root_) const
 {
-	string root = root_;
+	std::string root = root_;
 	if(!data->caseSensitive)
 		convertLower(root);
 
@@ -346,16 +344,16 @@ int FileList::getDirAmount(const std::string &root_) const
 
 std::string FileList::getDirName(const std::string &root_, int index) const
 {
-	string root = root_;
+	std::string root = root_;
 	if(!data->caseSensitive)
 		convertLower(root);
 
 	haxFile(root);
 	DirList::iterator it;
 	if(!data->findDir(it, root))
-		return empty;
+		return std::string();
 
-	string result;
+	std::string result;
 	getDirNameImp(it->second.subDirs, result, 0, index);
 
 	return result;
@@ -363,7 +361,7 @@ std::string FileList::getDirName(const std::string &root_, int index) const
 
 int FileList::getFileAmount(const std::string &root_) const
 {
-	string root = root_;
+	std::string root = root_;
 	if(!data->caseSensitive)
 		convertLower(root);
 	haxFile(root);
@@ -377,7 +375,7 @@ int FileList::getFileAmount(const std::string &root_) const
 
 const std::string &FileList::getFileName(const std::string &root_, int index) const
 {
-	string root = root_;
+	std::string root = root_;
 	if(!data->caseSensitive)
 		convertLower(root);
 	haxFile(root);
@@ -443,7 +441,7 @@ namespace {
 
 void getAllFiles(IFileList &list, const std::string &root_, std::vector<std::string> &result, bool recurse, bool caseSensitive)
 {
-	string root = root_;
+	std::string root = root_;
 	if(!caseSensitive)
 		convertLower(root);
 	haxFile(root);
@@ -454,7 +452,7 @@ void getAllFiles(IFileList &list, const std::string &root_, std::vector<std::str
 
 void getAllDirs(IFileList &list, const std::string &root_, std::vector<std::string> &result, bool recurse, bool caseSensitive)
 {
-	string root = root_;
+	std::string root = root_;
 	if(!caseSensitive)
 		convertLower(root);
 	haxFile(root);

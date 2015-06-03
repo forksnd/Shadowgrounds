@@ -5,7 +5,6 @@
 
 #include "ifile_list.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <vector>
 #include <string>
 
@@ -15,7 +14,7 @@ namespace filesystem {
 class FileList: public IFileList
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	FileList();

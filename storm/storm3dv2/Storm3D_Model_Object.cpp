@@ -93,7 +93,7 @@ Storm3D_Model_Object::~Storm3D_Model_Object()
 		resourceManager.removeUser(mesh, this);
 
 	{
-		set<IStorm3D_Model_Object *>::iterator it = child_objects.begin();
+		std::set<IStorm3D_Model_Object *>::iterator it = child_objects.begin();
 		for(; it != child_objects.end(); ++it)
 		{
 			Storm3D_Model_Object *o = static_cast<Storm3D_Model_Object *> (*it);
@@ -105,7 +105,7 @@ Storm3D_Model_Object::~Storm3D_Model_Object()
 	}
 
 	{
-		set<IStorm3D_Helper *>::iterator it = child_helpers.begin();
+		std::set<IStorm3D_Helper *>::iterator it = child_helpers.begin();
 		for(; it != child_helpers.end(); ++it)
 		{
 			IStorm3D_Helper *ihelper = *it;
@@ -504,7 +504,7 @@ void Storm3D_Model_Object::RemoveChild(IStorm3D_Helper *ihelper)
 void Storm3D_Model_Object::InformChangeToChilds()
 {
 	// Objects
-	for(set<IStorm3D_Model_Object*>::iterator io=child_objects.begin();io!=child_objects.end();++io)
+	for(std::set<IStorm3D_Model_Object*>::iterator io=child_objects.begin();io!=child_objects.end();++io)
 	{
 		// Typecast to simplify code
 		Storm3D_Model_Object *md=(Storm3D_Model_Object*)*io;
@@ -519,7 +519,7 @@ void Storm3D_Model_Object::InformChangeToChilds()
 	}
 
 	// Helpers
-	for(set<IStorm3D_Helper*>::iterator ih=child_helpers.begin();ih!=child_helpers.end();++ih)
+	for(std::set<IStorm3D_Helper*>::iterator ih=child_helpers.begin();ih!=child_helpers.end();++ih)
 	{
 		switch ((*ih)->GetHelperType())
 		{

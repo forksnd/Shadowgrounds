@@ -3,7 +3,6 @@
 #ifndef INCLUDED_STORM3D_TERRAIN_LIGHTMANAGER_H
 #define INCLUDED_STORM3D_TERRAIN_LIGHTMANAGER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include "DatatypeDef.h"
@@ -33,7 +32,7 @@ struct Storm3D_LightTexture
 class Storm3D_TerrainLightManager
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	Storm3D_TerrainLightManager(Storm3D &storm, IStorm3D_TerrainRendererBase &renderer, std::vector<boost::shared_ptr<Storm3D_Spotlight> > &spots, std::vector<boost::shared_ptr<Storm3D_FakeSpotlight> > &fakeSpots, std::vector<Storm3D_LightTexture> &fakeLights);

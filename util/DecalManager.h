@@ -1,7 +1,6 @@
 #ifndef INCLUDED_DECALMANAGER_H
 #define INCLUDED_DECALMANAGER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <DatatypeDef.h>
 #include <vector>
 
@@ -26,7 +25,7 @@ struct DecalIdentifier
 class DecalManager
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	DecalManager(IStorm3D_TerrainDecalSystem &system);

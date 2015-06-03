@@ -16,7 +16,7 @@ class StormStream;
 class Sound
 {
 	struct Data;
-	boost::shared_ptr<Data> data;
+	Data* data;
 	friend class SoundLib;
 
 public:
@@ -34,7 +34,7 @@ public:
 class SoundStream
 {
 	struct Data;
-	boost::shared_ptr<Data> data;
+	Data* data;
 	friend class SoundLib;
 	friend struct Data;
 
@@ -62,7 +62,7 @@ public:
 class SoundLib
 {
 	struct Data;
-	boost::shared_ptr<Data> data;
+	Data* data;
 
 	friend class SoundStream;
 	friend class StormStream;

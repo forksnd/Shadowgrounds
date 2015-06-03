@@ -5,7 +5,6 @@
 
 #include "DatatypeDef.h"
 #include "IStorm3D_Terrain.h"
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 class Storm3D;
@@ -17,7 +16,7 @@ struct Storm3D_TerrainGroupData;
 
 class Storm3D_TerrainGroup
 {
-	boost::scoped_ptr<Storm3D_TerrainGroupData> data;
+	Storm3D_TerrainGroupData* data;
 
 public:
 	Storm3D_TerrainGroup(Storm3D &storm, Storm3D_TerrainModels &models, bool ps14);

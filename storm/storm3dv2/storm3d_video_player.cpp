@@ -28,12 +28,13 @@ struct Storm3D_VideoPlayerData
 
 Storm3D_VideoPlayer::Storm3D_VideoPlayer(Storm3D &storm, Storm3D_Scene &scene, const char *fileName, IStorm3D_StreamBuilder *streamBuilder)
 {
-	boost::scoped_ptr<Storm3D_VideoPlayerData> tempData(new Storm3D_VideoPlayerData(storm, scene, fileName, streamBuilder));
-	data.swap(tempData);
+	data = new Storm3D_VideoPlayerData(storm, scene, fileName, streamBuilder);
 }
 
 Storm3D_VideoPlayer::~Storm3D_VideoPlayer()
 {
+    assert(data);
+    delete data;
 }
 
 void Storm3D_VideoPlayer::play()

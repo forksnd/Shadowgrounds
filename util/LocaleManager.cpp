@@ -19,8 +19,6 @@
 
 using namespace frozenbyte;
 using namespace frozenbyte::editor;
-using namespace boost;
-using namespace std;
 
 namespace util {
 namespace {
@@ -30,9 +28,9 @@ namespace {
 #else
 	const char *configName = "data/locale/configuration.txt";
 #endif
-	string convertBuffer;
+	std::string convertBuffer;
 
-	void convertString(const char localeId[2], string &str)
+	void convertString(const char localeId[2], std::string &str)
 	{
 		if(str.empty())
 			return;
@@ -223,7 +221,7 @@ void LocaleManager::loadResource(int resourceId, const char *filename, const cha
 		stream >> parser;
 	else
 	{
-		string message = "Failed to load locale file ";
+		std::string message = "Failed to load locale file ";
 		if(filename)
 			message += filename;
 		else
@@ -288,7 +286,7 @@ void LocaleManager::parse(const char localeId[2], const std::string &group)
 		stream >> parser;
 	else
 	{
-		string message = "Failed to load locale main file ";
+		std::string message = "Failed to load locale main file ";
 		if(configName)
 			message += configName;
 		else
@@ -324,7 +322,7 @@ void LocaleManager::parse(const char localeId[2], const std::string &group)
 
 		for(int j = 0; j < files; ++j)
 		{
-			const string &line = group.getLine(j);
+			const std::string &line = group.getLine(j);
 			loadResource(id, convertPath(localeId, line.c_str()), localeId);
 		}
 	}
@@ -366,7 +364,7 @@ void LocaleManager::init(const char *configurationFile)
 		stream >> parser;
 	else
 	{
-		string message = "Failed to load locale init file ";
+		std::string message = "Failed to load locale init file ";
 		if(configurationFile)
 			message += configurationFile;
 		else
@@ -388,7 +386,7 @@ void LocaleManager::init(const char *configurationFile)
 
 		try
 		{
-			int index = lexical_cast<int> (key);
+			int index = boost::lexical_cast<int> (key);
 			if(index < 0 || index >= MAX_LOCALES)
 			{
 				Logger::getInstance()->error("Invalid locale index");
@@ -520,7 +518,7 @@ const char *LocaleManager::getString(int resourceId, const char *key) const
 	if(result)
 		return result;
 
-	string message = "Couldn't find locale key: ";
+	std::string message = "Couldn't find locale key: ";
 	if(key)
 		message += key;
 	else
@@ -583,7 +581,7 @@ int LocaleManager::getInt(int resourceId, const char *key, int defaultValue) con
 	if(result)
 		return atoi(result);
 
-	string message = "Couldn't find locale key: ";
+	std::string message = "Couldn't find locale key: ";
 	if(key)
 		message += key;
 	else

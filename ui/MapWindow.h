@@ -2,7 +2,6 @@
 #define INCLUDED_UI_MAP_WINDOW_H
 
 #include <DatatypeDef.h>
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
 
@@ -19,7 +18,7 @@ class Map;
 class MapWindow
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	MapWindow(game::Game &game, Ogui &ogui, boost::shared_ptr<Map> &map);

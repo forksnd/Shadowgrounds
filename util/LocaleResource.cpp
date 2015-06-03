@@ -5,15 +5,14 @@
 #include "../system/Logger.h"
 #include <fstream>
 
-using namespace std;
-typedef map<string, string> LocaleValueMap;
+typedef std::map<std::string, std::string> LocaleValueMap;
 
 namespace util {
 namespace {
 
 //#define LOCALERESOURCE_MAX_STRING_LENGTH 512
 //static char convertBuffer[LOCALERESOURCE_MAX_STRING_LENGTH];
-string resourceConvertBuffer;
+std::string resourceConvertBuffer;
 
 void add(const char *str, int start, int end)
 {
@@ -87,7 +86,7 @@ const char *LocaleResource::convert(const char *str) const
 		if(end == -1)
 			break;
 
-		string key;
+		std::string key;
 		key.resize(end - i - 2);
 
 		if(!key.empty())
@@ -111,7 +110,7 @@ const char *LocaleResource::convert(const char *str) const
 				f << key << std::endl;
 				f.close();
 
-				string error("Locale does not define key ");
+				std::string error("Locale does not define key ");
 				error += key;
 				error += " (";
 				error += str;

@@ -6,7 +6,6 @@
 #pragma once
 
 #include <IStorm3D_ProceduralManager.h>
-#include <boost/scoped_ptr.hpp>
 #include <atlbase.h>
 
 struct IDirect3DTexture9;
@@ -16,7 +15,7 @@ class IStorm3D_Logger;
 class Storm3D_ProceduralManager: public IStorm3D_ProceduralManager
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	Storm3D_ProceduralManager(Storm3D &storm);

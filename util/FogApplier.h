@@ -2,7 +2,6 @@
 #define INCLUDED_FOG_APPLIER_H
 
 #include <string>
-#include <boost/scoped_ptr.hpp>
 #include <DatatypeDef.h>
 
 class IStorm3D_Scene;
@@ -12,7 +11,7 @@ namespace util {
 class FogApplier
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	FogApplier();

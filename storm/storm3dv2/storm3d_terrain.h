@@ -4,7 +4,6 @@
 #define INCLUDED_STORM3D_TERRAIN_H
 
 #include <IStorm3D_Terrain.h>
-#include <boost/scoped_ptr.hpp>
 
 class Storm3D;
 class Storm3D_Scene;
@@ -18,7 +17,7 @@ namespace util
 
 class Storm3D_Terrain: public IStorm3D_Terrain
 {
-	boost::scoped_ptr<Storm3D_TerrainData> data;
+	Storm3D_TerrainData* data;
 
 public:
 	Storm3D_Terrain(Storm3D &storm, bool ps13, bool ps14, bool ps20);

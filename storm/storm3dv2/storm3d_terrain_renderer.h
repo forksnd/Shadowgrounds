@@ -5,7 +5,6 @@
 
 #include <istorm3D_terrain_renderer.h>
 #include "istorm3d_terrain_rendererbase.h"
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <DatatypeDef.h>
 
@@ -28,7 +27,7 @@ class Storm3D_TerrainRenderer:
 	public IStorm3D_TerrainRenderer,
 	public IStorm3D_TerrainRendererBase
 {
-	boost::scoped_ptr<Storm3D_TerrainRendererData> data;
+	Storm3D_TerrainRendererData* data;
 
 public:
 	Storm3D_TerrainRenderer(Storm3D &storm, Storm3D_TerrainHeightmap &heightMap, Storm3D_TerrainGroup &groups, Storm3D_TerrainModels &models, Storm3D_TerrainDecalSystem &decalSystem, bool ps14, bool ps20);

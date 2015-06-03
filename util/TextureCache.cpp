@@ -17,9 +17,6 @@
 #include <map>
 #include <list>
 
-using namespace std;
-using namespace boost;
-
 namespace frozenbyte {
 
 	static const int TEMPORARY_TIME = 20 * 1000;
@@ -88,17 +85,17 @@ namespace frozenbyte {
 		size_t data_size;
 	};
 
-typedef list<TemporaryTexture> TimedTemporaryList;
+typedef std::list<TemporaryTexture> TimedTemporaryList;
 
 struct TextureCache::Data
 {
 	IStorm3D &storm;
 
-	map<string, boost::shared_ptr<IStorm3D_Texture> > textures;
-	map<string, boost::shared_ptr<IStorm3D_Texture> > temporaryTextures;
+	std::map<std::string, boost::shared_ptr<IStorm3D_Texture> > textures;
+	std::map<std::string, boost::shared_ptr<IStorm3D_Texture> > temporaryTextures;
 
 	// texture data loaded to memory
-	map<string, TextureData > textureDatas;
+	std::map<std::string, TextureData > textureDatas;
 
 	TimedTemporaryList timedTemporaries;
 
@@ -113,7 +110,7 @@ struct TextureCache::Data
 	~Data()
 	{
 		size_t total = 0;
-		map<string, TextureData>::iterator it;
+		std::map<std::string, TextureData>::iterator it;
 		for(it = textureDatas.begin(); it != textureDatas.end(); it++)
 		{
 			total += it->second.data_size;
@@ -122,14 +119,14 @@ struct TextureCache::Data
 		Logger::getInstance()->debug(("TextureCache preloaded a total of " + boost::lexical_cast<std::string>(total) + " bytes").c_str());
 	}
 
-	void loadTexture(string fileName, bool temporaryCache)
+	void loadTexture(std::string fileName, bool temporaryCache)
 	{
 		makeLower(fileName);
 
 		// try to find texture data from CPU side memory
 		const void *data = NULL;
 		size_t data_size = 0;
-		map<string, TextureData >::iterator it = textureDatas.find(fileName.c_str());
+		std::map<std::string, TextureData >::iterator it = textureDatas.find(fileName.c_str());
 		if(it != textureDatas.end())
 		{
 			data = it->second.data;
@@ -162,11 +159,11 @@ struct TextureCache::Data
 		}
 	}
 
-	IStorm3D_Texture *getTexture(string fileName)
+	IStorm3D_Texture *getTexture(std::string fileName)
 	{
 		makeLower(fileName);
 
-		map<string, boost::shared_ptr<IStorm3D_Texture> >::iterator it = textures.find(fileName);
+		std::map<std::string, boost::shared_ptr<IStorm3D_Texture> >::iterator it = textures.find(fileName);
 		if(it != textures.end())
 			return it->second.get();
 
@@ -177,7 +174,7 @@ struct TextureCache::Data
 		return 0;
 	}
 
-	void loadTextureData(string fileName)
+	void loadTextureData(std::string fileName)
 	{
 		makeLower(fileName);
 
@@ -209,12 +206,14 @@ struct TextureCache::Data
 };
 
 TextureCache::TextureCache(IStorm3D &storm)
-:	data(new Data(storm))
 {
+    data = new Data(storm);
 }
 
 TextureCache::~TextureCache()
 {
+    assert(data);
+    delete data;
 }
 
 void TextureCache::loadTexture(const char *fileName, bool temporaryCache)

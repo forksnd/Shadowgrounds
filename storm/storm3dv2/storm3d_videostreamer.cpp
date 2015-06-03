@@ -199,10 +199,9 @@ Storm3D_VideoStreamer::Storm3D_VideoStreamer(Storm3D                &storm,
                                              bool                    downscale,
                                              bool                    higherColorRange)
 {
-    boost::scoped_ptr<Data> tempData( new Data(storm, downscale, higherColorRange) );
-    tempData->streamBuilder = streamBuilder;
-    tempData->initialize(fileName);
-    data.swap(tempData);
+    data = new Data(storm, downscale, higherColorRange);
+    data->streamBuilder = streamBuilder;
+    data->initialize(fileName);
 
     if ( !data->initStormResources() )
         return;
@@ -212,6 +211,8 @@ Storm3D_VideoStreamer::Storm3D_VideoStreamer(Storm3D                &storm,
 
 Storm3D_VideoStreamer::~Storm3D_VideoStreamer()
 {
+    assert(data);
+    delete data;
 }
 
 bool Storm3D_VideoStreamer::hasVideo() const
@@ -271,7 +272,7 @@ void Storm3D_VideoStreamer::setAlpha(float alpha)
 
 void Storm3D_VideoStreamer::update()
 {
-    if (!data.get() || data->finished || data->width == 0 || data->height == 0)
+    if (data == NULL || data->finished || data->width == 0 || data->height == 0)
         return;
 
     uint32_t currentTime = SDL_GetTicks();

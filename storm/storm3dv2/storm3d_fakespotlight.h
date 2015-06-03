@@ -4,7 +4,6 @@
 #define INCLUDED_STORM3D_FAKESPOTLIGHT_H
 
 #include <istorm3d_fakespotlight.h>
-#include <boost/scoped_ptr.hpp>
 
 class Storm3D;
 class Storm3D_Camera;
@@ -15,7 +14,7 @@ struct D3DXMATRIX;
 class Storm3D_FakeSpotlight: public IStorm3D_FakeSpotlight
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	Storm3D_FakeSpotlight(Storm3D &storm, IDirect3D9 &d3d, IDirect3DDevice9 &device);

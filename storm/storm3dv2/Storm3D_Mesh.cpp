@@ -603,10 +603,10 @@ void Storm3D_Mesh::ReBuild()
 			bone_chunks[lod].clear();		 
 
 			// Find used bones indices
-			vector<int> bone_indices;
+			std::vector<int> bone_indices;
 			int max_bone_index = 0;
 
-			vector<vector<int> > chunk_faces;
+			std::vector<std::vector<int> > chunk_faces;
 
 			for(int v = 0; v < vertex_amount; ++v)
 			{
@@ -616,7 +616,7 @@ void Storm3D_Mesh::ReBuild()
 
 				if(index > max_bone_index)
 					max_bone_index = index;
-				if(find(bone_indices.begin(), bone_indices.end(), index) == bone_indices.end())
+				if(std::find(bone_indices.begin(), bone_indices.end(), index) == bone_indices.end())
 					bone_indices.push_back(index);
 
 				index = bone_weights[v].index2;
@@ -629,7 +629,7 @@ void Storm3D_Mesh::ReBuild()
 					bone_indices.push_back(index);
 			}
 
-			sort(bone_indices.begin(), bone_indices.end());
+			std::sort(bone_indices.begin(), bone_indices.end());
 
 			for(int i = 0; i < face_amount[lod]; ++i)
 			{
@@ -645,14 +645,14 @@ void Storm3D_Mesh::ReBuild()
 					int bone_index = bone_weights[vindex].index1;
 					if(bone_index >= 0)
 					{
-						if(find(&weights[0], &weights[6], bone_index) == &weights[6])
+						if(std::find(&weights[0], &weights[6], bone_index) == &weights[6])
 							weights[weight_index++] = bone_index;
 					}
 
 					bone_index = bone_weights[vindex].index2;
 					if(bone_index >= 0)
 					{
-						if(find(&weights[0], &weights[6], bone_index) == &weights[6])
+						if(std::find(&weights[0], &weights[6], bone_index) == &weights[6])
 							weights[weight_index++] = bone_index;
 					}
 				}
@@ -713,11 +713,11 @@ void Storm3D_Mesh::ReBuild()
 			int bone_chunk_amount = bone_chunks[lod].size();
 			for(int i = 0; i < bone_chunk_amount; ++i)
 			{
-				const vector<int> &chunk_face_list = chunk_faces[i];
+				const std::vector<int> &chunk_face_list = chunk_faces[i];
 				Storm3D_BoneChunk &chunk = bone_chunks[lod][i];
 
-				vector<int> vertex_list;
-				vector<int> vertex_convert_list(vertex_amount, -1);
+				std::vector<int> vertex_list;
+				std::vector<int> vertex_convert_list(vertex_amount, -1);
 
 				// Create index buffer
 				{

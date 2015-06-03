@@ -3,7 +3,6 @@
 #ifndef INCLUDED_FILE_WRAPPER_H
 #define INCLUDED_FILE_WRAPPER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <string>
 #include <vector>
 
@@ -13,7 +12,7 @@ namespace editor {
 class FileWrapper
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	FileWrapper(const std::string &dir, const std::string &extension, bool caseSensitive = false);

@@ -4,7 +4,6 @@
 #define INCLUDED_STORM3D_TERRAIN_LOD_H
 
 #include "DatatypeDef.h"
-#include <boost/scoped_ptr.hpp>
 
 class Storm3D;
 class Storm3D_Scene;
@@ -12,7 +11,7 @@ struct Storm3D_TerrainLodData;
 
 class Storm3D_TerrainLod
 {
-	boost::scoped_ptr<Storm3D_TerrainLodData> data;
+	Storm3D_TerrainLodData* data;
 
 public:
 	Storm3D_TerrainLod(Storm3D &storm);

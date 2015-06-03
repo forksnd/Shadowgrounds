@@ -5,8 +5,6 @@
 #include <istorm3d_terrain_decalsystem.h>
 #include <deque>
 
-using namespace std;
-
 namespace frozenbyte {
 
 	
@@ -75,9 +73,9 @@ namespace frozenbyte {
 		}
 	};
 
-	typedef deque<Decal> DecalList;
-	typedef deque<FadeDecal> FadeDecalList;
-	typedef deque<WaitFadeDecal> WaitFadeDecalList;
+	typedef std::deque<Decal> DecalList;
+	typedef std::deque<FadeDecal> FadeDecalList;
+	typedef std::deque<WaitFadeDecal> WaitFadeDecalList;
 
 	struct DecalCollection
 	{
@@ -318,12 +316,14 @@ struct DecalManager::Data
 };
 
 DecalManager::DecalManager(IStorm3D_TerrainDecalSystem &system)
-:	data(new Data(system))
 {
+    data = new Data(system);
 }
 
 DecalManager::~DecalManager()
 {
+    assert(data);
+    delete data;
 }
 
 void DecalManager::setMaxDecalAmount(int amount)

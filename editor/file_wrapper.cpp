@@ -6,7 +6,6 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <boost/scoped_ptr.hpp>
 #include <boost/utility.hpp>
 
 // Copyright 2002-2004 Frozenbyte Ltd.
@@ -30,7 +29,6 @@
 #include "../system/Logger.h"
 #include "../convert/str2int.h"
 
-using namespace std;
 using namespace frozenbyte::filesystem;
 
 namespace frozenbyte {
@@ -346,11 +344,11 @@ if (extension == "*.s3d")
 	}
 
 
-	void getFiles(const Dir &dir, vector<string> &result)
+	void getFiles(const Dir &dir, std::vector<std::string> &result)
 	{
 		for(unsigned int i = 0; i < dir.files.size(); ++i)
 		{
-			const string &file = dir.files[i];
+			const std::string &file = dir.files[i];
 			result.push_back(file);
 		}
 
@@ -359,11 +357,11 @@ if (extension == "*.s3d")
 	}
 
 
-	void getDirs(const Dir &dir, vector<string> &result)
+	void getDirs(const Dir &dir, std::vector<std::string> &result)
 	{
 		for(unsigned int i = 0; i < dir.dirs.size(); ++i)
 		{
-			const string &tmp = dir.dirs[i].dir->name;
+			const std::string &tmp = dir.dirs[i].dir->name;
 			result.push_back(tmp);
 		}
 
@@ -380,8 +378,7 @@ FileWrapper::FileWrapper(const std::string &dir, const std::string &extension, b
 	int startTime = Timer::getUnfactoredTime();
 	*/
 
-	boost::scoped_ptr<Data> tempData(new Data(dir, extension, caseSensitive));
-	data.swap(tempData);
+	data = new Data(dir, extension, caseSensitive);
 
 	/*
 	int endTime = Timer::getUnfactoredTime();
@@ -392,6 +389,8 @@ FileWrapper::FileWrapper(const std::string &dir, const std::string &extension, b
 
 FileWrapper::~FileWrapper()
 {
+    assert(data);
+    delete data;
 }
 
 int FileWrapper::getRootDirAmount() const
@@ -466,9 +465,9 @@ const std::string &FileWrapper::getFile(int rootIndex, int dirIndex, int fileInd
 	return dir.files[fileIndex];
 }
 
-vector<string> FileWrapper::getAllFiles() const
+std::vector<std::string> FileWrapper::getAllFiles() const
 {
-	vector<string> files;
+	std::vector<std::string> files;
 	data->getFiles(data->root, files);
   // TODO: Hax to fix deleting of player profiles
 	for(unsigned int i=0;i<files.size();++i)
@@ -478,9 +477,9 @@ vector<string> FileWrapper::getAllFiles() const
 	return files;
 }
 
-vector<string> FileWrapper::getAllDirs() const
+std::vector<std::string> FileWrapper::getAllDirs() const
 {
-	vector<string> dirs;
+	std::vector<std::string> dirs;
 	data->getDirs(data->root, dirs);
 
 	return dirs;

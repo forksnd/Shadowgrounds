@@ -2,7 +2,6 @@
 #include "precompiled.h"
 
 #include <set>
-using namespace std;
 
 #include "LoadingMessage.h"
 

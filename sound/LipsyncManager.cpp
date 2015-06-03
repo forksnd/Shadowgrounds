@@ -20,9 +20,7 @@
 
 namespace sfx {
 
-using namespace boost;
-using namespace std;
-typedef map<string, boost::shared_ptr<IStorm3D_BoneAnimation> > AnimationMap;
+typedef std::map<std::string, boost::shared_ptr<IStorm3D_BoneAnimation> > AnimationMap;
 
 
 	struct Releaser
@@ -55,7 +53,7 @@ typedef map<string, boost::shared_ptr<IStorm3D_BoneAnimation> > AnimationMap;
 			}
 		};
 
-		typedef vector<Info> Fades;
+		typedef std::vector<Info> Fades;
 		Fades fades;
 
 		void addFadeOut(IStorm3D_BoneAnimation *a, IStorm3D_Model *m, int fadeTime, int waitTime)
@@ -213,9 +211,9 @@ typedef map<string, boost::shared_ptr<IStorm3D_BoneAnimation> > AnimationMap;
 		}
 	};
 
-	typedef map<IStorm3D_Model *, ModelInfo> ModelInfos;
-	typedef vector<boost::shared_ptr<PlayData> > PlayDatas;
-	typedef vector<Amplitude> Amplitudes;
+	typedef std::map<IStorm3D_Model *, ModelInfo> ModelInfos;
+	typedef std::vector<boost::shared_ptr<PlayData> > PlayDatas;
+	typedef std::vector<Amplitude> Amplitudes;
 
 
 struct LipsyncManager::Data
@@ -243,7 +241,7 @@ struct LipsyncManager::Data
 	{
 	}
 
-	void addAnimation(AnimationMap &map, const string &name, const string &file)
+	void addAnimation(AnimationMap &map, const std::string &name, const std::string &file)
 	{
 		IStorm3D_BoneAnimation *a = storm->CreateNewBoneAnimation(file.c_str());
 		map[name].reset(a, Releaser());
@@ -279,7 +277,7 @@ struct LipsyncManager::Data
 		sampleRate = properties.getPropertyValue(LipsyncProperties::SampleRate);
 	}
 
-	void setIdle(IStorm3D_Model *model, const string &value, int fadeTime)
+	void setIdle(IStorm3D_Model *model, const std::string &value, int fadeTime)
 	{
 		FB_ASSERT(model);
 
@@ -294,7 +292,7 @@ struct LipsyncManager::Data
 		modelInfo[model].setIdle(fader, model, it->second.get(), fadeTime);
 	}
 
-	void setExpression(IStorm3D_Model *model, const string &value, int fadeTime)
+	void setExpression(IStorm3D_Model *model, const std::string &value, int fadeTime)
 	{
 		FB_ASSERT(model);
 
@@ -359,14 +357,14 @@ struct LipsyncManager::Data
 
 LipsyncManager::LipsyncManager(IStorm3D *storm)
 {
-	boost::scoped_ptr<Data> tempData(new Data(storm));
-	tempData->initialize();
-
-	data.swap(tempData);
+	data = new Data(storm);
+	data->initialize();
 }
 
 LipsyncManager::~LipsyncManager()
 {
+    assert(data);
+    delete data;
 }
 
 const LipsyncProperties &LipsyncManager::getProperties() const
@@ -385,12 +383,12 @@ boost::shared_ptr<AmplitudeArray> LipsyncManager::getAmplitudeBuffer(const std::
 	return array;
 }
 
-void LipsyncManager::setIdle(IStorm3D_Model *model, const string &value, int fadeTime)
+void LipsyncManager::setIdle(IStorm3D_Model *model, const std::string &value, int fadeTime)
 {
 	data->setIdle(model, value, fadeTime);
 }
 
-void LipsyncManager::setExpression(IStorm3D_Model *model, const string &value, int fadeTime)
+void LipsyncManager::setExpression(IStorm3D_Model *model, const std::string &value, int fadeTime)
 {
 	data->setExpression(model, value, fadeTime);
 }

@@ -3,7 +3,6 @@
 
 #include <Storm3D_UI.h>
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
 #include <string>

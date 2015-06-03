@@ -18,8 +18,6 @@
 #include <map>
 #include <string>
 
-using namespace std;
-using namespace boost;
 using namespace frozenbyte;
 using namespace frozenbyte::editor;
 
@@ -50,7 +48,7 @@ namespace sfx {
 			FadeOut
 		};
 
-		string filename;
+		std::string filename;
 		boost::shared_ptr<SoundStream> stream;
 
 		Mode mode;
@@ -288,15 +286,15 @@ namespace sfx {
 		}
 	};
 
-	typedef vector<boost::shared_ptr<Stream> > AmbientStreamList;
+	typedef std::vector<boost::shared_ptr<Stream> > AmbientStreamList;
 
 	// .......
 
-	typedef vector<string> StringList;
+	typedef std::vector<std::string> StringList;
 
 	struct Ambient
 	{
-		string file;
+		std::string file;
 		int fadeTime;
 		float volume;
 
@@ -343,11 +341,11 @@ namespace sfx {
 			for(int i = 0; i < group.getLineCount(); ++i)
 			{
 				const std::string &file = group.getLine(i);
-				if(ifstream(file.c_str()).good())
+				if(std::ifstream(file.c_str()).good())
 					files.push_back(file);
 				else
 				{
-					string message = "Random ambient file not found: ";
+					std::string message = "Random ambient file not found: ";
 					message += file;
 
 					Logger::getInstance()->error(message.c_str());
@@ -360,7 +358,7 @@ namespace sfx {
 	{
 		Ambient ambient;
 		Random random;
-		string soundArea;
+		std::string soundArea;
 
 		int time;
 		int randomTime;
@@ -391,7 +389,7 @@ namespace sfx {
 
 		const std::string &getRandomSound() const
 		{
-			static string empty;
+			static std::string empty;
 			if(random.files.empty())
 				return empty;
 
@@ -441,19 +439,19 @@ namespace sfx {
 		}
 	};
 
-	typedef map<string, AreaInfo> AmbientAreaMap;
+	typedef std::map<std::string, AreaInfo> AmbientAreaMap;
 
 	struct ListInfo
 	{
 		AmbientAreaMap areas;
-		string active;
+		std::string active;
 
 		ListInfo()
 		:	active(DEFAULT_AMBIENT_AREA)
 		{
 		}
 
-		void load(const string &groupName, const ParserGroup &group)
+		void load(const std::string &groupName, const ParserGroup &group)
 		{
 			areas.clear();
 			active = DEFAULT_AMBIENT_AREA;
@@ -476,8 +474,8 @@ struct AmbientAreaManager::Data
 {
 	SoundMixer *mixer;
 	ListInfo list[2];
-	string oldActives[2];
-	string eaxArea[2];
+	std::string oldActives[2];
+	std::string eaxArea[2];
 
 	AreaType activeArea;
 	AmbientStreamList ambients;
@@ -588,7 +586,7 @@ struct AmbientAreaManager::Data
 		{
 			if(list[type].areas.find(name) == list[type].areas.end())
 			{
-				string foo("Ambient area not defined: ");
+				std::string foo("Ambient area not defined: ");
 				foo += name;
 				Logger::getInstance()->error(foo.c_str());
 			}
@@ -694,12 +692,13 @@ struct AmbientAreaManager::Data
 
 AmbientAreaManager::AmbientAreaManager(SoundMixer *mixer)
 {
-	scoped_ptr<Data> tempData(new Data(mixer));
-	data.swap(tempData);
+	data = new Data(mixer);
 }
 
 AmbientAreaManager::~AmbientAreaManager()
 {
+    assert(data);
+    delete data;
 }
 
 void AmbientAreaManager::loadList(const std::string &file)

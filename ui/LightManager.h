@@ -1,7 +1,6 @@
 #ifndef UI_LIGHTMANAGER_H
 #define UI_LIGHTMANAGER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <string>
 #include <DatatypeDef.h>
 #include "../game/unified_handle_type.h"
@@ -126,7 +125,7 @@ struct PointLights
 class LightManager
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	LightManager(IStorm3D &storm, IStorm3D_Scene &scene, IStorm3D_Terrain &terrain, util::LightMap *lightMap, Terrain *uiTerrain);

@@ -3,7 +3,6 @@
 #ifndef INCLUDED_STORM3D_TERRAIN_HEIGHTMAP_H
 #define INCLUDED_STORM3D_TERRAIN_HEIGHTMAP_H
 
-#include <boost/scoped_ptr.hpp>
 #include "DatatypeDef.h"
 #include <istorm3d_spotlight.h>
 
@@ -24,7 +23,7 @@ namespace util
 
 class Storm3D_TerrainHeightmap
 {
-	boost::scoped_ptr<Storm3D_TerrainHeightmapData> data;
+	Storm3D_TerrainHeightmapData* data;
 
 public:
 	Storm3D_TerrainHeightmap(Storm3D &storm, bool ps13);

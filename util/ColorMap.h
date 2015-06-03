@@ -2,7 +2,6 @@
 #define INCLUDED_COLOR_MAP_H
 
 #include <DatatypeDef.h>
-#include <boost/scoped_ptr.hpp>
 
 namespace game {
 
@@ -16,7 +15,7 @@ struct ColorMapData;
 
 class ColorMap
 {
-	boost::scoped_ptr<ColorMapData> data;
+	ColorMapData* data;
 
 public:
 	ColorMap(game::GameMap *gameMap, const char *fileName, float scaleX, float scaleY, float scaledSizeX, float scaledSizeY);

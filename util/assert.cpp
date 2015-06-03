@@ -14,9 +14,6 @@
 #include <boost/lexical_cast.hpp>
 #include <string>
 
-using namespace std;
-using namespace boost;
-
 namespace frozenbyte {
 namespace {
 
@@ -28,11 +25,11 @@ namespace {
 
 void assertImp(const char *predicateString, const char *file, int line)
 {
-	string error = predicateString;
+	std::string error = predicateString;
 	error += " (";
 	error += file;
 	error += ", ";
-	error += lexical_cast<string> (line);
+	error += boost::lexical_cast<std::string> (line);
 	error += ")";
 
 	Logger::getInstance()->error(error.c_str());

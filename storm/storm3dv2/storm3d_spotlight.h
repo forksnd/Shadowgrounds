@@ -4,7 +4,6 @@
 #define INCLUDED_STORM3D_SPOTLIGHT_H
 
 #include <istorm3d_spotlight.h>
-#include <boost/scoped_ptr.hpp>
 
 class Storm3D;
 class Storm3D_Camera;
@@ -15,7 +14,7 @@ struct IDirect3DDevice9;
 
 class Storm3D_Spotlight: public IStorm3D_Spotlight
 {
-	boost::scoped_ptr<Storm3D_SpotlightData> data;
+	Storm3D_SpotlightData* data;
 
 public:
 	enum SpotType

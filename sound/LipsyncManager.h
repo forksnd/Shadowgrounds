@@ -3,7 +3,6 @@
 #ifndef LIPSYNC_MANAGER_H
 #define LIPSYNC_MANAGER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
 
@@ -18,7 +17,7 @@ class AmplitudeArray;
 class LipsyncManager
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	LipsyncManager(IStorm3D *storm);

@@ -5,7 +5,6 @@
 #include <string>
 //#include "../util/Parser.h"
 #include <IStorm3D_Model.h>
-#include <boost/scoped_ptr.hpp>
 
 #include "../game/tracking/ITrackableUnifiedHandleObjectImplementationManager.h"
 #include "../util/GridOcclusionCuller.h"
@@ -89,7 +88,7 @@ struct TerrainData;
 
 class Terrain : public game::tracking::ITrackableUnifiedHandleObjectImplementationManager
 {
-	boost::scoped_ptr<TerrainData> data;
+	TerrainData* data;
 
 public:
 	Terrain(IStorm3D *storm, IStorm3D_Scene *scene, const char *dirName, const char *forceMapName, const util::AreaMap *areaMap, game::GameMap *gameMap, ui::LightManager *lightManager, ui::AmbientSoundManager *ambientSoundManager);

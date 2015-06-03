@@ -125,12 +125,13 @@ ColorMap::ColorMap(game::GameMap *gameMap, const char *fileName, float scaleX, f
 {
 	assert(gameMap && fileName);
 
-	boost::scoped_ptr<ColorMapData> tempData(new ColorMapData(gameMap, fileName, scaleX, scaleY, scaledSizeX, scaledSizeY));
-	data.swap(tempData);
+	data = new ColorMapData(gameMap, fileName, scaleX, scaleY, scaledSizeX, scaledSizeY);
 }
 
 ColorMap::~ColorMap()
 {
+    assert(data);
+    delete data;
 }
 
 void ColorMap::setMultiplier(ColorMap::Area area, float value)

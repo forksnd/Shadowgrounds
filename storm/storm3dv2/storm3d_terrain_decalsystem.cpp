@@ -5,6 +5,7 @@
 #endif
 
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <vector>
 #include <deque>
 
@@ -22,15 +23,13 @@
 
 #include "../../util/Debug_MemoryManager.h"
 
-using namespace std;
-using namespace boost;
 using namespace frozenbyte::storm;
 
 	struct Decal;
 	struct Material;
-	typedef deque<Decal> DecalList;
-	typedef vector<VertexBuffer> VertexBufferList;
-	typedef vector<Material> MaterialList;
+	typedef std::deque<Decal> DecalList;
+	typedef std::vector<VertexBuffer> VertexBufferList;
+	typedef std::vector<Material> MaterialList;
 
 	// position + normal + texcoord + color 
 	static const int VERTEX_SIZE = 3*4 + 3*4 + 4*4 + 1*4;
@@ -403,7 +402,7 @@ struct Storm3D_TerrainDecalSystem::Data
 	VertexBuffer shadowVertices;
 	IndexBuffer indices;
 
-	scoped_ptr<Tree> tree;
+	boost::scoped_ptr<Tree> tree;
 	DecalPtrList decals;
 	DecalList shadowDecals;
 
@@ -893,6 +892,8 @@ Storm3D_TerrainDecalSystem::Storm3D_TerrainDecalSystem(Storm3D &storm)
 
 Storm3D_TerrainDecalSystem::~Storm3D_TerrainDecalSystem()
 {
+    assert(data);
+    delete data;
 }
 
 void Storm3D_TerrainDecalSystem::setSceneSize(const VC3 &size)

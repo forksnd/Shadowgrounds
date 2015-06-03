@@ -3,10 +3,6 @@
 #ifndef INCLUDED_FILESYSTEM_OUTPUT_FILE_STREAM_H
 #define INCLUDED_FILESYSTEM_OUTPUT_FILE_STREAM_H
 
-#ifndef INCLUDED_BOOST_SCOPED_PTR_HPP
-#define INCLUDED_BOOST_SCOPED_PTR_HPP
-#include <boost/scoped_ptr.hpp>
-#endif
 #ifndef INCLUDED_FILESYSTEM_OUTPUT_STREAM_H
 #include "output_stream.h"
 #endif
@@ -18,7 +14,7 @@ struct OutputFileStreamBufferData;
 
 class OutputFileStreamBuffer: public IOutputStreamBuffer
 {
-	boost::scoped_ptr<OutputFileStreamBufferData> data;
+	OutputFileStreamBufferData* data;
 
 public:
 	OutputFileStreamBuffer(const std::string &fileName);

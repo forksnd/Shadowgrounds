@@ -5,14 +5,11 @@
 #include "BuildingBlinker.h"
 #include <vector>
 
-using namespace std;
-using namespace boost;
-
 namespace util {
 
 struct BlinkerManager::Data
 {
-	vector<boost::shared_ptr<BuildingBlinker> > blinkers;
+	std::vector<boost::shared_ptr<BuildingBlinker> > blinkers;
 
 	void update(int timeDelta)
 	{
@@ -22,12 +19,14 @@ struct BlinkerManager::Data
 };
 
 BlinkerManager::BlinkerManager()
-:	data(new Data())
 {
+    data = new Data();
 }
 
 BlinkerManager::~BlinkerManager()
 {
+    assert(data);
+    delete data;
 }
 
 void BlinkerManager::addBlinker(boost::shared_ptr<BuildingBlinker> blinker)

@@ -1,7 +1,6 @@
 #ifndef INCLUDED_UTIL_BLINKER_MANAGER_H
 #define INCLUDED_UTIL_BLINKER_MANAGER_H
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace util {
@@ -11,7 +10,7 @@ class BuildingBlinker;
 class BlinkerManager 
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	Data* data;
 
 public:
 	BlinkerManager();

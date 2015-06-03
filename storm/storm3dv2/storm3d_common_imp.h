@@ -103,7 +103,6 @@ inline DWORD F2DW(FLOAT f) {return *((DWORD*)&f);}
 #pragma warning(disable:4103)
 #endif
 #include <set>
-using namespace std;			// For sets
 
 // "this used in constructor" warning disable
 #ifdef _MSC_VER

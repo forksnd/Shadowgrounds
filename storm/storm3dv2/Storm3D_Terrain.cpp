@@ -53,13 +53,14 @@ struct Storm3D_TerrainData
 
 Storm3D_Terrain::Storm3D_Terrain(Storm3D &storm, bool ps13, bool ps14, bool ps20)
 {
-	boost::scoped_ptr<Storm3D_TerrainData> tempData(new Storm3D_TerrainData(storm, ps13, ps14, ps20));
-	data.swap(tempData);
+	data = new Storm3D_TerrainData(storm, ps13, ps14, ps20);
 }
 
 Storm3D_Terrain::~Storm3D_Terrain()
 {
+    assert(data);
 	data->storm.Remove(this);
+    delete data;
 }
 
 void Storm3D_Terrain::setHeightMap(const unsigned short *buffer, const VC2I &resolution, const VC3 &size, int textureDetail, unsigned short *forceMap, int heightmapMultiplier, int obstaclemapMultiplier)

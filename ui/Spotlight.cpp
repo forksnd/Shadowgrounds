@@ -699,12 +699,13 @@ Spotlight::Spotlight(IStorm3D &storm, IStorm3D_Terrain &terrain,
 	IStorm3D_Scene &scene, IStorm3D_Model *originModel,
 	const std::string &spottype)
 {
-	boost::scoped_ptr<SpotlightData> tempData(new SpotlightData(storm, terrain, scene, originModel, spottype));
-	data.swap(tempData);
+	data = new SpotlightData(storm, terrain, scene, originModel, spottype);
 }
 
 Spotlight::~Spotlight()
 {
+    assert(data);
+    delete data;
 }
 
 void Spotlight::prepareForRender()
