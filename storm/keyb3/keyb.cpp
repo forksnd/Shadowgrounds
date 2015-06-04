@@ -570,11 +570,11 @@ void Keyb3_UpdateDevices() {
 				unsigned int b;
 				switch (event.button.button) {
 				case SDL_BUTTON_MIDDLE:
-					b = KEYCODE_MOUSE_BUTTON2;
+					b = KEYCODE_MOUSE_BUTTON3;
 					break;
 
 				case SDL_BUTTON_RIGHT:
-					b = KEYCODE_MOUSE_BUTTON3;
+					b = KEYCODE_MOUSE_BUTTON2;
 					break;
 
 				case SDL_BUTTON_WHEELDOWN:
