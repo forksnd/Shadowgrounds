@@ -391,7 +391,10 @@ void VideoBackgroundLoader::startLoadingThread()
                             // if too many buffered frames, sleep
                             if (mContext->frames.size() >= MAX_BUFFERED_FRAMES) {
                                 backgroundReaderWaiting = true;
-                                SDL_CondWait(framesFullCVar, backgroundMutex);
+                                while (backgroundReaderWaiting)
+                                {
+                                    SDL_CondWait(framesFullCVar, backgroundMutex);
+                                }
                                 backgroundReaderWaiting = false;
                             }
                             SDL_UnlockMutex(backgroundMutex);
@@ -473,7 +476,7 @@ int TReader::nextframe()
 
 int TReader::read_pixels(char *buffer, unsigned int w, unsigned int h, int64_t& time)
 {
-    return !mLoader->readFrame(buffer, w, h, time);
+    return mLoader->readFrame(buffer, w, h, time);
 }
 
 int TReader::finish()

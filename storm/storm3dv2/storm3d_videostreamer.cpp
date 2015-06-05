@@ -299,10 +299,12 @@ void Storm3D_VideoStreamer::update()
             uint32_t* buf = data->buffer;
 
             int64_t time;
-            data->test->read_pixels( (char *)buf, width, height, time );
-            data->nextFrameTime = data->startTime + (uint32_t)(( (double)data->test->fps_numerator / data->test->fps_denominator ) * 1000 * time);
-            data->activeTexture->Copy32BitSysMembufferToTexture((DWORD*)buf);
-            data->lastFrame++;
+            if (data->test->read_pixels( (char *)buf, width, height, time ))
+            {
+                data->nextFrameTime = data->startTime + (uint32_t)(( (double)data->test->fps_numerator / data->test->fps_denominator ) * 1000 * time);
+                data->activeTexture->Copy32BitSysMembufferToTexture((DWORD*)buf);
+                data->lastFrame++;
+            }
         } else if (data->looping) {
             //FIXME: restart video
             data->test->restart();
