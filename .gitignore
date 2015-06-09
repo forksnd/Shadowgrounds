@@ -6,4 +6,9 @@ tmp
 *.user
 *.opensdf
 *.sdf
+*.idb
+*.patch
+*.PIXExp
+*.PIXRun
+TODO.txt
 SDK
