@@ -368,36 +368,22 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 	screen_size.height=present_params.BackBufferHeight;
 	viewport_size=screen_size;
 
-	DWORD ptype=D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+	DWORD ptype=D3DCREATE_HARDWARE_VERTEXPROCESSING;
 	present_params.Flags = 0;//D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL;
 
-	if (adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HW_TL)
-		ptype=D3DCREATE_MIXED_VERTEXPROCESSING;
-	if (adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)
-		ptype=D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE;
-	if (adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)
-		ptype=D3DCREATE_HARDWARE_VERTEXPROCESSING;
+	if((adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)==0)
+    {
+		MessageBox(NULL,"Unsupported graphics card","Storm3D Error",0);
+		return false;
+    }
 
-
-	if (use_reference_driver)
+	// Create the device
+	if (FAILED(D3D->CreateDevice(active_adapter,D3DDEVTYPE_HAL,window_handle,
+	ptype,&present_params,&D3DDevice)))
 	{
-		// --- REFERENCE DRIVER ---
-		if (FAILED(D3D->CreateDevice(D3D->GetAdapterCount() - 1,D3DDEVTYPE_REF,window_handle,
-		ptype,&present_params,&D3DDevice)))
-		{
-			MessageBox(NULL,"Error creating windowed device","Storm3D Error",0);
-			return false;
-		}
-		// --- END REFERENCE DRIVER ---
-	} else {
-		// Create the device
-		if (FAILED(D3D->CreateDevice(active_adapter,D3DDEVTYPE_HAL,window_handle,
-		ptype,&present_params,&D3DDevice)))
-		{
-			//MessageBox(NULL,"Error creating fullscreen device","Storm3D Error",0);
-			error_string = "Failed to create device";
-			return false;
-		}
+		//MessageBox(NULL,"Error creating fullscreen device","Storm3D Error",0);
+		error_string = "Failed to create device";
+		return false;
 	}
 
 	// Get original gamma ramp
@@ -433,13 +419,7 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 	// Create shader manager
 	new Storm3D_ShaderManager(*D3DDevice);
 
-	if(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)
-		Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice, true);
-	else
-	{
-		D3DDevice->SetSoftwareVertexProcessing(TRUE);
-		Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice, false);
-	}
+	Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice);
 
 	//D3DDevice->SetDepthStencilSurface(depthTarget);
 
@@ -516,34 +496,21 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 	viewport_size=screen_size;
 	present_params.Flags = 0; //D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL;
 
-	DWORD ptype=D3DCREATE_SOFTWARE_VERTEXPROCESSING;
-	if (adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HW_TL)
-		ptype=D3DCREATE_MIXED_VERTEXPROCESSING;
-	if (adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)
-		ptype=D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE;
-	if (adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)
-		ptype=D3DCREATE_HARDWARE_VERTEXPROCESSING;
+	DWORD ptype=D3DCREATE_HARDWARE_VERTEXPROCESSING;
+
+	if((adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)==0)
+    {
+		MessageBox(NULL,"Unsupported graphics card","Storm3D Error",0);
+		return false;
+    }
 
     // Create the device
-	if (use_reference_driver)
+	if (FAILED(D3D->CreateDevice(active_adapter,D3DDEVTYPE_HAL,window_handle,
+		ptype,&present_params,&D3DDevice)))
 	{
-		// --- REFERENCE DRIVER ---
-		// TODO: this relies on the last adapter being the reference driver (is that always true?)
-		if (FAILED(D3D->CreateDevice(D3D->GetAdapterCount() - 1,D3DDEVTYPE_REF,window_handle,
-			ptype,&present_params,&D3DDevice)))
-		{
-			MessageBox(NULL,"Error creating windowed device","Storm3D Error",0);
-			return false;
-		}
-		// --- END REFERENCE DRIVER ---
-	} else {
-		if (FAILED(D3D->CreateDevice(active_adapter,D3DDEVTYPE_HAL,window_handle,
-			ptype,&present_params,&D3DDevice)))
-		{
-			//MessageBox(NULL,"Error creating windowed device","Storm3D Error",0);
-			error_string = "Failed to create device";
-			return false;
-		}
+		//MessageBox(NULL,"Error creating windowed device","Storm3D Error",0);
+		error_string = "Failed to create device";
+		return false;
 	}
 
 	// Get original gamma ramp
@@ -579,13 +546,7 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 	// Create shader manager
 	new Storm3D_ShaderManager(*D3DDevice);
 
-	if(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)
-		Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice, true);
-	else
-	{
-		D3DDevice->SetSoftwareVertexProcessing(TRUE);
-		Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice, false);
-	}
+	Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice);
 
 	//D3DDevice->SetDepthStencilSurface(depthTarget);
 
@@ -642,14 +603,13 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 	screen_size.height=present_params.BackBufferHeight;
 	viewport_size=screen_size;
 
-	DWORD ptype=D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+	DWORD ptype=D3DCREATE_HARDWARE_VERTEXPROCESSING;
 
-	//present_params.Flags = D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL | D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
-	//present_params.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
-	if (adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HW_TL)
-		ptype=D3DCREATE_MIXED_VERTEXPROCESSING;
-	if (adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)
-		ptype=D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE;
+	if((adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)==0)
+    {
+		MessageBox(NULL,"Unsupported graphics card","Storm3D Error",0);
+		return false;
+    }
 
 /*
 #pragma message(" ********************* ")
@@ -718,13 +678,7 @@ if (FAILED(D3D->CreateDevice(D3D->GetAdapterCount() - 1,D3DDEVTYPE_REF,window_ha
 	// Create shader manager
 	new Storm3D_ShaderManager(*D3DDevice);
 
-	if(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)
-		Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice, true);
-	else
-	{
-		D3DDevice->SetSoftwareVertexProcessing(TRUE);
-		Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice, false);
-	}
+	Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice);
 
 	//D3DDevice->SetDepthStencilSurface(depthTarget);
 
@@ -780,7 +734,6 @@ Storm3D::Storm3D(bool _no_info, filesystem::FilePackageManager *fileManager, ISt
 	high_quality_textures(true),
 	downscale_videos(false),
 	highcolorrange_videos(true),
-	use_reference_driver(false),
 	enableReflection(false),
 	halfReflection(false),
 	reflectionQuality(0),
@@ -2542,10 +2495,7 @@ bool Storm3D::RestoreDeviceIfLost()
 				logger->debug("Storm3D::RestoreDeviceIfLost - create shaders");
 
 			// Recreate shaders
-			if(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)
-				Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice, true);
-			else
-				Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice, false);
+			Storm3D_ShaderManager::GetSingleton()->CreateShaders(D3DDevice);
 
 			//MessageBox(0, "", "", MB_OK);
 		}

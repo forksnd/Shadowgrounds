@@ -121,7 +121,6 @@ private:
 	bool high_quality_textures;
 	bool downscale_videos;
 	bool highcolorrange_videos;	
-	bool use_reference_driver;
 
 	VC2I colorTargetSize;
 	VC2I colorSecondaryTargetSize;
@@ -234,7 +233,6 @@ public:
 	void SetAntiAliasing(int quality) { antialiasing_level = quality; }
 	void AllocateProceduralTarget(bool enable) { allocate_procedural_target = enable; }
 	void SetReflectionQuality(int quality);
-	void UseReferenceDriver(bool refdriver) { use_reference_driver = refdriver; }
 	void forceReset() { force_reset = true; }
 
 	bool hasHighQualityTextures() const { return high_quality_textures; }

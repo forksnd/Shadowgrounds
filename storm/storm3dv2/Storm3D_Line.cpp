@@ -94,24 +94,15 @@ void Storm3D_Line::Render(IDirect3DDevice9 *device)
 	// Create buffers when needed
 	if(vertex_buffer == 0)
 	{
-		if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == true)
-			device->CreateVertexBuffer( vertices*sizeof(VXFORMAT_PSD), D3DUSAGE_SOFTWAREPROCESSING| D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC, FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer, 0);
-		else
-			device->CreateVertexBuffer( vertices*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer, 0);
+		device->CreateVertexBuffer( vertices*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer, 0);
 	}
 	if(index_buffer == 0)
 	{
-		if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == true)
-			device->CreateIndexBuffer(sizeof(WORD)*faces*3, D3DUSAGE_WRITEONLY|D3DUSAGE_SOFTWAREPROCESSING|D3DUSAGE_DYNAMIC,D3DFMT_INDEX16,D3DPOOL_DEFAULT, &index_buffer, 0);
-		else
-			device->CreateIndexBuffer(sizeof(WORD)*faces*3, D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,D3DFMT_INDEX16,D3DPOOL_DEFAULT, &index_buffer, 0);
+		device->CreateIndexBuffer(sizeof(WORD)*faces*3, D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,D3DFMT_INDEX16,D3DPOOL_DEFAULT, &index_buffer, 0);
 	}
 	if(vertex_buffer2 == 0)
 	{
-		if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == true)
-			device->CreateVertexBuffer( points.size()*sizeof(VXFORMAT_PSD), D3DUSAGE_SOFTWAREPROCESSING| D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC, FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer2, 0);
-		else
-			device->CreateVertexBuffer( points.size()*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer2, 0);
+		device->CreateVertexBuffer( points.size()*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer2, 0);
 	}
 
 	// Update as needed

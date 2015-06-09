@@ -163,7 +163,6 @@ class Storm3D_ShaderManager: public Singleton<Storm3D_ShaderManager>
 
 	int current_shader;
 
-	bool software_shaders;
 	bool lighting_shaders;
 	bool projected_shaders;
 	bool ati_depth_shaders;
@@ -189,7 +188,7 @@ public:
 	~Storm3D_ShaderManager();
 	
 	// Create shaders
-	void CreateShaders(IDirect3DDevice9 *device, bool hw_shader);
+	void CreateShaders(IDirect3DDevice9 *device);
 	void CreateAtiShaders(IDirect3DDevice9 *device);
 
 	void setLightingParameters(bool reflection_, bool local_reflection_, int light_count_);
@@ -231,7 +230,6 @@ public:
 
 	void setSpotType(SpotType type);
 
-	bool SoftwareShaders();
 	bool BoneShader();
 
 	// Do the magic ;-)

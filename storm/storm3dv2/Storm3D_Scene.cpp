@@ -553,9 +553,6 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 	}
 	*/
 
-	// psd: switch to hw t&l if needed
-	if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders())
-		Storm3D2->D3DDevice->SetSoftwareVertexProcessing(FALSE);
 /*
 	// Set fog
 	if (fog_active)
@@ -639,16 +636,9 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 		// psd: disable fog table
 		Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGCOLOR,fog_color.GetAsD3DCompatibleARGB());
 
-		if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == false)
-		{
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_NONE);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_NONE );  
-		}
+		Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_NONE);
+		Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_NONE );  
 	}
-
-	// psd: switch back to sw t&l if needed
-	if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders())
-		Storm3D2->D3DDevice->SetSoftwareVertexProcessing(TRUE);
 
 	Storm3D_ShaderManager::GetSingleton()->ResetShader();
 	Storm3D_ShaderManager::GetSingleton()->ClearCache();
@@ -1003,10 +993,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 					line[1].color = D3DCOLOR_RGBA(255,255,128,255);
 
 					IDirect3DVertexBuffer9 *vbuffer = 0;
-					if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == true)
-						Storm3D2->D3DDevice->CreateVertexBuffer( 3*sizeof(VXFORMAT_PSD), D3DUSAGE_SOFTWAREPROCESSING| D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC, FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vbuffer, 0);
-					else
-						Storm3D2->D3DDevice->CreateVertexBuffer( 3*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC, FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vbuffer, 0);
+					Storm3D2->D3DDevice->CreateVertexBuffer( 3*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC, FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vbuffer, 0);
 
 					Vector bone_position;
 					Vector bone_offset = Vector(0,0,1.f);

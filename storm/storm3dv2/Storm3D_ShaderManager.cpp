@@ -139,7 +139,6 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(IDirect3DDevice9 &device)
 	fake_shadow_bone_shader(device),
 
 	current_shader(0),
-	software_shaders(true),
 	projected_shaders(false),
 	ati_depth_shaders(false),
 	ati_shadow_shaders(false),
@@ -179,13 +178,8 @@ Storm3D_ShaderManager::~Storm3D_ShaderManager()
 {
 }
 
-void Storm3D_ShaderManager::CreateShaders(IDirect3DDevice9 *device, bool hw_shader)
+void Storm3D_ShaderManager::CreateShaders(IDirect3DDevice9 *device)
 {
-	if(hw_shader == true)
-		software_shaders = false;
-	else
-		software_shaders = true;
-
 	default_shader.createDefaultShader();
 	lighting_shader_0light_noreflection.createLightingShader_0light_noreflection();
 	lighting_shader_0light_localreflection.createLightingShader_0light_localreflection();
@@ -551,11 +545,6 @@ void Storm3D_ShaderManager::setSpotTarget(const D3DXMATRIX &matrix)
 void Storm3D_ShaderManager::setSpotType(SpotType type)
 {
 	spot_type = type;
-}
-
-bool Storm3D_ShaderManager::SoftwareShaders()
-{
-	return software_shaders;
 }
 
 bool Storm3D_ShaderManager::BoneShader()

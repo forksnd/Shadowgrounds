@@ -580,17 +580,8 @@ void Storm3D_Mesh::ReBuild()
 		// Create new vertexbuffer (and release old)
 		if (dx_vbuf) dx_vbuf->Release();
 
-		// psd: fixme!
-		if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == true)
-		{
-			Storm3D2->D3DDevice->CreateVertexBuffer(vertex_amount*size,D3DUSAGE_SOFTWAREPROCESSING|D3DUSAGE_WRITEONLY,
+		Storm3D2->D3DDevice->CreateVertexBuffer(vertex_amount*size,D3DUSAGE_WRITEONLY,
 				fvf,D3DPOOL_MANAGED,&dx_vbuf, 0);
-		}
-		else
-		{
-			Storm3D2->D3DDevice->CreateVertexBuffer(vertex_amount*size,D3DUSAGE_WRITEONLY,
-				fvf,D3DPOOL_MANAGED,&dx_vbuf, 0);
-		}
 	}
 
 	int lodLevels = hasLods ? LOD_AMOUNT : 1;
@@ -724,10 +715,7 @@ void Storm3D_Mesh::ReBuild()
 					if(chunk.index_buffer)
 						chunk.index_buffer->Release();
 
-					if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders())
-						Storm3D2->D3DDevice->CreateIndexBuffer(sizeof(WORD) * chunk_face_list.size() * 3, D3DUSAGE_WRITEONLY|D3DUSAGE_SOFTWAREPROCESSING,D3DFMT_INDEX16,D3DPOOL_MANAGED, &chunk.index_buffer, 0);
-					else
-						Storm3D2->D3DDevice->CreateIndexBuffer(sizeof(WORD) * chunk_face_list.size() * 3, D3DUSAGE_WRITEONLY,D3DFMT_INDEX16,D3DPOOL_MANAGED, &chunk.index_buffer, 0);
+					Storm3D2->D3DDevice->CreateIndexBuffer(sizeof(WORD) * chunk_face_list.size() * 3, D3DUSAGE_WRITEONLY,D3DFMT_INDEX16,D3DPOOL_MANAGED, &chunk.index_buffer, 0);
 
 					WORD *ip = 0;
 					chunk.index_buffer->Lock(0, sizeof(WORD) * chunk_face_list.size() * 3, (void**) &ip, 0);
@@ -759,16 +747,8 @@ void Storm3D_Mesh::ReBuild()
 					if(chunk.vertex_buffer)
 						chunk.vertex_buffer->Release();
 
-					if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders())
-					{
-						Storm3D2->D3DDevice->CreateVertexBuffer(vertex_list.size() * size,D3DUSAGE_SOFTWAREPROCESSING|D3DUSAGE_WRITEONLY,
+					Storm3D2->D3DDevice->CreateVertexBuffer(vertex_list.size() * size,D3DUSAGE_WRITEONLY,
 							fvf, D3DPOOL_MANAGED, &chunk.vertex_buffer, 0);
-					}
-					else
-					{
-						Storm3D2->D3DDevice->CreateVertexBuffer(vertex_list.size() * size,D3DUSAGE_WRITEONLY,
-							fvf, D3DPOOL_MANAGED, &chunk.vertex_buffer, 0);
-					}
 
 					BYTE *vp = 0;
 					chunk.vertex_buffer->Lock(0, 0, (void**) &vp, 0);
@@ -1158,16 +1138,8 @@ void Storm3D_Mesh::ReBuild()
 			// Create new indexbuffer (and delete old)
 			if (dx_ibuf[i]) dx_ibuf[i]->Release();
 
-			if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == true)
-			{
-				Storm3D2->D3DDevice->CreateIndexBuffer(sizeof(WORD)*face_amount[i]*3,
-					D3DUSAGE_WRITEONLY|D3DUSAGE_SOFTWAREPROCESSING,D3DFMT_INDEX16,D3DPOOL_MANAGED,&dx_ibuf[i], 0);
-			}
-			else
-			{
-				Storm3D2->D3DDevice->CreateIndexBuffer(sizeof(WORD)*face_amount[i]*3,
+			Storm3D2->D3DDevice->CreateIndexBuffer(sizeof(WORD)*face_amount[i]*3,
 					D3DUSAGE_WRITEONLY,D3DFMT_INDEX16,D3DPOOL_MANAGED,&dx_ibuf[i], 0);
-			}
 		
 			//update_fc_amount = false;
 		}

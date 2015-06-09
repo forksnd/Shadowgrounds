@@ -89,7 +89,6 @@ public:
 	virtual void SetAntiAliasing(int quality) = 0;
 	virtual void AllocateProceduralTarget(bool enable) = 0;
 	virtual void SetReflectionQuality(int quality) = 0;
-	virtual void UseReferenceDriver(bool refdriver) = 0;
 	virtual void forceReset() = 0;
 
 	virtual void addAdditionalRenderTargets(const VC2 &size, int amount) = 0;
