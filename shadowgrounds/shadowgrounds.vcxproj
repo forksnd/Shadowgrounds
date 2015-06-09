@@ -878,7 +878,6 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
-    <ClCompile Include="..\game\GameWorldFold.cpp" />
     <ClCompile Include="..\game\goretypedefs.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -3265,22 +3264,6 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
-    <ClCompile Include="..\ui\terrain_legacy.cpp">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(ForcedIncludeFiles)</ForcedIncludeFiles>
-    </ClCompile>
     <ClCompile Include="..\ui\TerrainCreator.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -5436,18 +5419,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\chat\SGChat.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\chat\SGScriptChatter.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\chat\winpipe.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\ogui\Ogui.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -5929,7 +5900,6 @@
     <ClInclude Include="..\ui\ScoreWindow.h" />
     <ClInclude Include="..\ui\SelectionBox.h" />
     <ClInclude Include="..\ui\Terrain.h" />
-    <ClInclude Include="..\ui\terrain_legacy.h" />
     <ClInclude Include="..\ui\TerrainCreator.h" />
     <ClInclude Include="..\ui\ui_namespace.h" />
     <ClInclude Include="..\ui\uidefaults.h" />
@@ -6135,10 +6105,6 @@
     <ClInclude Include="..\storm\include\c2_ptrlist.h" />
     <ClInclude Include="..\storm\include\c2_quat.h" />
     <ClInclude Include="..\storm\include\c2_rect.h" />
-    <ClInclude Include="..\storm\include\c2_sptr.h" />
-    <ClInclude Include="..\storm\include\c2_sptrlist.h" />
-    <ClInclude Include="..\storm\include\c2_string.h" />
-    <ClInclude Include="..\storm\include\c2_thread.h" />
     <ClInclude Include="..\storm\include\c2_UI.h" />
     <ClInclude Include="..\storm\include\c2_vectors.h" />
     <ClInclude Include="..\storm\include\DatatypeDef.h" />
@@ -6170,17 +6136,10 @@
     <ClInclude Include="..\filesystem\output_stream.h" />
     <ClInclude Include="..\filesystem\standard_package.h" />
     <ClInclude Include="..\filesystem\zip_package.h" />
-    <ClInclude Include="..\game\GameState.h" />
-    <ClInclude Include="..\game\GameStateVariable.h" />
-    <ClInclude Include="..\game\GameVariable.h" />
     <ClInclude Include="..\game\IScriptVariable.h" />
     <ClInclude Include="..\game\ParticleSpawner.h" />
     <ClInclude Include="..\game\ParticleSpawnerManager.h" />
     <ClInclude Include="..\ui\PlayerViewport.h" />
-    <ClInclude Include="..\game\PluginConnector.h" />
-    <ClInclude Include="..\game\PluginManager.h" />
-    <ClInclude Include="..\game\PluginStarter.h" />
-    <ClInclude Include="..\util\RLEBlockMap.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bitmap1.bmp" />

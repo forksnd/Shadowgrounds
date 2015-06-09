@@ -51,7 +51,6 @@
 #include "GameProfiles.h"
 #include "physics/GamePhysics.h"
 #include "Weapon.h"
-#include "GameWorldFold.h"
 
 #include "../convert/str2int.h"
 #include "../system/Logger.h"

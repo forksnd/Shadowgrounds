@@ -4,10 +4,6 @@
 #pragma warning(disable:4103)
 #endif
 
-#ifdef NVPERFSDK
-#include "NVPerfSDK.h"
-#endif
-
 //------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------
@@ -22,7 +18,6 @@
 #include "storm3d_model.h"
 #include "storm3d_texture.h"
 #include "storm3d_particle.h"
-#include "Storm3D_structs.h"
 #include "storm3d_scene.h"
 #include "storm3d_terrain.h"
 #include "storm3d_terrain_renderer.h"
@@ -40,25 +35,11 @@
 #include "Storm3D_Line.h"
 #include "../../util/Debug_MemoryManager.h"
 
-#ifdef WORLD_FOLDING_ENABLED
-#include "WorldFold.h"
-#define STORM_WORLD_FOLD_STEP 2.5f
-#endif
+
+#undef min
+#undef max
 
 extern int storm3d_dip_calls;
-
-namespace {
-	int pick_min(int a, int b)
-	{
-		return (a < b) ? a : b;
-	}
-}
-
-//------------------------------------------------------------------
-// Structs & defines etc.
-//------------------------------------------------------------------
-#define MAX_MIRRORS 500
-Mirror mirrors[MAX_MIRRORS];
 
 
 
@@ -93,20 +74,6 @@ Storm3D_Scene::Storm3D_Scene(Storm3D *s2) :
 	renderlist_points=new float[renderlist_size];
 	renderlistmir_obj=new PStorm3D_Model_Object[renderlistmir_size];
 	renderlistmir_points=new float[renderlistmir_size];
-
-#ifdef NVPERFSDK
-	for( int i = 0; i < 9; i++ )
-		bottlenecks[i] = 0;
-#endif
-
-#ifdef WORLD_FOLDING_ENABLED
-	static bool storm_scene_inited_world_fold = false;
-	if (!storm_scene_inited_world_fold)
-	{
-		storm_scene_inited_world_fold = true;
-		WorldFold::initWorldFold(STORM_WORLD_FOLD_STEP);
-	}
-#endif
 }
 
 
@@ -116,11 +83,6 @@ Storm3D_Scene::Storm3D_Scene(Storm3D *s2) :
 //------------------------------------------------------------------
 Storm3D_Scene::~Storm3D_Scene()
 {
-// can't do this - as there are multiple scenes.
-//#ifdef WORLD_FOLDING_ENABLED
-//	WorldFold::uninitWorldFold();
-//#endif
-
 	for(std::set<IStorm3D_Terrain *>::iterator it = terrains.begin(); it != terrains.end(); ++it)
 	{
 		Storm3D_Terrain *terrain = static_cast<Storm3D_Terrain *> (*it);
@@ -147,14 +109,6 @@ Storm3D_Scene::~Storm3D_Scene()
 
 	// Delete stuff
 	delete particlesystem;
-#ifdef NVPERFSDK
-	char *bname = new char[50];
-	for( int i = 1; i < 9; i++ )
-	{
-		NVPMGetGPUBottleneckName(i, bname);
-		fprintf(stderr, "%i: %d \n", i, bottlenecks[i]);
-	}
-#endif
 }
 
 
@@ -432,39 +386,7 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 	CComPtr<IDirect3DSurface9> originalDepthBuffer;
 	Storm3D2->D3DDevice->GetDepthStencilSurface(&originalDepthBuffer);
 
-
-	// Start REAL scene rendering
-#ifdef NVPERFSDK
-	if (flip) {
-		int nCount = 0;
-		NVPMBeginExperiment(&nCount);
-		if (nCount > 0) {
-			fprintf(stderr, "begin experiment, %d cycles\n", nCount);
-			for (int i = 0; i < nCount; i++ ) {
-				NVPMBeginPass(i);
 				renderRealScene(flip, render_mirrored);
-				NVPMEndPass(i);
-			}
-			NVPMEndExperiment();
-
-			UINT64 value = 0, cycles = 0;
-			char *bname = new char[50];
-			NVPMGetCounterValueByName("GPU Bottleneck", 0, &value, &cycles);
-			NVPMGetGPUBottleneckName(value, bname);
-			bottlenecks[value]++;
-			fprintf(stderr, "GPU Bottleneck value: %lu cycles: %lu\n", value, cycles);
-			fprintf(stderr, "Bottleneck : %s\n", bname);
-			delete[] bname;
-		} else {
-			renderRealScene(flip, render_mirrored);
-		}
-	} else {
-		renderRealScene(flip, render_mirrored);
-	}
-#else
-	renderRealScene(flip, render_mirrored);
-#endif
-
 
 	// Present the scene (flip)
 	if (flip)
@@ -1876,7 +1798,7 @@ void Storm3D_Scene::SetAnisotropicFilteringLevel(int level)
 	int maxani=Storm3D2->adapters[Storm3D2->active_adapter].max_anisotropy;
 
 	// Set level
-	anisotropic_level=pick_min(level,maxani);
+	anisotropic_level=std::min(level,maxani);
 	if (anisotropic_level<0) anisotropic_level=0;
 }
 
@@ -1924,40 +1846,4 @@ void Storm3D_Scene::AddPoint(const VC3 &p1, const COL &color)
 
 	if(debugPoints.size() < 20000)
 		debugPoints.push_back(d);
-}
-
-void Storm3D_Scene::setWorldFoldCenter(const VC3 &position)
-{
-#ifdef WORLD_FOLDING_ENABLED
-	WorldFold::setWorldFoldCenter(position);
-#else
-	assert(!"Storm3D_Scene::setWorldFoldCenter - world folding not enabled.");
-#endif
-}
-
-void Storm3D_Scene::addWorldFoldAtPosition(const VC3 &position, const MAT &fold)
-{
-#ifdef WORLD_FOLDING_ENABLED
-	WorldFold::addWorldFoldAtPosition(position, fold);
-#else
-	assert(!"Storm3D_Scene::addWorldFoldAtPosition - world folding not enabled.");
-#endif
-}
-
-void Storm3D_Scene::changeWorldFoldAtPosition(const VC3 &position, const MAT &fold)
-{
-#ifdef WORLD_FOLDING_ENABLED
-	WorldFold::changeWorldFoldAtPosition(position, fold);
-#else
-	assert(!"Storm3D_Scene::changeWorldFoldAtPosition - world folding not enabled.");
-#endif
-}
-
-void Storm3D_Scene::resetWorldFold()
-{
-#ifdef WORLD_FOLDING_ENABLED
-	WorldFold::resetWorldFold();
-#else
-	assert(!"Storm3D_Scene::resetWorldFold - world folding not enabled.");
-#endif
 }

@@ -241,7 +241,6 @@ public:
 };
 
 boost::shared_ptr<Storm3D_Texture> createSharedTexture(Storm3D_Texture *texture);
-void validateDevice(IDirect3DDevice9 &device, IStorm3D_Logger *logger);
 
 void setCurrentAnisotrophy(int max);
 void applyMaxAnisotrophy(IDirect3DDevice9 &device, int stageAmount);
@@ -250,8 +249,6 @@ void enableMipFiltering(IDirect3DDevice9 &device, int startStage, int endStage, 
 
 void setInverseCulling(bool enable);
 void setCulling(IDirect3DDevice9 &device, DWORD type);
-
-void dumpD3DXMatrix(const D3DXMATRIX &mat);
 
 } // storm
 } // frozenbyte

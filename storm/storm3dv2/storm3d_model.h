@@ -203,13 +203,6 @@ class Storm3D_Model : public IStorm3D_Model
 
 	bool need_cull_adding;
 
-#ifdef WORLD_FOLDING_ENABLED
-	const MAT *mfold;
-	const int *mfold_key;
-	int last_mfold_key_value;
-	MAT mx_folded;
-#endif
-
 	bool skyModel;
 
 public:

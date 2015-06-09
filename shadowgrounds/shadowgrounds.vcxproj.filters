@@ -110,9 +110,6 @@
     <Filter Include="Source Files\physics">
       <UniqueIdentifier>{c09ee8be-ff05-4e85-b6b7-3e1133af2d0d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\chat">
-      <UniqueIdentifier>{e12ff4c1-064e-493f-a606-009f57e796c8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{6bb26579-d5e9-45d0-aab2-b8e74f577696}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
@@ -400,9 +397,6 @@
       <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\game\GameUI.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\GameWorldFold.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\game\goretypedefs.cpp">
@@ -945,9 +939,6 @@
     <ClCompile Include="..\ui\Terrain.cpp">
       <Filter>Source Files\ui\terrain</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\terrain_legacy.cpp">
-      <Filter>Source Files\ui\terrain</Filter>
-    </ClCompile>
     <ClCompile Include="..\ui\TerrainCreator.cpp">
       <Filter>Source Files\ui\terrain</Filter>
     </ClCompile>
@@ -1430,15 +1421,6 @@
     </ClCompile>
     <ClCompile Include="..\physics\visualizer.cpp">
       <Filter>Source Files\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\chat\SGChat.cpp">
-      <Filter>Source Files\chat</Filter>
-    </ClCompile>
-    <ClCompile Include="..\chat\SGScriptChatter.cpp">
-      <Filter>Source Files\chat</Filter>
-    </ClCompile>
-    <ClCompile Include="..\chat\winpipe.cpp">
-      <Filter>Source Files\chat</Filter>
     </ClCompile>
     <ClCompile Include="..\ogui\Ogui.cpp">
       <Filter>Source Files\ogui</Filter>
@@ -2027,9 +2009,6 @@
     <ClInclude Include="..\ui\Terrain.h">
       <Filter>Header Files\ui h</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\terrain_legacy.h">
-      <Filter>Header Files\ui h</Filter>
-    </ClInclude>
     <ClInclude Include="..\ui\TerrainCreator.h">
       <Filter>Header Files\ui h</Filter>
     </ClInclude>
@@ -2603,18 +2582,6 @@
     <ClInclude Include="..\storm\include\c2_rect.h">
       <Filter>Header Files\common2 h</Filter>
     </ClInclude>
-    <ClInclude Include="..\storm\include\c2_sptr.h">
-      <Filter>Header Files\common2 h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\storm\include\c2_sptrlist.h">
-      <Filter>Header Files\common2 h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\storm\include\c2_string.h">
-      <Filter>Header Files\common2 h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\storm\include\c2_thread.h">
-      <Filter>Header Files\common2 h</Filter>
-    </ClInclude>
     <ClInclude Include="..\storm\include\c2_UI.h">
       <Filter>Header Files\common2 h</Filter>
     </ClInclude>
@@ -2708,15 +2675,6 @@
     <ClInclude Include="..\filesystem\zip_package.h">
       <Filter>Header Files\filesys h</Filter>
     </ClInclude>
-    <ClInclude Include="..\game\GameState.h">
-      <Filter>Header Files\drafts h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\GameStateVariable.h">
-      <Filter>Header Files\drafts h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\GameVariable.h">
-      <Filter>Header Files\drafts h</Filter>
-    </ClInclude>
     <ClInclude Include="..\game\IScriptVariable.h">
       <Filter>Header Files\drafts h</Filter>
     </ClInclude>
@@ -2727,18 +2685,6 @@
       <Filter>Header Files\drafts h</Filter>
     </ClInclude>
     <ClInclude Include="..\ui\PlayerViewport.h">
-      <Filter>Header Files\drafts h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\PluginConnector.h">
-      <Filter>Header Files\drafts h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\PluginManager.h">
-      <Filter>Header Files\drafts h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\PluginStarter.h">
-      <Filter>Header Files\drafts h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\util\RLEBlockMap.h">
       <Filter>Header Files\drafts h</Filter>
     </ClInclude>
     <ClInclude Include="..\filesystem\detail\ioapi.h">

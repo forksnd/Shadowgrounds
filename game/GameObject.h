@@ -2,8 +2,6 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
-#include <c2_sptr.h>
-
 #include "../container/LinkedList.h"
 #include "GameObjectList.h"
 #include "SaveData.h"

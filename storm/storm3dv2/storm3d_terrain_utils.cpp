@@ -2279,7 +2279,6 @@ void IndexBuffer::render(IDirect3DDevice9 &device, int faceAmount, int maxIndex,
 {
 	device.SetIndices(buffer);
 	
-	validateDevice(device, logger);
 	device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, vertexOffset, 0, maxIndex, startIndex, faceAmount);
 
 	++storm3d_dip_calls;
@@ -2303,53 +2302,6 @@ boost::shared_ptr<Storm3D_Texture> createSharedTexture(Storm3D_Texture *texture)
 	return boost::shared_ptr<Storm3D_Texture> (texture);
 }
 
-void validateDevice(IDirect3DDevice9 &device, IStorm3D_Logger *logger)
-{
-//#ifdef NDEBUG
-	return;
-//#endif
-/*
-	HRESULT deviceState = device.TestCooperativeLevel();
-    if(deviceState == D3DERR_DEVICELOST || deviceState == D3DERR_DEVICENOTRESET)
-		return;
-
-	DWORD value = 1;
-	HRESULT hr = device.ValidateDevice(&value);
-	if(SUCCEEDED(hr))
-		return;
-
-	const char *msg = "ValidateDevice() failed for unknown reason";
-	if(hr == D3DERR_CONFLICTINGRENDERSTATE)
-		msg = "ValidateDevice() failed -- D3DERR_CONFLICTINGRENDERSTATE";
-	else if(hr == D3DERR_CONFLICTINGTEXTUREFILTER)
-		msg = "ValidateDevice() failed -- D3DERR_CONFLICTINGTEXTUREFILTER";
-	else if(hr == D3DERR_DRIVERINTERNALERROR)
-		msg = "ValidateDevice() failed -- D3DERR_DRIVERINTERNALERROR";
-	else if(hr == D3DERR_TOOMANYOPERATIONS)
-		msg = "ValidateDevice() failed -- D3DERR_TOOMANYOPERATIONS";
-	else if(hr == D3DERR_UNSUPPORTEDALPHAARG)
-		msg = "ValidateDevice() failed -- D3DERR_UNSUPPORTEDALPHAARG";
-	else if(hr == D3DERR_UNSUPPORTEDALPHAOPERATION)
-		msg = "ValidateDevice() failed -- D3DERR_UNSUPPORTEDALPHAOPERATION";
-	else if(hr == D3DERR_UNSUPPORTEDCOLORARG)
-		msg = "ValidateDevice() failed -- D3DERR_UNSUPPORTEDCOLORARG";
-	else if(hr == D3DERR_UNSUPPORTEDCOLOROPERATION)
-		msg = "ValidateDevice() failed -- D3DERR_UNSUPPORTEDCOLOROPERATION";
-	else if(hr == D3DERR_UNSUPPORTEDFACTORVALUE)
-		msg = "ValidateDevice() failed -- D3DERR_UNSUPPORTEDFACTORVALUE";
-	else if(hr == D3DERR_UNSUPPORTEDTEXTUREFILTER)
-		msg = "ValidateDevice() failed -- D3DERR_UNSUPPORTEDTEXTUREFILTER";
-	else if(hr == D3DERR_WRONGTEXTUREFORMAT)
-		msg = "ValidateDevice() failed -- D3DERR_WRONGTEXTUREFORMAT";
-	else if(hr == D3DERR_DRIVERINTERNALERROR)
-		msg = "ValidateDevice() failed -- D3DERR_DRIVERINTERNALERROR";
-
-	if(logger)
-		logger->error(msg);
-
-	assert(!"Whoopsie, validate() failed");
-*/
-}
 
 // ...
 
@@ -2426,12 +2378,6 @@ void setCulling(IDirect3DDevice9 &device, DWORD type)
 			else
 				device.SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 		}
-	}
-}
-
-void dumpD3DXMatrix(const D3DXMATRIX &mat) {
-	for (unsigned int i = 0; i < 4; i++) {
-        fprintf(stderr, "%f\t%f\t%f\t%f\n", mat.m[i][0], mat.m[i][1], mat.m[i][2], mat.m[i][3]);
 	}
 }
 

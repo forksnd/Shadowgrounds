@@ -1291,7 +1291,6 @@
     <ClInclude Include="storm3d_scene_piclist.h" />
     <ClInclude Include="Storm3D_ShaderManager.h" />
     <ClInclude Include="storm3d_string_util.h" />
-    <ClInclude Include="Storm3D_structs.h" />
     <ClInclude Include="storm3d_texture.h" />
     <ClInclude Include="storm3d_video_player.h" />
     <ClInclude Include="storm3d_videostreamer.h" />
@@ -1315,9 +1314,6 @@
     <ClInclude Include="..\include\c2_ray.h" />
     <ClInclude Include="..\include\c2_rect.h" />
     <ClInclude Include="..\include\c2_sphere.h" />
-    <ClInclude Include="..\include\c2_sptr.h" />
-    <ClInclude Include="..\include\c2_sptrlist.h" />
-    <ClInclude Include="..\include\c2_string.h" />
     <ClInclude Include="..\include\c2_UI.h" />
     <ClInclude Include="..\include\c2_vectors.h" />
     <ClInclude Include="..\include\IStorm3D_Terrain.h" />

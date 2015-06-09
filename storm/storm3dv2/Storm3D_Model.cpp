@@ -32,9 +32,6 @@
 #include "../../filesystem/input_stream_wrapper.h"
 #include "../../util/Debug_MemoryManager.h"
 
-#ifdef WORLD_FOLDING_ENABLED
-#include "WorldFold.h"
-#endif
 
 #if defined BONE_MODEL_SPHERE_TRANSFORM && defined _MSC_VER
 #pragma message("--- NOTICE!!! Bounding sphere transform enabled for models with bones! ---") 
@@ -2740,13 +2737,6 @@ Storm3D_Model::Storm3D_Model(Storm3D *s2) :
 	ITHelper=new ICreateIM_Set<IStorm3D_Helper*>(&(helpers));
 
 	storm3d_model_allocs++;
-
-#ifdef WORLD_FOLDING_ENABLED
-	mfold = WorldFold::getWorldFoldForPosition(position);
-	mfold_key = WorldFold::getWorldFoldKeyForPosition(position);
-	last_mfold_key_value = *mfold_key;
-#endif
-
 }
 
 
@@ -2783,30 +2773,9 @@ MAT &Storm3D_Model::GetMX()
 		mr.CreateRotationMatrix(rotation);
 		mp.CreateTranslationMatrix(position);
 		mx=ms*mr*mp;
-
-#ifdef WORLD_FOLDING_ENABLED
-		mfold = WorldFold::getWorldFoldForPosition(position);
-		mfold_key = WorldFold::getWorldFoldKeyForPosition(position);
-		// by setting the mx_fold_key != mfold_key, forcing below rebuild of mx_folded 
-		last_mfold_key_value = *mfold_key + 1;
-#endif
 	}
 
-#ifdef WORLD_FOLDING_ENABLED
-	if (*mfold_key != last_mfold_key_value)
-	{
-		// if not here because of xm_update, then probably mfold_key has changed - should inform children as well...
-		if (!mx_update) 
-		{
-			InformChangeToChilds();
-		}
-		last_mfold_key_value = *mfold_key;
-		mx_folded = mx * (*mfold);
-	}
-	return mx_folded;
-#else
 	return mx;
-#endif
 }
 
 VC3 Storm3D_Model::GetApproximatedPosition()

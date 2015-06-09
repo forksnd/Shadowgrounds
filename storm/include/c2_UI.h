@@ -4,10 +4,7 @@
 
 
 #include "c2_common.h"
-#include "c2_sptr.h"
-#include "c2_sptrlist.h"
 #include "c2_ptrlist.h"
-#include "c2_string.h"
 #include "c2_vectors.h"
 #include "c2_quat.h"
 #include "c2_matrix.h"

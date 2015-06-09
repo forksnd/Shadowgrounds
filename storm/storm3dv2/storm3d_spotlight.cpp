@@ -1349,7 +1349,6 @@ void Storm3D_Spotlight::debugRender()
 	data->device.SetVertexShader(0);
 	data->device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX1);
 
-	frozenbyte::storm::validateDevice(data->device, data->storm.getLogger());
 	data->device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) *  6);
 }
 

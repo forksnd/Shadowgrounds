@@ -387,7 +387,6 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
 			Storm3D2->D3DDevice->SetIndices(bone_chunks[lod][i].index_buffer);
 			Storm3D2->D3DDevice->SetStreamSource(0, bone_chunks[lod][i].vertex_buffer, 0, vbuf_vsize);
 
-			frozenbyte::storm::validateDevice(*Storm3D2->D3DDevice, Storm3D2->getLogger());
 			Storm3D2->D3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
 				0,bone_chunks[lod][i].vertex_count,0, bone_chunks[lod][i].index_count);
 
@@ -399,7 +398,6 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
 		Storm3D2->D3DDevice->SetStreamSource(0, dx_vbuf, 0, vbuf_vsize);
 		Storm3D2->D3DDevice->SetIndices(dx_ibuf[lod]);
 		
-		frozenbyte::storm::validateDevice(*Storm3D2->D3DDevice, Storm3D2->getLogger());
 		Storm3D2->D3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
 			0,render_vertex_amount,0,render_face_amount[lod]);
 
@@ -424,7 +422,6 @@ void Storm3D_Mesh::RenderBuffersWithoutTransformation()
 	}
 
 	// Render it!
-	frozenbyte::storm::validateDevice(*Storm3D2->D3DDevice, Storm3D2->getLogger());
 	Storm3D2->D3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
 		0,vertex_amount,0,face_amount[0]);
 	

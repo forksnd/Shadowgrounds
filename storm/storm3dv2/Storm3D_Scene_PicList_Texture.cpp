@@ -110,7 +110,6 @@ void Storm3D_Scene_PicList_Picture::Render()
 			customShape->vertices[i].position.x -= .5f;
 			customShape->vertices[i].position.y -= .5f;
 		}
-		frozenbyte::storm::validateDevice(*Storm3D2->GetD3DDevice(), Storm3D2->getLogger());
 		Storm3D2->GetD3DDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST,customShape->numVertices/3,customShape->vertices,sizeof(VXFORMAT_2D));
 		scene->AddPolyCounter(customShape->numVertices/3);
 	}
@@ -161,7 +160,6 @@ void Storm3D_Scene_PicList_Picture::Render()
 			vx[i].position.y -= .5f;
 		}
 
-		frozenbyte::storm::validateDevice(*Storm3D2->GetD3DDevice(), Storm3D2->getLogger());
 		Storm3D2->GetD3DDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
 		scene->AddPolyCounter(2);
 	}

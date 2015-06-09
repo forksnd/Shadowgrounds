@@ -308,9 +308,6 @@
     <ClInclude Include="storm3d_string_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Storm3D_structs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="storm3d_texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -375,15 +372,6 @@
       <Filter>Header Files\extern</Filter>
     </ClInclude>
     <ClInclude Include="..\include\c2_sphere.h">
-      <Filter>Header Files\extern</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\c2_sptr.h">
-      <Filter>Header Files\extern</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\c2_sptrlist.h">
-      <Filter>Header Files\extern</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\c2_string.h">
       <Filter>Header Files\extern</Filter>
     </ClInclude>
     <ClInclude Include="..\include\c2_UI.h">

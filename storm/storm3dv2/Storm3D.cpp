@@ -4,9 +4,6 @@
 #pragma warning(disable:4103)
 #endif
 
-#ifdef NVPERFSDK
-#include "NVPerfSDK.h"
-#endif
 
 //------------------------------------------------------------------
 // Includes
@@ -776,11 +773,6 @@ Storm3D::Storm3D(bool _no_info, filesystem::FilePackageManager *fileManager, ISt
 	timeFactor = 1.0f;
 	gammaPeakEnabled = false;
 	SetApplicationName("Storm3D", "Storm3D v2.0 - Render Window");
-
-#ifdef NVPERFSDK
-	NVPMInit();
-	NVPMAddCounterByName("GPU Bottleneck");
-#endif
 }
 
 
@@ -789,10 +781,6 @@ Storm3D::Storm3D(bool _no_info, filesystem::FilePackageManager *fileManager, ISt
 //------------------------------------------------------------------
 Storm3D::~Storm3D()
 {
-#ifdef NVPERFSDK
-	NVPMShutdown();
-#endif
-
 	// Delete iterators
 	delete ITTexture;
 	delete ITMaterial;

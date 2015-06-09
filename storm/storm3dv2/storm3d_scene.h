@@ -96,9 +96,6 @@ class Storm3D_Scene : public IStorm3D_Scene
 	std::vector<Debug1> debugPoints;
 
 	void renderRealScene(bool flip, bool render_mirrored);
-#ifdef NVPERFSDK
-	int bottlenecks[9];
-#endif
 public:
 
 	inline IStorm3D * getStorm() { return (IStorm3D*) Storm3D2; };
@@ -181,13 +178,6 @@ public:
 	void AddTriangle(const VC3 &p1, const VC3 &p2, const VC3 &p3, const COL &color);
 	void AddLine(const VC3 &p1, const VC3 &p2, const COL &color);
 	void AddPoint(const VC3 &p1, const COL &color);
-
-	// World folding --jpk
-	// (does not do anything if no WORLD_FOLDING_ENABLED defined)	
-	void setWorldFoldCenter(const VC3 &position);
-	void addWorldFoldAtPosition(const VC3 &position, const MAT &fold);
-	void changeWorldFoldAtPosition(const VC3 &position, const MAT &fold);
-	void resetWorldFold();
 
 
 	// Creation/delete

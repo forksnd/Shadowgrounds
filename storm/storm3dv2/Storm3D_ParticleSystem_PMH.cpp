@@ -484,7 +484,6 @@ void Storm3D_ParticleSystem::QuadArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	Storm3D2->GetD3DDevice()->SetIndices(m_ib);
 	
 	// Render as indexed primitive
-	frozenbyte::storm::validateDevice(*Storm3D2->GetD3DDevice(), Storm3D2->getLogger());
 	Storm3D2->GetD3DDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,0,0,m_numParts * 4,0,m_numParts * 2);
 	scene->AddPolyCounter(m_numParts * 2);
 
@@ -907,7 +906,6 @@ void Storm3D_ParticleSystem::LineArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	Storm3D2->GetD3DDevice()->SetIndices(m_ib);
 	
 	// Render as indexed primitive
-	frozenbyte::storm::validateDevice(*Storm3D2->GetD3DDevice(), Storm3D2->getLogger());
 	Storm3D2->GetD3DDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,0,0,m_numParts * 4,0,m_numParts * 2);
 	scene->AddPolyCounter(m_numParts * 2);
 	++storm3d_dip_calls;

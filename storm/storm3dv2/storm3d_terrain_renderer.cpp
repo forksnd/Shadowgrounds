@@ -1876,7 +1876,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 						{
 							device.SetTexture(0, data->glowTexture2);
 
-							frozenbyte::storm::validateDevice(device, data->storm.getLogger());
 							device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer3, sizeof(float) *  20);
 						}
 						else
@@ -1884,7 +1883,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 							for(int stage = 0; stage < stages; ++stage)
 								device.SetTexture(stage, data->glowTexture2);
 
-							frozenbyte::storm::validateDevice(device, data->storm.getLogger());
 							if(betterGlow)
 								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer1_6, sizeof(float) *  16);
 							else
@@ -1895,7 +1893,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 							device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 							device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
-							frozenbyte::storm::validateDevice(device, data->storm.getLogger());
 							if(betterGlow)
 								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer2_6, sizeof(float) *  16);
 							else
@@ -1982,7 +1979,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 						{
 							device.SetTexture(0, data->glowTexture1);
 
-							frozenbyte::storm::validateDevice(device, data->storm.getLogger());
 							device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer3, sizeof(float) *  20);
 						}
 						else
@@ -1990,7 +1986,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 							for(int stage = 0; stage < stages; ++stage)
 								device.SetTexture(stage, data->glowTexture1);
 
-							frozenbyte::storm::validateDevice(device, data->storm.getLogger());
 							if(betterGlow)
 								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer1_6, sizeof(float) *  16);
 							else
@@ -1998,7 +1993,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 							device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 							
-							frozenbyte::storm::validateDevice(device, data->storm.getLogger());
 							if(betterGlow)
 								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer2_6, sizeof(float) *  16);
 							else
@@ -2130,7 +2124,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 			device.SetPixelShader(0);
 			device.SetVertexShader(0);
 			device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX1);
-			frozenbyte::storm::validateDevice(device, data->storm.getLogger());
 
 			// Transparency
 			if(data->glowTransparencyFactor > 0.001f)
@@ -2404,7 +2397,6 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 
 		device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX3);
 
-		frozenbyte::storm::validateDevice(device, data->storm.getLogger());
 		device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, bufferTex, sizeof(float) *  10);
 
 		device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX1);

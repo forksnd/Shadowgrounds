@@ -232,12 +232,6 @@ GS_CMD_SIMPLE(168, statMarkTimeOfDeath, NONE)
 GS_CMD_SIMPLE(169, getUnitPlayerNumber, NONE)
 GS_CMD_SIMPLE(170, getShooter, NONE)
 
-GS_CMD_SIMPLE(171, resetWorldFold, NONE)
-GS_CMD_SIMPLE(172, addWorldFoldToPosition, FLOAT)
-GS_CMD_SIMPLE(173, getWorldFoldNumberAtPosition, NONE)
-GS_CMD_SIMPLE(174, moveWorldFoldToPosition, NONE)
-GS_CMD_SIMPLE(175, setWorldFoldAngle, FLOAT)
-
 GS_CMD_SIMPLE(176, setEngineMetaValueInt, STRING)
 GS_CMD_SIMPLE(177, getEngineMetaValueInt, STRING)
 GS_CMD_SIMPLE(178, defineEngineMetaValueInt, STRING)

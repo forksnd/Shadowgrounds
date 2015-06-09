@@ -194,7 +194,6 @@ void Storm3D_Scene_PicList_Font::Render()
 					Storm3D2->GetD3DDevice()->SetVertexShader(0);
 					Storm3D2->GetD3DDevice()->SetFVF(FVF_VXFORMAT_2D);
 
-					frozenbyte::storm::validateDevice(*Storm3D2->GetD3DDevice(), Storm3D2->getLogger());
 					Storm3D2->GetD3DDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
 					scene->AddPolyCounter(2);
 				}

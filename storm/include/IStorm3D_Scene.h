@@ -104,11 +104,6 @@ public:
 	virtual void AddLine(const VC3 &p1, const VC3 &p2, const COL &color) = 0;
 	virtual void AddPoint(const VC3 &p1, const COL &color) = 0;
 
-	virtual void setWorldFoldCenter(const VC3 &position) = 0;
-	virtual void addWorldFoldAtPosition(const VC3 &position, const MAT &fold) = 0;
-	virtual void changeWorldFoldAtPosition(const VC3 &position, const MAT &fold) = 0;
-	virtual void resetWorldFold() = 0;
-
 	// Iterators
 	ICreate<IStorm3D_Model*> *ITModel;
 	ICreate<IStorm3D_Terrain*> *ITTerrain;

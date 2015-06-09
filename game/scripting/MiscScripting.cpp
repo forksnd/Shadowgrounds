@@ -59,7 +59,6 @@
 #endif
 #include <istorm3D_terrain_renderer.h>
 #include "../UnifiedHandleManager.h"
-#include "../GameWorldFold.h"
 
 #ifdef PHYSICS_PHYSX
 #include "../../physics/physics_lib.h"
@@ -2666,49 +2665,6 @@ namespace game
 				}
 			} else {
 				sp->warning("MiscScripting::process - Attempt to getUnitPlayerNumber for null unit.");
-			}
-			break;
-
-		case GS_CMD_resetWorldFold:
-			GameWorldFold::getInstance()->reset();
-			break;
-
-		case GS_CMD_addWorldFoldToPosition:
-			{
-				float floatData = intFloat.f;
-				VC3 tmp = gsd->position;
-				// Where the heck does this offset come from?
-				//tmp.x -= 0.4475f;
-				*lastValue = GameWorldFold::getInstance()->addFold(tmp, floatData);
-			}
-			break;
-
-		case GS_CMD_getWorldFoldNumberAtPosition:
-			{
-				*lastValue = GameWorldFold::getInstance()->getFoldNumberAtPosition(gsd->position);
-				if (*lastValue == 0)
-				{
-					sp->warning("MiscScripting::process - getWorldFoldNumberAtPosition, no fold exists at given position.");
-				}
-			}
-			break;
-
-		case GS_CMD_moveWorldFoldToPosition:
-			if (*lastValue > 0) 
-			{
-				GameWorldFold::getInstance()->moveFold(*lastValue, gsd->position);
-			} else {
-				sp->warning("MiscScripting::process - moveWorldFoldToPosition, invalid world fold number.");
-			}
-			break;
-
-		case GS_CMD_setWorldFoldAngle:
-			if (*lastValue > 0) 
-			{
-				float floatData = intFloat.f;
-				GameWorldFold::getInstance()->setFoldAngle(*lastValue, floatData);
-			} else {
-				sp->warning("MiscScripting::process - setWorldFoldAngle, invalid world fold number.");
 			}
 			break;
 
