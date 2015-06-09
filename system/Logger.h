@@ -2,6 +2,8 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+#include "IStorm3D_Logger.h"
+
 #include "../util/Debug_MemoryManager.h"
 
 #include <stdio.h>
@@ -43,7 +45,7 @@ public:
 };
 
 
-class Logger
+class Logger: public IStorm3D_Logger
 {
 public:
   static Logger *getInstance();
