@@ -413,6 +413,8 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 	Storm3D_FakeSpotlight::createBuffers(*this, *D3D, *D3DDevice, fake_shadow_quality);
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
+    createSyncObjects();
+
 	// Create shader manager
 	new Storm3D_ShaderManager(*D3DDevice);
 
@@ -539,6 +541,8 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 	Storm3D_Spotlight::createShadowBuffers(*this, *D3D, *D3DDevice, ps14, ps20, shadow_quality);
 	Storm3D_FakeSpotlight::createBuffers(*this, *D3D, *D3DDevice, fake_shadow_quality);
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
+
+    createSyncObjects();
 
 	// Create shader manager
 	new Storm3D_ShaderManager(*D3DDevice);
@@ -672,6 +676,8 @@ if (FAILED(D3D->CreateDevice(D3D->GetAdapterCount() - 1,D3DDEVTYPE_REF,window_ha
 		Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 	}
 
+    createSyncObjects();
+
 	// Create shader manager
 	new Storm3D_ShaderManager(*D3DDevice);
 
@@ -773,6 +779,8 @@ Storm3D::Storm3D(bool _no_info, filesystem::FilePackageManager *fileManager, ISt
 	timeFactor = 1.0f;
 	gammaPeakEnabled = false;
 	SetApplicationName("Storm3D", "Storm3D v2.0 - Render Window");
+
+    for (auto& q: frame_sync) q = 0;
 }
 
 
@@ -862,6 +870,8 @@ Storm3D::~Storm3D()
 
 	if(window_handle && destroy_window)
 		DestroyWindow(window_handle);
+
+    destroySyncObjects();
 }
 
 
@@ -2559,6 +2569,8 @@ void Storm3D::ReleaseDynamicResources()
 	}	
 
 	proceduralManager.releaseTarget();
+
+    destroySyncObjects();
 }
 
 void Storm3D::RecreateDynamicResources()
@@ -2607,6 +2619,46 @@ void Storm3D::RecreateDynamicResources()
 
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 	//D3DDevice->SetDepthStencilSurface(depthTarget);
+
+    createSyncObjects();
 }
 
+void Storm3D::BeginFrame()
+{
+    assert(frame_id >= 0);
+    assert(frame_id < NUM_FRAMES_DELAY);
 
+    while (frame_sync[frame_id]->GetData( NULL, 0, D3DGETDATA_FLUSH ) == S_FALSE);
+}
+
+void Storm3D::EndFrame()
+{
+    assert(frame_id >= 0);
+    assert(frame_id < NUM_FRAMES_DELAY);
+
+    frame_sync[frame_id]->Issue(D3DISSUE_END);
+
+    frame_id = (frame_id + 1) % NUM_FRAMES_DELAY;
+
+    D3DDevice->Present(NULL,NULL,NULL,NULL);
+}
+
+void Storm3D::createSyncObjects()
+{
+    for (auto& q: frame_sync)
+    {
+        assert(q == 0);
+        D3DDevice->CreateQuery(D3DQUERYTYPE_EVENT, &q);
+        assert(q != 0);
+    }
+    frame_id = 0;
+}
+
+void Storm3D::destroySyncObjects()
+{
+    for (auto& q: frame_sync)
+    {
+        if (q) q->Release();
+        q = 0;
+    }
+}

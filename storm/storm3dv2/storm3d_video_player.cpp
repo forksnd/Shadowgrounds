@@ -46,7 +46,9 @@ void Storm3D_VideoPlayer::play()
 	{
 		Sleep(0);
 		data->streamer->render(&data->scene);
+        data->storm.BeginFrame();
 		data->scene.RenderScene(true);
+        data->storm.EndFrame();
 
 		MSG windowsMessage = { 0 };
 		while(PeekMessage(&windowsMessage, 0, 0, 0, PM_REMOVE)) 

@@ -1232,6 +1232,8 @@ try {
 			}
 		}
 
+        s3d->BeginFrame();
+
 	//while(Timer::getTime() - curTime < 33)
 	//	Timer::update();
 
@@ -1423,6 +1425,8 @@ try {
 
 		// Render scene
 		polys += renderfunc(disposable_scene);
+
+        s3d->EndFrame();
 
 		SelectionBox *sbox = gameUI->getSelectionBox();
 		if (sbox != NULL)

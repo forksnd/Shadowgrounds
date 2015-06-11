@@ -69,6 +69,8 @@ class ST3D_EXP_DLLAPI IStorm3D
 {
 
 public:
+    virtual void BeginFrame() = 0;
+    virtual void EndFrame() = 0;
 
 	// ScreenModes
 	virtual bool SetFullScreenMode(int width=640,int height=480,int bpp=16)=0;

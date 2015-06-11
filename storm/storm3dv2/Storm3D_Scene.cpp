@@ -393,9 +393,7 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 	renderRealScene(flip, render_mirrored);
 
 	// Present the scene (flip)
-	if (flip)
-		Storm3D2->D3DDevice->Present(NULL,NULL,NULL,NULL);
-	else if(!render_mirrored)
+	if (!flip && !render_mirrored)
 		Storm3D2->D3DDevice->SetDepthStencilSurface(originalDepthBuffer);
 }
 

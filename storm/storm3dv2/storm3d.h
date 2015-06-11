@@ -16,6 +16,8 @@
 class IStorm3D_BoneAnimation;
 class IStorm3D_Line;
 
+#define NUM_FRAMES_DELAY 2
+
 //------------------------------------------------------------------
 // Storm3D
 //------------------------------------------------------------------
@@ -33,7 +35,12 @@ public:
 		}
 	};
 
-private:	
+private:
+    void createSyncObjects();
+    void destroySyncObjects();
+
+    LPDIRECT3DQUERY9 frame_sync[NUM_FRAMES_DELAY];
+    size_t           frame_id = 0;
 
 	Storm3D_Texture *CreateNewTextureInstance(int width,int height,IStorm3D_Texture::TEXTYPE textype);
 
@@ -282,10 +289,6 @@ public:
 	IStorm3D_Texture *CreateNewTexture(const char *filename,DWORD tex_flags=0,DWORD tex_identity=0, const void *data=0, size_t data_size=0);
 	IStorm3D_Texture *CreateNewTexture(int width,int height,IStorm3D_Texture::TEXTYPE textype); // For dynamic textures
 
-
-	
-
-
 	// Material handling
 	IStorm3D_Material *CreateNewMaterial(const char *name);
 
@@ -328,7 +331,10 @@ public:
 	// Delete everything (textures,materials,models,scenes)
 	void Empty();
 
-	// Creation/delete
+    void BeginFrame();
+    void EndFrame();
+
+    // Creation/delete
 	Storm3D(bool no_info = false, frozenbyte::filesystem::FilePackageManager *fileManager = 0, IStorm3D_Logger *logger = 0);
 	~Storm3D();
 
