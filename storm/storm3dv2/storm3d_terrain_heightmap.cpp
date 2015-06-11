@@ -1086,6 +1086,7 @@ void Storm3D_TerrainHeightmap::calculateVisibility(Storm3D_Scene &scene)
 
 void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene, bool atiShader)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainHeightmap::renderTextures");
 	IDirect3DDevice9 &device = data->device;
 
 	D3DXMATRIX dm;
@@ -1201,6 +1202,7 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene, bool atiShad
 
 void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera *camera, RenderMode mode, RenderType type, IStorm3D_Spotlight::Type spot_type, Storm3D_Spotlight *spot)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainHeightmap::renderDepth");
 	IDirect3DDevice9 &device = data->device;
 	std::vector<RenderBlock> &visibleBlocks = data->visibleBlocks;
 
@@ -1305,6 +1307,7 @@ void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera 
 	Sphere sphere;
 	for(unsigned int i = 0; i < visibleBlocks.size(); ++i)
 	{
+        GFX_TRACE_SCOPE("visibleBlocks[i]");
 		RenderBlock &renderBlock = visibleBlocks[i];
 		TerrainBlock &block = data->blocks[renderBlock.indexY * data->blockAmount.x + renderBlock.indexX];
 

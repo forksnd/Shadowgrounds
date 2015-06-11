@@ -312,6 +312,7 @@ struct Storm3D_ProceduralManager::Data
 
 	void render(const ProceduralEffect &e, float width, float height, bool offsetTarget)
 	{
+        GFX_TRACE_SCOPE("Storm3D_ProceduralManager::render");
 		IDirect3DDevice9 &device = *storm.GetD3DDevice();
 		
 		if(e.texture1)
@@ -395,6 +396,7 @@ struct Storm3D_ProceduralManager::Data
 
 	void update(int ms)
 	{
+        GFX_TRACE_SCOPE("Storm3D_ProceduralManager::update");
 		if(useFallback)
 			return;
 

@@ -957,11 +957,13 @@ void Storm3D_TerrainDecalSystem::setFog(float end, float range)
 
 void Storm3D_TerrainDecalSystem::renderTextures(Storm3D_Scene &scene)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainDecalSystem::renderTextures");
 	data->render(scene);
 }
 
 void Storm3D_TerrainDecalSystem::renderShadows(Storm3D_Scene &scene)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainDecalSystem::renderShadows");
 	data->renderShadows(scene);
 }
 

@@ -109,3 +109,37 @@ inline DWORD F2DW(FLOAT f) {return *((DWORD*)&f);}
 #pragma warning(disable:4355)
 #endif
 
+//#define USE_PIX_MARKERS
+
+#ifdef USE_PIX_MARKERS
+
+#define WIDEN2(x) L ## x
+#define WIDEN(x) WIDEN2(x)
+
+#define GFX_TRACE_SCOPE(id) GFX_TRACE_SCOPE_INTERNAL(id, __LINE__)
+#define GFX_TRACE_SCOPE_INTERNAL(id, idx) GfxTraceScope sp##idx ( WIDEN(id), idx )
+#include "strsafe.h"
+
+class GfxTraceScope
+{
+	public:
+		GfxTraceScope(WCHAR *Name, int Line)
+	    {
+		    WCHAR wc[ MAX_PATH ];
+		    StringCchPrintfW( wc, MAX_PATH, L"%s @ Line %d.\0", Name, Line );
+		    D3DPERF_BeginEvent( D3DCOLOR_XRGB( 0, 0, 0 ), wc );
+	    }
+		~GfxTraceScope( )
+	    {
+		    D3DPERF_EndEvent( );
+	    }
+
+	private:
+		GfxTraceScope( );
+};
+
+#else
+
+#define GFX_TRACE_SCOPE(id)
+
+#endif

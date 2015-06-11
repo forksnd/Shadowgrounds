@@ -1515,6 +1515,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 	bool renderSolid(RenderType renderType, Storm3D_Scene &scene, Storm3D_Spotlight *spot, Storm3D_FakeSpotlight *fakeSpot, const IStorm3D_Model *skipModel, RenderFlags flags)
 	{
+        GFX_TRACE_SCOPE("renderSolid");
 		Storm3D_ShaderManager::GetSingleton()->ClearCache();
 		IDirect3DDevice9 &device = *storm.GetD3DDevice();
 
@@ -1578,6 +1579,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 		ObjectList::iterator it = solidObjects[active_visibility][objectType].begin();
 		for(; it != solidObjects[active_visibility][objectType].end(); ++it)
 		{
+            GFX_TRACE_SCOPE("Storm3D_Model_Object[i]");
 			Storm3D_Model_Object *object = *it;
 			if(!object)
 				continue;
@@ -1631,6 +1633,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 	void renderAlpha(RenderType renderType, Storm3D_Scene &scene, Storm3D_Spotlight *spot, Storm3D_FakeSpotlight *fakeSpot, const IStorm3D_Model *skipModel, RenderFlags flags)
 	{
+        GFX_TRACE_SCOPE("renderAlpha");
 		Storm3D_ShaderManager::GetSingleton()->ClearCache();
 
 		IDirect3DDevice9 &device = *storm.GetD3DDevice();
@@ -1685,6 +1688,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 		ObjectList::iterator it = alphaObjects[active_visibility][objectType].begin();
 		for(; it != alphaObjects[active_visibility][objectType].end(); ++it)
 		{
+            GFX_TRACE_SCOPE("Storm3D_Model_Object[i]");
 			Storm3D_Model_Object *object = *it;
 			if(!object)
 				continue;
@@ -2067,6 +2071,7 @@ void Storm3D_TerrainModels::renderTextures(MaterialType materialType, Storm3D_Sc
 
 void Storm3D_TerrainModels::renderLighting(MaterialType materialType, Storm3D_Scene &scene)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainModels::renderLighting");
 	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
 
 	if(materialType == SolidOnly)

@@ -640,8 +640,10 @@ t->Apply(4);
 		if(pass == Solid)
 		{
 
+            GFX_TRACE_SCOPE("Solid pass");
 			if(renderHeightmap)
 			{
+                GFX_TRACE_SCOPE("Render heightmap");
 				// fakeTexture contains lights
 				device.SetTexture(2, fakeTexture);
 				// terrainTexture contains terrain textures
@@ -669,8 +671,8 @@ t->Apply(4);
 				device.SetSamplerState(3, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 				device.SetSamplerState(3, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 
-//device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
-device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
+                //device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
+                device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 
 				if(forcedDirectionalLightEnabled)
 				{
@@ -700,6 +702,7 @@ device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 
 			if(renderModels)
 			{
+                GFX_TRACE_SCOPE("Render models");
 				device.SetVertexShaderConstantF(14, fakeTextureProjection, 4);
 				device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 				//device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
@@ -727,6 +730,7 @@ device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 		}
 		else if(pass == Alpha)
 		{
+            GFX_TRACE_SCOPE("Alpha pass");
 			device.SetTexture(0, fakeTexture);
 			device.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 			device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
@@ -735,6 +739,7 @@ device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 
 			if(renderDecals)
 			{
+                GFX_TRACE_SCOPE("Render decals");
 				frozenbyte::storm::enableMipFiltering(device, 0, 0, false);
 
 				device.SetRenderState(D3DRS_FOGENABLE, TRUE);
@@ -753,6 +758,7 @@ device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 
 			if(renderModels)
 			{
+                GFX_TRACE_SCOPE("Render models");
 				device.SetTexture(2, fakeTexture);
 
 				if(renderWireframe)
@@ -785,17 +791,20 @@ device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 
 	void renderFakelights(Storm3D_Scene &scene)
 	{
+        GFX_TRACE_SCOPE("renderFakelights");
 		if(renderFakeShadows)
 			lightManager.renderProjectedFakeLights(scene, renderSpotShadows);
 	}
 
 	void renderProjectedLightsSolid(Storm3D_Scene &scene)
 	{
+        GFX_TRACE_SCOPE("renderProjectedLightsSolid");
 		lightManager.renderProjectedLightsSolid(scene, renderSpotShadows);
 	}
 
 	void renderProjectedLightsAlpha(Storm3D_Scene &scene)
 	{
+        GFX_TRACE_SCOPE("renderProjectedLightsAlpha");
 		lightManager.renderProjectedLightsAlpha(scene, renderSpotShadows);
 	}
 
@@ -1339,6 +1348,7 @@ void Storm3D_TerrainRenderer::updateVisibility(Storm3D_Scene &scene, int timeDel
 
 void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderTargets");
 	if(!data->forceDraw && !data->renderRenderTargets)
 	{
 		data->decalSystem.clearShadowDecals();
@@ -1492,6 +1502,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 		// (Ambient + lightmaps + fake) * base to fb
 		// this renders pretty much everything...
 		{
+            GFX_TRACE_SCOPE("Main lighting: (Ambient + lightmaps + fake) * base");
 			device.Clear(0, 0, D3DCLEAR_TARGET, data->clearColor.GetAsD3DCompatibleARGB(), 1.f, 0);
 			device.SetScissorRect(&data->scissorRect);
 			device.SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
@@ -1504,6 +1515,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 			if(data->skyBox && !data->renderWireframe && data->renderSkyBox)
 			{
+                GFX_TRACE_SCOPE("Skybox");
 				data->skyBox->SetPosition(camera.GetPosition());
 				// sideways mode, rotate skybox --jpk
 				VC3 camup = camera.GetUpVec();
@@ -2192,6 +2204,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderBase");
 	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
 
 	Storm3D_Camera &camera = static_cast<Storm3D_Camera &> (*scene.GetCamera());

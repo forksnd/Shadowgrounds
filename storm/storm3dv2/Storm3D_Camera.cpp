@@ -190,6 +190,7 @@ extern D3DXMATRIX reflection_matrix;
 //------------------------------------------------------------------
 void Storm3D_Camera::Apply()
 {
+    GFX_TRACE_SCOPE("Storm3D_Camera::Apply");
 	if(!forcedViewProjection)
 	{
 		// Calc direction

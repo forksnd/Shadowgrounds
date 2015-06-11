@@ -79,6 +79,8 @@ struct Storm3D_TerrainLightManager::Data
 
 	void renderSpotBuffers(Storm3D_Scene &scene, bool renderShadows)
 	{
+        GFX_TRACE_SCOPE("renderSpotBuffers");
+
 		bool atiShaders = false;
 		int spotType = Storm3D_Spotlight::getSpotType();
 		if(spotType == Storm3D_Spotlight::AtiBuffer)
@@ -137,6 +139,8 @@ struct Storm3D_TerrainLightManager::Data
 
 	void renderFakeSpotBuffers(Storm3D_Scene &scene, bool renderShadows)
 	{
+        GFX_TRACE_SCOPE("renderFakeSpotBuffers");
+
 		// Renders fake shadows to texture?
 		Storm3D_ShaderManager::GetSingleton()->setFakeDepthShaders();
 		Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
@@ -184,6 +188,8 @@ struct Storm3D_TerrainLightManager::Data
 
 	void renderSpotLights(Storm3D_Scene &scene, bool renderShadows, LightType type)
 	{
+        GFX_TRACE_SCOPE("renderSpotLights");
+
 		// this renders spotlight light & shadows
 		//setTracing(true);
 		bool atiShaders = false;
@@ -272,6 +278,8 @@ struct Storm3D_TerrainLightManager::Data
 
 	void renderFakeSpotLights(Storm3D_Scene &scene, bool renderShadows)
 	{
+        GFX_TRACE_SCOPE("renderFakeSpotLights");
+
 		// Renders fake shadows to screen?
 		Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
 		Storm3D_ShaderManager::GetSingleton()->setFakeShadowShaders();
@@ -483,31 +491,37 @@ void Storm3D_TerrainLightManager::setFog(float start, float end)
 
 void Storm3D_TerrainLightManager::renderProjectedRenderTargets(Storm3D_Scene &scene, bool renderShadows, bool renderFakeBuffers)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainLightManager::renderProjectedRenderTargets");
 	data->renderBuffers(scene, renderShadows, renderFakeBuffers);
 }
 
 void Storm3D_TerrainLightManager::renderProjectedFakeLights(Storm3D_Scene &scene, bool renderShadows)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainLightManager::renderProjectedFakeLights");
 	data->renderLights(Data::Fake, scene, renderShadows);
 }
 
 void Storm3D_TerrainLightManager::renderProjectedLightsSolid(Storm3D_Scene &scene, bool renderShadows)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainLightManager::renderProjectedLightsSolid");
 	data->renderLights(Data::RealSolid, scene, renderShadows);
 }
 
 void Storm3D_TerrainLightManager::renderProjectedLightsAlpha(Storm3D_Scene &scene, bool renderShadows)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainLightManager::renderProjectedLightsAlpha");
 	data->renderLights(Data::RealAlpha, scene, renderShadows);
 }
 
 void Storm3D_TerrainLightManager::renderFakeLights(const VC2I &renderSize)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainLightManager::renderFakeLights");
 	data->renderFakeLights(renderSize);
 }
 
 void Storm3D_TerrainLightManager::renderCones(Storm3D_Scene &scene, bool renderShadows, bool renderGlows)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainLightManager::renderCones");
 	float timeFactor = float(scene.time_dif) * 0.001f;
 	data->renderCones(scene, renderShadows, timeFactor, renderGlows);
 }
