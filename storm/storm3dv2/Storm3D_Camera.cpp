@@ -199,7 +199,7 @@ void Storm3D_Camera::Apply()
 		// Create View matrix
 		D3DXMatrixLookAtLH(&mv,(D3DXVECTOR3*)&position,
 			(D3DXVECTOR3*)&target,(D3DXVECTOR3*)&upvec);
-		Storm3D2->GetD3DDevice()->SetTransform(D3DTS_VIEW,&mv);
+		Storm3D2->GetD3DDevice().SetTransform(D3DTS_VIEW,&mv);
 
 		matView = mv;
 
@@ -228,7 +228,7 @@ void Storm3D_Camera::Apply()
  		}
 
 
-		Storm3D2->GetD3DDevice()->SetTransform(D3DTS_PROJECTION,&matProj);
+		Storm3D2->GetD3DDevice().SetTransform(D3DTS_PROJECTION,&matProj);
 		// Multiply matrices to get VP (view-projection) matrix
 		if (shearEffectFactor > 0.001f)
 		{
@@ -248,7 +248,7 @@ void Storm3D_Camera::Apply()
 		matProj = matForcedOrtho;
 	}
 
-	Storm3D2->GetD3DDevice()->SetTransform(D3DTS_PROJECTION,&matProj);
+	Storm3D2->GetD3DDevice().SetTransform(D3DTS_PROJECTION,&matProj);
 
 //	Storm3D_ShaderManager::GetSingleton()->SetViewMatrix(mv);
 //	Storm3D_ShaderManager::GetSingleton()->SetProjectionMatrix(matProj);
@@ -268,8 +268,8 @@ void Storm3D_Camera::Apply()
 		D3DXMATRIX proj;
 		proj = matProj * clip_matrix;
 
-		Storm3D2->GetD3DDevice()->SetTransform(D3DTS_PROJECTION,&proj);
-		Storm3D2->GetD3DDevice()->SetTransform(D3DTS_VIEW,&view);
+		Storm3D2->GetD3DDevice().SetTransform(D3DTS_PROJECTION,&proj);
+		Storm3D2->GetD3DDevice().SetTransform(D3DTS_VIEW,&view);
 	}
 }
 
@@ -334,7 +334,7 @@ void Storm3D_Camera::ApplyMirrored()
 	// Create View matrix
     D3DXMatrixLookAtLH(&mv,(D3DXVECTOR3*)&position,
 		(D3DXVECTOR3*)&target,(D3DXVECTOR3*)&upvec);    
-	Storm3D2->GetD3DDevice()->SetTransform(D3DTS_VIEW,&mv);
+	Storm3D2->GetD3DDevice().SetTransform(D3DTS_VIEW,&mv);
 
 	// Calc aspect!
 	Storm3D_SurfaceInfo ss=Storm3D2->GetScreenSize();
@@ -344,7 +344,7 @@ void Storm3D_Camera::ApplyMirrored()
     D3DXMATRIX matProj;
     //D3DXMatrixPerspectiveFovLH(&matProj,fov,-aspect,1.0f,vis_range);
     D3DXMatrixPerspectiveFovLH(&matProj,fov,-aspect,znear,vis_range);
-	Storm3D2->GetD3DDevice()->SetTransform(D3DTS_PROJECTION,&matProj);
+	Storm3D2->GetD3DDevice().SetTransform(D3DTS_PROJECTION,&matProj);
 
 	// Multiply matrices to get VP (view-projection) matrix
 	vp=mv*matProj;

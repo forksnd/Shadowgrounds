@@ -5,8 +5,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <string>
-#include <d3d9.h>
-#include <d3dx9.h>
+#include "GfxDevice.h"
 #include <atlbase.h>
 #include <vector>
 
@@ -30,14 +29,14 @@ class VertexShader
 	CComPtr<IDirect3DVertexShader9> handle;
 	CComPtr<IDirect3DVertexDeclaration9> declaration;
 	
-	IDirect3DDevice9 &device;
+	GfxDevice& device;
 	std::vector<D3DVERTEXELEMENT9> elements;
 
 	std::string name;
-	CComPtr<IDirect3DVertexShader9> createVertexShader(IDirect3DDevice9 &device, const std::string &fileName);
+	CComPtr<IDirect3DVertexShader9> createVertexShader(GfxDevice& device, const std::string &fileName);
 
 public:
-	VertexShader(IDirect3DDevice9 &device);
+	VertexShader(GfxDevice& device);
 	~VertexShader();
 
 	void create2DShader2Tex();
@@ -130,15 +129,15 @@ public:
 class PixelShader
 {
 	CComPtr<IDirect3DPixelShader9> handle;
-	IDirect3DDevice9 &device;
+	GfxDevice& device;
 
 	std::vector<D3DVERTEXELEMENT9> elements;
 
 	std::string name;
 
-	CComPtr<IDirect3DPixelShader9> createPixelShader(IDirect3DDevice9 &device, const std::string &fileName);
+	CComPtr<IDirect3DPixelShader9> createPixelShader(GfxDevice& device, const std::string &fileName);
 public:
-	PixelShader(IDirect3DDevice9 &device);
+	PixelShader(GfxDevice &device);
 	~PixelShader();
 
 	void createTerrainShader();
@@ -208,12 +207,12 @@ public:
 	~VertexBuffer();
 
 	void release();
-	void create(IDirect3DDevice9 &device, int vertexAmount, int vertexSize, bool dynamic);
+	void create(GfxDevice& device, int vertexAmount, int vertexSize, bool dynamic);
 	void *lock();
 	void *unsafeLock(int offset, int amount);
 	void unlock();
 
-	void apply(IDirect3DDevice9 &device, int stream) const;
+	void apply(GfxDevice& device, int stream) const;
 	operator bool() const;
 };
 
@@ -232,23 +231,23 @@ public:
 	void setLogger(IStorm3D_Logger *logger);
 
 	void release();
-	void create(IDirect3DDevice9 &device, int faceAmount, bool dynamic);
+	void create(GfxDevice& device, int faceAmount, bool dynamic);
 	unsigned short *lock();
 	void unlock();
 
-	void render(IDirect3DDevice9 &device, int faceAmount, int maxIndex, int vertexOffset = 0, int startIndex = 0) const;
+	void render(GfxDevice& device, int faceAmount, int maxIndex, int vertexOffset = 0, int startIndex = 0) const;
 	operator bool() const;
 };
 
 boost::shared_ptr<Storm3D_Texture> createSharedTexture(Storm3D_Texture *texture);
 
 void setCurrentAnisotrophy(int max);
-void applyMaxAnisotrophy(IDirect3DDevice9 &device, int stageAmount);
-void enableMinMagFiltering(IDirect3DDevice9 &device, int startStage, int endStage, bool enable);
-void enableMipFiltering(IDirect3DDevice9 &device, int startStage, int endStage, bool enable);
+void applyMaxAnisotrophy(GfxDevice& device, int stageAmount);
+void enableMinMagFiltering(GfxDevice& device, int startStage, int endStage, bool enable);
+void enableMipFiltering(GfxDevice& device, int startStage, int endStage, bool enable);
 
 void setInverseCulling(bool enable);
-void setCulling(IDirect3DDevice9 &device, DWORD type);
+void setCulling(GfxDevice& device, DWORD type);
 
 } // storm
 } // frozenbyte

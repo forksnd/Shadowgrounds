@@ -6,6 +6,7 @@
 //------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------
+#include "GfxDevice.h"
 #include "storm3d_common_imp.h"
 #include "IStorm3D.h"
 #include "storm3d_resourcemanager.h"
@@ -15,8 +16,6 @@
 // Forward declarations
 class IStorm3D_BoneAnimation;
 class IStorm3D_Line;
-
-#define NUM_FRAMES_DELAY 2
 
 //------------------------------------------------------------------
 // Storm3D
@@ -36,12 +35,6 @@ public:
 	};
 
 private:
-    void createSyncObjects();
-    void destroySyncObjects();
-
-    LPDIRECT3DQUERY9 frame_sync[NUM_FRAMES_DELAY];
-    size_t           frame_id = 0;
-
 	Storm3D_Texture *CreateNewTextureInstance(int width,int height,IStorm3D_Texture::TEXTYPE textype);
 
 	// Loaded resources
@@ -78,7 +71,7 @@ private:
 	D3DFORMAT GetDSBufferModeForDisplayMode(int adapter,D3DDISPLAYMODE &mode);
 
 	LPDIRECT3D9 D3D;									// Direct3D device
-	LPDIRECT3DDEVICE9 D3DDevice;					// 3d-device
+	GfxDevice device;					// 3d-device
 	D3DPRESENT_PARAMETERS present_params;		// Present parameters
 
 	// gamma ramps
@@ -197,7 +190,7 @@ public:
 	void createTargets();
 
 	// Get D3D Device inline (v3)
-	LPDIRECT3DDEVICE9 GetD3DDevice() const {return D3DDevice;} 
+	GfxDevice& GetD3DDevice() {return device;} 
 	LPDIRECT3D9 GetD3D() const {return D3D;} 
 
 	IStorm3D_Logger *getLogger() {return logger; }

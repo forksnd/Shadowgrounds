@@ -35,7 +35,7 @@
 		CComPtr<IDirect3DTexture9> color;
 		CComPtr<IDirect3DSurface9> depth;
 
-		IDirect3DDevice9 &device;
+		GfxDevice &device;
 		VC2I pos;
 
 		bool hasInitialized() const
@@ -43,7 +43,7 @@
 			return color && depth;
 		}
 
-		RenderTarget(IDirect3D9 &d3d, IDirect3DDevice9 &device_, CComPtr<IDirect3DTexture9> sharedColor, CComPtr<IDirect3DSurface9> sharedDepth)
+		RenderTarget(GfxDevice &device_, CComPtr<IDirect3DTexture9> sharedColor, CComPtr<IDirect3DSurface9> sharedDepth)
 		:	device(device_)
 		{
 			color = sharedColor;
@@ -175,7 +175,7 @@
 		{
 		}
 
-		bool createAll(Storm3D &storm, IDirect3D9 &d3d, IDirect3DDevice9 &device, int quality)
+		bool createAll(Storm3D &storm, GfxDevice &device, int quality)
 		{
 			freeAll();
 			if(SHARE_BUFFERS)
@@ -186,7 +186,7 @@
 
 			for(unsigned int i = 0; i < BUFFER_LIMIT; ++i)
 			{
-				targets[i] = new RenderTarget(d3d, device, sharedColor, sharedDepth);
+				targets[i] = new RenderTarget(device, sharedColor, sharedDepth);
 				if(SHARE_BUFFERS)
 				{
 					if(i == 0)
@@ -277,7 +277,7 @@
 			}
 		}
 
-		void filter(Storm3D &storm, IDirect3DDevice9 &device)
+		void filter(Storm3D &storm, GfxDevice &device)
 		{
 			CComPtr<IDirect3DTexture9> filterTexture = storm.getColorSecondaryTarget();
 			if(!filterTexture || !sharedColor)
@@ -319,8 +319,7 @@
 struct Storm3D_FakeSpotlight::Data
 {
 	Storm3D &storm; 
-	IDirect3D9 &d3d; 
-	IDirect3DDevice9 &device;
+	GfxDevice &device;
 
 	boost::shared_ptr<RenderTarget> renderTarget;
 	Storm3D_SpotlightShared properties;
@@ -341,9 +340,8 @@ struct Storm3D_FakeSpotlight::Data
 	static frozenbyte::storm::IndexBuffer *indexBuffer;
 	frozenbyte::storm::VertexBuffer vertexBuffer;
 
-	Data(Storm3D &storm_, IDirect3D9 &d3d_, IDirect3DDevice9 &device_)
+	Data(Storm3D &storm_, GfxDevice &device_)
 	:	storm(storm_),
-		d3d(d3d_),
 		device(device_),
 		properties(device),
 		camera(&storm),
@@ -390,9 +388,9 @@ frozenbyte::storm::VertexShader *Storm3D_FakeSpotlight::Data::shadowVertexShader
 frozenbyte::storm::PixelShader *Storm3D_FakeSpotlight::Data::depthPixelShader = 0;
 frozenbyte::storm::PixelShader *Storm3D_FakeSpotlight::Data::shadowPixelShader = 0;
 
-Storm3D_FakeSpotlight::Storm3D_FakeSpotlight(Storm3D &storm, IDirect3D9 &d3d, IDirect3DDevice9 &device)
+Storm3D_FakeSpotlight::Storm3D_FakeSpotlight(Storm3D &storm, GfxDevice &device)
 {
-	data = new Data(storm, d3d, device);
+	data = new Data(storm, device);
 }
 
 Storm3D_FakeSpotlight::~Storm3D_FakeSpotlight()
@@ -748,7 +746,7 @@ void Storm3D_FakeSpotlight::recreateDynamicResources()
 	data->renderTarget = renderTargets.getTarget();
 }
 
-void Storm3D_FakeSpotlight::filterBuffers(Storm3D &storm, IDirect3DDevice9 &device)
+void Storm3D_FakeSpotlight::filterBuffers(Storm3D &storm, GfxDevice &device)
 {
 	if(BUFFER_WIDTH <= 0 || BUFFER_HEIGHT <= 0)
 		return;
@@ -796,12 +794,12 @@ void Storm3D_FakeSpotlight::querySizes(Storm3D &storm, int shadowQuality)
 	}
 }
 
-void Storm3D_FakeSpotlight::createBuffers(Storm3D &storm, IDirect3D9 &d3d, IDirect3DDevice9 &device, int shadowQuality)
+void Storm3D_FakeSpotlight::createBuffers(Storm3D &storm, GfxDevice &device, int shadowQuality)
 {
 	if(BUFFER_WIDTH <= 0 || BUFFER_HEIGHT <= 0)
 		return;
 
-	bool status = renderTargets.createAll(storm, d3d, device, shadowQuality);
+	bool status = renderTargets.createAll(storm, device, shadowQuality);
 	while(!status && shadowQuality >= 0)
 	{
 		IStorm3D_Logger *logger = storm.getLogger();
@@ -810,7 +808,7 @@ void Storm3D_FakeSpotlight::createBuffers(Storm3D &storm, IDirect3D9 &d3d, IDire
 
 		shadowQuality -= 50;
 		querySizes(storm, shadowQuality);
-		status = renderTargets.createAll(storm, d3d, device, shadowQuality);
+		status = renderTargets.createAll(storm, device, shadowQuality);
 	}
 
 	IStorm3D_Logger *logger = storm.getLogger();

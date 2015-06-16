@@ -20,7 +20,7 @@
 #define MAX(a,b) (std::min( (a), (b) ) )
 #endif
 
-Storm3D_SpotlightShared::Storm3D_SpotlightShared(IDirect3DDevice9 &device_)
+Storm3D_SpotlightShared::Storm3D_SpotlightShared(GfxDevice &device_)
 :	device(device_),
 	range(20.f),
 	fov(60.f)

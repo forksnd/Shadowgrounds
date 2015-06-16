@@ -83,7 +83,7 @@ void Storm3D_Line::SetColor(int color)
 	rebuild_vertices = true;
 }
 
-void Storm3D_Line::Render(IDirect3DDevice9 *device)
+void Storm3D_Line::Render(GfxDevice& device)
 {
 	if(points.size() < 2)
 		return;
@@ -94,15 +94,15 @@ void Storm3D_Line::Render(IDirect3DDevice9 *device)
 	// Create buffers when needed
 	if(vertex_buffer == 0)
 	{
-		device->CreateVertexBuffer( vertices*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer, 0);
+		device.CreateVertexBuffer( vertices*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer, 0);
 	}
 	if(index_buffer == 0)
 	{
-		device->CreateIndexBuffer(sizeof(WORD)*faces*3, D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,D3DFMT_INDEX16,D3DPOOL_DEFAULT, &index_buffer, 0);
+		device.CreateIndexBuffer(sizeof(WORD)*faces*3, D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,D3DFMT_INDEX16,D3DPOOL_DEFAULT, &index_buffer, 0);
 	}
 	if(vertex_buffer2 == 0)
 	{
-		device->CreateVertexBuffer( points.size()*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer2, 0);
+		device.CreateVertexBuffer( points.size()*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer2, 0);
 	}
 
 	// Update as needed
@@ -199,22 +199,22 @@ void Storm3D_Line::Render(IDirect3DDevice9 *device)
 	rebuild_vertices = false;
 	rebuild_indices = false;
 
-	device->SetVertexShader(0);
-	device->SetFVF(FVF_VXFORMAT_PSD);
+	device.SetVertexShader(0);
+	device.SetFVF(FVF_VXFORMAT_PSD);
 
 	// Render
 	if(!pixel_line)
 	{
-		device->SetStreamSource(0, vertex_buffer, 0, sizeof(VXFORMAT_PSD));
-		device->SetIndices(index_buffer);
+		device.SetStreamSource(0, vertex_buffer, 0, sizeof(VXFORMAT_PSD));
+		device.SetIndices(index_buffer);
 
-		device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, vertices, 0, faces);
+		device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, vertices, 0, faces);
 		++storm3d_dip_calls;
 	}
 	else
 	{
-		device->SetStreamSource(0, vertex_buffer2, 0, sizeof(VXFORMAT_PSD));
-		device->DrawPrimitive(D3DPT_LINELIST, 0, points.size() / 2);
+		device.SetStreamSource(0, vertex_buffer2, 0, sizeof(VXFORMAT_PSD));
+		device.DrawPrimitive(D3DPT_LINELIST, 0, points.size() / 2);
 		++storm3d_dip_calls;
 	}
 }

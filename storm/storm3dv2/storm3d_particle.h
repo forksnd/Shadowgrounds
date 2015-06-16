@@ -27,7 +27,7 @@ public:
 		virtual bool isDistorted() const = 0;
 		virtual int getMaxParticleAmount() const = 0;
 		virtual int lock(VXFORMAT_PART *pointer, int particleOffset, Storm3D_Scene *scene) = 0;
-		virtual void setRender(IDirect3DDevice9 &device, int &vertexOffset, int &particleAmount) = 0;
+		virtual void setRender(GfxDevice &device, int &vertexOffset, int &particleAmount) = 0;
 
 		virtual void render(Storm3D* Storm3D2, Storm3D_Scene* scene)=0;
 	};
@@ -65,7 +65,7 @@ public:
 		
 		int getMaxParticleAmount() const;
 		int lock(VXFORMAT_PART *pointer, int vertexOffset, Storm3D_Scene *scene);
-		void setRender(IDirect3DDevice9 &device, int &vertexOffset, int &particleAmount);
+		void setRender(GfxDevice &device, int &vertexOffset, int &particleAmount);
 
 		void render(Storm3D* Storm3D2, Storm3D_Scene* scene);
 	};
@@ -119,7 +119,7 @@ public:
 	
 		int getMaxParticleAmount() const;
 		int lock(VXFORMAT_PART *pointer, int particleOffset, Storm3D_Scene *scene);
-		void setRender(IDirect3DDevice9 &device, int &vertexOffset, int &particleAmount);
+		void setRender(GfxDevice &device, int &vertexOffset, int &particleAmount);
 
 		void render(Storm3D* Storm3D2, Storm3D_Scene* scene);
 	};
@@ -171,7 +171,7 @@ public:
 
 		int getMaxParticleAmount() const;
 		int lock(VXFORMAT_PART *pointer, int particleOffset, Storm3D_Scene *scene);
-		void setRender(IDirect3DDevice9 &device, int &vertexOffset, int &particleAmount);
+		void setRender(GfxDevice &device, int &vertexOffset, int &particleAmount);
 
 		void render(Storm3D* Storm3D2, Storm3D_Scene* scene);
 	};
@@ -230,7 +230,7 @@ public:
 
 	Storm3D_ParticleSystem(Storm3D *storm) 
 	:	Storm3D2(storm),
-		offsetShader(*storm->GetD3DDevice())
+		offsetShader(storm->GetD3DDevice())
 	{
 		
 		PointArray::m_totalParticles = 500;

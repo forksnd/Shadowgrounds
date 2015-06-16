@@ -187,13 +187,13 @@ void Storm3D_Font::SetFont(const char *face_, int width_, int height_, bool bold
 	strcpy(desc.FaceName, face_);
 
 	HRESULT hr;
-	hr = D3DXCreateFontIndirect(Storm3D2->GetD3DDevice(), &desc, &font);
+	hr = D3DXCreateFontIndirect(Storm3D2->GetD3DDevice().device, &desc, &font);
 	if(FAILED(hr))
 	{
 		//MessageBox(NULL,"Storm3D_Font::SetFont() - D3DXCreateFontIndirect failed!","Storm3D Error",0);
 		font = NULL;
 	}
-	hr = D3DXCreateSprite(Storm3D2->GetD3DDevice(), &sprite);
+	hr = D3DXCreateSprite(Storm3D2->GetD3DDevice().device, &sprite);
 	if(FAILED(hr))
 	{
 		//MessageBox(NULL,"Storm3D_Font::SetFont() - D3DXCreateSprite failed!","Storm3D Error",0);

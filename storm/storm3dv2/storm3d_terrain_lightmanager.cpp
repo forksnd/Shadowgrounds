@@ -57,7 +57,7 @@ struct Storm3D_TerrainLightManager::Data
 	FakeSpotList &fakeSpots;
 	FakeLightList &fakeLights;
 
-	IDirect3DDevice9 &device;
+	GfxDevice &device;
 
 	frozenbyte::storm::VertexShader coneAtiVertexShader;
 	frozenbyte::storm::VertexShader coneNvVertexShader;
@@ -68,7 +68,7 @@ struct Storm3D_TerrainLightManager::Data
 		spots(spots_),
 		fakeSpots(fakeSpots_),
 		fakeLights(fakeLights_),
-		device(*storm.GetD3DDevice()),
+		device(storm.GetD3DDevice()),
 
 		coneAtiVertexShader(device),
 		coneNvVertexShader(device)

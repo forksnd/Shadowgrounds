@@ -72,7 +72,7 @@ namespace {
 const int Storm3D_ShaderManager::BONE_INDEX_START = 27;
 const int Storm3D_ShaderManager::BONE_INDICES = 23;
 
-Storm3D_ShaderManager::Storm3D_ShaderManager(IDirect3DDevice9 &device)
+Storm3D_ShaderManager::Storm3D_ShaderManager(GfxDevice& device)
 :	ambient_color(.7f,.7f,.7f,0),
 	ambient_force_color(0,0,0,0),
 	fog(-20.f,1.f / 100.f,0.0f,1.f),
@@ -178,7 +178,7 @@ Storm3D_ShaderManager::~Storm3D_ShaderManager()
 {
 }
 
-void Storm3D_ShaderManager::CreateShaders(IDirect3DDevice9 *device)
+void Storm3D_ShaderManager::CreateShaders(GfxDevice& device)
 {
 	default_shader.createDefaultShader();
 	lighting_shader_0light_noreflection.createLightingShader_0light_noreflection();
@@ -231,10 +231,10 @@ void Storm3D_ShaderManager::CreateShaders(IDirect3DDevice9 *device)
 	// Set identity matrix on card
 	D3DXMATRIX identity;
 	D3DXMatrixIdentity(&identity);
-	device->SetVertexShaderConstantF(BONE_INDEX_START, identity, 3);
+	device.SetVertexShaderConstantF(BONE_INDEX_START, identity, 3);
 }
 
-void Storm3D_ShaderManager::CreateAtiShaders(IDirect3DDevice9 *device)
+void Storm3D_ShaderManager::CreateAtiShaders(GfxDevice& device)
 {
 	ati_depth_default_shader.createAtiDepthShader();
 	ati_depth_bone_shader.createAtiBoneDepthShader();	
@@ -568,13 +568,13 @@ bool Storm3D_ShaderManager::BoneShader()
 	return false;
 }
 
-void Storm3D_ShaderManager::SetShader(IDirect3DDevice9 *device, Storm3D_Model_Object *object)
+void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *object)
 {
-	assert(device);
+	assert(device.device);
 
 	D3DXMATRIX object_tm;
 	object->GetMXG().GetAsD3DCompatible4x4((float *) &object_tm);
-	SetWorldTransform(*device, object_tm);
+	SetWorldTransform(device, object_tm);
 
 	IStorm3D_Material *m = object->GetMesh()->GetMaterial();
 	float alpha = 1.f;
@@ -602,13 +602,13 @@ void Storm3D_ShaderManager::SetShader(IDirect3DDevice9 *device, Storm3D_Model_Ob
 	if(!projected_shaders && !ati_shadow_shaders && !fake_shadow_shaders && !fake_depth_shaders)
 	{
 		D3DXMatrixTranspose(&object_tm, &object_tm);
-		device->SetVertexShaderConstantF(4, object_tm, 3);
+		device.SetVertexShaderConstantF(4, object_tm, 3);
 
 		//if(update_values == true)
 		{
 			// Constants
-			device->SetVertexShaderConstantF(7, object_ambient_color, 1);
-			device->SetVertexShaderConstantF(8, object_diffuse_color, 1);
+			device.SetVertexShaderConstantF(7, object_ambient_color, 1);
+			device.SetVertexShaderConstantF(8, object_diffuse_color, 1);
 			update_values = false;	
 		}
 
@@ -643,7 +643,7 @@ void Storm3D_ShaderManager::SetShader(IDirect3DDevice9 *device, Storm3D_Model_Ob
 
 		ambient.w = alpha; //1.f;
 
-		device->SetVertexShaderConstantF(7, ambient, 1);
+		device.SetVertexShaderConstantF(7, ambient, 1);
 	}
 
 	if(projected_shaders || ati_shadow_shaders)
@@ -654,13 +654,13 @@ void Storm3D_ShaderManager::SetShader(IDirect3DDevice9 *device, Storm3D_Model_Ob
 		dif.z *= spot_color.z;
 
 		dif.w = alpha * transparency_factor;
-		device->SetVertexShaderConstantF(17, dif, 1);
+		device.SetVertexShaderConstantF(17, dif, 1);
 	}
 
 	if(fake_depth_shaders)
 	{
 		D3DXMatrixTranspose(&object_tm, &object_tm);
-		device->SetVertexShaderConstantF(13, object_tm, 3);
+		device.SetVertexShaderConstantF(13, object_tm, 3);
 	}
 
 	// Set actual shader
@@ -927,7 +927,7 @@ void Storm3D_ShaderManager::SetShader(IDirect3DDevice9 *device, Storm3D_Model_Ob
 	}
 }
 
-void Storm3D_ShaderManager::SetShader(IDirect3DDevice9 *device, const std::vector<int> &bone_indices)
+void Storm3D_ShaderManager::SetShader(GfxDevice &device, const std::vector<int> &bone_indices)
 {
 	bool setIndices = false;
 
@@ -974,7 +974,7 @@ void Storm3D_ShaderManager::SetShader(IDirect3DDevice9 *device, const std::vecto
 			array[arrayIndex++] = vertexTm.Get(14);
 		}
 
-		device->SetVertexShaderConstantF(BONE_INDEX_START, array, 3 * bone_indices.size());
+		device.SetVertexShaderConstantF(BONE_INDEX_START, array, 3 * bone_indices.size());
 	}
 }
 
@@ -1016,7 +1016,7 @@ void Storm3D_ShaderManager::ClearCache()
 	model_ambient_color.w = 0.f;
 }
 
-void Storm3D_ShaderManager::BackgroundShader(IDirect3DDevice9 *device)
+void Storm3D_ShaderManager::BackgroundShader(GfxDevice &device)
 {
 	//current_shader = 0; //DEFAULT_SHADER;
 	//update_values = false;
@@ -1027,27 +1027,27 @@ void Storm3D_ShaderManager::BackgroundShader(IDirect3DDevice9 *device)
 	skybox_shader.apply();
 }
 
-void Storm3D_ShaderManager::SetShaderDefaultValues(IDirect3DDevice9 *device)
+void Storm3D_ShaderManager::SetShaderDefaultValues(GfxDevice &device)
 {
 	// Set values
 	D3DXVECTOR4 foo(1,1,1,1);
-	device->SetVertexShaderConstantF(7, foo, 1);
-	device->SetVertexShaderConstantF(8, foo, 1);
+	device.SetVertexShaderConstantF(7, foo, 1);
+	device.SetVertexShaderConstantF(8, foo, 1);
 }
 
-void Storm3D_ShaderManager::SetShaderAmbient(IDirect3DDevice9 *device, const COL &color)
+void Storm3D_ShaderManager::SetShaderAmbient(GfxDevice &device, const COL &color)
 {
 	D3DXVECTOR4 ambient(color.r, color.g, color.b, 0.f);
 	D3DXVECTOR4 diffuse(1, 1, 1, 0);
 
-	device->SetVertexShaderConstantF(7, ambient, 1);
-	device->SetVertexShaderConstantF(8, diffuse, 1);
+	device.SetVertexShaderConstantF(7, ambient, 1);
+	device.SetVertexShaderConstantF(8, diffuse, 1);
 }
 
-void Storm3D_ShaderManager::SetShaderDiffuse(IDirect3DDevice9 *device, const COL &color)
+void Storm3D_ShaderManager::SetShaderDiffuse(GfxDevice &device, const COL &color)
 {
 	D3DXVECTOR4 diffuse(color.r, color.g, color.b, 0.f);
-	device->SetVertexShaderConstantF(8, diffuse, 1);
+	device.SetVertexShaderConstantF(8, diffuse, 1);
 }
 
 void Storm3D_ShaderManager::SetLightmapFactor(float xf, float yf)
@@ -1058,12 +1058,12 @@ void Storm3D_ShaderManager::SetLightmapFactor(float xf, float yf)
 	lightmap_factor.w = 0;
 }
 
-void Storm3D_ShaderManager::ApplyDeclaration(IDirect3DDevice9 &device)
+void Storm3D_ShaderManager::ApplyDeclaration(GfxDevice &device)
 {
 	default_shader.applyDeclaration();
 }
 
-void Storm3D_ShaderManager::SetWorldTransform(IDirect3DDevice9 &device, const D3DXMATRIX &tm, bool forceTextureTm, bool terrain)
+void Storm3D_ShaderManager::SetWorldTransform(GfxDevice &device, const D3DXMATRIX &tm, bool forceTextureTm, bool terrain)
 {
 	update_values = true;
 
@@ -1177,7 +1177,7 @@ void Storm3D_ShaderManager::SetWorldTransform(IDirect3DDevice9 &device, const D3
 	}
 }
 
-void Storm3D_ShaderManager::ApplyForceAmbient(IDirect3DDevice9 &device)
+void Storm3D_ShaderManager::ApplyForceAmbient(GfxDevice &device)
 {
 	D3DXVECTOR4 v = ambient_force_color + ambient_color;
 	device.SetVertexShaderConstantF(7, v, 1);

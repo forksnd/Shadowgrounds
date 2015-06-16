@@ -47,8 +47,8 @@ void Storm3D_Scene_PicList_Picture::Render()
 {
 	if(wrap)
 	{
-		Storm3D2->GetD3DDevice()->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-		Storm3D2->GetD3DDevice()->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+		Storm3D2->GetD3DDevice().SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+		Storm3D2->GetD3DDevice().SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 	}
 
 	IStorm3D_Material::ATYPE alphaType = IStorm3D_Material::ATYPE_NONE;
@@ -88,8 +88,8 @@ void Storm3D_Scene_PicList_Picture::Render()
 	}
 
 	// Render it
-	Storm3D2->GetD3DDevice()->SetVertexShader(0);
-	Storm3D2->GetD3DDevice()->SetFVF(FVF_VXFORMAT_2D);
+	Storm3D2->GetD3DDevice().SetVertexShader(0);
+	Storm3D2->GetD3DDevice().SetFVF(FVF_VXFORMAT_2D);
 
 	// render with custom shape
 	if(customShape && customShape->vertices)
@@ -110,7 +110,7 @@ void Storm3D_Scene_PicList_Picture::Render()
 			customShape->vertices[i].position.x -= .5f;
 			customShape->vertices[i].position.y -= .5f;
 		}
-		Storm3D2->GetD3DDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST,customShape->numVertices/3,customShape->vertices,sizeof(VXFORMAT_2D));
+		Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLELIST,customShape->numVertices/3,customShape->vertices,sizeof(VXFORMAT_2D));
 		scene->AddPolyCounter(customShape->numVertices/3);
 	}
 	// render quad
@@ -160,7 +160,7 @@ void Storm3D_Scene_PicList_Picture::Render()
 			vx[i].position.y -= .5f;
 		}
 
-		Storm3D2->GetD3DDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
+		Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
 		scene->AddPolyCounter(2);
 	}
 
@@ -169,8 +169,8 @@ void Storm3D_Scene_PicList_Picture::Render()
 
 	if(wrap)
 	{
-		Storm3D2->GetD3DDevice()->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-		Storm3D2->GetD3DDevice()->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+		Storm3D2->GetD3DDevice().SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+		Storm3D2->GetD3DDevice().SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 	}
 }
 
@@ -237,12 +237,12 @@ void Storm3D_Scene_PicList_Picture3D::Render()
 			vx[3].texcoords.x=vx[2].texcoords.x;
 
 			// Render it (with Z buffer read)
-			Storm3D2->GetD3DDevice()->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-			Storm3D2->GetD3DDevice()->SetVertexShader(0);
-			Storm3D2->GetD3DDevice()->SetFVF(FVF_VXFORMAT_2D);
-			Storm3D2->GetD3DDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
+			Storm3D2->GetD3DDevice().SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+			Storm3D2->GetD3DDevice().SetVertexShader(0);
+			Storm3D2->GetD3DDevice().SetFVF(FVF_VXFORMAT_2D);
+			Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
 			scene->AddPolyCounter(2);
-			Storm3D2->GetD3DDevice()->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+			Storm3D2->GetD3DDevice().SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 		}
 	}
 }

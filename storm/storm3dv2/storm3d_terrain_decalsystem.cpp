@@ -309,7 +309,7 @@ namespace {
 			decal.calculateValues();
 		}
 
-		void apply(IDirect3DDevice9 &device)
+		void apply(GfxDevice &device)
 		{
 			if(baseTexture)
 				baseTexture->Apply(1);
@@ -318,7 +318,7 @@ namespace {
 			device.SetVertexShaderConstantF(7, diffuse, 1);
 		}
 
-		void applyProjection(IDirect3DDevice9 &device, const COL &spotColor)
+		void applyProjection(GfxDevice &device, const COL &spotColor)
 		{
 			if(baseTexture)
 				baseTexture->Apply(2);
@@ -329,7 +329,7 @@ namespace {
 			device.SetVertexShaderConstantF(17, diffuse, 1);
 		}
 
-		void applyShadow(IDirect3DDevice9 &device)
+		void applyShadow(GfxDevice &device)
 		{
 			if(baseTexture)
 				baseTexture->Apply(0);
@@ -416,11 +416,11 @@ struct Storm3D_TerrainDecalSystem::Data
 
 	Data(Storm3D &storm_)
 	:	storm(storm_),
-		pixelShader(*storm.GetD3DDevice()),
-		vertexShader(*storm.GetD3DDevice()),
-		pointVertexShader(*storm.GetD3DDevice()),
-		dirVertexShader(*storm.GetD3DDevice()),
-		flatVertexShader(*storm.GetD3DDevice()),
+		pixelShader(storm.GetD3DDevice()),
+		vertexShader(storm.GetD3DDevice()),
+		pointVertexShader(storm.GetD3DDevice()),
+		dirVertexShader(storm.GetD3DDevice()),
+		flatVertexShader(storm.GetD3DDevice()),
 		tree(0),
 		outFactor(1.f, 1.f, 1.f),
 		inFactor(1.f, 1.f, 1.f),
@@ -566,7 +566,7 @@ struct Storm3D_TerrainDecalSystem::Data
 		}
 	}
 
-	void createIndexBuffers(IDirect3DDevice9 &device)
+	void createIndexBuffers(GfxDevice &device)
 	{
 		if(!indices)
 		{
@@ -590,7 +590,7 @@ struct Storm3D_TerrainDecalSystem::Data
 		}
 	}
 
-	void createVertexBuffers(IDirect3DDevice9 &device)
+	void createVertexBuffers(GfxDevice &device)
 	{
 		if(!decals.empty())
 		{
@@ -618,7 +618,7 @@ struct Storm3D_TerrainDecalSystem::Data
 	{
 		findDecals(scene);
 
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice &device = storm.GetD3DDevice();
 		createIndexBuffers(device);
 		createVertexBuffers(device);
 
@@ -682,7 +682,7 @@ struct Storm3D_TerrainDecalSystem::Data
 
 	void renderShadows(Storm3D_Scene &scene)
 	{
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice &device = storm.GetD3DDevice();
 		createIndexBuffers(device);
 
 		int renderAmount = 0;
@@ -796,7 +796,7 @@ struct Storm3D_TerrainDecalSystem::Data
 
 	void renderProjection(Storm3D_Scene &scene, Storm3D_Spotlight *spot)
 	{
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice &device = storm.GetD3DDevice();
 		bool atiShader = false;
 		if(Storm3D_Spotlight::getSpotType() == Storm3D_Spotlight::AtiBuffer)
 			atiShader = true;

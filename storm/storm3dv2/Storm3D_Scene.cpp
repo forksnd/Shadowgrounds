@@ -58,7 +58,7 @@ Storm3D_Scene::Storm3D_Scene(Storm3D *s2) :
 	time(0),
 	scene_paused(false),
 	draw_bones(false),
-	basic_shader(*s2->GetD3DDevice()),
+	basic_shader(s2->GetD3DDevice()),
 	camera(Storm3D2)
 {
 	basic_shader.createBasicBoneLightingShader();
@@ -187,18 +187,18 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 	// Basic renderstates
     {
         GFX_TRACE_SCOPE("Basic renderstates");
-	    Storm3D2->D3DDevice->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
-    //    Storm3D2->D3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
-        Storm3D2->D3DDevice->SetRenderState(D3DRS_ZENABLE,D3DZB_TRUE);
-        Storm3D2->D3DDevice->SetRenderState(D3DRS_DITHERENABLE,TRUE);
-	    Storm3D2->D3DDevice->SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
-	    Storm3D2->D3DDevice->SetRenderState(D3DRS_LOCALVIEWER,TRUE);
+	    Storm3D2->device.SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL);
+    //    Storm3D2->device.SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
+        Storm3D2->device.SetRenderState(D3DRS_ZENABLE,D3DZB_TRUE);
+        Storm3D2->device.SetRenderState(D3DRS_DITHERENABLE,TRUE);
+	    Storm3D2->device.SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
+	    Storm3D2->device.SetRenderState(D3DRS_LOCALVIEWER,TRUE);
 
 
 	    frozenbyte::storm::setCurrentAnisotrophy(anisotropic_level);
-	    frozenbyte::storm::applyMaxAnisotrophy(*Storm3D2->D3DDevice, Storm3D2->adapters[Storm3D2->active_adapter].multitex_layers);
-	    frozenbyte::storm::enableMinMagFiltering(*Storm3D2->D3DDevice, 0, Storm3D2->adapters[Storm3D2->active_adapter].multitex_layers, true);
-	    frozenbyte::storm::enableMipFiltering(*Storm3D2->D3DDevice, 0, Storm3D2->adapters[Storm3D2->active_adapter].multitex_layers, true);
+	    frozenbyte::storm::applyMaxAnisotrophy(Storm3D2->device, Storm3D2->adapters[Storm3D2->active_adapter].multitex_layers);
+	    frozenbyte::storm::enableMinMagFiltering(Storm3D2->device, 0, Storm3D2->adapters[Storm3D2->active_adapter].multitex_layers, true);
+	    frozenbyte::storm::enableMipFiltering(Storm3D2->device, 0, Storm3D2->adapters[Storm3D2->active_adapter].multitex_layers, true);
     }
 
 	// Clear renderlists
@@ -388,19 +388,19 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 	}
 
 	CComPtr<IDirect3DSurface9> originalDepthBuffer;
-	Storm3D2->D3DDevice->GetDepthStencilSurface(&originalDepthBuffer);
+	Storm3D2->device.GetDepthStencilSurface(&originalDepthBuffer);
 
 	renderRealScene(flip, render_mirrored);
 
 	// Present the scene (flip)
 	if (!flip && !render_mirrored)
-		Storm3D2->D3DDevice->SetDepthStencilSurface(originalDepthBuffer);
+		Storm3D2->device.SetDepthStencilSurface(originalDepthBuffer);
 }
 
 void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
     GFX_TRACE_SCOPE("Storm3D_Scene::renderRealScene");
-	Storm3D2->D3DDevice->BeginScene();
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+	Storm3D2->device.BeginScene();
+	Storm3D2->device.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 
 	if(!flip && !render_mirrored)
 	{
@@ -408,15 +408,15 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 		if(Storm3D2->support_stencil)
 			clearFlag |= D3DCLEAR_STENCIL;
 
-		Storm3D2->D3DDevice->SetDepthStencilSurface(Storm3D2->getDepthTarget());
+		Storm3D2->device.SetDepthStencilSurface(Storm3D2->getDepthTarget());
 
 		DWORD color = bgcolor.GetAsD3DCompatibleARGB() & 0x00FFFFFF;
-		Storm3D2->D3DDevice->Clear(0,0,D3DCLEAR_TARGET | clearFlag, color, 1, 0);
+		Storm3D2->device.Clear(0,0,D3DCLEAR_TARGET | clearFlag, color, 1, 0);
 	}
 	else
 	{
 		Storm3D2->getProceduralManagerImp().update(time_dif);
-		Storm3D2->D3DDevice->Clear(0,0,D3DCLEAR_TARGET,bgcolor.GetAsD3DCompatibleARGB(),1,0);
+		Storm3D2->device.Clear(0,0,D3DCLEAR_TARGET,bgcolor.GetAsD3DCompatibleARGB(),1,0);
 	}
 
 	// Update terrain render targets
@@ -438,13 +438,13 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 	camera.Apply();
 
 	// Set ambient
-    Storm3D2->D3DDevice->SetRenderState(D3DRS_AMBIENT,ambient.GetAsD3DCompatibleARGB());
+    Storm3D2->device.SetRenderState(D3DRS_AMBIENT,ambient.GetAsD3DCompatibleARGB());
 
 	// psd: fog was here
 
 	/*
 	// Render background model!
-	Storm3D_ShaderManager::GetSingleton()->BackgroundShader(Storm3D2->D3DDevice);
+	Storm3D_ShaderManager::GetSingleton()->BackgroundShader(Storm3D2->device);
 	if (bg_model)
 	{
 		// Set model to camera position
@@ -470,7 +470,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 			float range=camera.position.GetRangeTo(owp);
 
 			// Set correct shader
-			Storm3D_ShaderManager::GetSingleton()->SetShader(Storm3D2->D3DDevice, obj);
+			Storm3D_ShaderManager::GetSingleton()->SetShader(Storm3D2->device, obj);
 
 			// Do not apply lights!
 			// Render it
@@ -484,21 +484,21 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 	if (fog_active)
 	{
 		// Set values
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGCOLOR,fog_color.GetAsD3DCompatibleARGB());
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGSTART,*(DWORD*)(&fog_start));
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGEND,*(DWORD*)(&fog_end));
+		Storm3D2->device.SetRenderState(D3DRS_FOGENABLE, TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_FOGCOLOR,fog_color.GetAsD3DCompatibleARGB());
+		Storm3D2->device.SetRenderState(D3DRS_FOGSTART,*(DWORD*)(&fog_start));
+		Storm3D2->device.SetRenderState(D3DRS_FOGEND,*(DWORD*)(&fog_end));
 
 		//if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == true)
 		{
 			// Set pixel or vertex fog (depending on hardware support)
 			if (Storm3D2->adapters[Storm3D2->active_adapter].caps&Storm3D_Adapter::CAPS_PIXELFOG)
-				Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGTABLEMODE,D3DFOG_LINEAR);
+				Storm3D2->device.SetRenderState(D3DRS_FOGTABLEMODE,D3DFOG_LINEAR);
 			else 
-				Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGVERTEXMODE,D3DFOG_LINEAR);
+				Storm3D2->device.SetRenderState(D3DRS_FOGVERTEXMODE,D3DFOG_LINEAR);
 		}
 	}
-	else Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGENABLE,FALSE);
+	else Storm3D2->device.SetRenderState(D3DRS_FOGENABLE,FALSE);
 */
 	// Render terrains
 	//if (flip) // Does not render to mirrors
@@ -516,7 +516,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 	}
 /*
 	// Render background model!
-	Storm3D_ShaderManager::GetSingleton()->BackgroundShader(Storm3D2->D3DDevice);
+	Storm3D_ShaderManager::GetSingleton()->BackgroundShader(Storm3D2->device);
 	Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
 	if (bg_model)
 	{
@@ -537,8 +537,8 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 			if (obj->mesh==NULL) continue;
 
 			// Set correct shader
-			Storm3D_ShaderManager::GetSingleton()->SetShader(Storm3D2->D3DDevice, obj);
-			Storm3D_ShaderManager::GetSingleton()->BackgroundShader(Storm3D2->D3DDevice);
+			Storm3D_ShaderManager::GetSingleton()->SetShader(Storm3D2->device, obj);
+			Storm3D_ShaderManager::GetSingleton()->BackgroundShader(Storm3D2->device);
 			Storm3D_Material *mat = (Storm3D_Material *) (obj->mesh->GetMaterial());
 
 			mat->ApplyBaseTextureOnly();
@@ -561,10 +561,10 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 	{
 		// psd: no pixel fog for shaders
 		// psd: disable fog table
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGCOLOR,fog_color.GetAsD3DCompatibleARGB());
+		Storm3D2->device.SetRenderState(D3DRS_FOGCOLOR,fog_color.GetAsD3DCompatibleARGB());
 
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_NONE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_NONE );  
+		Storm3D2->device.SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_NONE);
+		Storm3D2->device.SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_NONE );  
 	}
 
 	Storm3D_ShaderManager::GetSingleton()->ResetShader();
@@ -572,7 +572,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 	//Storm3D_ShaderManager::GetSingleton()->SetModelAmbient(ambient);
 	Storm3D_ShaderManager::GetSingleton()->setLightingShaders();
 
-	//Storm3D2->D3DDevice->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
+	//Storm3D2->device.SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
 
     {
         GFX_TRACE_SCOPE("Render renderlist objects");
@@ -582,15 +582,15 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
             GFX_TRACE_SCOPE("Object");
 		    if(i == 0)
 		    {
-			    Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
-			    Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
-			    Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
-			    Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-			    Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-			    Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
-			    Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
-			    Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
-			    Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
+			    Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
+			    Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
+			    Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
+			    Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
+			    Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
+			    Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
+			    Storm3D2->device.SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
+			    Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
+			    Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
 
 			    //Storm3D_ShaderManager::GetSingleton()->SetForceAmbient(COL());
 			    this->camera.Apply();
@@ -600,8 +600,8 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 		    Storm3D_Material *m = static_cast<Storm3D_Material *> (renderlist_obj[i]->mesh->GetMaterial());
 		    Storm3D_Model *mod = renderlist_obj[i]->parent_model;
 
-		    //Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
-		    //Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG2);
+		    //Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
+		    //Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG2);
 
 		    if(m)
 		    {
@@ -612,16 +612,16 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 			    if(t)
 			    {
 				    t->Apply(0);
-				    Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
-				    Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
+				    Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
+				    Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
 			    }
 			    else
 			    {
-				    Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG2);
-				    Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
+				    Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG2);
+				    Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
 			    }
 
-			    IDirect3DDevice9 &device = *Storm3D2->D3DDevice;
+			    GfxDevice& device = Storm3D2->device;
 			    int alphaType = m->GetAlphaType();
 			    if(alphaType == IStorm3D_Material::ATYPE_NONE)
 			    {
@@ -704,7 +704,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 		    Storm3D_ShaderManager::GetSingleton()->SetSun(VC3(), 0.f);
 
 		    // Set correct shader
-		    Storm3D_ShaderManager::GetSingleton()->SetShader(Storm3D2->D3DDevice, renderlist_obj[i]);
+		    Storm3D_ShaderManager::GetSingleton()->SetShader(Storm3D2->device, renderlist_obj[i]);
 		    basic_shader.apply();
 
 		    if(!renderlist_obj[i]->parent_model->bones.empty())
@@ -713,106 +713,106 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 			    renderlist_obj[i]->mesh->RenderBuffers(renderlist_obj[i]);
 		    }
 
-		    Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
+		    Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
 		    // Render it
 		    //renderlist_obj[i]->mesh->Render(this,false,renderlist_obj[i]); // always has a mesh!
 	    }
     }
 
-	//Storm3D2->D3DDevice->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
+	//Storm3D2->device.SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
 
-	Storm3D2->D3DDevice->SetTexture(0,0);
-	Storm3D2->D3DDevice->SetVertexShader(0);
+	Storm3D2->device.SetTexture(0,0);
+	Storm3D2->device.SetVertexShader(0);
 
 	// Set renderstates (for shadows/particles/sprites)
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_LIGHTING,FALSE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_SPECULARENABLE,FALSE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_FOGENABLE,FALSE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_FILLMODE,D3DFILL_SOLID);
+	Storm3D2->device.SetRenderState(D3DRS_LIGHTING,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_SPECULARENABLE,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_FOGENABLE,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_FILLMODE,D3DFILL_SOLID);
 
 	// Apply the original camera back!
 	camera.Apply();
 
 
 	// Render particles
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
+	Storm3D2->device.SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
 	if(terrains.empty())
     {
         GFX_TRACE_SCOPE("Particle system render");
 		particlesystem->Render(this);
     }
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 
 
 	// Set renderstates for sprite rendering
-//	Storm3D2->D3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_TEXCOORDINDEX,0);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_DISABLE);
-	Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
+//	Storm3D2->device.SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_TEXCOORDINDEX,0);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_DISABLE);
+	Storm3D2->device.SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
 
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);
+	Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+	Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
+	Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);
 
 	// Moved 2D rendering after line rendering...
 	// -- jpk
 
 	// Renderstate for lines
-//	Storm3D2->D3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_LIGHTING,TRUE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ZENABLE,TRUE);
+//	Storm3D2->device.SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
+	Storm3D2->device.SetRenderState(D3DRS_LIGHTING,TRUE);
+	Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_ZENABLE,TRUE);
 
 	// don't like the z-buffer update with semi-transparent lines
 	// nasty flickering when the lines are on a same plane
 	// thus, no z-buffer update 
 	// --jpk
-	//Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+	//Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+	Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 
 	// Textures off
 	for (int i=0;i<3;i++)
 	{
-		Storm3D2->D3DDevice->SetTexture(i,NULL);
+		Storm3D2->device.SetTexture(i,NULL);
 	}
 
 	/* Render lines */
 	{	
         GFX_TRACE_SCOPE("Render lines");
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_LIGHTING,FALSE);
-		//Storm3D2->D3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
-		frozenbyte::storm::setCulling(*Storm3D2->D3DDevice, D3DCULL_NONE);
+		Storm3D2->device.SetRenderState(D3DRS_LIGHTING,FALSE);
+		//Storm3D2->device.SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
+		frozenbyte::storm::setCulling(Storm3D2->device, D3DCULL_NONE);
 
 		D3DXMATRIX dm;
 		D3DXMatrixIdentity(&dm);
-		Storm3D2->D3DDevice->SetTransform(D3DTS_WORLD,&dm);
+		Storm3D2->device.SetTransform(D3DTS_WORLD,&dm);
 
 		if(!depth_lines.empty())
 		{
 			for(unsigned int i = 0; i < depth_lines.size(); ++i)
-				depth_lines[i]->Render(Storm3D2->D3DDevice);
+				depth_lines[i]->Render(Storm3D2->device);
 		}
 
 		if(!no_depth_lines.empty())
 		{
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ZENABLE,FALSE);
+			Storm3D2->device.SetRenderState(D3DRS_ZENABLE,FALSE);
 
 			for(unsigned int i = 0; i < no_depth_lines.size(); ++i)
-				no_depth_lines[i]->Render(Storm3D2->D3DDevice);
+				no_depth_lines[i]->Render(Storm3D2->device);
 			
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ZENABLE,TRUE);
+			Storm3D2->device.SetRenderState(D3DRS_ZENABLE,TRUE);
 		}
 		
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_LIGHTING,TRUE);
-		//Storm3D2->D3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
-		frozenbyte::storm::setCulling(*Storm3D2->D3DDevice, D3DCULL_CCW);
+		Storm3D2->device.SetRenderState(D3DRS_LIGHTING,TRUE);
+		//Storm3D2->device.SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
+		frozenbyte::storm::setCulling(Storm3D2->device, D3DCULL_CCW);
 	}
 
 	// Debug rendering
@@ -821,12 +821,12 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
         GFX_TRACE_SCOPE("Debug rendering");
 		D3DXMATRIX dm;
 		D3DXMatrixIdentity(&dm);
-		Storm3D2->D3DDevice->SetTransform(D3DTS_WORLD,&dm);
+		Storm3D2->device.SetTransform(D3DTS_WORLD,&dm);
 
 		int vertexAmount = (debugTriangles.size() * 3) + (debugLines.size() * 2) + (debugPoints.size());
 		
 		frozenbyte::storm::VertexBuffer vertexBuffer;
-		vertexBuffer.create(*Storm3D2->D3DDevice, vertexAmount, sizeof(VXFORMAT_PSD), true);
+		vertexBuffer.create(Storm3D2->device, vertexAmount, sizeof(VXFORMAT_PSD), true);
 		VXFORMAT_PSD *buffer = static_cast<VXFORMAT_PSD *> (vertexBuffer.lock());
 
 		for(unsigned int i = 0; i < debugTriangles.size(); ++i)
@@ -871,35 +871,35 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 		}
 
 		vertexBuffer.unlock();
-		vertexBuffer.apply(*Storm3D2->D3DDevice, 0);
+		vertexBuffer.apply(Storm3D2->device, 0);
 
-		Storm3D2->D3DDevice->SetVertexShader(0);
-		Storm3D2->D3DDevice->SetFVF(FVF_VXFORMAT_PSD);
+		Storm3D2->device.SetVertexShader(0);
+		Storm3D2->device.SetFVF(FVF_VXFORMAT_PSD);
 
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG2);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_LIGHTING,FALSE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG2);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
+		Storm3D2->device.SetRenderState(D3DRS_LIGHTING,FALSE);
 
 		if(!debugTriangles.empty())
-			Storm3D2->D3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, debugTriangles.size());
+			Storm3D2->device.DrawPrimitive(D3DPT_TRIANGLELIST, 0, debugTriangles.size());
 		if(!debugLines.empty())
-			Storm3D2->D3DDevice->DrawPrimitive(D3DPT_LINELIST, lineOffset, debugLines.size());
+			Storm3D2->device.DrawPrimitive(D3DPT_LINELIST, lineOffset, debugLines.size());
 		if(!debugPoints.empty())
-			Storm3D2->D3DDevice->DrawPrimitive(D3DPT_POINTLIST, pointOffset, debugPoints.size());
+			Storm3D2->device.DrawPrimitive(D3DPT_POINTLIST, pointOffset, debugPoints.size());
 
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_LIGHTING, TRUE);
 	}
 
 	// Render bones. SLOOOOOOOOW!
@@ -911,7 +911,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
         GFX_TRACE_SCOPE("Draw bones");
 		D3DXMATRIX dm;
 		D3DXMatrixIdentity(&dm);
-		Storm3D2->D3DDevice->SetTransform(D3DTS_WORLD,&dm);
+		Storm3D2->device.SetTransform(D3DTS_WORLD,&dm);
 
 		for(std::set<IStorm3D_Model *>::iterator mit=models.begin();mit!=models.end();++mit)
 		{
@@ -920,8 +920,8 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 
 			if(mod->bones.size() > 0)
 			{
-				Storm3D2->D3DDevice->SetRenderState(D3DRS_LIGHTING,FALSE);
-				Storm3D2->D3DDevice->SetRenderState(D3DRS_ZENABLE,FALSE);
+				Storm3D2->device.SetRenderState(D3DRS_LIGHTING,FALSE);
+				Storm3D2->device.SetRenderState(D3DRS_ZENABLE,FALSE);
 
 				if(true)
 				{
@@ -930,7 +930,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 					line[1].color = D3DCOLOR_RGBA(255,255,128,255);
 
 					IDirect3DVertexBuffer9 *vbuffer = 0;
-					Storm3D2->D3DDevice->CreateVertexBuffer( 3*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC, FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vbuffer, 0);
+					Storm3D2->device.CreateVertexBuffer( 3*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC, FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vbuffer, 0);
 
 					Vector bone_position;
 					Vector bone_offset = Vector(0,0,1.f);
@@ -967,21 +967,21 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 							vbuffer->Unlock();
 
 							// Render
-							Storm3D2->D3DDevice->SetStreamSource(0, vbuffer, 0, sizeof(VXFORMAT_PSD));
-							Storm3D2->D3DDevice->SetVertexShader(0);
-							Storm3D2->D3DDevice->SetFVF( FVF_VXFORMAT_PSD );
-							Storm3D2->D3DDevice->DrawPrimitive( D3DPT_LINELIST, 0, 1 );
+							Storm3D2->device.SetStreamSource(0, vbuffer, 0, sizeof(VXFORMAT_PSD));
+							Storm3D2->device.SetVertexShader(0);
+							Storm3D2->device.SetFVF( FVF_VXFORMAT_PSD );
+							Storm3D2->device.DrawPrimitive( D3DPT_LINELIST, 0, 1 );
 						}
 					}
 
 					vbuffer->Release();
-					Storm3D2->D3DDevice->SetRenderState(D3DRS_LIGHTING,TRUE);
-					Storm3D2->D3DDevice->SetRenderState(D3DRS_ZENABLE,TRUE);
+					Storm3D2->device.SetRenderState(D3DRS_LIGHTING,TRUE);
+					Storm3D2->device.SetRenderState(D3DRS_ZENABLE,TRUE);
 				}
 				else
 				{	
-					Storm3D2->D3DDevice->SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL);
-					Storm3D2->D3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+					Storm3D2->device.SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL);
+					Storm3D2->device.SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 
 					for(unsigned int i = 0; i < mod->bones.size(); ++i)
 					{
@@ -989,8 +989,8 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 						float thickness = b->GetThickness();
 
 						CComPtr<ID3DXMesh> mesh;
-						D3DXCreateCylinder(Storm3D2->D3DDevice, thickness, thickness, b->GetLenght() + 2*thickness, 4, 4, &mesh, 0);
-						//D3DXCreateCylinder(Storm3D2->D3DDevice, thickness, thickness, b->GetLenght(), 6, 6, &mesh, 0);
+						D3DXCreateCylinder(Storm3D2->device.device, thickness, thickness, b->GetLenght() + 2*thickness, 4, 4, &mesh, 0);
+						//D3DXCreateCylinder(Storm3D2->device, thickness, thickness, b->GetLenght(), 6, 6, &mesh, 0);
 						//thickness = 0.f;
 
 						Matrix global_tm = b->GetTM();
@@ -1000,26 +1000,26 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 						tm._42 += (-thickness + (0.5f * b->GetLenght())) * tm._32;
 						tm._43 += (-thickness + (0.5f * b->GetLenght())) * tm._33;
 
-						Storm3D2->D3DDevice->SetTransform(D3DTS_WORLD, &tm);
+						Storm3D2->device.SetTransform(D3DTS_WORLD, &tm);
 						mesh->DrawSubset(0);
 					}
 
-					Storm3D2->D3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+					Storm3D2->device.SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 				}
 			}
 		}
 
-		Storm3D2->D3DDevice->SetTransform(D3DTS_WORLD,&dm);
+		Storm3D2->device.SetTransform(D3DTS_WORLD,&dm);
 	}
 
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ZENABLE,FALSE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_ZENABLE,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
 
-	Storm3D2->D3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-	Storm3D2->D3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+	Storm3D2->device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+	Storm3D2->device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 
-	frozenbyte::storm::enableMipFiltering(*Storm3D2->D3DDevice, 0, 0, false);
+	frozenbyte::storm::enableMipFiltering(Storm3D2->device, 0, 0, false);
 
 	// Render picturelist
 	// CHANGED: was set
@@ -1039,9 +1039,9 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 		}
 	}
 
-	Storm3D2->D3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-	Storm3D2->D3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-	frozenbyte::storm::enableMipFiltering(*Storm3D2->D3DDevice, 0, 0, true);
+	Storm3D2->device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+	Storm3D2->device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+	frozenbyte::storm::enableMipFiltering(Storm3D2->device, 0, 0, true);
 
 	// Clear picturelist
 	if(!render_mirrored)
@@ -1052,12 +1052,12 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 		debugPoints.clear();
 	}
 
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ZENABLE,TRUE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-	Storm3D2->D3DDevice->SetTexture(0,0);
+	Storm3D2->device.SetRenderState(D3DRS_ZENABLE,TRUE);
+	Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+	Storm3D2->device.SetTexture(0,0);
 
 	// End REAL scene rendering
-	Storm3D2->D3DDevice->EndScene();
+	Storm3D2->device.EndScene();
 }
 
 
@@ -1530,7 +1530,7 @@ int Storm3D_Scene::RenderScene(bool present)
 			frozenbyte::storm::setInverseCulling(true);
 			active_visibility = 1;
 
-			IDirect3DDevice9 &device = *Storm3D2->GetD3DDevice();
+			GfxDevice &device = Storm3D2->GetD3DDevice();
 			Storm3D_Camera camback = camera;
 			camback.Apply();
 

@@ -304,14 +304,14 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 	Storm3D_TerrainModelsData(Storm3D &storm_)
 	:	storm(storm_),
-		lightingPixelShader_lightmap(*storm.GetD3DDevice()),
-		lightingPixelShader_lightmap_reflection(*storm.GetD3DDevice()),
-		lightingPixelShader_lightmap_localreflection(*storm.GetD3DDevice()),
-		lightingPixelShader_lightmap_notexture(*storm.GetD3DDevice()),
-		lightingPixelShader_noLightmap(*storm.GetD3DDevice()),
-		lightingPixelShader_noLightmap_reflection(*storm.GetD3DDevice()),
-		lightingPixelShader_noLightmap_localreflection(*storm.GetD3DDevice()),
-		lightingPixelShader_noLightmap_notexture(*storm.GetD3DDevice()),
+		lightingPixelShader_lightmap(storm.GetD3DDevice()),
+		lightingPixelShader_lightmap_reflection(storm.GetD3DDevice()),
+		lightingPixelShader_lightmap_localreflection(storm.GetD3DDevice()),
+		lightingPixelShader_lightmap_notexture(storm.GetD3DDevice()),
+		lightingPixelShader_noLightmap(storm.GetD3DDevice()),
+		lightingPixelShader_noLightmap_reflection(storm.GetD3DDevice()),
+		lightingPixelShader_noLightmap_localreflection(storm.GetD3DDevice()),
+		lightingPixelShader_noLightmap_notexture(storm.GetD3DDevice()),
 		filterLightmap(false),
 		renderCollision(false),
 		enableAlphaTest(true),
@@ -1105,7 +1105,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 		return true;
 	}
 
-	bool applyTexture(IDirect3DDevice9 &device, IStorm3D_Texture *texture, int stage) const
+	bool applyTexture(GfxDevice &device, IStorm3D_Texture *texture, int stage) const
 	{
 		Storm3D_Texture *t = static_cast<Storm3D_Texture *> (texture);
 		if(t)
@@ -1122,7 +1122,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 	void applyGeneralMaterial(RenderType renderType, Storm3D_Material &material, Storm3D_Model &model, Storm3D_Model_Object &object)
 	{
 		Storm3D_ShaderManager *shaderManager = Storm3D_ShaderManager::GetSingleton();
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice &device = storm.GetD3DDevice();
 
 		if(renderType == BaseTextures)
 		{
@@ -1413,7 +1413,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 	void applySolidMaterial(RenderType renderType, Storm3D_Material &material, Storm3D_Model &model, Storm3D_Model_Object &object, Storm3D_Spotlight *spot)
 	{
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice &device = storm.GetD3DDevice();
 
 		applyGeneralMaterial(renderType, material, model, object);
 
@@ -1438,7 +1438,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 	void applyAlphaMaterial(RenderType renderType, Storm3D_Material &material, Storm3D_Model &model, Storm3D_Model_Object &object, Storm3D_Spotlight *spot)
 	{
 		Storm3D_ShaderManager *shaderManager = Storm3D_ShaderManager::GetSingleton();
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice &device = storm.GetD3DDevice();
 
 		applyGeneralMaterial(renderType, material, model, object);
 		int alphaType = material.GetAlphaType();
@@ -1517,7 +1517,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 	{
         GFX_TRACE_SCOPE("renderSolid");
 		Storm3D_ShaderManager::GetSingleton()->ClearCache();
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice& device = storm.GetD3DDevice();
 
 //#ifdef PROJECT_AOV
 		static int atp_alpharef = NORMAL_ALPHA_TEST_VALUE;
@@ -1636,7 +1636,7 @@ struct Storm3D_TerrainModelsData : public DataBase
         GFX_TRACE_SCOPE("renderAlpha");
 		Storm3D_ShaderManager::GetSingleton()->ClearCache();
 
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice& device = storm.GetD3DDevice();
 
 		device.SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 		device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
@@ -1907,14 +1907,14 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 	void renderObject(Storm3D_Scene *scene, Storm3D_Model_Object *object)
 	{
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice &device = storm.GetD3DDevice();
 
 		Storm3D_Mesh *mesh = static_cast<Storm3D_Mesh *> (object->GetMesh());
 		mesh->ReBuild();
 
 //frozenbyte::storm::setCulling(device, D3DCULL_NONE);
 
-		Storm3D_ShaderManager::GetSingleton()->SetShader(&device, object);
+		Storm3D_ShaderManager::GetSingleton()->SetShader(device, object);
 		mesh->RenderBuffers(object);
 
 //frozenbyte::storm::setCulling(device, D3DCULL_CCW);
@@ -2047,7 +2047,7 @@ void Storm3D_TerrainModels::calculateVisibility(Storm3D_Scene &scene, int timeDe
 
 void Storm3D_TerrainModels::renderTextures(MaterialType materialType, Storm3D_Scene &scene)
 {
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice &device = data->storm.GetD3DDevice();
 
 	device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 	device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
@@ -2072,7 +2072,7 @@ void Storm3D_TerrainModels::renderTextures(MaterialType materialType, Storm3D_Sc
 void Storm3D_TerrainModels::renderLighting(MaterialType materialType, Storm3D_Scene &scene)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainModels::renderLighting");
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice& device = data->storm.GetD3DDevice();
 
 	if(materialType == SolidOnly)
 		data->renderSolid(BaseLighting, scene, 0, 0, 0, None);
@@ -2108,7 +2108,7 @@ void Storm3D_TerrainModels::renderProjection(MaterialType materialType, Storm3D_
 	{
 		data->renderAlpha(SpotProjection, scene, &spot, 0, 0, None);
 
-		IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+		GfxDevice &device = data->storm.GetD3DDevice();
 		device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 		device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 	}
@@ -2119,14 +2119,14 @@ void Storm3D_TerrainModels::renderProjection(Storm3D_Scene &scene, Storm3D_FakeS
 	data->renderSolid(FakeProjection, scene, 0, &spot, 0, None);
 	//data->renderAlpha(FakeProjection, scene, 0, &spot, 0, None);
 
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice &device = data->storm.GetD3DDevice();
 	device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
 	device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
 }
 
 void Storm3D_TerrainModels::renderGlows(Storm3D_Scene &scene)
 {
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice &device = data->storm.GetD3DDevice();
 
 	device.SetPixelShader(0);
 	device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
@@ -2146,7 +2146,7 @@ void Storm3D_TerrainModels::renderGlows(Storm3D_Scene &scene)
 
 void Storm3D_TerrainModels::renderDistortion(Storm3D_Scene &scene)
 {
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice &device = data->storm.GetD3DDevice();
 
 	device.SetPixelShader(0);
 	device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
@@ -2228,7 +2228,7 @@ void Storm3D_TerrainModels::renderBackground(Storm3D_Model *model)
 	if(!model)
 		return;
 
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice &device = data->storm.GetD3DDevice();
 
 	Storm3D_ShaderManager *shaderManager = Storm3D_ShaderManager::GetSingleton();
 	shaderManager->SetTextureOffset(VC2());
@@ -2249,8 +2249,8 @@ void Storm3D_TerrainModels::renderBackground(Storm3D_Model *model)
 
 		mesh->ReBuild();
 	
-		shaderManager->SetShader(&device, object);
-		shaderManager->BackgroundShader(&device);
+		shaderManager->SetShader(device, object);
+		shaderManager->BackgroundShader(device);
 		mesh->RenderBuffers(object);
 
 		//if(scene)

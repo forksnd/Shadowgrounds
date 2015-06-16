@@ -218,7 +218,7 @@
 struct Storm3D_TerrainGroupData
 {
 	Storm3D &storm;
-	IDirect3DDevice9 &device;
+	GfxDevice &device;
 	Storm3D_TerrainModels &terrainModels;
 
 	VC2 sceneSize;
@@ -230,7 +230,7 @@ struct Storm3D_TerrainGroupData
 
 	Storm3D_TerrainGroupData(Storm3D &storm_, Storm3D_TerrainModels &terrainModels_, bool ps14)
 	:	storm(storm_),
-		device(*storm.GetD3DDevice()),
+		device(storm.GetD3DDevice()),
 		terrainModels(terrainModels_)
 	{
 	}

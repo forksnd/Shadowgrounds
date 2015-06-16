@@ -310,14 +310,14 @@ void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_O
 			// Default: "white plastic"...
 
 			// Set stages (color only)
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
-			Storm3D2->D3DDevice->SetTexture(0,NULL);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG1);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_DIFFUSE);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_DISABLE);
-			Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
+			Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
+			Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+			Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
+			Storm3D2->device.SetTexture(0,NULL);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG1);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_DIFFUSE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_DISABLE);
+			Storm3D2->device.SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
 
 
 			// Setup material
@@ -343,10 +343,10 @@ void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_O
 			mat.Power=25; 
 
 			// Use this material
-			Storm3D2->D3DDevice->SetMaterial(&mat);
+			Storm3D2->device.SetMaterial(&mat);
 /* PSD
 			// Apply shader
-			Storm3D2->D3DDevice->SetVertexShader(vbuf_fvf);
+			Storm3D2->device.SetVertexShader(vbuf_fvf);
 */
 			// Set active material
 			Storm3D2->active_material=NULL;
@@ -356,8 +356,8 @@ void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_O
 	// If object is scaled use normalizenormals, otherwise don't
 	if ((fabsf(object->scale.x-1.0f)>=0.001)||
 		(fabsf(object->scale.y-1.0f)>=0.001)||
-		(fabsf(object->scale.z-1.0f)>=0.001)) Storm3D2->D3DDevice->SetRenderState(D3DRS_NORMALIZENORMALS,TRUE);
-		else Storm3D2->D3DDevice->SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
+		(fabsf(object->scale.z-1.0f)>=0.001)) Storm3D2->device.SetRenderState(D3DRS_NORMALIZENORMALS,TRUE);
+		else Storm3D2->device.SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
 }
 
 
@@ -382,12 +382,12 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
 		for(unsigned int i = 0; i < bone_chunks[lod].size(); ++i)
 		{
 			Storm3D_ShaderManager *manager = Storm3D_ShaderManager::GetSingleton();
-			manager->SetShader(Storm3D2->D3DDevice, bone_chunks[lod][i].bone_indices);
+			manager->SetShader(Storm3D2->device, bone_chunks[lod][i].bone_indices);
 
-			Storm3D2->D3DDevice->SetIndices(bone_chunks[lod][i].index_buffer);
-			Storm3D2->D3DDevice->SetStreamSource(0, bone_chunks[lod][i].vertex_buffer, 0, vbuf_vsize);
+			Storm3D2->device.SetIndices(bone_chunks[lod][i].index_buffer);
+			Storm3D2->device.SetStreamSource(0, bone_chunks[lod][i].vertex_buffer, 0, vbuf_vsize);
 
-			Storm3D2->D3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
+			Storm3D2->device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
 				0,bone_chunks[lod][i].vertex_count,0, bone_chunks[lod][i].index_count);
 
 			++storm3d_dip_calls;
@@ -395,10 +395,10 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
 	}
 	else
 	{
-		Storm3D2->D3DDevice->SetStreamSource(0, dx_vbuf, 0, vbuf_vsize);
-		Storm3D2->D3DDevice->SetIndices(dx_ibuf[lod]);
+		Storm3D2->device.SetStreamSource(0, dx_vbuf, 0, vbuf_vsize);
+		Storm3D2->device.SetIndices(dx_ibuf[lod]);
 		
-		Storm3D2->D3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
+		Storm3D2->device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
 			0,render_vertex_amount,0,render_face_amount[lod]);
 
 		++storm3d_dip_calls;
@@ -417,12 +417,12 @@ void Storm3D_Mesh::RenderBuffersWithoutTransformation()
 	// Mesh buffer change optimization (v2.6)
 	if (Storm3D2->active_mesh!=this)
 	{
-		Storm3D2->D3DDevice->SetStreamSource(0,dx_vbuf,0,vbuf_vsize);
-		Storm3D2->D3DDevice->SetIndices(dx_ibuf[0]);
+		Storm3D2->device.SetStreamSource(0,dx_vbuf,0,vbuf_vsize);
+		Storm3D2->device.SetIndices(dx_ibuf[0]);
 	}
 
 	// Render it!
-	Storm3D2->D3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
+	Storm3D2->device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
 		0,vertex_amount,0,face_amount[0]);
 	
 	// Mesh buffer change optimization (v2.6)
@@ -457,13 +457,13 @@ void Storm3D_Mesh::Render(Storm3D_Scene *scene,bool mirrored,Storm3D_Model_Objec
 
 			if (!ds)
 			{
-//				Storm3D2->D3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CW);
+//				Storm3D2->device.SetRenderState(D3DRS_CULLMODE,D3DCULL_CW);
 			}
 		}
 	}
 
 	//if(GetKeyState('R') & 0x80)
-	//	Storm3D2->D3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+	//	Storm3D2->device.SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 
 	int lod = object->parent_model->lodLevel;
 	if(!hasLods)
@@ -498,7 +498,7 @@ void Storm3D_Mesh::RenderWithoutMaterial(Storm3D_Scene *scene,bool mirrored,Stor
 
 			if (!ds)
 			{
-//				Storm3D2->D3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CW);
+//				Storm3D2->device.SetRenderState(D3DRS_CULLMODE,D3DCULL_CW);
 			}
 		}
 	}
@@ -526,16 +526,16 @@ void Storm3D_Mesh::RenderToBackground(Storm3D_Scene *scene,Storm3D_Model_Object 
 	PrepareMaterialForRender(scene,object);
 
 	// Disable some states
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_SPECULARENABLE,FALSE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ZENABLE,FALSE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_SPECULARENABLE,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_ZENABLE,FALSE);
+	Storm3D2->device.SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
 
 	// Render vertex buffers
 	RenderBuffers(object);
 	scene->AddPolyCounter(face_amount[0]);
 
 	// Return states
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ZENABLE,TRUE);
+	Storm3D2->device.SetRenderState(D3DRS_ZENABLE,TRUE);
 }
 
 
@@ -577,7 +577,7 @@ void Storm3D_Mesh::ReBuild()
 		// Create new vertexbuffer (and release old)
 		if (dx_vbuf) dx_vbuf->Release();
 
-		Storm3D2->D3DDevice->CreateVertexBuffer(vertex_amount*size,D3DUSAGE_WRITEONLY,
+		Storm3D2->device.CreateVertexBuffer(vertex_amount*size,D3DUSAGE_WRITEONLY,
 				fvf,D3DPOOL_MANAGED,&dx_vbuf, 0);
 	}
 
@@ -712,7 +712,7 @@ void Storm3D_Mesh::ReBuild()
 					if(chunk.index_buffer)
 						chunk.index_buffer->Release();
 
-					Storm3D2->D3DDevice->CreateIndexBuffer(sizeof(WORD) * chunk_face_list.size() * 3, D3DUSAGE_WRITEONLY,D3DFMT_INDEX16,D3DPOOL_MANAGED, &chunk.index_buffer, 0);
+					Storm3D2->device.CreateIndexBuffer(sizeof(WORD) * chunk_face_list.size() * 3, D3DUSAGE_WRITEONLY,D3DFMT_INDEX16,D3DPOOL_MANAGED, &chunk.index_buffer, 0);
 
 					WORD *ip = 0;
 					chunk.index_buffer->Lock(0, sizeof(WORD) * chunk_face_list.size() * 3, (void**) &ip, 0);
@@ -744,7 +744,7 @@ void Storm3D_Mesh::ReBuild()
 					if(chunk.vertex_buffer)
 						chunk.vertex_buffer->Release();
 
-					Storm3D2->D3DDevice->CreateVertexBuffer(vertex_list.size() * size,D3DUSAGE_WRITEONLY,
+					Storm3D2->device.CreateVertexBuffer(vertex_list.size() * size,D3DUSAGE_WRITEONLY,
 							fvf, D3DPOOL_MANAGED, &chunk.vertex_buffer, 0);
 
 					BYTE *vp = 0;
@@ -968,9 +968,9 @@ void Storm3D_Mesh::ReBuild()
 				}
 
 				if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == true)
-					Storm3D2->D3DDevice->CreateIndexBuffer(sizeof(WORD)*face_amount[l]*3, D3DUSAGE_WRITEONLY|D3DUSAGE_SOFTWAREPROCESSING,D3DFMT_INDEX16,D3DPOOL_MANAGED, &bone_chunks[l][i].index_buffer, 0);
+					Storm3D2->device.CreateIndexBuffer(sizeof(WORD)*face_amount[l]*3, D3DUSAGE_WRITEONLY|D3DUSAGE_SOFTWAREPROCESSING,D3DFMT_INDEX16,D3DPOOL_MANAGED, &bone_chunks[l][i].index_buffer, 0);
 				else
-					Storm3D2->D3DDevice->CreateIndexBuffer(sizeof(WORD)*face_amount[l]*3, D3DUSAGE_WRITEONLY,D3DFMT_INDEX16,D3DPOOL_MANAGED, &bone_chunks[l][i].index_buffer, 0);
+					Storm3D2->device.CreateIndexBuffer(sizeof(WORD)*face_amount[l]*3, D3DUSAGE_WRITEONLY,D3DFMT_INDEX16,D3DPOOL_MANAGED, &bone_chunks[l][i].index_buffer, 0);
 
 				// This needs to be done after inserting discarded polys!
 
@@ -1135,7 +1135,7 @@ void Storm3D_Mesh::ReBuild()
 			// Create new indexbuffer (and delete old)
 			if (dx_ibuf[i]) dx_ibuf[i]->Release();
 
-			Storm3D2->D3DDevice->CreateIndexBuffer(sizeof(WORD)*face_amount[i]*3,
+			Storm3D2->device.CreateIndexBuffer(sizeof(WORD)*face_amount[i]*3,
 					D3DUSAGE_WRITEONLY,D3DFMT_INDEX16,D3DPOOL_MANAGED,&dx_ibuf[i], 0);
 		
 			//update_fc_amount = false;
@@ -1519,7 +1519,7 @@ void Storm3D_Mesh::applyBuffers()
 	assert(dx_vbuf);
 	assert(vbuf_vsize);
 
-	Storm3D2->D3DDevice->SetStreamSource(0, dx_vbuf, 0, vbuf_vsize);
+	Storm3D2->device.SetStreamSource(0, dx_vbuf, 0, vbuf_vsize);
 }
 
 int Storm3D_Mesh::renderPrimitives(float range)
@@ -1531,8 +1531,8 @@ int Storm3D_Mesh::renderPrimitives(float range)
 	*/
 	int lod = 0;
 
-	Storm3D2->D3DDevice->SetIndices(dx_ibuf[lod]);
-	Storm3D2->D3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
+	Storm3D2->device.SetIndices(dx_ibuf[lod]);
+	Storm3D2->device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0,
 		0,vertex_amount,0,face_amount[lod]);
 
 	++storm3d_dip_calls;

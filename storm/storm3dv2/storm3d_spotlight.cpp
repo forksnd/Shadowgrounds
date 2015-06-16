@@ -72,7 +72,7 @@ namespace {
 
 	struct ShadowMap
 	{
-		IDirect3DDevice9 &device;
+		GfxDevice &device;
 		bool ps14;
 		bool depthSupport;
 
@@ -88,7 +88,7 @@ namespace {
 		}
 
 	public:
-		ShadowMap(IDirect3D9 &d3d, IDirect3DDevice9 &device_, bool ps14_, CComPtr<IDirect3DTexture9> sharedColor, CComPtr<IDirect3DTexture9> sharedDepthTexture, CComPtr<IDirect3DSurface9> sharedDepth, const VC2I &pos_)
+		ShadowMap(GfxDevice &device_, bool ps14_, CComPtr<IDirect3DTexture9> sharedColor, CComPtr<IDirect3DTexture9> sharedDepthTexture, CComPtr<IDirect3DSurface9> sharedDepth, const VC2I &pos_)
 		:	device(device_),
 			ps14(ps14_),
 			depthSupport(false),
@@ -272,7 +272,7 @@ namespace {
 			freeAll();
 		}
 
-		bool createAll(Storm3D &storm, IDirect3D9 &d3d, IDirect3DDevice9 &device, bool ps14, int quality)
+		bool createAll(Storm3D &storm, GfxDevice &device, bool ps14, int quality)
 		{
 			freeAll();
 
@@ -297,7 +297,7 @@ namespace {
 					pos.y = 1;
 				}
 
-				buffers[i] = new ShadowMap(d3d, device, ps14, sharedColor, sharedDepthTexture, sharedDepth, pos);
+				buffers[i] = new ShadowMap(device, ps14, sharedColor, sharedDepthTexture, sharedDepth, pos);
 				if(SHARE_BUFFERS)
 				{
 					if(i == 0)
@@ -371,7 +371,7 @@ namespace {
 struct Storm3D_SpotlightData
 {
 	Storm3D &storm;
-	IDirect3DDevice9 &device;
+	GfxDevice &device;
 
 	boost::shared_ptr<ShadowMap> shadowMap;
 	boost::shared_ptr<Storm3D_Texture> projectionTexture;
@@ -432,7 +432,7 @@ struct Storm3D_SpotlightData
 	static frozenbyte::storm::PixelShader *coneNvPixelShader_NoTexture;
 	static frozenbyte::storm::VertexShader *coneStencilVertexShader;
 
-	Storm3D_SpotlightData(Storm3D &storm_, IDirect3D9 &d3d, IDirect3DDevice9 &device_, bool ps14_, bool ps20_)
+	Storm3D_SpotlightData(Storm3D &storm_, GfxDevice &device_, bool ps14_, bool ps20_)
 	:	storm(storm_),
 		device(device_),
 		properties(device),
@@ -730,9 +730,9 @@ frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneNvPixelShader_Texture
 frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneNvPixelShader_NoTexture = 0;
 frozenbyte::storm::VertexShader *Storm3D_SpotlightData::coneStencilVertexShader = 0;
 
-Storm3D_Spotlight::Storm3D_Spotlight(Storm3D &storm, IDirect3D9 &d3d, IDirect3DDevice9 &device, bool ps14, bool ps20)
+Storm3D_Spotlight::Storm3D_Spotlight(Storm3D &storm, GfxDevice &device, bool ps14, bool ps20)
 {
-	data = new Storm3D_SpotlightData(storm, d3d, device, ps14, ps20);
+	data = new Storm3D_SpotlightData(storm, device, ps14, ps20);
 }
 
 Storm3D_Spotlight::~Storm3D_Spotlight()
@@ -1428,9 +1428,9 @@ void Storm3D_Spotlight::querySizes(Storm3D &storm, bool ps14, int shadowQuality)
 		//storm.setNeededColorTarget(VC2I(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2));
 }
 
-void Storm3D_Spotlight::createShadowBuffers(Storm3D &storm, IDirect3D9 &d3d, IDirect3DDevice9 &device, bool ps14, bool ps20, int shadowQuality)
+void Storm3D_Spotlight::createShadowBuffers(Storm3D &storm, GfxDevice &device, bool ps14, bool ps20, int shadowQuality)
 {
-	bool status = staticBuffers.createAll(storm, d3d, device, ps14, shadowQuality);
+	bool status = staticBuffers.createAll(storm, device, ps14, shadowQuality);
 	while(!status && shadowQuality > 0)
 	{
 		IStorm3D_Logger *logger = storm.getLogger();
@@ -1439,7 +1439,7 @@ void Storm3D_Spotlight::createShadowBuffers(Storm3D &storm, IDirect3D9 &d3d, IDi
 
 		shadowQuality -= 50;
 		querySizes(storm, ps14, shadowQuality);
-		status = staticBuffers.createAll(storm, d3d, device, ps14, shadowQuality);
+		status = staticBuffers.createAll(storm, device, ps14, shadowQuality);
 	}
 
 	IStorm3D_Logger *logger = storm.getLogger();

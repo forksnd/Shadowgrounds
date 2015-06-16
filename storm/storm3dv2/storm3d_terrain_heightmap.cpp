@@ -109,7 +109,7 @@
 		{
 		}
 
-		void createBuffer(IDirect3DDevice9 &device)
+		void createBuffer(GfxDevice &device)
 		{
 			heightBuffer.create(device, VERTEX_COUNT * VERTEX_COUNT, STREAM_0_SIZE, DYNAMIC_POSITION);
 		}
@@ -247,7 +247,7 @@
 struct Storm3D_TerrainHeightmapData
 {
 	Storm3D &storm;
-	IDirect3DDevice9 &device;
+	GfxDevice &device;
 
 	boost::scoped_array<unsigned short> heightMap;
 	boost::scoped_array<unsigned short> collisionHeightMap;
@@ -300,7 +300,7 @@ struct Storm3D_TerrainHeightmapData
 
 	Storm3D_TerrainHeightmapData(Storm3D &storm_, bool ps13_)
 	:	storm(storm_),
-		device(*storm.GetD3DDevice()),
+		device(storm.GetD3DDevice()),
 		textureDetail(0),
 
 		pixelShader(device),
@@ -393,7 +393,7 @@ struct Storm3D_TerrainHeightmapData
 		for(int j = 0; j < blockAmount.y; ++j)
 		for(int i = 0; i < blockAmount.x; ++i)
 		{
-			tempBlocks[j * blockAmount.x + i].createBuffer(*storm.GetD3DDevice());
+			tempBlocks[j * blockAmount.x + i].createBuffer(storm.GetD3DDevice());
 			tempBlocks[j * blockAmount.x + i].fillBuffer(start, end, heightMap, i, j, resolution, scale, size);
 		}
 
@@ -412,7 +412,7 @@ struct Storm3D_TerrainHeightmapData
 		{
 			TerrainBlock &block = blocks[j * blockAmount.x + i];
 
-			block.createBuffer(*storm.GetD3DDevice());
+			block.createBuffer(storm.GetD3DDevice());
 			block.fillBuffer(VC2I(), VC2I(VERTEX_COUNT, VERTEX_COUNT), heightMap, i, j, resolution, scale, size);
 		}
 	}
@@ -1087,7 +1087,7 @@ void Storm3D_TerrainHeightmap::calculateVisibility(Storm3D_Scene &scene)
 void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene, bool atiShader)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainHeightmap::renderTextures");
-	IDirect3DDevice9 &device = data->device;
+	GfxDevice& device = data->device;
 
 	D3DXMATRIX dm;
 	D3DXMatrixIdentity(&dm);
@@ -1203,7 +1203,7 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene, bool atiShad
 void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera *camera, RenderMode mode, RenderType type, IStorm3D_Spotlight::Type spot_type, Storm3D_Spotlight *spot)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainHeightmap::renderDepth");
-	IDirect3DDevice9 &device = data->device;
+	GfxDevice& device = data->device;
 	std::vector<RenderBlock> &visibleBlocks = data->visibleBlocks;
 
 	Frustum *frustum1 = 0;

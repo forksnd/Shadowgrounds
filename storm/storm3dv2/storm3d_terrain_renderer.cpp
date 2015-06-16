@@ -180,15 +180,15 @@ struct Storm3D_TerrainRendererData
 		skyBox(0),
 		ps14(ps14_),
 		ps20(ps20_),
-		glowShader(*storm.GetD3DDevice()),
-		glowPs2Shader(*storm.GetD3DDevice()),
-		glowPs14Shader(*storm.GetD3DDevice()),
-		glowFinalShader(*storm.GetD3DDevice()),
-		lightShader(*storm.GetD3DDevice()),
-		colorEffectShader(*storm.GetD3DDevice()),
-		colorEffectOffsetShader(*storm.GetD3DDevice()),
-		colorEffectOffsetShader_NoGamma(*storm.GetD3DDevice()),
-		blackWhiteShader(*storm.GetD3DDevice()),
+		glowShader(storm.GetD3DDevice()),
+		glowPs2Shader(storm.GetD3DDevice()),
+		glowPs14Shader(storm.GetD3DDevice()),
+		glowFinalShader(storm.GetD3DDevice()),
+		lightShader(storm.GetD3DDevice()),
+		colorEffectShader(storm.GetD3DDevice()),
+		colorEffectOffsetShader(storm.GetD3DDevice()),
+		colorEffectOffsetShader_NoGamma(storm.GetD3DDevice()),
+		blackWhiteShader(storm.GetD3DDevice()),
 
 		renderMode(IStorm3D_TerrainRenderer::Normal),
 		renderRenderTargets(true),
@@ -246,7 +246,7 @@ struct Storm3D_TerrainRendererData
 
 		forcedDirectionalLightEnabled(false)
 	{
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice &device = storm.GetD3DDevice();
 		glowShader.createGlowShader();
 		lightShader.createLightShader();
 		colorEffectShader.createColorEffectPixelShader();
@@ -264,7 +264,7 @@ struct Storm3D_TerrainRendererData
 
 		if(ps14)
 		{
-			Storm3D_ShaderManager::GetSingleton()->CreateAtiShaders(&device);
+			Storm3D_ShaderManager::GetSingleton()->CreateAtiShaders(device);
 			device.CreateTexture(2048, 1, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &depthLookupTexture, 0);
 
 			D3DLOCKED_RECT lockedRect = { 0 };
@@ -586,7 +586,7 @@ struct Storm3D_TerrainRendererData
 
 	void renderConeLights(Storm3D_Scene &scene, bool glowsEnabled)
 	{
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice &device = storm.GetD3DDevice();
 		device.SetTexture(2, coneFadeTexture);
 
 		lightManager.renderCones(scene, renderSpotShadows, glowsEnabled);
@@ -607,7 +607,7 @@ struct Storm3D_TerrainRendererData
 	{
 		Storm3D_ShaderManager::GetSingleton()->setLightingShaders();
 
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice& device = storm.GetD3DDevice();
 		D3DXMATRIX dm;
 		D3DXMatrixIdentity(&dm);
 
@@ -616,7 +616,7 @@ struct Storm3D_TerrainRendererData
 		Storm3D_ShaderManager::GetSingleton()->SetModelAmbient(COL(0,0,0));
 		Storm3D_ShaderManager::GetSingleton()->SetObjectAmbient(COL(0,0,0));
 		Storm3D_ShaderManager::GetSingleton()->SetObjectDiffuse(COL(1.f, 1.f, 1.f));
-		Storm3D_ShaderManager::GetSingleton()->SetShaderAmbient(&device, ambient);
+		Storm3D_ShaderManager::GetSingleton()->SetShaderAmbient(device, ambient);
 		device.SetRenderState(D3DRS_AMBIENT, ambient.GetAsD3DCompatibleARGB());
 
 		// update only in first pass
@@ -826,7 +826,7 @@ t->Apply(4);
 
 	static void createTextures(Storm3D &storm, int lightmapQuality)
 	{
-		IDirect3DDevice9 &device = *storm.GetD3DDevice();
+		GfxDevice &device = storm.GetD3DDevice();
 		Storm3D_SurfaceInfo screen = storm.GetScreenSize();
 
 		renderSize.x = screen.width;
@@ -931,10 +931,9 @@ Storm3D_TerrainRenderer::~Storm3D_TerrainRenderer()
 
 boost::shared_ptr<IStorm3D_Spotlight> Storm3D_TerrainRenderer::createSpot()
 {
-	IDirect3D9 &d3d = *data->storm.GetD3D();
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice &device = data->storm.GetD3DDevice();
 
-	boost::shared_ptr<Storm3D_Spotlight> spot(new Storm3D_Spotlight(data->storm, d3d, device, data->ps14, data->ps20));
+	boost::shared_ptr<Storm3D_Spotlight> spot(new Storm3D_Spotlight(data->storm, device, data->ps14, data->ps20));
 	spot->enableSmoothing(data->smoothShadows);
 	data->spots.push_back(spot);
 
@@ -955,10 +954,9 @@ void Storm3D_TerrainRenderer::deleteSpot(boost::shared_ptr<IStorm3D_Spotlight> &
 
 boost::shared_ptr<IStorm3D_FakeSpotlight> Storm3D_TerrainRenderer::createFakeSpot()
 {
-	IDirect3D9 &d3d = *data->storm.GetD3D();
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice &device = data->storm.GetD3DDevice();
 
-	boost::shared_ptr<Storm3D_FakeSpotlight> spot(new Storm3D_FakeSpotlight(data->storm, d3d, device));
+	boost::shared_ptr<Storm3D_FakeSpotlight> spot(new Storm3D_FakeSpotlight(data->storm, device));
 	data->fakeSpots.push_back(spot);
 
 	return boost::static_pointer_cast<IStorm3D_FakeSpotlight> (spot);;
@@ -1370,7 +1368,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 	data->models.enableAdditionalAlphaTestPass(data->additionalAlphaTestPassAllowed);
 	data->models.enableSkyModelGlow(data->skyModelGlowAllowed);
 
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice &device = data->storm.GetD3DDevice();
 	Storm3D_Camera &camera = static_cast<Storm3D_Camera &> (*scene.GetCamera());
 	camera.Apply();
 
@@ -2205,7 +2203,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderBase");
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice& device = data->storm.GetD3DDevice();
 
 	Storm3D_Camera &camera = static_cast<Storm3D_Camera &> (*scene.GetCamera());
 	camera.Apply();
@@ -2492,7 +2490,7 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 void Storm3D_TerrainRenderer::render(IStorm3D_TerrainRendererBase::RenderMode mode, Storm3D_Scene &scene, Storm3D_Spotlight *spot, Storm3D_FakeSpotlight *fakeSpot)
 {
 	Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice &device = data->storm.GetD3DDevice();
 
 	bool atiShader = false;
 	int spotType = Storm3D_Spotlight::getSpotType();

@@ -789,27 +789,27 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 	*/
 
 	// BETA: UnApply() all (very slow!)
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_LIGHTING,TRUE);
-	Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
-	Storm3D2->D3DDevice->SetTexture(0,NULL);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_DISABLE);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_TEXCOORDINDEX,0);
-	Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_DISABLE);
+	Storm3D2->device.SetRenderState(D3DRS_LIGHTING,TRUE);
+	Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
+	Storm3D2->device.SetTexture(0,NULL);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_DISABLE);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_TEXCOORDINDEX,0);
+	Storm3D2->device.SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_DISABLE);
 
 	//	FixMe:
 	//	Setting this causes debug runtime to halt (set only to supported stages)
 		//for (int i=1;i<3;i++)
 	for (int i=0;i<2;i++)
 	{
-		Storm3D2->D3DDevice->SetTexture(i,NULL);
-		Storm3D2->D3DDevice->SetTextureStageState(i,D3DTSS_COLORARG1,D3DTA_TEXTURE);
-		Storm3D2->D3DDevice->SetTextureStageState(i,D3DTSS_COLORARG2,D3DTA_CURRENT);
-		Storm3D2->D3DDevice->SetTextureStageState(i,D3DTSS_ALPHAOP,D3DTOP_DISABLE);
-		Storm3D2->D3DDevice->SetTextureStageState(i,D3DTSS_TEXCOORDINDEX,i);
-		Storm3D2->D3DDevice->SetTextureStageState(i,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_DISABLE);
+		Storm3D2->device.SetTexture(i,NULL);
+		Storm3D2->device.SetTextureStageState(i,D3DTSS_COLORARG1,D3DTA_TEXTURE);
+		Storm3D2->device.SetTextureStageState(i,D3DTSS_COLORARG2,D3DTA_CURRENT);
+		Storm3D2->device.SetTextureStageState(i,D3DTSS_ALPHAOP,D3DTOP_DISABLE);
+		Storm3D2->device.SetTextureStageState(i,D3DTSS_TEXCOORDINDEX,i);
+		Storm3D2->device.SetTextureStageState(i,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_DISABLE);
 	}
 
 	// Animate textures
@@ -823,19 +823,19 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 	if (multitexture_type==MTYPE_COLORONLY)			// COL only
 	{
 		// Set stages (color only)
-		//Storm3D2->D3DDevice->SetTexture(0,NULL);
+		//Storm3D2->device.SetTexture(0,NULL);
 
 		// psd: assume lightmap if base2 defined
 		if(texture_base2)
 		{
 			texture_base2->texture->Apply(0);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,texture_base2->GetDX8MultitexBlendingOp());
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,texture_base2->GetDX8MultitexBlendingOp());
 		}
 		else
 		{
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG1);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_DIFFUSE);
-			Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG1);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_DIFFUSE);
+			Storm3D2->device.SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
 		}
 	}
 	else if (multitexture_type==MTYPE_TEXTURE)		// Base
@@ -844,7 +844,7 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 		texture_base->texture->Apply(0);
 
 		// Disable last stage
-		Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
+		Storm3D2->device.SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
 	}
 	else if (multitexture_type==MTYPE_DUALTEX)		// Base+Base2
 	{
@@ -853,10 +853,10 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 		
 		// Set stage (base2)
 		texture_base2->texture->Apply(1);
-		Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_COLOROP,texture_base2->GetDX8MultitexBlendingOp());
+		Storm3D2->device.SetTextureStageState(1,D3DTSS_COLOROP,texture_base2->GetDX8MultitexBlendingOp());
 
 		// Disable last stage
-		Storm3D2->D3DDevice->SetTextureStageState(2,D3DTSS_COLOROP,D3DTOP_DISABLE);
+		Storm3D2->device.SetTextureStageState(2,D3DTSS_COLOROP,D3DTOP_DISABLE);
 	}
 	else if (multitexture_type==MTYPE_REF)			// Reflection
 	{		
@@ -866,13 +866,13 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 		// Reflection texture (or projective?)
 		if (texture_reflection->texcoord_gen==TEX_GEN_REFLECTION)
 		{
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_TEXCOORDINDEX,D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_TEXCOORDINDEX,D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR);
 
 			// Correct number of texturecoordinates
 			if (texture_reflection->texture->IsCube())
-				Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT3);
+				Storm3D2->device.SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT3);
 			else
-				Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT2);
+				Storm3D2->device.SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT2);
 		
 
 			// Rotate the reflection
@@ -902,7 +902,7 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 			// Set texture rotation matrix
 			D3DMATRIX dxmat;
 			mat.GetAsD3DCompatible4x4((float*)&dxmat);
-			Storm3D2->D3DDevice->SetTransform(D3DTS_TEXTURE0,&dxmat);
+			Storm3D2->device.SetTransform(D3DTS_TEXTURE0,&dxmat);
 		}
 		else	// Projective texture
 		{
@@ -917,13 +917,13 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 			if (texture_reflection->texcoord_gen==TEX_GEN_PROJECTED_MIRROR)
 				mat._11*=-1;
 
-		    Storm3D2->D3DDevice->SetTransform(D3DTS_TEXTURE0,&mat);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT3|D3DTTFF_PROJECTED);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_TEXCOORDINDEX,D3DTSS_TCI_CAMERASPACEPOSITION);
+		    Storm3D2->device.SetTransform(D3DTS_TEXTURE0,&mat);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT3|D3DTTFF_PROJECTED);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_TEXCOORDINDEX,D3DTSS_TCI_CAMERASPACEPOSITION);
 		}
 
 		// Disable last stage
-		Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
+		Storm3D2->device.SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
 	}
 	else if (multitexture_type==MTYPE_TEX_REF)		// Base+Reflection
 	{
@@ -932,18 +932,18 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 
 		// Set stage (reflection)
 		texture_reflection->texture->Apply(1);
-		Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_COLOROP,texture_reflection->GetDX8MultitexBlendingOp());
+		Storm3D2->device.SetTextureStageState(1,D3DTSS_COLOROP,texture_reflection->GetDX8MultitexBlendingOp());
 		
 		// Reflection texture (or projective?)
 		if (texture_reflection->texcoord_gen==TEX_GEN_REFLECTION)
 		{
-			Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_TEXCOORDINDEX,D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR);
+			Storm3D2->device.SetTextureStageState(1,D3DTSS_TEXCOORDINDEX,D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR);
 
 			// Correct number of texturecoordinates
 			if (texture_reflection->texture->IsCube())
-				Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT3);
+				Storm3D2->device.SetTextureStageState(1,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT3);
 			else
-				Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT2);
+				Storm3D2->device.SetTextureStageState(1,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT2);
 
 			// Rotate the reflection
 			VC3 camdir=scene->camera.GetDirection();
@@ -969,7 +969,7 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 			// Set texture rotation matrix
 			D3DMATRIX dxmat;
 			mat.GetAsD3DCompatible4x4((float*)&dxmat);
-			Storm3D2->D3DDevice->SetTransform(D3DTS_TEXTURE1,&dxmat);
+			Storm3D2->device.SetTransform(D3DTS_TEXTURE1,&dxmat);
 		}
 		else	// Projective mirror texture
 		{
@@ -984,13 +984,13 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 			if (texture_reflection->texcoord_gen==TEX_GEN_PROJECTED_MIRROR)
 				mat._11*=-1;
 
-			Storm3D2->D3DDevice->SetTransform(D3DTS_TEXTURE1,&mat);
-			Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT3|D3DTTFF_PROJECTED);
-			Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_TEXCOORDINDEX,D3DTSS_TCI_CAMERASPACEPOSITION);
+			Storm3D2->device.SetTransform(D3DTS_TEXTURE1,&mat);
+			Storm3D2->device.SetTextureStageState(1,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_COUNT3|D3DTTFF_PROJECTED);
+			Storm3D2->device.SetTextureStageState(1,D3DTSS_TEXCOORDINDEX,D3DTSS_TCI_CAMERASPACEPOSITION);
 		}
 
 		// Disable last stage
-		Storm3D2->D3DDevice->SetTextureStageState(2,D3DTSS_COLOROP,D3DTOP_DISABLE);
+		Storm3D2->device.SetTextureStageState(2,D3DTSS_COLOROP,D3DTOP_DISABLE);
 	}
 
 	// Setup material
@@ -1019,107 +1019,107 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 	if ((specular_sharpness>1)&&
 		((specular.r>0.01f)||(specular.g>0.01f)||(specular.b>0.01f)))
 	{
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_SPECULARENABLE,TRUE);
-	} else Storm3D2->D3DDevice->SetRenderState(D3DRS_SPECULARENABLE,FALSE);
+		Storm3D2->device.SetRenderState(D3DRS_SPECULARENABLE,TRUE);
+	} else Storm3D2->device.SetRenderState(D3DRS_SPECULARENABLE,FALSE);
 
 	// Set 2sided
-//	if (doublesided) Storm3D2->D3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
-//		else Storm3D2->D3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
+//	if (doublesided) Storm3D2->device.SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
+//		else Storm3D2->device.SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
 
 	// Set wireframe
-	if (wireframe) Storm3D2->D3DDevice->SetRenderState(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
-		else Storm3D2->D3DDevice->SetRenderState(D3DRS_FILLMODE,D3DFILL_SOLID);
+	if (wireframe) Storm3D2->device.SetRenderState(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
+		else Storm3D2->device.SetRenderState(D3DRS_FILLMODE,D3DFILL_SOLID);
 	
 	// BETA!!!
-	//Storm3D2->D3DDevice->SetRenderState(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
+	//Storm3D2->device.SetRenderState(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
 
 	// Set alphablending
 	if (alphablend_type==ATYPE_NONE)
 	{
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
+		Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
 	}
 	else if (alphablend_type==ATYPE_USE_TRANSPARENCY)
 	{
 		if (transparency>0.001f)
 		{
 			mat.Diffuse.a=1.0f-transparency;
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_DIFFUSE);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG1);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);				
+			Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+			Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
+			Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_DIFFUSE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG1);
+			Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
+			Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);				
 		}
 		else
 		{
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
+			Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+			Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
 		}
 	}
 	else if (alphablend_type==ATYPE_USE_TEXTRANSPARENCY || alphablend_type==IStorm3D_Material::ATYPE_USE_ALPHATEST)
 	{
 		mat.Diffuse.a=1.0f-transparency;
 
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
 
 		if(alphablend_type==IStorm3D_Material::ATYPE_USE_ALPHATEST)
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+			Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
 		else
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+			Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 
 		if ((multitexture_type==MTYPE_DOT3_TEX)||(multitexture_type==MTYPE_DOT3_REF))
 		{
 			// Stage 1 alphamap (no diffuse)
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
-			Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-			Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_ALPHAARG2,D3DTA_CURRENT);
-			Storm3D2->D3DDevice->SetTextureStageState(1,D3DTSS_ALPHAOP,D3DTOP_SELECTARG1);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
+			Storm3D2->device.SetTextureStageState(1,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
+			Storm3D2->device.SetTextureStageState(1,D3DTSS_ALPHAARG2,D3DTA_CURRENT);
+			Storm3D2->device.SetTextureStageState(1,D3DTSS_ALPHAOP,D3DTOP_SELECTARG1);
 		}
 		else	
 		{
 			// Stage 0 alphamap * diffuse
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
 		}
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);
+		Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
+		Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);
 
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHAREF,(DWORD)0x00000001);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHAFUNC,D3DCMP_GREATEREQUAL);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHAREF,(DWORD)0x00000001);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHAFUNC,D3DCMP_GREATEREQUAL);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,TRUE);
 	}
 	else if (alphablend_type==ATYPE_ADD)
 	{
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
+		Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
+		Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 	}
 	else if (alphablend_type==ATYPE_MUL)
 	{
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_ZERO);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_ZERO);
+		Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
+		Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 	}
 	else if (alphablend_type==ATYPE_MUL2X)
 	{
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_DESTCOLOR);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_DESTCOLOR);
+		Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
+		Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 	}
 
 	// Use this material
-	Storm3D2->D3DDevice->SetMaterial(&mat);
+	Storm3D2->device.SetMaterial(&mat);
 /* PSD
 	// Apply shader
-	if (!ApplyShaderIfAvailable(scene,mtx)) Storm3D2->D3DDevice->SetVertexShader(fvf);
+	if (!ApplyShaderIfAvailable(scene,mtx)) Storm3D2->device.SetVertexShader(fvf);
 */
 	// Set active material
 	Storm3D2->active_material=this;
@@ -1142,7 +1142,7 @@ void Storm3D_Material::ApplyBaseTextureOnly()
 	}
 	else
 	{
-		Storm3D2->D3DDevice->SetTexture(0,NULL);
+		Storm3D2->device.SetTexture(0,NULL);
 	}
 
 	// Set active material
@@ -1154,7 +1154,7 @@ void Storm3D_Material::ApplyBase2TextureOnly()
 	if(texture_base2)
 		texture_base2->texture->Apply(1);
 	else
-		Storm3D2->D3DDevice->SetTexture(1, 0);
+		Storm3D2->device.SetTexture(1, 0);
 }
 
 
@@ -1171,7 +1171,7 @@ void Storm3D_Material::ApplyBaseTextureExtOnly()
 	}
 	else
 	{
-		Storm3D2->D3DDevice->SetTexture(0,NULL);
+		Storm3D2->device.SetTexture(0,NULL);
 	}
 
 	// Setup material
@@ -1201,75 +1201,75 @@ void Storm3D_Material::ApplyBaseTextureExtOnly()
 	// Set alphablending
 	if (alphablend_type==ATYPE_NONE)
 	{
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
+		Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
 	}
 	else if (alphablend_type==ATYPE_USE_TRANSPARENCY)
 	{
 		if (transparency>0.001f)
 		{
 			mat.Diffuse.a=1.0f-transparency;
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_DIFFUSE);
-			Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG1);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);				
+			Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+			Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
+			Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_DIFFUSE);
+			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG1);
+			Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
+			Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);				
 		}
 		else
 		{
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-			Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
+			Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+			Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
 		}
 	}
 	else if (alphablend_type==ATYPE_USE_TEXTRANSPARENCY || alphablend_type==IStorm3D_Material::ATYPE_USE_ALPHATEST)
 	{
 		mat.Diffuse.a=1.0f-transparency;
 
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
 		// wtf ?!
 		// -- psd
-		//Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+		//Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-		Storm3D2->D3DDevice->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
+		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
+		Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
+		Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);
 
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHAREF,(DWORD)0x00000001);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHAFUNC,D3DCMP_GREATEREQUAL);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHAREF,(DWORD)0x00000001);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHAFUNC,D3DCMP_GREATEREQUAL);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,TRUE);
 	}
 	else if (alphablend_type==ATYPE_ADD)
 	{
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
+		Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
+		Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 	}
 	else if (alphablend_type==ATYPE_MUL)
 	{
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_ZERO);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
-		//Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_DESTCOLOR);
-		//Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_ZERO);
+		Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
+		//Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_DESTCOLOR);
+		//Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
 
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+		Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 	}
 	else if (alphablend_type==ATYPE_MUL2X)
 	{
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_DESTCOLOR);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_DESTCOLOR);
+		Storm3D2->device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_SRCCOLOR);
+		Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 	}
 
 	// Use this material
-	Storm3D2->D3DDevice->SetMaterial(&mat);
+	Storm3D2->device.SetMaterial(&mat);
 
 	// Set active material
 	Storm3D2->active_material=this;
@@ -1291,7 +1291,7 @@ void Storm3D_Material::ApplyBaseTextureExtOnly_NoAlphaSort(Storm3D_Scene *scene,
 	}
 	else
 	{
-		Storm3D2->D3DDevice->SetTexture(0,NULL);
+		Storm3D2->device.SetTexture(0,NULL);
 	}
 
 	// Setup material
@@ -1319,7 +1319,7 @@ void Storm3D_Material::ApplyBaseTextureExtOnly_NoAlphaSort(Storm3D_Scene *scene,
 	// NO specular, wire
 
 	// Set 2sided
-//	if (doublesided) Storm3D2->D3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
+//	if (doublesided) Storm3D2->device.SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
 	
 	// Set alphablending
 	/*if (alphablend_type==ATYPE_NONE)
@@ -1336,7 +1336,7 @@ void Storm3D_Material::ApplyBaseTextureExtOnly_NoAlphaSort(Storm3D_Scene *scene,
 		mat.Diffuse.a=1.0f-transparency;
 
 		// Only alphatest
-		Storm3D2->D3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE,TRUE);
+		Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,TRUE);
 	}
 	/*else if (alphablend_type==ATYPE_ADD)
 	{
@@ -1352,10 +1352,10 @@ void Storm3D_Material::ApplyBaseTextureExtOnly_NoAlphaSort(Storm3D_Scene *scene,
 	}*/
 
 	// Use this material
-	Storm3D2->D3DDevice->SetMaterial(&mat);
+	Storm3D2->device.SetMaterial(&mat);
 /*
 	// Apply shader
-	if (!ApplyShaderIfAvailable(scene,mtx)) Storm3D2->D3DDevice->SetVertexShader(fvf);
+	if (!ApplyShaderIfAvailable(scene,mtx)) Storm3D2->device.SetVertexShader(fvf);
 */
 	// Set active material
 	Storm3D2->active_material=this;

@@ -9,6 +9,7 @@
 //------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------
+#include "GfxDevice.h"
 #include <cassert>
 #include <d3dx9math.h>
 #include "Storm3D_Datatypes.h"
@@ -184,12 +185,12 @@ class Storm3D_ShaderManager: public Singleton<Storm3D_ShaderManager>
 	bool light_params_changed;
 
 public:
-	Storm3D_ShaderManager(IDirect3DDevice9 &device);
+	Storm3D_ShaderManager(GfxDevice& device);
 	~Storm3D_ShaderManager();
 	
 	// Create shaders
-	void CreateShaders(IDirect3DDevice9 *device);
-	void CreateAtiShaders(IDirect3DDevice9 *device);
+	void CreateShaders(GfxDevice& device);
+	void CreateAtiShaders(GfxDevice& device);
 
 	void setLightingParameters(bool reflection_, bool local_reflection_, int light_count_);
 
@@ -233,20 +234,20 @@ public:
 	bool BoneShader();
 
 	// Do the magic ;-)
-	void SetShader(IDirect3DDevice9 *device, Storm3D_Model_Object *object);
-	void SetShader(IDirect3DDevice9 *device, const std::vector<int> &bone_indices); // not including first identity
+	void SetShader(GfxDevice& device, Storm3D_Model_Object *object);
+	void SetShader(GfxDevice& device, const std::vector<int> &bone_indices); // not including first identity
 	void ResetShader();
 	void ClearCache();
-	void BackgroundShader(IDirect3DDevice9 *device);
+	void BackgroundShader(GfxDevice& device);
 
-	void SetShaderDefaultValues(IDirect3DDevice9 *device);
-	void SetShaderAmbient(IDirect3DDevice9 *device, const COL &color);
-	void SetShaderDiffuse(IDirect3DDevice9 *device, const COL &color);
+	void SetShaderDefaultValues(GfxDevice& device);
+	void SetShaderAmbient(GfxDevice& device, const COL &color);
+	void SetShaderDiffuse(GfxDevice& device, const COL &color);
 	void SetLightmapFactor(float xf, float yf);
 
-	void ApplyDeclaration(IDirect3DDevice9 &device);
-	void ApplyForceAmbient(IDirect3DDevice9 &device);
-	void SetWorldTransform(IDirect3DDevice9 &device, const D3DXMATRIX &tm, bool forceTextureTm = false, bool terrain = false);
+	void ApplyDeclaration(GfxDevice& device);
+	void ApplyForceAmbient(GfxDevice& device);
+	void SetWorldTransform(GfxDevice& device, const D3DXMATRIX &tm, bool forceTextureTm = false, bool terrain = false);
 
 	// Public constants
 	static const int BONE_INDEX_START; // First is identity

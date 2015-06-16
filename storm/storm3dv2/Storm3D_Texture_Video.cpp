@@ -48,7 +48,7 @@ Storm3D_Texture_Video::Storm3D_Texture_Video(Storm3D *s2,const char *_filename,D
 	{
 		// Create (empty) texture (without mipmaps)
 		// Prefer 16bit textures in (565 format) if possible
-		D3DXCreateTexture(Storm3D2->GetD3DDevice(),width,height,D3DX_DEFAULT,//D3DX_DEFAULT,
+		D3DXCreateTexture(Storm3D2->GetD3DDevice().device,width,height,D3DX_DEFAULT,//D3DX_DEFAULT,
 			0,D3DFMT_R5G6B5,D3DPOOL_MANAGED,&frames[i]);
 	}
 

@@ -89,7 +89,7 @@ void Storm3D_Scene_PicList_Font::Render()
 	//DWORD col=font->GetColor().GetAsD3DCompatibleARGB();
 	//DWORD col=color.GetAsD3DCompatibleARGB();
 	DWORD col = D3DCOLOR_ARGB((int)((alpha)*255.0f),(int)(color.r*255.0f),(int)(color.g*255.0f),(int)(color.b*255.0f));
-	Storm3D2->GetD3DDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+	Storm3D2->GetD3DDevice().SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
 
 	if(font->font && font->sprite)
 	{
@@ -191,10 +191,10 @@ void Storm3D_Scene_PicList_Font::Render()
 					}
 
 					// Render it
-					Storm3D2->GetD3DDevice()->SetVertexShader(0);
-					Storm3D2->GetD3DDevice()->SetFVF(FVF_VXFORMAT_2D);
+					Storm3D2->GetD3DDevice().SetVertexShader(0);
+					Storm3D2->GetD3DDevice().SetFVF(FVF_VXFORMAT_2D);
 
-					Storm3D2->GetD3DDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
+					Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
 					scene->AddPolyCounter(2);
 				}
 			}

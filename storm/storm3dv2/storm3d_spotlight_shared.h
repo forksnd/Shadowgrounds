@@ -8,10 +8,11 @@
 
 class Storm3D_Camera;
 class Storm3D_Scene;
+struct GfxDevice;
 
 struct Storm3D_SpotlightShared
 {
-	IDirect3DDevice9 &device;
+	GfxDevice &device;
 
 	VC3 position;
 	VC3 direction;
@@ -42,7 +43,7 @@ struct Storm3D_SpotlightShared
 	unsigned int resolutionX;
 	unsigned int resolutionY;
 
-	Storm3D_SpotlightShared(IDirect3DDevice9 &device);
+	Storm3D_SpotlightShared(GfxDevice &device);
 	~Storm3D_SpotlightShared();
 
 	void updateMatrices(const D3DXMATRIX &cameraView, float bias);

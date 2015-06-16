@@ -479,6 +479,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="GfxDevice.cpp" />
     <ClCompile Include="IStorm3D.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -1267,6 +1268,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Clipper.h" />
+    <ClInclude Include="GfxDevice.h" />
     <ClInclude Include="DatatypeDef.h" />
     <ClInclude Include="Iterator.h" />
     <ClInclude Include="Iterator_TRBMOList.h" />

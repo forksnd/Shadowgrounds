@@ -77,7 +77,7 @@ namespace storm {
 		*/
 	}
 
-	CComPtr<IDirect3DVertexShader9> VertexShader::createVertexShader(IDirect3DDevice9 &device, const std::string &fileName)
+	CComPtr<IDirect3DVertexShader9> VertexShader::createVertexShader(GfxDevice& device, const std::string &fileName)
 	{
 		std::string shaderString;
 		name = fileName;
@@ -127,7 +127,7 @@ namespace storm {
 		return result;
 	}
 
-	CComPtr<IDirect3DPixelShader9> PixelShader::createPixelShader(IDirect3DDevice9 &device, const std::string &fileName)
+	CComPtr<IDirect3DPixelShader9> PixelShader::createPixelShader(GfxDevice& device, const std::string &fileName)
 	{
 		std::string shaderString;
 		readFile(shaderString, fileName);
@@ -186,7 +186,7 @@ namespace storm {
 
 	static D3DVERTEXELEMENT9 end = D3DDECL_END();
 
-VertexShader::VertexShader(IDirect3DDevice9 &device_)
+VertexShader::VertexShader(GfxDevice& device_)
 :	handle(0),
 	device(device_)
 {
@@ -1595,7 +1595,7 @@ void VertexShader::apply() const
 
 // --
 
-PixelShader::PixelShader(IDirect3DDevice9 &device_)
+PixelShader::PixelShader(GfxDevice& device_)
 :	handle(0),
 	device(device_)
 {
@@ -2152,7 +2152,7 @@ void VertexBuffer::release()
 	buffer.Release();
 }
 
-void VertexBuffer::create(IDirect3DDevice9 &device, int vertexAmount_, int vertexSize_, bool dynamic_)
+void VertexBuffer::create(GfxDevice& device, int vertexAmount_, int vertexSize_, bool dynamic_)
 {
 	if(vertexSize_ == vertexSize)
 	if(vertexAmount >= vertexAmount_)
@@ -2202,7 +2202,7 @@ void VertexBuffer::unlock()
 	buffer->Unlock();
 }
 
-void VertexBuffer::apply(IDirect3DDevice9 &device, int stream) const
+void VertexBuffer::apply(GfxDevice& device, int stream) const
 {
 	device.SetStreamSource(stream, buffer, 0, vertexSize);
 }
@@ -2235,7 +2235,7 @@ void IndexBuffer::release()
 	buffer.Release();
 }
 
-void IndexBuffer::create(IDirect3DDevice9 &device, int faceAmount_, bool dynamic_)
+void IndexBuffer::create(GfxDevice& device, int faceAmount_, bool dynamic_)
 {
 	if(faceAmount >= faceAmount_)
 	if(buffer)
@@ -2275,7 +2275,7 @@ void IndexBuffer::unlock()
 	buffer->Unlock();
 }
 
-void IndexBuffer::render(IDirect3DDevice9 &device, int faceAmount, int maxIndex, int vertexOffset, int startIndex) const
+void IndexBuffer::render(GfxDevice& device, int faceAmount, int maxIndex, int vertexOffset, int startIndex) const
 {
 	device.SetIndices(buffer);
 	
@@ -2311,7 +2311,7 @@ void setCurrentAnisotrophy(int max)
 	currentAnisotrophy = max;
 }
 
-void applyMaxAnisotrophy(IDirect3DDevice9 &device, int stageAmount)
+void applyMaxAnisotrophy(GfxDevice& device, int stageAmount)
 {
 	if(currentAnisotrophy)
 	{
@@ -2320,7 +2320,7 @@ void applyMaxAnisotrophy(IDirect3DDevice9 &device, int stageAmount)
 	}
 }
 
-void enableMinMagFiltering(IDirect3DDevice9 &device, int startStage, int endStage, bool enable)
+void enableMinMagFiltering(GfxDevice& device, int startStage, int endStage, bool enable)
 {
 	DWORD minFilter = D3DTEXF_POINT;
 	DWORD magFilter = D3DTEXF_POINT;
@@ -2342,7 +2342,7 @@ void enableMinMagFiltering(IDirect3DDevice9 &device, int startStage, int endStag
 	}
 }
 
-void enableMipFiltering(IDirect3DDevice9 &device, int startStage, int endStage, bool enable)
+void enableMipFiltering(GfxDevice& device, int startStage, int endStage, bool enable)
 {
 	DWORD filter = D3DTEXF_NONE;
 	if(enable)
@@ -2358,7 +2358,7 @@ void setInverseCulling(bool enable)
 	inverseCulling = enable;
 }
 
-void setCulling(IDirect3DDevice9 &device, DWORD type)
+void setCulling(GfxDevice& device, DWORD type)
 {
 	if(type == D3DCULL_NONE)
 		device.SetRenderState(D3DRS_CULLMODE, type);

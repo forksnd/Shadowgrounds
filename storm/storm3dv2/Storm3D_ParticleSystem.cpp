@@ -46,7 +46,7 @@ namespace {
 	int allocateVertexAmount[2] = { 0, 0 };
 	int vertexBufferOffset[2] = { 0, 0 };
 
-	void initBuffer(IDirect3DDevice9 &device, int particleBufferSize, int index)
+	void initBuffer(GfxDevice &device, int particleBufferSize, int index)
 	{
 		int vertexAmount = particleBufferSize * 4;
 		if(vertexAmount < 2048)
@@ -124,7 +124,7 @@ void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion)
 	//if(distortion && !offsetShader.hasShader())
 	//	offsetShader.createOffsetBlendShader();
 
-	IDirect3DDevice9 &device = *Storm3D2->GetD3DDevice();
+	GfxDevice &device = Storm3D2->GetD3DDevice();
 	//device.SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
 	frozenbyte::storm::setCulling(device, D3DCULL_NONE);
 	device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);

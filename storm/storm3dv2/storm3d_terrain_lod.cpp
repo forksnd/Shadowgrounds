@@ -46,7 +46,7 @@
 		{
 		}
 
-		void generate(IDirect3DDevice9 &device, Type type, int resolution, int lodFactor_, bool leftLod, bool rightLod, bool upLod, bool downLod, unsigned char *clipBuffer)
+		void generate(GfxDevice &device, Type type, int resolution, int lodFactor_, bool leftLod, bool rightLod, bool upLod, bool downLod, unsigned char *clipBuffer)
 		{
 			faceAmount = 0;
 			lodFactor = lodFactor_;
@@ -70,7 +70,7 @@
 			indexBuffer.unlock();
 		}
 
-		void generateCenters(IDirect3DDevice9 &device, int resolution, int lodFactor_, int mask, unsigned char *clipBuffer)
+		void generateCenters(GfxDevice &device, int resolution, int lodFactor_, int mask, unsigned char *clipBuffer)
 		{
 			faceAmount = 0;
 			lodFactor = lodFactor_;
@@ -361,7 +361,7 @@
 		// Center in 16 pieces (2x2 chunks, same ordering)
 		LodIndexBuffer centerBuffers[16];
 
-		void generate(IDirect3DDevice9 &device, int resolution, int lod, unsigned char *clipBuffer, IStorm3D_Logger *logger)
+		void generate(GfxDevice &device, int resolution, int lod, unsigned char *clipBuffer, IStorm3D_Logger *logger)
 		{
 			for(int l = 0; l < 2; ++l)
 			for(int r = 0; r < 2; ++r)
@@ -446,7 +446,7 @@ void Storm3D_TerrainLod::generate(int resolution, unsigned char *clipBuffer)
 	for(int i = 0; i < LOD_AMOUNT; ++i)
 	{
 		LOD &lod = data->lodBuffers[i];
-		lod.generate(*data->storm.GetD3DDevice(), resolution, 1 << i, clipBuffer, data->storm.getLogger());
+		lod.generate(data->storm.GetD3DDevice(), resolution, 1 << i, clipBuffer, data->storm.getLogger());
 	}
 }
 
@@ -457,7 +457,7 @@ void Storm3D_TerrainLod::setBlockRadius(float size)
 
 void Storm3D_TerrainLod::render(Storm3D_Scene &scene, int subMask, float range, float rangeX1, float rangeY1, float rangeX2, float rangeY2)
 {
-	IDirect3DDevice9 &device = *data->storm.GetD3DDevice();
+	GfxDevice &device = data->storm.GetD3DDevice();
 
 	int lod = data->getLOD(range);
 
