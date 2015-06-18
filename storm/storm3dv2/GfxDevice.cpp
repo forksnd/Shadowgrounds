@@ -102,6 +102,8 @@ void GfxDevice::beginFrame()
     assert(frame_id < NUM_FRAMES_DELAY);
 
     while (frame_sync[frame_id]->GetData( NULL, 0, D3DGETDATA_FLUSH ) == S_FALSE);
+
+    frame_vb_used = 0;
 }
 
 void GfxDevice::endFrame()
@@ -116,15 +118,31 @@ void GfxDevice::endFrame()
     device->Present(NULL, NULL, NULL, NULL);
 }
 
-bool GfxDevice::lockDynVtx(size_t count, size_t stride, void** ptr, UINT* baseVertex)
+void GfxDevice::SetDynVtxBuffer(UINT Stride)
 {
-    UINT    sz = count*stride;
+    SetStreamSource(0, frame_vb[frame_id], 0, Stride);
+}
 
-    if (frame_vb_used + sz <= DYNAMIC_BUFFER_FRAME_SIZE)
+bool GfxDevice::lockDynVtx(UINT count, UINT stride, void** ptr, UINT* baseVertex)
+{
+    UINT sz = count*stride;
+    UINT rem;
+
+    rem = (frame_vb_used + sz) % stride;
+    rem = rem == 0 ? 0 : stride - rem;
+
+    if (frame_vb_used + rem + sz > DYNAMIC_BUFFER_FRAME_SIZE)
+    {
+        assert(0);
         return false;
+    }
+
+    frame_vb_used += rem;
 
     HRESULT hr = frame_vb[frame_id]->Lock(frame_vb_used, sz, ptr, D3DLOCK_NOOVERWRITE);
-    assert(hr);
+    assert(SUCCEEDED(hr));
+
+    *baseVertex = frame_vb_used / stride;
 
     frame_vb_used += sz;
 
@@ -134,6 +152,32 @@ bool GfxDevice::lockDynVtx(size_t count, size_t stride, void** ptr, UINT* baseVe
 void GfxDevice::unlockDynVtx()
 {
     frame_vb[frame_id]->Unlock();
+}
+
+void GfxDevice::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT PrimitiveCount,CONST void* vertexData,UINT Stride)
+{
+    void* vertices = NULL;
+    UINT  baseVertex = 0;
+    UINT  VertexCount = 0;
+
+    switch (PrimitiveType)
+    {
+        case D3DPT_TRIANGLESTRIP:
+            VertexCount = PrimitiveCount + 2;
+            break;
+        case D3DPT_TRIANGLELIST:
+            VertexCount = 3 * PrimitiveCount;
+            break;
+        default:
+            assert(0);
+    }
+
+    lockDynVtx(VertexCount, Stride, &vertices, &baseVertex);
+    memcpy(vertices, vertexData, Stride*VertexCount);
+    unlockDynVtx();
+
+    SetDynVtxBuffer(Stride);
+    DrawPrimitive(PrimitiveType, baseVertex, PrimitiveCount);
 }
 
 void GfxDevice::createFrameResources()
@@ -415,16 +459,6 @@ HRESULT GfxDevice::DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType,UINT StartVertex
 HRESULT GfxDevice::DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType,INT BaseVertexIndex,UINT MinVertexIndex,UINT NumVertices,UINT startIndex,UINT primCount)
 {
     return device->DrawIndexedPrimitive(PrimitiveType, BaseVertexIndex, MinVertexIndex, NumVertices, startIndex, primCount);
-}
-
-HRESULT GfxDevice::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT PrimitiveCount,CONST void* pVertexStreamZeroData,UINT VertexStreamZeroStride)
-{
-    return device->DrawPrimitiveUP(PrimitiveType, PrimitiveCount, pVertexStreamZeroData, VertexStreamZeroStride);
-}
-
-HRESULT GfxDevice::DrawIndexedPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT MinVertexIndex,UINT NumVertices,UINT PrimitiveCount,CONST void* pIndexData,D3DFORMAT IndexDataFormat,CONST void* pVertexStreamZeroData,UINT VertexStreamZeroStride)
-{
-    return device->DrawIndexedPrimitiveUP(PrimitiveType, MinVertexIndex, NumVertices, PrimitiveCount, pIndexData, IndexDataFormat, pVertexStreamZeroData, VertexStreamZeroStride);
 }
 
 HRESULT GfxDevice::CreateVertexDeclaration(CONST D3DVERTEXELEMENT9* pVertexElements,IDirect3DVertexDeclaration9** ppDecl)

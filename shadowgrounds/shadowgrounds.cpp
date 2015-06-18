@@ -930,7 +930,9 @@ try {
         Storm3D_SurfaceInfo surfinfo = s3d->GetScreenSize();
 	
 		disposable_scene->Render2D_Picture(m, Vector2D(0,0), Vector2D((float)surfinfo.width-1,(float)surfinfo.height-1));
+        s3d->BeginFrame();
 		disposable_scene->RenderScene();
+        s3d->EndFrame();
 		delete m;
 	}
 

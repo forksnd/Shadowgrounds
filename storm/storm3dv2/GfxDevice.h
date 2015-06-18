@@ -41,15 +41,25 @@ public:
     void beginFrame();
     void endFrame();
 
-    bool lockDynVtx(size_t count, size_t stride, void** ptr, UINT* baseVertex);
+    void SetDynVtxBuffer(UINT Stride);
+
+
+    bool lockDynVtx(UINT count, UINT stride, void** ptr, UINT* baseVertex);
     void unlockDynVtx();
 
     template<typename T>
-    bool lockDynVtx(size_t count, T** ptr, UINT* baseVertex)
+    void SetDynVtxBuffer()
+    {
+        SetDynVtxBuffer(sizeof(T));
+    }
+
+    template<typename T>
+    bool lockDynVtx(UINT count, T** ptr, UINT* baseVertex)
     {
         return lockDynVtx(count, sizeof(T), (void**)ptr, baseVertex);
     }
 
+    void DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT PrimitiveCount,CONST void* vertexData,UINT Stride);
 
     HRESULT TestCooperativeLevel();
     HRESULT EvictManagedResources();
@@ -97,8 +107,6 @@ public:
     HRESULT SetSoftwareVertexProcessing(BOOL bSoftware);
     HRESULT DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType,UINT StartVertex,UINT PrimitiveCount);
     HRESULT DrawIndexedPrimitive(D3DPRIMITIVETYPE,INT BaseVertexIndex,UINT MinVertexIndex,UINT NumVertices,UINT startIndex,UINT primCount);
-    HRESULT DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT PrimitiveCount,CONST void* pVertexStreamZeroData,UINT VertexStreamZeroStride);
-    HRESULT DrawIndexedPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT MinVertexIndex,UINT NumVertices,UINT PrimitiveCount,CONST void* pIndexData,D3DFORMAT IndexDataFormat,CONST void* pVertexStreamZeroData,UINT VertexStreamZeroStride);
     HRESULT CreateVertexDeclaration(CONST D3DVERTEXELEMENT9* pVertexElements,IDirect3DVertexDeclaration9** ppDecl);
     HRESULT SetVertexDeclaration(IDirect3DVertexDeclaration9* pDecl);
     HRESULT SetFVF(DWORD FVF);
