@@ -30,7 +30,7 @@ int Storm3D_ParticleSystem::PointArray::getMaxParticleAmount() const
 	return 0;
 }
 
-int Storm3D_ParticleSystem::PointArray::lock(VXFORMAT_PART *pointer, int particleOffset, Storm3D_Scene *scene)
+int Storm3D_ParticleSystem::PointArray::lock(Vertex_P3DUV2 *pointer, int particleOffset, Storm3D_Scene *scene)
 {
 	return 0;
 }
@@ -70,64 +70,12 @@ void Storm3D_ParticleSystem::QuadArray::release() {
 
 void Storm3D_ParticleSystem::QuadArray::createDynamicBuffers(Storm3D* Storm3D2) 
 {
-/*
-	SAFE_RELEASE(m_vb);
-	if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == false)
-	{
-		Storm3D2->GetD3DDevice().CreateVertexBuffer(m_maxParticles*4*sizeof(VXFORMAT_PART),
-			D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PART,
-			D3DPOOL_DEFAULT,&m_vb, 0);
-	}
-	else
-	{
-		Storm3D2->GetD3DDevice().CreateVertexBuffer(m_maxParticles*4*sizeof(VXFORMAT_PART),
-			D3DUSAGE_SOFTWAREPROCESSING | D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PART,
-			D3DPOOL_DEFAULT,&m_vb, 0);
-	}
-*/	
 }
 
 void Storm3D_ParticleSystem::QuadArray::init(Storm3D* Storm3D2) {
 	
 	if((m_totalParticles > m_maxParticles) || (m_vb == NULL)) {
-		
 		m_maxParticles = m_totalParticles + 10;
-		
-		/*
-		createDynamicBuffers(Storm3D2);
-		
-		SAFE_RELEASE(m_ib);
-		
-		if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == false)
-		{
-			Storm3D2->GetD3DDevice().CreateIndexBuffer(sizeof(WORD)*m_maxParticles*6,
-				D3DUSAGE_WRITEONLY,D3DFMT_INDEX16,D3DPOOL_MANAGED,&m_ib, 0);
-		}
-		else
-		{
-			Storm3D2->GetD3DDevice().CreateIndexBuffer(sizeof(WORD)*m_maxParticles*6,
-				D3DUSAGE_WRITEONLY|D3DUSAGE_SOFTWAREPROCESSING,D3DFMT_INDEX16,D3DPOOL_MANAGED,&m_ib, 0);
-		}
-		
-		// prefill ib
-		WORD *ip=NULL;
-		m_ib->Lock(0,sizeof(WORD)*m_maxParticles*6,(void**)&ip,0);
-		if (ip)
-		{
-			int pos=0;
-			for (int i=0;i<m_maxParticles;i++)
-			{
-				ip[pos+0]=i * 4 + 0;
-				ip[pos+1]=i * 4 + 1;
-				ip[pos+2]=i * 4 + 2;
-				ip[pos+3]=i * 4 + 2;
-				ip[pos+4]=i * 4 + 1;
-				ip[pos+5]=i * 4 + 3;
-				pos+=6;
-			}
-		}
-		m_ib->Unlock();		
-		*/
 	}
 	
 }
@@ -168,11 +116,11 @@ namespace {
 	}
 }
 
-int Storm3D_ParticleSystem::QuadArray::lock(VXFORMAT_PART *pointer, int particleOffset, Storm3D_Scene *scene)
+int Storm3D_ParticleSystem::QuadArray::lock(Vertex_P3DUV2 *pointer, int particleOffset, Storm3D_Scene *scene)
 {
 	m_partOffset = particleOffset;
 	pointer += particleOffset * 4;
-	VXFORMAT_PART *vp = pointer;
+	Vertex_P3DUV2 *vp = pointer;
 
 	float frameWidth = 0.0f;
 	float frameHeight = 0.0f;
@@ -182,11 +130,11 @@ int Storm3D_ParticleSystem::QuadArray::lock(VXFORMAT_PART *pointer, int particle
 		frameHeight = 1.0f / m_animInfo.textureVSubDivs;
 	}
 	
-	BYTE *verts = (BYTE*)&vp[0].position;
-	BYTE *uvs = (BYTE*)&vp[0].texcoords;
-	BYTE *colors = (BYTE*)&vp[0].color;
+	BYTE *verts = (BYTE*)&vp[0].p;
+	BYTE *uvs = (BYTE*)&vp[0].uv0;
+	BYTE *colors = (BYTE*)&vp[0].d;
 	
-	DWORD stride = sizeof(VXFORMAT_PART);
+	DWORD stride = sizeof(Vertex_P3DUV2);
 	D3DXMATRIX mv = scene->camera.GetViewMatrix();
 	DWORD c0 = 0;
 
@@ -361,7 +309,7 @@ void Storm3D_ParticleSystem::QuadArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 
 	// lock vb
 	
-	VXFORMAT_PART *vp;
+	Vertex_P3DUV2 *vp;
 	m_vb->Lock(0,0,(void**)&vp,D3DLOCK_DISCARD);
 	if (vp==NULL) return;
 	
@@ -372,11 +320,11 @@ void Storm3D_ParticleSystem::QuadArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 		frameHeight = 1.0f / m_animInfo.textureVSubDivs;
 	}
 	
-	BYTE* verts = (BYTE*)&vp[0].position;
-	BYTE* uvs = (BYTE*)&vp[0].texcoords;
-	BYTE* colors = (BYTE*)&vp[0].color;
+	BYTE* verts = (BYTE*)&vp[0].p;
+	BYTE* uvs = (BYTE*)&vp[0].uv0;
+	BYTE* colors = (BYTE*)&vp[0].d;
 	
-	DWORD stride = sizeof(VXFORMAT_PART);
+	DWORD stride = sizeof(Vertex_P3DUV2);
 
 	D3DXMATRIX mv = scene->camera.GetViewMatrix();
 		
@@ -478,7 +426,7 @@ void Storm3D_ParticleSystem::QuadArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	
 	// Render the buffer
 	Storm3D2->GetD3DDevice().SetVertexShader(0);
-	Storm3D2->GetD3DDevice().SetFVF(FVF_VXFORMAT_PART);
+	Storm3D2->GetD3DDevice().SetFVF(FVF_P3DUV2);
 	
 	Storm3D2->GetD3DDevice().SetStreamSource(0,m_vb,0,stride);
 	Storm3D2->GetD3DDevice().SetIndices(m_ib);
@@ -508,14 +456,14 @@ void Storm3D_ParticleSystem::LineArray::createDynamicBuffers(Storm3D* Storm3D2) 
 /*
 	if(Storm3D_ShaderManager::GetSingleton()->SoftwareShaders() == false)
 	{
-		Storm3D2->GetD3DDevice().CreateVertexBuffer(m_maxParticles*4*sizeof(VXFORMAT_PART),
-			D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PART,
+		Storm3D2->GetD3DDevice().CreateVertexBuffer(m_maxParticles*4*sizeof(Vertex_P3DUV2),
+			D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_P3DUV2,
 			D3DPOOL_DEFAULT,&m_vb, 0);
 	}
 	else
 	{
-		Storm3D2->GetD3DDevice().CreateVertexBuffer(m_maxParticles*4*sizeof(VXFORMAT_PART),
-			D3DUSAGE_SOFTWAREPROCESSING | D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PART,
+		Storm3D2->GetD3DDevice().CreateVertexBuffer(m_maxParticles*4*sizeof(Vertex_P3DUV2),
+			D3DUSAGE_SOFTWAREPROCESSING | D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_P3DUV2,
 			D3DPOOL_DEFAULT,&m_vb, 0);
 	}
 */	
@@ -681,11 +629,11 @@ int Storm3D_ParticleSystem::LineArray::getMaxParticleAmount() const
 	return m_numParts;
 }
 
-int Storm3D_ParticleSystem::LineArray::lock(VXFORMAT_PART *pointer, int particleOffset, Storm3D_Scene *scene)
+int Storm3D_ParticleSystem::LineArray::lock(Vertex_P3DUV2 *pointer, int particleOffset, Storm3D_Scene *scene)
 {
 	m_partOffset = particleOffset;
 	pointer += particleOffset * 4;
-	VXFORMAT_PART *vp = pointer;
+	Vertex_P3DUV2 *vp = pointer;
 
 	float frameWidth=0.0f;
 	float frameHeight=0.0f;
@@ -697,11 +645,11 @@ int Storm3D_ParticleSystem::LineArray::lock(VXFORMAT_PART *pointer, int particle
 
 	DWORD c0 = 0;
 	DWORD c1 = 0;
-	BYTE *verts = (BYTE*)&vp[0].position;
-	BYTE *uvs = (BYTE*)&vp[0].texcoords;
-	BYTE *colors = (BYTE*)&vp[0].color;
+	BYTE *verts = (BYTE*)&vp[0].p;
+	BYTE *uvs = (BYTE*)&vp[0].uv0;
+	BYTE *colors = (BYTE*)&vp[0].d;
 
-	DWORD stride = sizeof(VXFORMAT_PART);
+	DWORD stride = sizeof(Vertex_P3DUV2);
 	D3DXMATRIX inview, view, proj;
 	view = scene->camera.GetViewMatrix();
 
@@ -805,7 +753,7 @@ void Storm3D_ParticleSystem::LineArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 
 	// lock vb
 	
-	VXFORMAT_PART *vp;
+	Vertex_P3DUV2 *vp;
 	m_vb->Lock(0,0,(void**)&vp,D3DLOCK_DISCARD);
 	if (vp==NULL) return;
 	
@@ -818,11 +766,11 @@ void Storm3D_ParticleSystem::LineArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	
 	DWORD c0,c1;
 
-	BYTE* verts = (BYTE*)&vp[0].position;
-	BYTE* uvs = (BYTE*)&vp[0].texcoords;
-	BYTE* colors = (BYTE*)&vp[0].color;
+	BYTE* verts = (BYTE*)&vp[0].p;
+	BYTE* uvs = (BYTE*)&vp[0].uv0;
+	BYTE* colors = (BYTE*)&vp[0].d;
 	
-	DWORD stride = sizeof(VXFORMAT_PART);
+	DWORD stride = sizeof(Vertex_P3DUV2);
 
 	D3DXMATRIX inview, view, proj;
 	view = scene->camera.GetViewMatrix();
@@ -900,7 +848,7 @@ void Storm3D_ParticleSystem::LineArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	
 	// Render the buffer
 	Storm3D2->GetD3DDevice().SetVertexShader(0);
-	Storm3D2->GetD3DDevice().SetFVF(FVF_VXFORMAT_PART);
+	Storm3D2->GetD3DDevice().SetFVF(FVF_P3DUV2);
 	
 	Storm3D2->GetD3DDevice().SetStreamSource(0,m_vb,0,stride);
 	Storm3D2->GetD3DDevice().SetIndices(m_ib);

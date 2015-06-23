@@ -42,6 +42,47 @@ namespace {
 void toNearestPow(int &v);
 extern int active_visibility;
 
+static D3DVERTEXELEMENT9 VertexDesc_P3UV3[] = {
+    {0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0},
+    {0, 16, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0},
+    {0, 24, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  1},
+    {0, 32, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  2},
+    D3DDECL_END()
+};
+
+static D3DVERTEXELEMENT9 VertexDesc_P3UV4[] = {
+    {0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0},
+    {0, 16, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0},
+    {0, 24, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  1},
+    {0, 32, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  2},
+    {0, 40, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  3},
+    D3DDECL_END()
+};
+
+static D3DVERTEXELEMENT9 VertexDesc_P3UV6[] = {
+    {0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0},
+    {0, 16, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0},
+    {0, 24, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  1},
+    {0, 32, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  2},
+    {0, 40, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  3},
+    {0, 48, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  4},
+    {0, 56, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  5},
+    D3DDECL_END()
+};
+
+static D3DVERTEXELEMENT9 VertexDesc_P3UV8[] = {
+    {0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0},
+    {0, 16, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0},
+    {0, 24, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  1},
+    {0, 32, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  2},
+    {0, 40, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  3},
+    {0, 48, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  4},
+    {0, 56, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  5},
+    {0, 64, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  6},
+    {0, 72, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  7},
+    D3DDECL_END()
+};
+
 struct Storm3D_TerrainRendererData
 {
 	Storm3D &storm;
@@ -73,6 +114,11 @@ struct Storm3D_TerrainRendererData
 	static VC2I fakeSize;
 	static VC2I fakeTargetSize;
 	static VC2I glowSize;
+
+    LPDIRECT3DVERTEXDECLARATION9 VtxFmt_P3UV3;
+    LPDIRECT3DVERTEXDECLARATION9 VtxFmt_P3UV4;
+    LPDIRECT3DVERTEXDECLARATION9 VtxFmt_P3UV6;
+    LPDIRECT3DVERTEXDECLARATION9 VtxFmt_P3UV8;
 
 	CComPtr<IDirect3DTexture9> depthLookupTexture;
 	CComPtr<IDirect3DTexture9> spotFadeTexture;
@@ -498,10 +544,19 @@ struct Storm3D_TerrainRendererData
 			storm.getLogger()->error("Missing distortion mask texture. Distortion will not work properly.");
 
 		hasStretchFiltering = storm.adapters[storm.active_adapter].stretchFilter;
+
+        device.CreateVertexDeclaration(VertexDesc_P3UV3, &VtxFmt_P3UV3);
+        device.CreateVertexDeclaration(VertexDesc_P3UV4, &VtxFmt_P3UV4);
+        device.CreateVertexDeclaration(VertexDesc_P3UV6, &VtxFmt_P3UV6);
+        device.CreateVertexDeclaration(VertexDesc_P3UV8, &VtxFmt_P3UV8);
 	}
 
 	~Storm3D_TerrainRendererData()
 	{
+        VtxFmt_P3UV3->Release();
+        VtxFmt_P3UV4->Release();
+        VtxFmt_P3UV6->Release();
+        VtxFmt_P3UV8->Release();
 	}
 
 	void updateMovieAspectRatio(void)
@@ -1655,7 +1710,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 					device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 					device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 
-					device.SetFVF(FVF_VXFORMAT_2D);
+					device.SetFVF(FVF_P4DUV);
 					int c = (unsigned char) (data->glowFactor * 255.f);
 					if(c > 255)
 						c = 255;
@@ -1663,13 +1718,13 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 						c = 1;
 
 					DWORD color = c << 24 | c << 16 | c << 8 | c;
-					VXFORMAT_2D buffer[4];
+					Vertex_P4DUV buffer[4];
 					float x2 = float(data->renderSize.x);
 					float y2 = float(data->renderSize.y);
-					buffer[0] = VXFORMAT_2D(VC3(0, y2, 1.f),  1.f, color, VC2(0.f, 1.f));
-					buffer[1] = VXFORMAT_2D(VC3(0, 0, 1.f),   1.f, color, VC2(0.f, 0.f));
-					buffer[2] = VXFORMAT_2D(VC3(x2, y2, 1.f), 1.f, color, VC2(1.f, 1.f));
-					buffer[3] = VXFORMAT_2D(VC3(x2, 0, 1.f),  1.f, color, VC2(1.f, 0.f));
+					buffer[0] = {VC4( 0, y2, 1.f, 1.f), color, VC2(0.f, 1.f)};
+					buffer[1] = {VC4( 0,  0, 1.f, 1.f), color, VC2(0.f, 0.f)};
+					buffer[2] = {VC4(x2, y2, 1.f, 1.f), color, VC2(1.f, 1.f)};
+					buffer[3] = {VC4(x2,  0, 1.f, 1.f), color, VC2(1.f, 0.f)};
 
 					device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 					device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
@@ -1677,7 +1732,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 					device.SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 					device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-					device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(VXFORMAT_2D));
+					device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
 					device.SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 				}
 				else
@@ -1775,24 +1830,24 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 						device.SetSamplerState(i, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 					}
 
-					if(singlePass)
-					{
-						data->glowPs2Shader.apply();
-						device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX8);
-					}
-					else
-					{
-						if(betterGlow)
-						{
-							data->glowPs14Shader.apply();
-							device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX6);
-						}
-						else
-						{
-							data->glowShader.apply();
-							device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX4);
-						}
-					}
+                    if (singlePass)
+                    {
+                        data->glowPs2Shader.apply();
+                        device.SetVertexDeclaration(data->VtxFmt_P3UV8);
+                    }
+                    else
+                    {
+                        if (betterGlow)
+                        {
+                            data->glowPs14Shader.apply();
+                            device.SetVertexDeclaration(data->VtxFmt_P3UV6);
+                        }
+                        else
+                        {
+                            data->glowShader.apply();
+                            device.SetVertexDeclaration(data->VtxFmt_P3UV4);
+                        }
+                    }
 
 					frozenbyte::storm::enableMipFiltering(device, 0, stages, false);
 					frozenbyte::storm::enableMinMagFiltering(device, 0, stages, true);
@@ -2133,7 +2188,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 			device.SetPixelShader(0);
 			device.SetVertexShader(0);
-			device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX1);
+			device.SetFVF(FVF_P4UV);
 
 			// Transparency
 			if(data->glowTransparencyFactor > 0.001f)
@@ -2293,7 +2348,7 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 	device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 	device.SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 	device.SetVertexShader(0);
-	device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX1);
+	device.SetFVF(FVF_P4UV);
 
 	Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
 
@@ -2406,11 +2461,11 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 		float offsetValues[4] = { offsetScale, offsetScale, offsetScale, offsetScale };
 		device.SetPixelShaderConstantF(5, offsetValues, 1);
 
-		device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX3);
+        device.SetVertexDeclaration(data->VtxFmt_P3UV3);
 
 		device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, bufferTex, sizeof(float) *  10);
 
-		device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX1);
+		device.SetFVF(FVF_P4UV);
 		device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
 		device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 		device.SetSamplerState(1, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
@@ -2473,14 +2528,14 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 
 
 		float x2 = 300, y2 = 300;
-		VXFORMAT_2D buffer[4];
+		Vertex_P4DUV buffer[4];
 		DWORD color = 0xFFFFFFFF;
-		buffer[0] = VXFORMAT_2D(VC3(0, y2, 1.f),  1.f, color, VC2(0.f, 1.f));
-		buffer[1] = VXFORMAT_2D(VC3(0, 0, 1.f),   1.f, color, VC2(0.f, 0.f));
-		buffer[2] = VXFORMAT_2D(VC3(x2, y2, 1.f), 1.f, color, VC2(1.f, 1.f));
-		buffer[3] = VXFORMAT_2D(VC3(x2, 0, 1.f),  1.f, color, VC2(1.f, 0.f));
-		device.SetFVF(FVF_VXFORMAT_2D);
-		device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(VXFORMAT_2D));
+		buffer[0] = {VC4( 0, y2, 1.f, 1.f), color, VC2(0.f, 1.f)};
+		buffer[1] = {VC4( 0,  0, 1.f, 1.f), color, VC2(0.f, 0.f)};
+		buffer[2] = {VC4(x2, y2, 1.f, 1.f), color, VC2(1.f, 1.f)};
+		buffer[3] = {VC4(x2,  0, 1.f, 1.f), color, VC2(1.f, 0.f)};
+		device.SetFVF(FVF_P4DUV);
+		device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
 
 		state->Apply();
 	}

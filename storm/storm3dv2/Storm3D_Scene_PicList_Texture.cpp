@@ -35,12 +35,12 @@ Storm3D_Scene_PicList_Picture::~Storm3D_Scene_PicList_Picture()
 	}
 }
 
-void Storm3D_Scene_PicList_Picture::createCustomShape(struct VXFORMAT_2D *vertices, int numVertices)
+void Storm3D_Scene_PicList_Picture::createCustomShape(struct Vertex_P4DUV *vertices, int numVertices)
 {
 	customShape = new CustomShape();
 	customShape->numVertices = numVertices;
-	customShape->vertices = new VXFORMAT_2D[numVertices];
-	memcpy(customShape->vertices, vertices, numVertices * sizeof(VXFORMAT_2D));
+	customShape->vertices = new Vertex_P4DUV[numVertices];
+	memcpy(customShape->vertices, vertices, numVertices * sizeof(Vertex_P4DUV));
 }
 
 void Storm3D_Scene_PicList_Picture::Render()
@@ -74,7 +74,7 @@ void Storm3D_Scene_PicList_Picture::Render()
 	}
 
 	// Create 3d-vector
-	VC3 pos(position.x,position.y,0);
+	VC2 pos(position.x,position.y);
 
 	// Create color (color+alpha)
 	DWORD col = 0xFFFFFFFF;
@@ -89,7 +89,7 @@ void Storm3D_Scene_PicList_Picture::Render()
 
 	// Render it
 	Storm3D2->GetD3DDevice().SetVertexShader(0);
-	Storm3D2->GetD3DDevice().SetFVF(FVF_VXFORMAT_2D);
+	Storm3D2->GetD3DDevice().SetFVF(FVF_P4DUV);
 
 	// render with custom shape
 	if(customShape && customShape->vertices)
@@ -102,15 +102,15 @@ void Storm3D_Scene_PicList_Picture::Render()
 		}
 		for(int i = 0; i < customShape->numVertices; i++)
 		{
-			DWORD c = customShape->vertices[i].color;
+			DWORD c = customShape->vertices[i].d;
 			int newAlpha = (int)((c >> 24) * alpha_mul);
 			c &= 0x00FFFFFF;
 			c |= (newAlpha & 0xFF) << 24;
-			customShape->vertices[i].color = c;
-			customShape->vertices[i].position.x -= .5f;
-			customShape->vertices[i].position.y -= .5f;
+			customShape->vertices[i].d = c;
+			customShape->vertices[i].p.x -= .5f;
+			customShape->vertices[i].p.y -= .5f;
 		}
-		Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLELIST,customShape->numVertices/3,customShape->vertices,sizeof(VXFORMAT_2D));
+		Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLELIST,customShape->numVertices/3,customShape->vertices,sizeof(Vertex_P4DUV));
 		scene->AddPolyCounter(customShape->numVertices/3);
 	}
 	// render quad
@@ -140,27 +140,21 @@ void Storm3D_Scene_PicList_Picture::Render()
 			}
 		}
 
-		// Create a quad
-		VXFORMAT_2D vx[4];
-		vx[0]=VXFORMAT_2D(pos+VC3(0,size.y,0),1,
-			col,p[0]);
-		
-		vx[1]=VXFORMAT_2D(pos,1,
-			col,p[1]);
-		
-		vx[2]=VXFORMAT_2D(pos+VC3(size.x,size.y,0),1,
-			col,p[2]);
-
-		vx[3]=VXFORMAT_2D(pos+VC3(size.x,0,0),1,
-			col,p[3]);
+        // Create a quad
+        Vertex_P4DUV vx[4] = {
+            {VC4(pos.x, pos.y+size.y, 0, 1), col, p[0]},
+            {VC4(pos.x, pos.y, 0, 1), col, p[1]},
+            {VC4(pos.x+size.x, pos.y+size.y, 0, 1), col, p[2]},
+            {VC4(pos.x+size.x, pos.y, 0, 1), col, p[3]},
+        };
 
 		for(int i = 0; i < 4; ++i)
 		{
-			vx[i].position.x -= .5f;
-			vx[i].position.y -= .5f;
+			vx[i].p.x -= .5f;
+			vx[i].p.y -= .5f;
 		}
 
-		Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
+		Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(Vertex_P4DUV));
 		scene->AddPolyCounter(2);
 	}
 
@@ -218,29 +212,29 @@ void Storm3D_Scene_PicList_Picture3D::Render()
 		// Create a quad
 		float hsx=size.x*0.5f;
 		float hsy=size.y*0.5f;
-		VXFORMAT_2D vx[4];
-		vx[0]=VXFORMAT_2D(pos+VC3(-hsx,hsy,0),1,col,VC2(0,1));
-		vx[1]=VXFORMAT_2D(pos+VC3(-hsx,-hsy,0),1,col,VC2(0,0));
-		vx[2]=VXFORMAT_2D(pos+VC3(hsx,hsy,0),1,col,VC2(1,1));
-		vx[3]=VXFORMAT_2D(pos+VC3(hsx,-hsy,0),1,col,VC2(1,0));
+		Vertex_P4DUV vx[4];
+        vx[0]={VC4(pos.x-hsx,pos.y+hsy,0,1),col,VC2(0,1)};
+        vx[1]={VC4(pos.x-hsx,pos.y-hsy,0,1),col,VC2(0,0)};
+        vx[2]={VC4(pos.x+hsx,pos.y+hsy,0,1),col,VC2(1,1)};
+        vx[3]={VC4(pos.x+hsx,pos.y-hsy,0,1),col,VC2(1,0)};
 
 		if (Clip2DRectangle(Storm3D2,vx[1],vx[2])) 
 		{
 			// Copy clipping
-			vx[0].position.x=vx[1].position.x;
-			vx[0].texcoords.x=vx[1].texcoords.x;
-			vx[3].position.y=vx[1].position.y;
-			vx[3].texcoords.y=vx[1].texcoords.y;
-			vx[0].position.y=vx[2].position.y;
-			vx[0].texcoords.y=vx[2].texcoords.y;
-			vx[3].position.x=vx[2].position.x;
-			vx[3].texcoords.x=vx[2].texcoords.x;
+			vx[0].p.x=vx[1].p.x;
+			vx[0].uv.x=vx[1].uv.x;
+			vx[3].p.y=vx[1].p.y;
+			vx[3].uv.y=vx[1].uv.y;
+			vx[0].p.y=vx[2].p.y;
+			vx[0].uv.y=vx[2].uv.y;
+			vx[3].p.x=vx[2].p.x;
+			vx[3].uv.x=vx[2].uv.x;
 
 			// Render it (with Z buffer read)
 			Storm3D2->GetD3DDevice().SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 			Storm3D2->GetD3DDevice().SetVertexShader(0);
-			Storm3D2->GetD3DDevice().SetFVF(FVF_VXFORMAT_2D);
-			Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
+			Storm3D2->GetD3DDevice().SetFVF(FVF_P4DUV);
+			Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(Vertex_P4DUV));
 			scene->AddPolyCounter(2);
 			Storm3D2->GetD3DDevice().SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 		}

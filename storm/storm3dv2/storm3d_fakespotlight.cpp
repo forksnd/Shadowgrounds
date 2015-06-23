@@ -721,7 +721,7 @@ void Storm3D_FakeSpotlight::debugRender()
 
 	data->device.SetPixelShader(0);
 	data->device.SetVertexShader(0);
-	data->device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX1);
+	data->device.SetFVF(FVF_P4UV);
 
 	data->device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) *  6);
 

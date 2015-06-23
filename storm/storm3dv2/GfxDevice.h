@@ -4,6 +4,8 @@
 #include <d3dx9.h>
 #include <stdint.h>
 
+#include <VertexFormats.h>
+
 #define NUM_FRAMES_DELAY 2
 
 struct GfxDevice
@@ -13,6 +15,8 @@ struct GfxDevice
 private:
     // cache
     static bool cached;
+
+    LPDIRECT3DVERTEXDECLARATION9 vtxFmtSet[FVF_COUNT];
 
     uint32_t  rs_valid[8];
     DWORD     rs[256];
@@ -29,6 +33,9 @@ private:
     LPDIRECT3DVERTEXBUFFER9 frame_vb[NUM_FRAMES_DELAY];
     UINT                    frame_vb_used;
 
+    LPDIRECT3DINDEXBUFFER9 frame_ib16[NUM_FRAMES_DELAY];
+    UINT                   frame_ib16_used;
+
     void createFrameResources();
     void destroyFrameResources();
 
@@ -36,14 +43,20 @@ public:
     bool init(LPDIRECT3D9 d3d, UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
     void fini();
 
+
     bool reset(D3DPRESENT_PARAMETERS& params);
+
 
     void beginFrame();
     void endFrame();
 
+
+    void SetDynIdx16Buffer();
+    bool lockDynIdx16(UINT count, uint16_t** ptr, UINT* baseIndex);
+    void unlockDynIdx16();
+
+
     void SetDynVtxBuffer(UINT Stride);
-
-
     bool lockDynVtx(UINT count, UINT stride, void** ptr, UINT* baseVertex);
     void unlockDynVtx();
 
@@ -59,7 +72,11 @@ public:
         return lockDynVtx(count, sizeof(T), (void**)ptr, baseVertex);
     }
 
+
+    //Fixed function imitation
+    void SetFVF(FVF vtxFmt);
     void DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT PrimitiveCount,CONST void* vertexData,UINT Stride);
+
 
     HRESULT TestCooperativeLevel();
     HRESULT EvictManagedResources();
@@ -99,17 +116,14 @@ public:
     HRESULT CreateStateBlock(D3DSTATEBLOCKTYPE Type,IDirect3DStateBlock9** ppSB);
     HRESULT BeginStateBlock();
     HRESULT EndStateBlock(IDirect3DStateBlock9** ppSB);
-    HRESULT SetClipStatus(CONST D3DCLIPSTATUS9* pClipStatus);
     HRESULT SetTexture(DWORD Stage,IDirect3DBaseTexture9* pTexture);
     HRESULT SetTextureStageState(DWORD Stage,D3DTEXTURESTAGESTATETYPE Type,DWORD Value);
     HRESULT SetSamplerState(DWORD Sampler,D3DSAMPLERSTATETYPE Type,DWORD Value);
     HRESULT SetScissorRect(CONST RECT* pRect);
-    HRESULT SetSoftwareVertexProcessing(BOOL bSoftware);
     HRESULT DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType,UINT StartVertex,UINT PrimitiveCount);
     HRESULT DrawIndexedPrimitive(D3DPRIMITIVETYPE,INT BaseVertexIndex,UINT MinVertexIndex,UINT NumVertices,UINT startIndex,UINT primCount);
     HRESULT CreateVertexDeclaration(CONST D3DVERTEXELEMENT9* pVertexElements,IDirect3DVertexDeclaration9** ppDecl);
     HRESULT SetVertexDeclaration(IDirect3DVertexDeclaration9* pDecl);
-    HRESULT SetFVF(DWORD FVF);
     HRESULT CreateVertexShader(CONST DWORD* pFunction,IDirect3DVertexShader9** ppShader);
     HRESULT SetVertexShader(IDirect3DVertexShader9* pShader);
     HRESULT SetVertexShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount);

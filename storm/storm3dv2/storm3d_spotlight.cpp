@@ -158,29 +158,7 @@ namespace {
 					return false;
 
 				if(depthSupport)
-				{
 					device.Clear(0, 0, D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, 0x00000000, 1.0f, 0);
-
-					/*
-					// I guess this should be used for buggy setups only (FX 5200-5600 at least)
-					float buffer[] = 
-					{
-						0.f, float(SHADOW_HEIGHT*2),                 1.f, 1.f,
-						0.f, 0.f,                                  1.f, 1.f,
-						float(SHADOW_WIDTH*2), float(SHADOW_HEIGHT*2), 1.f, 1.f,
-						float(SHADOW_WIDTH*2), 0.f,                  1.f, 1.f
-					};
-
-					device.SetVertexShader(0);
-					device.SetFVF(D3DFVF_XYZRHW);
-					device.SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
-
-					frozenbyte::storm::validateDevice(device, 0);
-
-					device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) *  4);
-					device.SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-					*/
-				}
 				else
 					device.Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, 0xFFFFFFFF, 1.0f, 0);
 			}
@@ -1347,7 +1325,7 @@ void Storm3D_Spotlight::debugRender()
 
 	data->device.SetPixelShader(0);
 	data->device.SetVertexShader(0);
-	data->device.SetFVF(D3DFVF_XYZRHW|D3DFVF_TEX1);
+	data->device.SetFVF(FVF_P4UV);
 
 	data->device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) *  6);
 }

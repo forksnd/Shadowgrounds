@@ -55,11 +55,11 @@ namespace {
 		if(vertexAmount > allocateVertexAmount[index])
 		{
 			vertexBufferOffset[index] = 0;
-			vertexBuffer[index].create(device, vertexAmount, sizeof(VXFORMAT_PART), true);
+			vertexBuffer[index].create(device, vertexAmount, sizeof(Vertex_P3DUV2), true);
 			allocateVertexAmount[index] = vertexAmount;
 
 			delete[] temporaryPointer[index];
-			temporaryPointer[index] = new char[vertexAmount * sizeof(VXFORMAT_PART)];
+			temporaryPointer[index] = new char[vertexAmount * sizeof(Vertex_P3DUV2)];
 		}
 
 		if(!indexBuffer)
@@ -145,7 +145,7 @@ void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion)
 	scene->camera.Apply();
 
 	device.SetVertexShader(0);
-	device.SetFVF(FVF_VXFORMAT_PART);
+	device.SetFVF(FVF_P3DUV2);
 
 	int maxParticles = 0;
 	int index = (distortion) ? 1 : 0;
@@ -165,7 +165,7 @@ void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion)
 
 	// Update buffer
 	{
-		VXFORMAT_PART *updatePointer = reinterpret_cast<VXFORMAT_PART *> (temporaryPointer[index]);
+		Vertex_P3DUV2 *updatePointer = reinterpret_cast<Vertex_P3DUV2 *> (temporaryPointer[index]);
 		int particleOffset = 0;
 
 		if(updatePointer)
@@ -180,7 +180,7 @@ void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion)
 				}
 			}
 
-			VXFORMAT_PART *vertexPointer = 0;
+			Vertex_P3DUV2 *vertexPointer = 0;
 			int neededVertexAmount = particleOffset * 4;
 /*
 if(neededVertexAmount)
@@ -200,23 +200,23 @@ OutputDebugString(msg.c_str());
 				if(vertexBufferOffset + neededVertexAmount >= allocateVertexAmount)
 				{
 					vertexBufferOffset[index] = 0;
-					vertexPointer = static_cast<VXFORMAT_PART *> (vertexBuffer[index].lock());
+					vertexPointer = static_cast<Vertex_P3DUV2 *> (vertexBuffer[index].lock());
 					vertexBuffer[index].unlock();
 				}
 
 				if(vertexBufferOffset + neededVertexAmount < allocateVertexAmount)
 				{
-					vertexPointer = static_cast<VXFORMAT_PART *> (vertexBuffer[index].unsafeLock(vertexBufferOffset[index], neededVertexAmount));
+					vertexPointer = static_cast<Vertex_P3DUV2 *> (vertexBuffer[index].unsafeLock(vertexBufferOffset[index], neededVertexAmount));
 					oldVertexBufferOffset = vertexBufferOffset[index];
 					vertexBufferOffset[index] += neededVertexAmount;
 				}
 				else
 				{
 					vertexBufferOffset[index] = 0;
-					vertexPointer = static_cast<VXFORMAT_PART *> (vertexBuffer[index].lock());
+					vertexPointer = static_cast<Vertex_P3DUV2 *> (vertexBuffer[index].lock());
 				}
 
-				memcpy(vertexPointer, updatePointer, neededVertexAmount * sizeof(VXFORMAT_PART));
+				memcpy(vertexPointer, updatePointer, neededVertexAmount * sizeof(Vertex_P3DUV2));
 				vertexBuffer[index].unlock();
 			}
 		}
@@ -225,7 +225,7 @@ OutputDebugString(msg.c_str());
 	vertexBuffer[index].apply(device, 0);
 
 	device.SetVertexShader(0);
-	device.SetFVF(FVF_VXFORMAT_PART);
+	device.SetFVF(FVF_P3DUV2);
 
 	// Render arrays
 	{

@@ -58,7 +58,7 @@ public:
 	struct CustomShape
 	{
 		// triangle list
-		struct VXFORMAT_2D *vertices;
+		struct Vertex_P4DUV *vertices;
 		int numVertices;
 	};
 
@@ -72,7 +72,7 @@ public:
 	Storm3D_Scene_PicList_Picture(Storm3D *Storm3D2,Storm3D_Scene *scene,Storm3D_Material *mat,VC2 position,VC2 size,float alpha,float rotation,float x1,float y1,float x2,float y2,bool wrap);
 	~Storm3D_Scene_PicList_Picture();
 
-	void createCustomShape(struct VXFORMAT_2D *vertices, int numVertices);
+	void createCustomShape(struct Vertex_P4DUV *vertices, int numVertices);
 };
 
 

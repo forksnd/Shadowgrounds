@@ -1,6 +1,61 @@
 #include "GfxDevice.h"
 #include <assert.h>
 
+D3DVERTEXELEMENT9 VertexDesc_P3NUV2[] = {
+    {0,  0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
+    {0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0},
+    {0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+    {0, 32, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1},
+    D3DDECL_END()
+};
+
+D3DVERTEXELEMENT9 VertexDesc_P3NUV4[] = {
+    {0,  0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
+    {0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0},
+    {0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+    {0, 32, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1},
+    {0, 40, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 2},
+    {0, 48, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 3},
+    D3DDECL_END()
+};
+
+D3DVERTEXELEMENT9 VertexDesc_P3D[] = {
+    {0,  0, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
+    {0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0},
+    D3DDECL_END()
+};
+
+D3DVERTEXELEMENT9 VertexDesc_P3DUV2[] = {
+    {0,  0, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
+    {0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0},
+    {0, 16, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+    {0, 24, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1},
+    D3DDECL_END()
+};
+
+D3DVERTEXELEMENT9 VertexDesc_P4DUV[] = {
+    {0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0}, //TODO: use D3DDECLUSAGE_POSITION when port to shaders
+    {0, 16, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,     0},
+    {0, 20, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0},
+    D3DDECL_END()
+};
+
+D3DVERTEXELEMENT9 VertexDesc_P4UV[] = {
+    {0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0}, //TODO: use D3DDECLUSAGE_POSITION when port to shaders
+    {0, 16, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0},
+    D3DDECL_END()
+};
+
+LPD3DVERTEXELEMENT9 vtxFmtDescs[FVF_COUNT] = {
+    VertexDesc_P3NUV2,
+    VertexDesc_P3NUV4,
+    VertexDesc_P3D,
+    VertexDesc_P3DUV2,
+    VertexDesc_P4DUV,
+    VertexDesc_P4UV
+};
+
+
 template<size_t N>
 bool bitset32_is_bit_set(uint32_t (&set)[N], size_t i)
 {
@@ -55,7 +110,8 @@ void bitset32_clear(uint32_t& set)
     set = 0;
 }
 
-#define DYNAMIC_BUFFER_FRAME_SIZE  (10 * (1<<20))
+#define DYNAMIC_VB_FRAME_SIZE    (10 * (1<<20))
+#define DYNAMIC_IB16_FRAME_SIZE  ( 1 * (1<<20))
 
 bool GfxDevice::cached = true;
 
@@ -67,18 +123,23 @@ void GfxDevice::resetCache()
 
 bool GfxDevice::init(LPDIRECT3D9 d3d, UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params)
 {
-    for (auto& q: frame_sync) q = 0;
-
    	if (FAILED(d3d->CreateDevice(Adapter, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &device)))
         return false;
 
+    for (auto& q: frame_sync) q = 0;
+
     createFrameResources();
+
+    for (size_t i = 0; i < FVF_COUNT; ++i)
+        device->CreateVertexDeclaration(vtxFmtDescs[i], &vtxFmtSet[i]);
 
     return true;
 }
 
 void GfxDevice::fini()
 {
+    for (auto vf: vtxFmtSet) vf->Release();
+
     destroyFrameResources();
     device->Release();
 }
@@ -103,7 +164,8 @@ void GfxDevice::beginFrame()
 
     while (frame_sync[frame_id]->GetData( NULL, 0, D3DGETDATA_FLUSH ) == S_FALSE);
 
-    frame_vb_used = 0;
+    frame_vb_used   = 0;
+    frame_ib16_used = 0;
 }
 
 void GfxDevice::endFrame()
@@ -118,6 +180,38 @@ void GfxDevice::endFrame()
     device->Present(NULL, NULL, NULL, NULL);
 }
 
+void GfxDevice::SetDynIdx16Buffer()
+{
+    SetIndices(frame_ib16[frame_id]);
+}
+
+bool GfxDevice::lockDynIdx16(UINT count, uint16_t** ptr, UINT* baseIndex)
+{
+    UINT sz = count*sizeof(uint16_t);
+
+    assert(frame_ib16_used % sizeof(uint16_t) == 0);
+
+    if (frame_ib16_used + sz > DYNAMIC_IB16_FRAME_SIZE)
+    {
+        assert(0);
+        return false;
+    }
+
+    HRESULT hr = frame_ib16[frame_id]->Lock(frame_ib16_used, sz, (void**)ptr, D3DLOCK_NOOVERWRITE);
+    assert(SUCCEEDED(hr));
+
+    *baseIndex = frame_ib16_used / sizeof(uint16_t);
+
+    frame_ib16_used += sz;
+
+    return true;
+}
+
+void GfxDevice::unlockDynIdx16()
+{
+    frame_ib16[frame_id]->Unlock();
+}
+
 void GfxDevice::SetDynVtxBuffer(UINT Stride)
 {
     SetStreamSource(0, frame_vb[frame_id], 0, Stride);
@@ -128,10 +222,10 @@ bool GfxDevice::lockDynVtx(UINT count, UINT stride, void** ptr, UINT* baseVertex
     UINT sz = count*stride;
     UINT rem;
 
-    rem = (frame_vb_used + sz) % stride;
+    rem = frame_vb_used % stride;
     rem = rem == 0 ? 0 : stride - rem;
 
-    if (frame_vb_used + rem + sz > DYNAMIC_BUFFER_FRAME_SIZE)
+    if (frame_vb_used + rem + sz > DYNAMIC_VB_FRAME_SIZE)
     {
         assert(0);
         return false;
@@ -152,6 +246,11 @@ bool GfxDevice::lockDynVtx(UINT count, UINT stride, void** ptr, UINT* baseVertex
 void GfxDevice::unlockDynVtx()
 {
     frame_vb[frame_id]->Unlock();
+}
+
+void GfxDevice::SetFVF(FVF vtxFmt)
+{
+    device->SetVertexDeclaration(vtxFmtSet[vtxFmt]);
 }
 
 void GfxDevice::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT PrimitiveCount,CONST void* vertexData,UINT Stride)
@@ -192,9 +291,22 @@ void GfxDevice::createFrameResources()
     for (auto& vb: frame_vb)
     {
         HRESULT hr = device->CreateVertexBuffer(
-            DYNAMIC_BUFFER_FRAME_SIZE,
-            D3DUSAGE_DYNAMIC, 0, D3DPOOL_DEFAULT,
+            DYNAMIC_VB_FRAME_SIZE,
+            D3DUSAGE_DYNAMIC|D3DUSAGE_WRITEONLY,
+            0, D3DPOOL_DEFAULT,
             &vb, NULL
+        );
+        assert(SUCCEEDED(hr));
+    }
+
+
+    for (auto& ib: frame_ib16)
+    {
+        HRESULT hr = device->CreateIndexBuffer(
+            DYNAMIC_IB16_FRAME_SIZE,
+            D3DUSAGE_DYNAMIC|D3DUSAGE_WRITEONLY,
+            D3DFMT_INDEX16, D3DPOOL_DEFAULT,
+            &ib, NULL
         );
         assert(SUCCEEDED(hr));
     }
@@ -204,16 +316,22 @@ void GfxDevice::createFrameResources()
 
 void GfxDevice::destroyFrameResources()
 {
-    for (auto& q: frame_sync)
+    for (auto q: frame_sync)
     {
         if (q) q->Release();
         q = 0;
     }
 
-    for (auto& vb: frame_vb)
+    for (auto vb: frame_vb)
     {
         if (vb) vb->Release();
         vb = 0;
+    }
+
+    for (auto ib: frame_ib16)
+    {
+        if (ib) ib->Release();
+        ib = 0;
     }
 }
 
@@ -414,11 +532,6 @@ HRESULT GfxDevice::EndStateBlock(IDirect3DStateBlock9** ppSB)
     return device->EndStateBlock(ppSB);
 }
 
-HRESULT GfxDevice::SetClipStatus(CONST D3DCLIPSTATUS9* pClipStatus)
-{
-    return device->SetClipStatus(pClipStatus);
-}
-
 HRESULT GfxDevice::SetTexture(DWORD Stage,IDirect3DBaseTexture9* pTexture)
 {
     if (!cached || !bitset32_is_bit_set(tex_valid, Stage) || textures[Stage] != pTexture)
@@ -446,11 +559,6 @@ HRESULT GfxDevice::SetScissorRect(CONST RECT* pRect)
     return device->SetScissorRect(pRect);
 }
 
-HRESULT GfxDevice::SetSoftwareVertexProcessing(BOOL bSoftware)
-{
-    return device->SetSoftwareVertexProcessing(bSoftware);
-}
-
 HRESULT GfxDevice::DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType,UINT StartVertex,UINT PrimitiveCount)
 {
     return device->DrawPrimitive(PrimitiveType, StartVertex, PrimitiveCount);
@@ -469,11 +577,6 @@ HRESULT GfxDevice::CreateVertexDeclaration(CONST D3DVERTEXELEMENT9* pVertexEleme
 HRESULT GfxDevice::SetVertexDeclaration(IDirect3DVertexDeclaration9* pDecl)
 {
     return device->SetVertexDeclaration(pDecl);
-}
-
-HRESULT GfxDevice::SetFVF(DWORD FVF)
-{
-    return device->SetFVF(FVF);
 }
 
 HRESULT GfxDevice::CreateVertexShader(CONST DWORD* pFunction,IDirect3DVertexShader9** ppShader)

@@ -4,6 +4,6 @@
 
 #include "VertexFormats.h"
 
-bool Clip2DRectangle(Storm3D *st,VXFORMAT_2D &ul,VXFORMAT_2D &dr);
+bool Clip2DRectangle(Storm3D *st,Vertex_P4DUV &ul,Vertex_P4DUV &dr);
 
 

@@ -221,13 +221,13 @@ void Storm3D_Mesh::PrepareForRender(Storm3D_Scene *scene,Storm3D_Model_Object *o
 	// buffers to be rebuilt.
 	if(bone_weights)
 	{
-		if (vbuf_fvf!=FVF_VXFORMAT_BLEND)
+		if (vbuf_fvf!=FVF_P3NUV4)
 		{
 			update_vx=true;
 			update_vx_amount=true;
 		}
 	}	
-	else if (vbuf_fvf!=FVF_VXFORMAT_TC2)
+	else if (vbuf_fvf!=FVF_P3NUV2)
 	{
 		update_vx=true;
 		update_vx_amount=true;
@@ -238,7 +238,7 @@ void Storm3D_Mesh::PrepareForRender(Storm3D_Scene *scene,Storm3D_Model_Object *o
 	{
 		if (material->GetBumpType()==Storm3D_Material::BUMPTYPE_DOT3)	// DOT3 only
 		{
-			if (vbuf_fvf!=FVF_VXFORMAT_TC2)
+			if (vbuf_fvf!=FVF_P3NUV2)
 			{
 				update_vx=true;
 				update_vx_amount=true;
@@ -248,7 +248,7 @@ void Storm3D_Mesh::PrepareForRender(Storm3D_Scene *scene,Storm3D_Model_Object *o
 		if ((material->GetMultiTextureType()==Storm3D_Material::MTYPE_TEX_EMBM_REF)
 			||(material->GetMultiTextureType()==Storm3D_Material::MTYPE_DUALTEX_EMBM_REF))	// TEX_EMBM_REF only
 		{
-			if (vbuf_fvf!=FVF_VXFORMAT_TC2)
+			if (vbuf_fvf!=FVF_P3NUV2)
 			{
 				update_vx=true;
 				update_vx_amount=true;
@@ -258,7 +258,7 @@ void Storm3D_Mesh::PrepareForRender(Storm3D_Scene *scene,Storm3D_Model_Object *o
 		{
 			if (material->GetTextureCoordinateSetCount()==0)
 			{
-				if (vbuf_fvf!=FVF_VXFORMAT_TC2)
+				if (vbuf_fvf!=FVF_P3NUV2)
 				{
 					update_vx=true;
 					update_vx_amount=true;
@@ -266,7 +266,7 @@ void Storm3D_Mesh::PrepareForRender(Storm3D_Scene *scene,Storm3D_Model_Object *o
 			}
 			else
 			{
-				if (vbuf_fvf!=FVF_VXFORMAT_TC2)
+				if (vbuf_fvf!=FVF_P3NUV2)
 				{
 					update_vx=true;
 					update_vx_amount=true;
@@ -277,7 +277,7 @@ void Storm3D_Mesh::PrepareForRender(Storm3D_Scene *scene,Storm3D_Model_Object *o
 	else	// No material
 	{
 		// If material was removed, it usually means rebuild. (but not always)
-		if (vbuf_fvf!=FVF_VXFORMAT_TC2)
+		if (vbuf_fvf!=FVF_P3NUV2)
 		{
 			update_vx=true;
 			update_vx_amount=true;
@@ -553,22 +553,21 @@ void Storm3D_Mesh::ReBuild()
 	if (vertex_amount<1) return;
 
 	// Select format for vertexbuffer
-	int size=sizeof(VXFORMAT_TC2);
-	DWORD fvf=FVF_VXFORMAT_TC2;
+	int size=sizeof(Vertex_P3NUV2);
+
+	vbuf_fvf = FVF_P3NUV2;
 
 	if(bone_weights)
 	{
-		size=sizeof(VXFORMAT_BLEND);
-		fvf=FVF_VXFORMAT_BLEND;
+		size=sizeof(Vertex_P3NUV4);
+        vbuf_fvf = FVF_P3NUV4;
 	}
 
 	// Test if failed
 	if (size<1) return;
-	if (fvf==0) return;
 
 	// Save size/fvf to object
 	vbuf_vsize=size;
-	vbuf_fvf=fvf;
 
 	// Create DX8 vertex/index buffers...
 
@@ -578,7 +577,7 @@ void Storm3D_Mesh::ReBuild()
 		if (dx_vbuf) dx_vbuf->Release();
 
 		Storm3D2->device.CreateVertexBuffer(vertex_amount*size,D3DUSAGE_WRITEONLY,
-				fvf,D3DPOOL_MANAGED,&dx_vbuf, 0);
+				0,D3DPOOL_MANAGED,&dx_vbuf, 0);
 	}
 
 	int lodLevels = hasLods ? LOD_AMOUNT : 1;
@@ -745,12 +744,12 @@ void Storm3D_Mesh::ReBuild()
 						chunk.vertex_buffer->Release();
 
 					Storm3D2->device.CreateVertexBuffer(vertex_list.size() * size,D3DUSAGE_WRITEONLY,
-							fvf, D3DPOOL_MANAGED, &chunk.vertex_buffer, 0);
+							0, D3DPOOL_MANAGED, &chunk.vertex_buffer, 0);
 
 					BYTE *vp = 0;
 					chunk.vertex_buffer->Lock(0, 0, (void**) &vp, 0);
 					
-					VXFORMAT_BLEND *p=(VXFORMAT_BLEND*)vp;
+					Vertex_P3NUV4 *v=(Vertex_P3NUV4*)vp;
 					float weight[4] = { 0 };
 
 					for(unsigned int i = 0; i < vertex_list.size(); ++i)
@@ -804,8 +803,14 @@ void Storm3D_Mesh::ReBuild()
 							weight[3] = bone_weights[vertex_index].weight2 / 100.f;
 						}
 			
-						p[i]=VXFORMAT_BLEND(vertexes[vertex_index].position,vertexes[vertex_index].normal,
-							vertexes[vertex_index].texturecoordinates, vertexes[vertex_index].texturecoordinates2, weight);
+                        v[i] = {
+                            vertexes[vertex_index].position,
+                            vertexes[vertex_index].normal,
+                            vertexes[vertex_index].texturecoordinates,
+                            vertexes[vertex_index].texturecoordinates2,
+                            VC2(weight[0], weight[1]),
+                            VC2(weight[2], weight[3])
+                        };
 					}
 
 					chunk.vertex_buffer->Unlock();
@@ -1171,13 +1176,17 @@ void Storm3D_Mesh::ReBuild()
 		if (vp==NULL) return;
 
 		// Typecast (to simplify code)
-		VXFORMAT_TC2 *p=(VXFORMAT_TC2*)vp;
+		Vertex_P3NUV2 *v=(Vertex_P3NUV2*)vp;
 
-		for(int i=0;i<vertex_amount;i++)
-		{
-			p[i]=VXFORMAT_TC2(vertexes[i].position,vertexes[i].normal,
-				vertexes[i].texturecoordinates,vertexes[i].texturecoordinates2);
-		}
+        for(int i=0;i<vertex_amount;i++)
+        {
+            v[i] = {
+                vertexes[i].position,
+                vertexes[i].normal,
+                vertexes[i].texturecoordinates,
+                vertexes[i].texturecoordinates2
+            };
+        }
 
 		dx_vbuf->Unlock();
 	}

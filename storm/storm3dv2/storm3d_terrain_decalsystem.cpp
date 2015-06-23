@@ -25,41 +25,39 @@
 
 using namespace frozenbyte::storm;
 
-	struct Decal;
-	struct Material;
-	typedef std::deque<Decal> DecalList;
-	typedef std::vector<VertexBuffer> VertexBufferList;
-	typedef std::vector<Material> MaterialList;
+struct Decal;
+struct Material;
+typedef std::deque<Decal> DecalList;
+typedef std::vector<VertexBuffer> VertexBufferList;
+typedef std::vector<Material> MaterialList;
 
-	// position + normal + texcoord + color 
-	static const int VERTEX_SIZE = 3*4 + 3*4 + 4*4 + 1*4;
-	static const int MAX_DECAL_AMOUNT = 10000;
+// position + normal + texcoord + color 
+static const int VERTEX_SIZE = 3*4 + 3*4 + 4*4 + 1*4;
+static const int MAX_DECAL_AMOUNT = 10000;
 
-	enum RenderMode
-	{
-		Textures,
-		Light
-	};
+enum RenderMode
+{
+	Textures,
+	Light
+};
 
-	static const int DECAL_FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX2;
-	struct VXFORMAT_DECAL
-	{
-		VC3 position;
-		VC3 normal;
-		DWORD color;
-		VC2 texcoords;
-		VC2 texcoords2;
+static D3DVERTEXELEMENT9 VertexDesc_DECAL[] = {
+    {0,  0, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
+    {0, 12, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0},
+    {0, 24, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0},
+    {0, 28, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+    {0, 32, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1},
+    D3DDECL_END()
+};
 
-		// Constructor
-		VXFORMAT_DECAL(const VC3 &position_, const VC3 &normal_, DWORD color_, const VC2 &texcoords_, const VC2 &texcoords2_)
-		:	position(position_),
-			normal(normal_),
-			color(color_),
-			texcoords(texcoords_),
-			texcoords2(texcoords2_)
-		{
-		}
-	};
+struct Vertex_DECAL
+{
+	VC3      position;
+	VC3      normal;
+	uint32_t color;
+	VC2      texcoords;
+	VC2      texcoords2;
+};
 
 namespace {
 
@@ -166,7 +164,7 @@ namespace {
 				entity->setRadius(getRadius());
 		}
 
-		void insert(VXFORMAT_DECAL *buffer) const
+		void insert(Vertex_DECAL *buffer) const
 		{
 			buffer->position = vertices[0];
 			buffer->normal = normal;
@@ -401,6 +399,7 @@ struct Storm3D_TerrainDecalSystem::Data
 	VertexBuffer vertices;
 	VertexBuffer shadowVertices;
 	IndexBuffer indices;
+    LPDIRECT3DVERTEXDECLARATION9 VtxFmt_DECAL;
 
 	boost::scoped_ptr<Tree> tree;
 	DecalPtrList decals;
@@ -433,7 +432,14 @@ struct Storm3D_TerrainDecalSystem::Data
 		pointVertexShader.createDecalPointShader();
 		dirVertexShader.createDecalDirShader();
 		flatVertexShader.createDecalFlatShader();
+
+        storm_.GetD3DDevice().CreateVertexDeclaration(VertexDesc_DECAL, &VtxFmt_DECAL);
 	}
+
+    ~Data()
+    {
+        VtxFmt_DECAL->Release();
+    }
 
 	void setSceneSize(const VC3 &size)
 	{
@@ -599,7 +605,7 @@ struct Storm3D_TerrainDecalSystem::Data
 			int rawSize = decals.size() * 4 * VERTEX_SIZE;
 			void *ramBuffer = malloc(rawSize);
 			void *lockPointer = vertices.lock();
-			VXFORMAT_DECAL *buffer = reinterpret_cast<VXFORMAT_DECAL *> (ramBuffer);
+			Vertex_DECAL *buffer = reinterpret_cast<Vertex_DECAL*> (ramBuffer);
 
 			for(unsigned int i = 0; i < decals.size(); ++i)
 			{
@@ -697,7 +703,7 @@ struct Storm3D_TerrainDecalSystem::Data
 			int rawSize = shadowDecals.size() * 4 * VERTEX_SIZE;
 			void *ramBuffer = malloc(rawSize);
 			void *lockPointer = shadowVertices.lock();
-			VXFORMAT_DECAL *buffer = reinterpret_cast<VXFORMAT_DECAL *> (ramBuffer);
+			Vertex_DECAL *buffer = reinterpret_cast<Vertex_DECAL*> (ramBuffer);
 
 			float inverseRange =1.f / fogRange;
 			for(unsigned int i = 0; i < shadowDecals.size(); ++i)
@@ -764,7 +770,7 @@ struct Storm3D_TerrainDecalSystem::Data
 		device.SetTransform(D3DTS_WORLD, &tm);
 
 		//vertexShader.applyDeclaration();
-		device.SetFVF(DECAL_FVF);
+		device.SetVertexDeclaration(VtxFmt_DECAL);
 		device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 		device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 		device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_ADD);

@@ -375,7 +375,7 @@ struct Storm3D_TerrainLightManager::Data
 
 		device.SetVertexShader(0);
 		device.SetPixelShader(0);
-		device.SetFVF(FVF_VXFORMAT_2D);
+		device.SetFVF(FVF_P4DUV);
 
 		FakeLightList::iterator it = fakeLights.begin();
 		for(; it != fakeLights.end(); ++it)
@@ -388,14 +388,15 @@ struct Storm3D_TerrainLightManager::Data
 			float x2 = lightTexture.end.x * renderSize.x;
 			float y2 = lightTexture.end.y * renderSize.y;
 
-			VXFORMAT_2D buffer[4];
-			buffer[0] = VXFORMAT_2D(VC3(x1, y2, 1.f), 1.f, color, VC2(0.f, 1.f));
-			buffer[1] = VXFORMAT_2D(VC3(x1, y1, 1.f), 1.f, color, VC2(0.f, 0.f));
-			buffer[2] = VXFORMAT_2D(VC3(x2, y2, 1.f), 1.f, color, VC2(1.f, 1.f));
-			buffer[3] = VXFORMAT_2D(VC3(x2, y1, 1.f), 1.f, color, VC2(1.f, 0.f));
+            Vertex_P4DUV buffer[4] = {
+                { VC4(x1, y2, 1.f, 1.f), color, VC2(0.f, 1.f) },
+                { VC4(x1, y1, 1.f, 1.f), color, VC2(0.f, 0.f) },
+                { VC4(x2, y2, 1.f, 1.f), color, VC2(1.f, 1.f) },
+                { VC4(x2, y1, 1.f, 1.f), color, VC2(1.f, 0.f) },
+            };
 
 			lightTexture.texture->Apply(0);
-			device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(VXFORMAT_2D));
+			device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
 		}
 
 		device.SetTexture(0, 0);

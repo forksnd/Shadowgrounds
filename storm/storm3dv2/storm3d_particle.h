@@ -26,7 +26,7 @@ public:
 		
 		virtual bool isDistorted() const = 0;
 		virtual int getMaxParticleAmount() const = 0;
-		virtual int lock(VXFORMAT_PART *pointer, int particleOffset, Storm3D_Scene *scene) = 0;
+		virtual int lock(Vertex_P3DUV2 *pointer, int particleOffset, Storm3D_Scene *scene) = 0;
 		virtual void setRender(GfxDevice &device, int &vertexOffset, int &particleAmount) = 0;
 
 		virtual void render(Storm3D* Storm3D2, Storm3D_Scene* scene)=0;
@@ -64,7 +64,7 @@ public:
 		bool isDistorted() const { return distortion; };
 		
 		int getMaxParticleAmount() const;
-		int lock(VXFORMAT_PART *pointer, int vertexOffset, Storm3D_Scene *scene);
+		int lock(Vertex_P3DUV2 *pointer, int vertexOffset, Storm3D_Scene *scene);
 		void setRender(GfxDevice &device, int &vertexOffset, int &particleAmount);
 
 		void render(Storm3D* Storm3D2, Storm3D_Scene* scene);
@@ -118,7 +118,7 @@ public:
 		bool isDistorted() const { return distortion; };
 	
 		int getMaxParticleAmount() const;
-		int lock(VXFORMAT_PART *pointer, int particleOffset, Storm3D_Scene *scene);
+		int lock(Vertex_P3DUV2 *pointer, int particleOffset, Storm3D_Scene *scene);
 		void setRender(GfxDevice &device, int &vertexOffset, int &particleAmount);
 
 		void render(Storm3D* Storm3D2, Storm3D_Scene* scene);
@@ -170,7 +170,7 @@ public:
 		bool isDistorted() const { return distortion; };
 
 		int getMaxParticleAmount() const;
-		int lock(VXFORMAT_PART *pointer, int particleOffset, Storm3D_Scene *scene);
+		int lock(Vertex_P3DUV2 *pointer, int particleOffset, Storm3D_Scene *scene);
 		void setRender(GfxDevice &device, int &vertexOffset, int &particleAmount);
 
 		void render(Storm3D* Storm3D2, Storm3D_Scene* scene);

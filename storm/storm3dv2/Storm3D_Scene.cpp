@@ -398,26 +398,28 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 }
 
 void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
+    GfxDevice& device = Storm3D2->device;
+
     GFX_TRACE_SCOPE("Storm3D_Scene::renderRealScene");
-	Storm3D2->device.BeginScene();
-	Storm3D2->device.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+    device.BeginScene();
+    device.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 
-	if(!flip && !render_mirrored)
-	{
-		int clearFlag = D3DCLEAR_ZBUFFER;
-		if(Storm3D2->support_stencil)
-			clearFlag |= D3DCLEAR_STENCIL;
+    if (!flip && !render_mirrored)
+    {
+        int clearFlag = D3DCLEAR_ZBUFFER;
+        if (Storm3D2->support_stencil)
+            clearFlag |= D3DCLEAR_STENCIL;
 
-		Storm3D2->device.SetDepthStencilSurface(Storm3D2->getDepthTarget());
+        device.SetDepthStencilSurface(Storm3D2->getDepthTarget());
 
-		DWORD color = bgcolor.GetAsD3DCompatibleARGB() & 0x00FFFFFF;
-		Storm3D2->device.Clear(0,0,D3DCLEAR_TARGET | clearFlag, color, 1, 0);
-	}
-	else
-	{
-		Storm3D2->getProceduralManagerImp().update(time_dif);
-		Storm3D2->device.Clear(0,0,D3DCLEAR_TARGET,bgcolor.GetAsD3DCompatibleARGB(),1,0);
-	}
+        DWORD color = bgcolor.GetAsD3DCompatibleARGB() & 0x00FFFFFF;
+        device.Clear(0, 0, D3DCLEAR_TARGET | clearFlag, color, 1, 0);
+    }
+    else
+    {
+        Storm3D2->getProceduralManagerImp().update(time_dif);
+        device.Clear(0, 0, D3DCLEAR_TARGET, bgcolor.GetAsD3DCompatibleARGB(), 1, 0);
+    }
 
 	// Update terrain render targets
 	{
@@ -815,202 +817,163 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 		frozenbyte::storm::setCulling(Storm3D2->device, D3DCULL_CCW);
 	}
 
-	// Debug rendering
-	if(!debugTriangles.empty() || !debugLines.empty() || !debugPoints.empty())
-	{
+    // Debug rendering
+    if (!debugTriangles.empty() || !debugLines.empty() || !debugPoints.empty())
+    {
         GFX_TRACE_SCOPE("Debug rendering");
-		D3DXMATRIX dm;
-		D3DXMatrixIdentity(&dm);
-		Storm3D2->device.SetTransform(D3DTS_WORLD,&dm);
+        D3DXMATRIX dm;
+        D3DXMatrixIdentity(&dm);
+        Storm3D2->device.SetTransform(D3DTS_WORLD, &dm);
 
-		int vertexAmount = (debugTriangles.size() * 3) + (debugLines.size() * 2) + (debugPoints.size());
-		
-		frozenbyte::storm::VertexBuffer vertexBuffer;
-		vertexBuffer.create(Storm3D2->device, vertexAmount, sizeof(VXFORMAT_PSD), true);
-		VXFORMAT_PSD *buffer = static_cast<VXFORMAT_PSD *> (vertexBuffer.lock());
+        int vertexAmount = (debugTriangles.size() * 3) + (debugLines.size() * 2) + (debugPoints.size());
 
-		for(unsigned int i = 0; i < debugTriangles.size(); ++i)
-		{
-			const Debug3 &d = debugTriangles[i];
-			DWORD color = d.color.GetAsD3DCompatibleARGB();
-			
-			buffer->color = color;
-			buffer->position = d.p1;
-			++buffer;
-			buffer->color = color;
-			buffer->position = d.p2;
-			++buffer;
-			buffer->color = color;
-			buffer->position = d.p3;
-			++buffer;
-		}
+        UINT        baseVtx = 0;
+        Vertex_P3D* buffer = 0;
 
-		int lineOffset = debugTriangles.size() * 3;
-		for(unsigned int i = 0; i < debugLines.size(); ++i)
-		{
-			const Debug2 &d = debugLines[i];
-			DWORD color = d.color.GetAsD3DCompatibleARGB();
-			
-			buffer->color = color;
-			buffer->position = d.p1;
-			++buffer;
-			buffer->color = color;
-			buffer->position = d.p2;
-			++buffer;
-		}
+        Storm3D2->device.lockDynVtx<Vertex_P3D>(vertexAmount, &buffer, &baseVtx);
 
-		int pointOffset = lineOffset + (debugLines.size() * 2);
-		for(unsigned int i = 0; i < debugPoints.size(); ++i)
-		{
-			const Debug1 &d = debugPoints[i];
-			DWORD color = d.color.GetAsD3DCompatibleARGB();
-			
-			buffer->color = color;
-			buffer->position = d.p1;
-			++buffer;
-		}
+        for (unsigned int i = 0; i < debugTriangles.size(); ++i)
+        {
+            const Debug3 &d = debugTriangles[i];
+            DWORD color = d.color.GetAsD3DCompatibleARGB();
 
-		vertexBuffer.unlock();
-		vertexBuffer.apply(Storm3D2->device, 0);
+            buffer->d = color;
+            buffer->p = d.p1;
+            ++buffer;
+            buffer->d = color;
+            buffer->p = d.p2;
+            ++buffer;
+            buffer->d = color;
+            buffer->p = d.p3;
+            ++buffer;
+        }
 
-		Storm3D2->device.SetVertexShader(0);
-		Storm3D2->device.SetFVF(FVF_VXFORMAT_PSD);
+        int lineOffset = baseVtx + debugTriangles.size() * 3;
+        for (unsigned int i = 0; i < debugLines.size(); ++i)
+        {
+            const Debug2 &d = debugLines[i];
+            DWORD color = d.color.GetAsD3DCompatibleARGB();
 
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG2);
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
-		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
-		Storm3D2->device.SetRenderState(D3DRS_LIGHTING,FALSE);
+            buffer->d = color;
+            buffer->p = d.p1;
+            ++buffer;
+            buffer->d = color;
+            buffer->p = d.p2;
+            ++buffer;
+        }
 
-		if(!debugTriangles.empty())
-			Storm3D2->device.DrawPrimitive(D3DPT_TRIANGLELIST, 0, debugTriangles.size());
-		if(!debugLines.empty())
-			Storm3D2->device.DrawPrimitive(D3DPT_LINELIST, lineOffset, debugLines.size());
-		if(!debugPoints.empty())
-			Storm3D2->device.DrawPrimitive(D3DPT_POINTLIST, pointOffset, debugPoints.size());
+        int pointOffset = lineOffset + (debugLines.size() * 2);
+        for (unsigned int i = 0; i < debugPoints.size(); ++i)
+        {
+            const Debug1 &d = debugPoints[i];
+            DWORD color = d.color.GetAsD3DCompatibleARGB();
 
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-		Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
-		Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
-		Storm3D2->device.SetRenderState(D3DRS_LIGHTING, TRUE);
-	}
+            buffer->d = color;
+            buffer->p = d.p1;
+            ++buffer;
+        }
 
-	// Render bones. SLOOOOOOOOW!
-	
-	// Ugly hack anyway
-	//		-- psd
-	if(draw_bones)
-	{
+        device.unlockDynVtx();
+
+        Storm3D2->device.SetVertexShader(0);
+        Storm3D2->device.SetFVF(FVF_P3D);
+        device.SetDynVtxBuffer<Vertex_P3D>();
+
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG2);
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG2);
+        Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+        Storm3D2->device.SetRenderState(D3DRS_LIGHTING, FALSE);
+
+        if (!debugTriangles.empty())
+            Storm3D2->device.DrawPrimitive(D3DPT_TRIANGLELIST, baseVtx, debugTriangles.size());
+        if (!debugLines.empty())
+            Storm3D2->device.DrawPrimitive(D3DPT_LINELIST, lineOffset, debugLines.size());
+        if (!debugPoints.empty())
+            Storm3D2->device.DrawPrimitive(D3DPT_POINTLIST, pointOffset, debugPoints.size());
+
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+        Storm3D2->device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+        Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+        Storm3D2->device.SetRenderState(D3DRS_LIGHTING, TRUE);
+    }
+
+
+    // Ugly hack anyway
+    //-- psd
+    if(draw_bones)
+    {
         GFX_TRACE_SCOPE("Draw bones");
-		D3DXMATRIX dm;
-		D3DXMatrixIdentity(&dm);
-		Storm3D2->device.SetTransform(D3DTS_WORLD,&dm);
+        D3DXMATRIX dm;
+        D3DXMatrixIdentity(&dm);
+        Storm3D2->device.SetTransform(D3DTS_WORLD, &dm);
 
-		for(std::set<IStorm3D_Model *>::iterator mit=models.begin();mit!=models.end();++mit)
-		{
-			// Typecast (to simplify code)
-			Storm3D_Model *mod=(Storm3D_Model*)*mit;
+        for (std::set<IStorm3D_Model *>::iterator mit = models.begin(); mit != models.end(); ++mit)
+        {
+            // Typecast (to simplify code)
+            Storm3D_Model *mod = (Storm3D_Model*)*mit;
 
-			if(mod->bones.size() > 0)
-			{
-				Storm3D2->device.SetRenderState(D3DRS_LIGHTING,FALSE);
-				Storm3D2->device.SetRenderState(D3DRS_ZENABLE,FALSE);
+            if (mod->bones.size() > 0)
+            {
+                Storm3D2->device.SetRenderState(D3DRS_LIGHTING, FALSE);
+                Storm3D2->device.SetRenderState(D3DRS_ZENABLE, FALSE);
 
-				if(true)
-				{
-					VXFORMAT_PSD line[2];
-					line[0].color = D3DCOLOR_RGBA(255,255,128,255);
-					line[1].color = D3DCOLOR_RGBA(255,255,128,255);
+                Vector bone_position;
+                Vector bone_offset = Vector(0, 0, 1.f);
 
-					IDirect3DVertexBuffer9 *vbuffer = 0;
-					Storm3D2->device.CreateVertexBuffer( 3*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC, FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vbuffer, 0);
+                UINT bone_count = mod->bones.size();
 
-					Vector bone_position;
-					Vector bone_offset = Vector(0,0,1.f);
+                UINT        base = 0;
+                Vertex_P3D* v = 0;
 
-					for(unsigned int i = 0; i < mod->bones.size(); ++i)
-					{
-						Storm3D_Bone *b = mod->bones[i];
-						
-						// Get D3D matrix and grab position from there
-						Matrix global_tm = b->GetTM();
-						float tm[16] = { 0 };
-						global_tm.GetAsD3DCompatible4x4(tm);
-						
-						float thickness = b->GetThickness();
-						thickness = 0.01f;
-						bone_position.x = tm[12] - (thickness * tm[8]);
-						bone_position.y = tm[13] - (thickness * tm[9]);
-						bone_position.z = tm[14] - (thickness * tm[10]);
+                Storm3D2->device.lockDynVtx<Vertex_P3D>(2 * bone_count, &v, &base);
+                for (unsigned int i = 0; i < bone_count; ++i)
+                {
+                    Storm3D_Bone *b = mod->bones[i];
 
-						bone_offset.z = b->GetLenght() + (2.f * thickness);
+                    // Get D3D matrix and grab position from there
+                    Matrix global_tm = b->GetTM();
+                    float tm[16] = { 0 };
+                    global_tm.GetAsD3DCompatible4x4(tm);
 
-						line[0].position = bone_position;
-						line[1].position = global_tm.GetTransformedVector(bone_offset);
+                    float thickness = b->GetThickness();
+                    thickness = 0.01f;
+                    bone_position.x = tm[12] - (thickness * tm[8]);
+                    bone_position.y = tm[13] - (thickness * tm[9]);
+                    bone_position.z = tm[14] - (thickness * tm[10]);
 
-						{
-							// Fill buffer
-							BYTE *vp;
-							vbuffer->Lock(0,0,(void**)&vp,D3DLOCK_DISCARD);
+                    bone_offset.z = b->GetLenght() + (2.f * thickness);
 
-							VXFORMAT_PSD *p=(VXFORMAT_PSD*)vp;
-							for(int i=0;i<2;i++)
-								p[i]=line[i];
-							
-							vbuffer->Unlock();
+                    // Fill buffer
+                    v[0].p = bone_position;
+                    v[0].d = D3DCOLOR_RGBA(255, 255, 128, 255);
+                    v[1].p = global_tm.GetTransformedVector(bone_offset);
+                    v[1].d = D3DCOLOR_RGBA(255, 255, 128, 255);
 
-							// Render
-							Storm3D2->device.SetStreamSource(0, vbuffer, 0, sizeof(VXFORMAT_PSD));
-							Storm3D2->device.SetVertexShader(0);
-							Storm3D2->device.SetFVF( FVF_VXFORMAT_PSD );
-							Storm3D2->device.DrawPrimitive( D3DPT_LINELIST, 0, 1 );
-						}
-					}
+                    v += 2;
+                }
+                device.unlockDynVtx();
 
-					vbuffer->Release();
-					Storm3D2->device.SetRenderState(D3DRS_LIGHTING,TRUE);
-					Storm3D2->device.SetRenderState(D3DRS_ZENABLE,TRUE);
-				}
-				else
-				{	
-					Storm3D2->device.SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL);
-					Storm3D2->device.SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+                // Render
+                device.SetDynVtxBuffer<Vertex_P3D>();
+                Storm3D2->device.SetVertexShader(0);
+                Storm3D2->device.SetFVF(FVF_P3D);
+                Storm3D2->device.DrawPrimitive(D3DPT_LINELIST, base, bone_count);
 
-					for(unsigned int i = 0; i < mod->bones.size(); ++i)
-					{
-						Storm3D_Bone *b = mod->bones[i];
-						float thickness = b->GetThickness();
+                Storm3D2->device.SetRenderState(D3DRS_LIGHTING, TRUE);
+                Storm3D2->device.SetRenderState(D3DRS_ZENABLE, TRUE);
+            }
+        }
 
-						CComPtr<ID3DXMesh> mesh;
-						D3DXCreateCylinder(Storm3D2->device.device, thickness, thickness, b->GetLenght() + 2*thickness, 4, 4, &mesh, 0);
-						//D3DXCreateCylinder(Storm3D2->device, thickness, thickness, b->GetLenght(), 6, 6, &mesh, 0);
-						//thickness = 0.f;
-
-						Matrix global_tm = b->GetTM();
-						D3DMATRIX tm;
-						global_tm.GetAsD3DCompatible4x4(&tm.m[0][0]);
-						tm._41 += (-thickness + (0.5f * b->GetLenght())) * tm._31;
-						tm._42 += (-thickness + (0.5f * b->GetLenght())) * tm._32;
-						tm._43 += (-thickness + (0.5f * b->GetLenght())) * tm._33;
-
-						Storm3D2->device.SetTransform(D3DTS_WORLD, &tm);
-						mesh->DrawSubset(0);
-					}
-
-					Storm3D2->device.SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-				}
-			}
-		}
-
-		Storm3D2->device.SetTransform(D3DTS_WORLD,&dm);
-	}
+        Storm3D2->device.SetTransform(D3DTS_WORLD, &dm);
+    }
 
 	Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 	Storm3D2->device.SetRenderState(D3DRS_ZENABLE,FALSE);
@@ -1256,7 +1219,7 @@ void Storm3D_Scene::Render2D_Picture(IStorm3D_Material *mat,VC2 position,VC2 siz
 //------------------------------------------------------------------
 // Storm3D_Scene::Render2D_Picture
 //------------------------------------------------------------------
-void Storm3D_Scene::Render2D_Picture(IStorm3D_Material *mat,struct VXFORMAT_2D *vertices, int numVertices, float alpha, bool wrap)
+void Storm3D_Scene::Render2D_Picture(IStorm3D_Material *mat,struct Vertex_P4DUV *vertices, int numVertices, float alpha, bool wrap)
 {
 	// Create new
 	Storm3D_Scene_PicList_Picture *pl=new Storm3D_Scene_PicList_Picture(Storm3D2,this,(Storm3D_Material*)mat,VC2(0,0),VC2(1,1),alpha,0,0,0,1,1,wrap);

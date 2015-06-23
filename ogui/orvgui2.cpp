@@ -1852,16 +1852,16 @@ void og_draw_button(orvgui_but *but)
 		}
 		else
 		{
-			VXFORMAT_2D *vertices = new VXFORMAT_2D[but->num_vertices];
+			Vertex_P4DUV *vertices = new Vertex_P4DUV[but->num_vertices];
 			for(int i = 0; i < but->num_vertices; i++)
 			{
-				vertices[i].position.x = (float)((but->parent->put_x + but->put_x + but->vertices[i].x) * og_scale_x / (float)OG_SCALE_MULTIPLIER);
-				vertices[i].position.y = (float)((but->parent->put_y + but->put_y + but->vertices[i].y) * og_scale_y / (float)OG_SCALE_MULTIPLIER);
-				vertices[i].position.z = 0.0f;
-				vertices[i].rhw = 1.0f;
-				vertices[i].color = but->vertices[i].col;
-				vertices[i].texcoords.x = but->scroll_x + but->repeat_x * but->vertices[i].x / (float)but->sizex;
-				vertices[i].texcoords.y = but->scroll_y + but->repeat_y * but->vertices[i].y / (float)but->sizey;
+				vertices[i].p.x = (float)((but->parent->put_x + but->put_x + but->vertices[i].x) * og_scale_x / (float)OG_SCALE_MULTIPLIER);
+				vertices[i].p.y = (float)((but->parent->put_y + but->put_y + but->vertices[i].y) * og_scale_y / (float)OG_SCALE_MULTIPLIER);
+				vertices[i].p.z = 0.0f;
+				vertices[i].p.w = 1.0f;
+				vertices[i].d = but->vertices[i].col;
+				vertices[i].uv.x = but->scroll_x + but->repeat_x * but->vertices[i].x / (float)but->sizex;
+				vertices[i].uv.y = but->scroll_y + but->repeat_y * but->vertices[i].y / (float)but->sizey;
 			}
 
 			og_renderer->Render2D_Picture(tmp, vertices, but->num_vertices, but->parent->alpha * but->alpha, but->wrap);

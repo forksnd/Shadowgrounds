@@ -17,10 +17,6 @@ extern int storm3d_dip_calls;
 Storm3D_Line::Storm3D_Line(Storm3D *storm_)
 :	storm(storm_)
 {
-	vertex_buffer = 0;
-	vertex_buffer2 = 0;
-	index_buffer = 0;
-
 	thickness = 0.5f;
 	color = RGB(255,255,255);
 
@@ -33,13 +29,6 @@ Storm3D_Line::~Storm3D_Line()
 {
 	if(storm)
 		storm->lines.erase(this);
-
-	if(index_buffer)
-		index_buffer->Release();
-	if(vertex_buffer)
-		vertex_buffer->Release();
-	if(vertex_buffer2)
-		vertex_buffer2->Release();
 }
 
 void Storm3D_Line::AddPoint(const Vector &position)
@@ -91,142 +80,104 @@ void Storm3D_Line::Render(GfxDevice& device)
 	int faces = (points.size() - 1) * 2;
 	int vertices = (points.size() - 1) * 4;
 
-	// Create buffers when needed
-	if(vertex_buffer == 0)
-	{
-		device.CreateVertexBuffer( vertices*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer, 0);
-	}
-	if(index_buffer == 0)
-	{
-		device.CreateIndexBuffer(sizeof(WORD)*faces*3, D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,D3DFMT_INDEX16,D3DPOOL_DEFAULT, &index_buffer, 0);
-	}
-	if(vertex_buffer2 == 0)
-	{
-		device.CreateVertexBuffer( points.size()*sizeof(VXFORMAT_PSD), D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC,FVF_VXFORMAT_PSD, D3DPOOL_DEFAULT, &vertex_buffer2, 0);
-	}
-
-	// Update as needed
-	if(rebuild_vertices == true)
-	{
-		void *vp = 0;
-		vertex_buffer->Lock(0,0,&vp,D3DLOCK_DISCARD);
-
-		VXFORMAT_PSD *p= (VXFORMAT_PSD*) vp;
-
-		// last corner points (next part will be connected to these)
-		// -jpk
-		VXFORMAT_PSD *lastp1 = NULL;
-		VXFORMAT_PSD *lastp2 = NULL;
-
-		for(unsigned int i = 0; i < points.size() - 1; ++i)
-		{
-			Vector direction = points[i];
-			direction -= points[i + 1];
-
-			if (fabs(direction.x) < 0.0001f 
-				&& fabs(direction.y) < 0.0001f 
-				&& fabs(direction.z) < 0.0001f)
-			{
-				// to avoid division by zero
-				direction.x = 0.1f;
-			}
-
-			direction.Normalize();
-			Vector side = direction.GetCrossWith(Vector(0,1,0));
-
-			p->color = color;
-			if (i > 1)
-				p->position = lastp1->position;
-			else
-				p->position = points[i] + (side * .5f * thickness);				
-			++p;
-
-			p->color = color;
-			if (i > 1)
-				p->position = lastp2->position;
-			else
-				p->position = points[i] - (side * .5f * thickness);
-			++p;
-
-			p->color = color;
-			p->position = points[i+1] + (side * .5f * thickness) + (direction * .5f * -thickness);
-			lastp1 = p;
-			++p;
-
-			p->color = color;
-			p->position = points[i+1] - (side * .5f * thickness) + (direction * .5f * -thickness);
-			lastp2 = p;
-			++p;
-		}
-					
-		vertex_buffer->Unlock();
-	}
-	if(rebuild_indices == true)
-	{
-		WORD *ip = 0;
-		index_buffer->Lock(0, sizeof(WORD)*faces*3, (void**)& ip, D3DLOCK_DISCARD);
-
-		for(int i = 0; i < static_cast<int> (points.size() - 1); ++i)
-		{
-			// First face
-			*ip++ = i*4 + 0;
-			*ip++ = i*4 + 1;
-			*ip++ = i*4 + 2;
-
-			// Second face
-			*ip++ = i*4 + 1;
-			*ip++ = i*4 + 3;
-			*ip++ = i*4 + 2;
-		}
-		
-		index_buffer->Unlock();
-	}
-	if(rebuild_vertices == true)
-	{
-		void *vp = 0;
-		vertex_buffer2->Lock(0,0,&vp,D3DLOCK_DISCARD);
-
-		VXFORMAT_PSD *p=(VXFORMAT_PSD*)vp;
-		for(unsigned int i=0;i<points.size();i++)
-		{
-			p[i].color = color;
-			p[i].position = points[i];
-		}
-					
-		vertex_buffer2->Unlock();
-	}
-
 	rebuild_vertices = false;
 	rebuild_indices = false;
 
 	device.SetVertexShader(0);
-	device.SetFVF(FVF_VXFORMAT_PSD);
+	device.SetFVF(FVF_P3D);
 
-	// Render
-	if(!pixel_line)
-	{
-		device.SetStreamSource(0, vertex_buffer, 0, sizeof(VXFORMAT_PSD));
-		device.SetIndices(index_buffer);
+    // Render
+    if (!pixel_line)
+    {
+        uint16_t* ip = 0;
+        UINT      baseIdx = 0;
 
-		device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, vertices, 0, faces);
-		++storm3d_dip_calls;
-	}
-	else
-	{
-		device.SetStreamSource(0, vertex_buffer2, 0, sizeof(VXFORMAT_PSD));
-		device.DrawPrimitive(D3DPT_LINELIST, 0, points.size() / 2);
-		++storm3d_dip_calls;
-	}
+        device.lockDynIdx16(faces*3, &ip, &baseIdx);
+        for (int i = 0; i < static_cast<int> (points.size() - 1); ++i)
+        {
+            // First face
+            *ip++ = i * 4 + 0;
+            *ip++ = i * 4 + 1;
+            *ip++ = i * 4 + 2;
+
+            // Second face
+            *ip++ = i * 4 + 1;
+            *ip++ = i * 4 + 3;
+            *ip++ = i * 4 + 2;
+        }
+        device.unlockDynIdx16();
+
+        UINT        baseVtx = 0;
+        Vertex_P3D* v = 0;
+
+        device.lockDynVtx<Vertex_P3D>(vertices, &v, &baseVtx);
+        // last corner points (next part will be connected to these)
+        // -jpk
+        Vertex_P3D *lastv1 = NULL;
+        Vertex_P3D *lastv2 = NULL;
+
+        for (unsigned int i = 0; i < points.size() - 1; ++i)
+        {
+            Vector direction = points[i];
+            direction -= points[i + 1];
+
+            if (fabs(direction.x) < 0.0001f
+                && fabs(direction.y) < 0.0001f
+                && fabs(direction.z) < 0.0001f)
+            {
+                // to avoid division by zero
+                direction.x = 0.1f;
+            }
+
+            direction.Normalize();
+            Vector side = direction.GetCrossWith(Vector(0, 1, 0));
+
+            v->p = (i > 1) ? lastv1->p : points[i] + (side * .5f * thickness);
+            v->d = color;
+            ++v;
+
+            v->p = (i > 1) ? lastv2->p : points[i] - (side * .5f * thickness);
+            v->d = color;
+            ++v;
+
+            v->p = points[i + 1] + (side * .5f * thickness) + (direction * .5f * -thickness);
+            v->d = color;
+            lastv1 = v;
+            ++v;
+
+            v->p = points[i + 1] - (side * .5f * thickness) + (direction * .5f * -thickness);
+            v->d = color;
+            lastv2 = v;
+            ++v;
+        }
+        device.unlockDynVtx();
+
+        device.SetDynVtxBuffer<Vertex_P3D>();
+        device.SetDynIdx16Buffer();
+        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVtx, 0, vertices, baseIdx, faces);
+        ++storm3d_dip_calls;
+    }
+    else
+    {
+        UINT        baseVtx = 0;
+        Vertex_P3D* v = 0;
+
+        device.lockDynVtx<Vertex_P3D>(points.size(), &v, &baseVtx);
+        for (unsigned int i = 0; i < points.size(); i++)
+        {
+            v[i].p = points[i];
+            v[i].d = color;
+        }
+        device.unlockDynVtx();
+
+        device.SetDynVtxBuffer<Vertex_P3D>();
+        device.DrawPrimitive(D3DPT_LINELIST, baseVtx, points.size() / 2);
+        ++storm3d_dip_calls;
+    }
 }
 
 void Storm3D_Line::releaseDynamicResources()
 {
-	if(index_buffer)
-		index_buffer->Release();
-	if(vertex_buffer)
-		vertex_buffer->Release();
-	if(vertex_buffer2)
-		vertex_buffer2->Release();
 }
 
 void Storm3D_Line::recreateDynamicResources()

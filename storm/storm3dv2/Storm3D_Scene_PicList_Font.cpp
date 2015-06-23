@@ -79,7 +79,7 @@ void Storm3D_Scene_PicList_Font::Render()
 	int letter_amt=font->texture_amount*letters_per_texture;
 
 	// Create 3d-vector
-	VC3 pos(position.x,position.y,0);
+	VC2 pos(position.x,position.y);
 
 	// Create color (color+alpha)
 	COL color = font->GetColor();
@@ -157,44 +157,38 @@ void Storm3D_Scene_PicList_Font::Render()
 				float fx=(float)x*tx1;
 				float fy=(float)y*ty1;
 
-				// Create a quad
-				VXFORMAT_2D vx[4];
-				vx[0]=VXFORMAT_2D(pos+VC3(0,size.y,0),1,
-					col,VC2(fx,fy+ty1));
-		
-				vx[1]=VXFORMAT_2D(pos,1,
-					col,VC2(fx,fy));
-		
-				vx[2]=VXFORMAT_2D(pos+VC3(size.x,size.y,0),1,
-					col,VC2(fx+tx1,fy+ty1));
-
-				vx[3]=VXFORMAT_2D(pos+VC3(size.x,0,0),1,
-					col,VC2(fx+tx1,fy));
+                // Create a quad
+                Vertex_P4DUV vx[4] = {
+                    {VC4(pos.x, pos.y+size.y, 0, 1), col, VC2(fx, fy + ty1)},
+                    {VC4(pos.x, pos.y, 0, 1), col, VC2(fx, fy)},
+                    {VC4(pos.x+size.x, pos.y+size.y, 0, 1), col, VC2(fx + tx1, fy + ty1)},
+                    {VC4(pos.x+size.x, pos.y+0, 0, 1), col, VC2(fx + tx1, fy)},
+                };
 
 				// Clip
 				if (Clip2DRectangle(Storm3D2,vx[1],vx[2])) 
 				{
 					// Copy clipping
-					vx[0].position.x=vx[1].position.x;
-					vx[0].texcoords.x=vx[1].texcoords.x;
-					vx[3].position.y=vx[1].position.y;
-					vx[3].texcoords.y=vx[1].texcoords.y;
-					vx[0].position.y=vx[2].position.y;
-					vx[0].texcoords.y=vx[2].texcoords.y;
-					vx[3].position.x=vx[2].position.x;
-					vx[3].texcoords.x=vx[2].texcoords.x;
+					vx[0].p.x=vx[1].p.x;
+					vx[0].uv.x=vx[1].uv.x;
+					vx[3].p.y=vx[1].p.y;
+					vx[3].uv.y=vx[1].uv.y;
+					vx[0].p.y=vx[2].p.y;
+					vx[0].uv.y=vx[2].uv.y;
+					vx[3].p.x=vx[2].p.x;
+					vx[3].uv.x=vx[2].uv.x;
 
 					for(int i = 0; i < 4; ++i)
 					{
-						vx[i].position.x -= .5f;
-						vx[i].position.y -= .5f;
+						vx[i].p.x -= .5f;
+						vx[i].p.y -= .5f;
 					}
 
 					// Render it
 					Storm3D2->GetD3DDevice().SetVertexShader(0);
-					Storm3D2->GetD3DDevice().SetFVF(FVF_VXFORMAT_2D);
+					Storm3D2->GetD3DDevice().SetFVF(FVF_P4DUV);
 
-					Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(VXFORMAT_2D));
+					Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(Vertex_P4DUV));
 					scene->AddPolyCounter(2);
 				}
 			}

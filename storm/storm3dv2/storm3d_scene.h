@@ -160,7 +160,7 @@ public:
 	// 2D-rendering (goes to render list, and it's rendered with RenderScene)
 	void Render3D_Picture(IStorm3D_Material *mat,VC3 position,VC2 size);
 	void Render2D_Picture(IStorm3D_Material *mat,VC2 position,VC2 size,float alpha,float rotation,float x1,float y1,float x2,float y2,bool wrap);
-	void Render2D_Picture(IStorm3D_Material *mat, struct VXFORMAT_2D *vertices, int numVertices, float alpha, bool wrap);
+	void Render2D_Picture(IStorm3D_Material *mat, struct Vertex_P4DUV *vertices, int numVertices, float alpha, bool wrap);
 	void Render2D_Text(IStorm3D_Font *font,VC2 position,VC2 size,const char *text,float alpha,const COL &colorFactor);
 	void Render2D_Text(IStorm3D_Font *font,VC2 position,VC2 size,const wchar_t *text,float alpha,const COL &colorFactor);
 

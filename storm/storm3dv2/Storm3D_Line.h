@@ -11,10 +11,7 @@ struct GfxDevice;
 class Storm3D_Line: public IStorm3D_Line
 {
 	Storm3D *storm;
-	IDirect3DVertexBuffer9 *vertex_buffer;
-	IDirect3DIndexBuffer9 *index_buffer;
 
-	IDirect3DVertexBuffer9 *vertex_buffer2;
 	bool pixel_line;
 
 	std::vector<Vector> points;
