@@ -1,5 +1,7 @@
 #include "GfxDevice.h"
+#include "storm3d_terrain_utils.h"
 #include <assert.h>
+#include <D3Dcompiler.h>
 
 D3DVERTEXELEMENT9 VertexDesc_P3NUV2[] = {
     {0,  0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
@@ -46,14 +48,92 @@ D3DVERTEXELEMENT9 VertexDesc_P4UV[] = {
     D3DDECL_END()
 };
 
+D3DVERTEXELEMENT9 VertexDesc_P2DUV[] = {
+    {0,  0, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
+    {0,  8, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0},
+    {0, 12, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+    D3DDECL_END()
+};
+
+D3DVERTEXELEMENT9 VertexDesc_P2UV[] = {
+    {0, 0, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
+    {0, 8, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+    D3DDECL_END()
+};
+
 LPD3DVERTEXELEMENT9 vtxFmtDescs[FVF_COUNT] = {
     VertexDesc_P3NUV2,
     VertexDesc_P3NUV4,
     VertexDesc_P3D,
     VertexDesc_P3DUV2,
     VertexDesc_P4DUV,
-    VertexDesc_P4UV
+    VertexDesc_P4UV,
+    VertexDesc_P2DUV,
+    VertexDesc_P2UV
 };
+
+
+
+enum ShaderType
+{
+    VERTEX_SHADER,
+    PIXEL_SHADER
+};
+
+ID3DBlob* compileShader(ShaderType type, const char* path, size_t path_len, D3D_SHADER_MACRO* defines, size_t defines_count)
+{
+    assert(path);
+
+    const char* target = 0;
+
+    switch (type)
+    {
+        case VERTEX_SHADER:
+            target = "vs_3_0";
+            break;
+        case PIXEL_SHADER:
+            target = "ps_3_0";
+            break;
+    }
+
+    assert(target);
+
+    std::string shaderString;
+    frozenbyte::storm::readFile(shaderString, path);
+
+    ID3DBlob*  code = 0;
+    ID3DBlob*  msgs = 0;
+
+    HRESULT hr = D3DCompile(
+        shaderString.c_str(), shaderString.size(),
+        path, defines, NULL,
+        "main", target,
+#ifdef _DEBUG
+        D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR|D3DCOMPILE_SKIP_OPTIMIZATION|D3DCOMPILE_DEBUG,
+#else
+        D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR|D3DCOMPILE_OPTIMIZATION_LEVEL3,
+#endif
+        0, &code, &msgs
+    );
+
+    if (FAILED(hr))
+    {
+        char* report = (char *)msgs->GetBufferPointer();
+        OutputDebugString(report);
+        MessageBox(NULL, "D3DCompile failed!", "Error!!!", MB_OK);
+    }
+
+    if (msgs) msgs->Release();
+
+    return code;
+}
+
+template<size_t path_len, size_t defines_count>
+ID3DBlob* compileShader(ShaderType type, const char (&path)[path_len], D3D_SHADER_MACRO (&defines)[defines_count])
+{
+    return compileShader(type, path, path_len, defines, defines_count);
+}
+
 
 
 template<size_t N>
@@ -133,11 +213,59 @@ bool GfxDevice::init(LPDIRECT3D9 d3d, UINT Adapter, HWND hWnd, D3DPRESENT_PARAME
     for (size_t i = 0; i < FVF_COUNT; ++i)
         device->CreateVertexDeclaration(vtxFmtDescs[i], &vtxFmtSet[i]);
 
+    D3D_SHADER_MACRO defines[4];
+    for (size_t i=0; i<STD_SHADER_COUNT; ++i)
+    {
+        size_t idx = 0;
+
+        if (i&SSF_2D_POS)
+        {
+            defines[idx].Name = "VS_2D_POS";
+            defines[idx].Definition = "";
+            ++idx;
+        }
+
+        if (i & SSF_COLOR)
+        {
+            defines[idx].Name = "ENABLE_COLOR";
+            defines[idx].Definition = "";
+            ++idx;
+        }
+
+        if (i & SSF_TEXTURE)
+        {
+            defines[idx].Name = "ENABLE_TEXTURE";
+            defines[idx].Definition = "";
+            ++idx;
+        }
+
+        defines[idx].Definition = 0;
+        defines[idx].Name = 0;
+
+        ID3DBlob* vscode = compileShader(VERTEX_SHADER, "Data\\shaders\\std.vs", defines);
+        ID3DBlob* pscode = compileShader(PIXEL_SHADER,  "Data\\shaders\\std.ps", defines);
+
+        if (vscode && pscode)
+        {
+            CreateVertexShader((const DWORD*)vscode->GetBufferPointer(), &stdVS[i]);
+            CreatePixelShader((const DWORD*)pscode->GetBufferPointer(), &stdPS[i]);
+        }
+
+        if (vscode) vscode->Release();
+        if (pscode) pscode->Release();
+    }
+
     return true;
 }
 
 void GfxDevice::fini()
 {
+    for (size_t i=0; i<STD_SHADER_COUNT; ++i)
+    {
+        if (stdVS[i]) stdVS[i]->Release();
+        if (stdPS[i]) stdPS[i]->Release();
+    }
+
     for (auto vf: vtxFmtSet) vf->Release();
 
     destroyFrameResources();
@@ -166,6 +294,10 @@ void GfxDevice::beginFrame()
 
     frame_vb_used   = 0;
     frame_ib16_used = 0;
+
+    D3DXMatrixIdentity(&world_mat);
+    D3DXMatrixIdentity(&view_mat);
+    D3DXMatrixIdentity(&proj_mat);
 }
 
 void GfxDevice::endFrame()
@@ -246,6 +378,39 @@ bool GfxDevice::lockDynVtx(UINT count, UINT stride, void** ptr, UINT* baseVertex
 void GfxDevice::unlockDynVtx()
 {
     frame_vb[frame_id]->Unlock();
+}
+
+void GfxDevice::SetStdProgram(size_t id)
+{
+    assert(id<STD_SHADER_COUNT);
+
+    SetVertexShader(stdVS[id]);
+    SetPixelShader(stdPS[id]);
+}
+
+void GfxDevice::SetWorldMatrix(const D3DXMATRIX& world)
+{
+    world_mat = world;
+}
+
+void GfxDevice::SetViewMatrix(const D3DXMATRIX& view)
+{
+    view_mat = view;
+}
+
+void GfxDevice::SetProjectionMatrix(const D3DXMATRIX& proj)
+{
+    proj_mat = proj;
+}
+
+void GfxDevice::CommitConstants()
+{
+    D3DXMATRIX MVP;
+
+    D3DXMatrixMultiply(&MVP, &view_mat, &proj_mat);
+    D3DXMatrixMultiply(&MVP, &world_mat, &MVP);
+
+    SetVertexShaderConstantF(0, MVP, 4);
 }
 
 void GfxDevice::SetFVF(FVF vtxFmt)

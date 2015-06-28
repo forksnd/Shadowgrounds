@@ -13,6 +13,8 @@ enum FVF //Fixed Vertex Format
     FVF_P3DUV2,
     FVF_P4DUV,
     FVF_P4UV,
+    FVF_P2DUV,
+    FVF_P2UV,
     FVF_COUNT
 };
 
@@ -51,6 +53,13 @@ struct Vertex_P3DUV2
 struct Vertex_P4DUV
 {
     VC4      p;
+    uint32_t d;
+    VC2      uv;
+};
+
+struct Vertex_P2DUV
+{
+    VC2      p;
     uint32_t d;
     VC2      uv;
 };

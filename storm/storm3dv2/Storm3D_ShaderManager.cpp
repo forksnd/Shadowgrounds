@@ -10,7 +10,6 @@
 #include <vector>
 #include <string>
 #include <stdio.h>
-#include <boost/static_assert.hpp>
 
 #include <d3d9.h>
 #include <d3dx9core.h>
@@ -1135,7 +1134,7 @@ void Storm3D_ShaderManager::SetWorldTransform(GfxDevice &device, const D3DXMATRI
 
 		if(!terrain)
 		{
-			BOOST_STATIC_ASSERT(LIGHT_MAX_AMOUNT >= 2 && LIGHT_MAX_AMOUNT <= 5);
+			static_assert(LIGHT_MAX_AMOUNT >= 2 && LIGHT_MAX_AMOUNT <= 5, "Light count should be 2-5.");
 			for(int i = 2; i < LIGHT_MAX_AMOUNT; ++i)
 			{
 				device.SetVertexShaderConstantF(21 + ((i - 2) * 2), light_position[i], 1);

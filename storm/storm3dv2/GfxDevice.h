@@ -14,6 +14,11 @@ struct GfxDevice
 
 private:
     // cache
+    enum
+    {
+        STD_SHADER_COUNT = 8
+    };
+
     static bool cached;
 
     LPDIRECT3DVERTEXDECLARATION9 vtxFmtSet[FVF_COUNT];
@@ -36,10 +41,24 @@ private:
     LPDIRECT3DINDEXBUFFER9 frame_ib16[NUM_FRAMES_DELAY];
     UINT                   frame_ib16_used;
 
+    D3DXMATRIX world_mat;
+    D3DXMATRIX view_mat;
+    D3DXMATRIX proj_mat;
+
+    LPDIRECT3DVERTEXSHADER9 stdVS[STD_SHADER_COUNT];
+    LPDIRECT3DPIXELSHADER9  stdPS[STD_SHADER_COUNT];
+
     void createFrameResources();
     void destroyFrameResources();
 
 public:
+    enum
+    {
+        SSF_2D_POS  = (1<<0),
+        SSF_COLOR   = (1<<1),
+        SSF_TEXTURE = (1<<2),
+    };
+
     bool init(LPDIRECT3D9 d3d, UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
     void fini();
 
@@ -49,6 +68,13 @@ public:
 
     void beginFrame();
     void endFrame();
+
+
+    void SetWorldMatrix(const D3DXMATRIX& world);
+    void SetViewMatrix(const D3DXMATRIX& view);
+    void SetProjectionMatrix(const D3DXMATRIX& proj);
+    void CommitConstants();
+    void SetStdProgram(size_t id);
 
 
     void SetDynIdx16Buffer();

@@ -239,6 +239,9 @@ public:
 	operator bool() const;
 };
 
+
+void readFile(std::string &result, const std::string &fileName);
+
 boost::shared_ptr<Storm3D_Texture> createSharedTexture(Storm3D_Texture *texture);
 
 void setCurrentAnisotrophy(int max);

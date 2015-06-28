@@ -162,7 +162,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>nvtristrip.lib;vfw32.lib;winmm.lib;d3d9.lib;d3dx9d.lib;odbc32.lib;odbccp32.lib;user32.lib;sdl.lib;SDLmain.lib;Comdlg32.lib;ole32.lib;avcodec.lib;avformat.lib;swscale.lib;swresample.lib;avutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>nvtristrip.lib;vfw32.lib;winmm.lib;d3d9.lib;d3dx9d.lib;user32.lib;sdl.lib;SDLmain.lib;avcodec.lib;avformat.lib;swscale.lib;swresample.lib;avutil.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>../lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -215,7 +215,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>vfw32.lib;winmm.lib;d3d9.lib;d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vfw32.lib;winmm.lib;d3d9.lib;d3dx9.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>../lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -369,7 +369,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>nvtristrip.lib;vfw32.lib;winmm.lib;d3d9.lib;d3dx9.lib;odbc32.lib;odbccp32.lib;user32.lib;sdl.lib;SDLmain.lib;Comdlg32.lib;ole32.lib;avcodec.lib;avformat.lib;swscale.lib;swresample.lib;avutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>nvtristrip.lib;vfw32.lib;winmm.lib;d3d9.lib;d3dx9.lib;user32.lib;sdl.lib;SDLmain.lib;avcodec.lib;avformat.lib;swscale.lib;swresample.lib;avutil.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
