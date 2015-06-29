@@ -199,6 +199,7 @@ void GfxDevice::resetCache()
 {
     bitset32_clear(rs_valid);
     bitset32_clear(tex_valid);
+    bitset32_clear(res_states);
 }
 
 bool GfxDevice::init(LPDIRECT3D9 d3d, UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params)
@@ -298,6 +299,8 @@ void GfxDevice::beginFrame()
     D3DXMatrixIdentity(&world_mat);
     D3DXMatrixIdentity(&view_mat);
     D3DXMatrixIdentity(&proj_mat);
+
+    resetCache();
 }
 
 void GfxDevice::endFrame()
@@ -415,7 +418,7 @@ void GfxDevice::CommitConstants()
 
 void GfxDevice::SetFVF(FVF vtxFmt)
 {
-    device->SetVertexDeclaration(vtxFmtSet[vtxFmt]);
+    SetVertexDeclaration(vtxFmtSet[vtxFmt]);
 }
 
 void GfxDevice::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT PrimitiveCount,CONST void* vertexData,UINT Stride)
@@ -741,7 +744,14 @@ HRESULT GfxDevice::CreateVertexDeclaration(CONST D3DVERTEXELEMENT9* pVertexEleme
 
 HRESULT GfxDevice::SetVertexDeclaration(IDirect3DVertexDeclaration9* pDecl)
 {
-    return device->SetVertexDeclaration(pDecl);
+    if (!cached || !bitset32_is_bit_set(res_states, RES_STATE_VF) || vf != pDecl)
+    {
+        vf = pDecl;
+        bitset32_set_bit(res_states, RES_STATE_VF);
+        return device->SetVertexDeclaration(pDecl);
+    }
+
+    return S_OK;
 }
 
 HRESULT GfxDevice::CreateVertexShader(CONST DWORD* pFunction,IDirect3DVertexShader9** ppShader)
@@ -751,7 +761,14 @@ HRESULT GfxDevice::CreateVertexShader(CONST DWORD* pFunction,IDirect3DVertexShad
 
 HRESULT GfxDevice::SetVertexShader(IDirect3DVertexShader9* pShader)
 {
-    return device->SetVertexShader(pShader);
+    if (!cached || !bitset32_is_bit_set(res_states, RES_STATE_VS) || vs != pShader)
+    {
+        vs = pShader;
+        bitset32_set_bit(res_states, RES_STATE_VS);
+        return device->SetVertexShader(pShader);
+    }
+
+    return S_OK;
 }
 
 HRESULT GfxDevice::SetVertexShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount)
@@ -771,7 +788,21 @@ HRESULT GfxDevice::SetVertexShaderConstantB(UINT StartRegister,CONST BOOL* pCons
 
 HRESULT GfxDevice::SetStreamSource(UINT StreamNumber,IDirect3DVertexBuffer9* pStreamData,UINT OffsetInBytes,UINT Stride)
 {
-    return device->SetStreamSource(StreamNumber, pStreamData, OffsetInBytes, Stride);
+    assert(StreamNumber<4);
+    if (!cached || !bitset32_is_bit_set(res_states, RES_STATE_VB0+StreamNumber) ||
+        vb_state[StreamNumber].vb != pStreamData ||
+        vb_state[StreamNumber].offset != OffsetInBytes ||
+        vb_state[StreamNumber].stride != Stride
+    )
+    {
+        vb_state[StreamNumber].vb     = pStreamData;
+        vb_state[StreamNumber].offset = OffsetInBytes;
+        vb_state[StreamNumber].stride = Stride;
+        bitset32_set_bit(res_states, RES_STATE_VB0+StreamNumber);
+        return device->SetStreamSource(StreamNumber, pStreamData, OffsetInBytes, Stride);
+    }
+
+    return S_OK;
 }
 
 HRESULT GfxDevice::SetStreamSourceFreq(UINT StreamNumber,UINT Setting)
@@ -781,7 +812,14 @@ HRESULT GfxDevice::SetStreamSourceFreq(UINT StreamNumber,UINT Setting)
 
 HRESULT GfxDevice::SetIndices(IDirect3DIndexBuffer9* pIndexData)
 {
-    return device->SetIndices(pIndexData);
+    if (!cached || !bitset32_is_bit_set(res_states, RES_STATE_IB) || ib != pIndexData)
+    {
+        ib = pIndexData;
+        bitset32_set_bit(res_states, RES_STATE_IB);
+        return device->SetIndices(pIndexData);
+    }
+
+    return S_OK;
 }
 
 HRESULT GfxDevice::CreatePixelShader(CONST DWORD* pFunction,IDirect3DPixelShader9** ppShader)
@@ -791,7 +829,14 @@ HRESULT GfxDevice::CreatePixelShader(CONST DWORD* pFunction,IDirect3DPixelShader
 
 HRESULT GfxDevice::SetPixelShader(IDirect3DPixelShader9* pShader)
 {
-    return device->SetPixelShader(pShader);
+    if (!cached || !bitset32_is_bit_set(res_states, RES_STATE_PS) || ps != pShader)
+    {
+        ps = pShader;
+        bitset32_set_bit(res_states, RES_STATE_PS);
+        return device->SetPixelShader(pShader);
+    }
+
+    return S_OK;
 }
 
 HRESULT GfxDevice::SetPixelShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount)

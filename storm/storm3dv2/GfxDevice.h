@@ -29,6 +29,35 @@ private:
     uint32_t  tex_valid;
     LPDIRECT3DBASETEXTURE9 textures[16];
 
+    enum
+    {
+        RES_STATE_VS,
+        RES_STATE_PS,
+        RES_STATE_VF,
+        RES_STATE_IB,
+        RES_STATE_VB0,
+        RES_STATE_VB1,
+        RES_STATE_VB2,
+        RES_STATE_VB3,
+        RES_STATE_COUNT
+    };
+
+    uint32_t res_states;
+
+    LPDIRECT3DVERTEXSHADER9 vs;
+    LPDIRECT3DPIXELSHADER9  ps;
+
+    LPDIRECT3DVERTEXDECLARATION9 vf;
+
+    struct
+    {
+        LPDIRECT3DVERTEXBUFFER9 vb;
+        UINT                    offset;
+        UINT                    stride;
+    } vb_state[4];
+
+    LPDIRECT3DINDEXBUFFER9  ib;
+
     void resetCache();
 
     // frame sync
