@@ -285,8 +285,9 @@ void Storm3D_ParticleSystem::QuadArray::setRender(GfxDevice &device, int &vertex
 	dm._41=dm._42=dm._43=0;
 	dm._11=dm._22=dm._33=dm._44=1;
 
-	device.SetTransform(D3DTS_WORLD,&dm);
-	device.SetTransform(D3DTS_VIEW,&dm);
+    device.SetWorldMatrix(dm);
+    device.SetViewMatrix(dm);
+    device.CommitConstants();
 
 	vertexOffset = m_partOffset * 4;
 	particleAmount = m_numParts;
@@ -418,14 +419,15 @@ void Storm3D_ParticleSystem::QuadArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	dm._41=dm._42=dm._43=0;
 	dm._11=dm._22=dm._33=dm._44=1;
 
-	// Set world transform to identity
-	Storm3D2->GetD3DDevice().SetTransform(D3DTS_WORLD,&dm);
-	
+    Storm3D2->GetD3DDevice().SetProjectionMatrix(scene->camera.GetProjectionMatrix());
 	// Set view transform to identity
-	Storm3D2->GetD3DDevice().SetTransform(D3DTS_VIEW,&dm);
-	
+    Storm3D2->GetD3DDevice().SetViewMatrix(dm);
+	// Set world transform to identity
+    Storm3D2->GetD3DDevice().SetWorldMatrix(dm);
+	Storm3D2->GetD3DDevice().CommitConstants();
+
 	// Render the buffer
-	Storm3D2->GetD3DDevice().SetVertexShader(0);
+    Storm3D2->GetD3DDevice().SetStdProgram(GfxDevice::SSF_COLOR|GfxDevice::SSF_TEXTURE);
 	Storm3D2->GetD3DDevice().SetFVF(FVF_P3DUV2);
 	
 	Storm3D2->GetD3DDevice().SetStreamSource(0,m_vb,0,stride);
@@ -727,8 +729,9 @@ void Storm3D_ParticleSystem::LineArray::setRender(GfxDevice &device, int &vertex
 	dm._41=dm._42=dm._43=0;
 	dm._11=dm._22=dm._33=dm._44=1;
 
-	device.SetTransform(D3DTS_WORLD,&dm);
-	//device.SetTransform(D3DTS_VIEW,&dm);
+    device.SetWorldMatrix(dm);
+    //device.SetViewMatrix(dm);
+    device.CommitConstants();
 
 	vertexOffset = m_partOffset * 4;
 	particleAmount = m_numParts;
@@ -840,16 +843,17 @@ void Storm3D_ParticleSystem::LineArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	dm._41=dm._42=dm._43=0;
 	dm._11=dm._22=dm._33=dm._44=1;
 
-	// Set world transform to identity
-	Storm3D2->GetD3DDevice().SetTransform(D3DTS_WORLD,&dm);
-	
-	// Set view transform to identity
-//	Storm3D2->GetD3DDevice().SetTransform(D3DTS_VIEW,&dm);
-	
-	// Render the buffer
-	Storm3D2->GetD3DDevice().SetVertexShader(0);
-	Storm3D2->GetD3DDevice().SetFVF(FVF_P3DUV2);
-	
+    Storm3D2->GetD3DDevice().SetProjectionMatrix(scene->camera.GetProjectionMatrix());
+    Storm3D2->GetD3DDevice().SetViewMatrix(scene->camera.GetViewMatrix());
+    // Set world transform to identity
+    Storm3D2->GetD3DDevice().SetWorldMatrix(dm);
+    Storm3D2->GetD3DDevice().CommitConstants();
+
+
+    // Render the buffer
+    Storm3D2->GetD3DDevice().SetStdProgram(GfxDevice::SSF_COLOR | GfxDevice::SSF_TEXTURE);
+    Storm3D2->GetD3DDevice().SetFVF(FVF_P3DUV2);
+
 	Storm3D2->GetD3DDevice().SetStreamSource(0,m_vb,0,stride);
 	Storm3D2->GetD3DDevice().SetIndices(m_ib);
 	

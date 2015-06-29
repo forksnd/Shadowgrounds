@@ -121,31 +121,19 @@ void Storm3D_ParticleSystem::Render(Storm3D_Scene* scene, bool distortion)
 
 void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion) 
 {
+    GFX_TRACE_SCOPE("Storm3D_ParticleSystem::RenderImp");
 	//if(distortion && !offsetShader.hasShader())
 	//	offsetShader.createOffsetBlendShader();
 
 	GfxDevice &device = Storm3D2->GetD3DDevice();
 	//device.SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
 	frozenbyte::storm::setCulling(device, D3DCULL_NONE);
-	device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
-	device.SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
-	device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
-	device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-	device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-	device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
-	device.SetTextureStageState(0,D3DTSS_TEXCOORDINDEX,0);
-	device.SetTextureStageState(0,D3DTSS_TEXTURETRANSFORMFLAGS,D3DTTFF_DISABLE);
-	device.SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
 	device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
 	device.SetRenderState(D3DRS_SRCBLEND,D3DBLEND_ONE);
 	device.SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
 	device.SetRenderState(D3DRS_ZWRITEENABLE,FALSE);
 	device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
 	device.SetRenderState(D3DRS_ALPHAREF, 0x1);
-	scene->camera.Apply();
-
-	device.SetVertexShader(0);
-	device.SetFVF(FVF_P3DUV2);
 
 	int maxParticles = 0;
 	int index = (distortion) ? 1 : 0;
@@ -224,8 +212,9 @@ OutputDebugString(msg.c_str());
 
 	vertexBuffer[index].apply(device, 0);
 
-	device.SetVertexShader(0);
-	device.SetFVF(FVF_P3DUV2);
+    device.SetStdProgram(GfxDevice::SSF_COLOR|GfxDevice::SSF_TEXTURE);
+    device.SetFVF(FVF_P3DUV2);
+    device.SetProjectionMatrix(scene->camera.GetProjectionMatrix());
 
 	// Render arrays
 	{
@@ -237,7 +226,7 @@ OutputDebugString(msg.c_str());
 				int vertexOffset = 0;
 				int particleAmount = 0;
 
-				scene->camera.Apply();
+                device.SetViewMatrix(scene->camera.GetViewMatrix());
 				(*it)->setRender(device, vertexOffset, particleAmount);
 
 				if(particleAmount > 0)
@@ -265,7 +254,9 @@ OutputDebugString(msg.c_str());
 		}
 	}
 
-	scene->camera.Apply();
+    //TODO: Remove!!!!!
+	device.SetVertexShader(0);
+	device.SetPixelShader(0);
 }
 
 void Storm3D_ParticleSystem::Clear() 
