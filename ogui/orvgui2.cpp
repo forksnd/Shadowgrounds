@@ -1852,13 +1852,11 @@ void og_draw_button(orvgui_but *but)
 		}
 		else
 		{
-			Vertex_P4DUV *vertices = new Vertex_P4DUV[but->num_vertices];
+			Vertex_P2DUV *vertices = new Vertex_P2DUV[but->num_vertices];
 			for(int i = 0; i < but->num_vertices; i++)
 			{
 				vertices[i].p.x = (float)((but->parent->put_x + but->put_x + but->vertices[i].x) * og_scale_x / (float)OG_SCALE_MULTIPLIER);
 				vertices[i].p.y = (float)((but->parent->put_y + but->put_y + but->vertices[i].y) * og_scale_y / (float)OG_SCALE_MULTIPLIER);
-				vertices[i].p.z = 0.0f;
-				vertices[i].p.w = 1.0f;
 				vertices[i].d = but->vertices[i].col;
 				vertices[i].uv.x = but->scroll_x + but->repeat_x * but->vertices[i].x / (float)but->sizex;
 				vertices[i].uv.y = but->scroll_y + but->repeat_y * but->vertices[i].y / (float)but->sizey;

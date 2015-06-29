@@ -84,7 +84,7 @@ public:
 	// 2D-rendering (goes to render list, and it's rendered with RenderScene)
 	virtual void Render3D_Picture(IStorm3D_Material *mat,VC3 position,VC2 size)=0;
 	virtual void Render2D_Picture(IStorm3D_Material *mat,VC2 position,VC2 size,float alpha=1.f,float rotation=0.f, float x1=0.f, float y1=0.f, float x2=1.f, float y2=1.f, bool wrap=false)=0;
-	virtual void Render2D_Picture(IStorm3D_Material *mat, struct Vertex_P4DUV *vertices, int numVertices, float alpha, bool wrap=false)=0;
+	virtual void Render2D_Picture(IStorm3D_Material *mat, struct Vertex_P2DUV *vertices, int numVertices, float alpha, bool wrap=false)=0;
 	virtual void Render2D_Text(IStorm3D_Font *font,VC2 position,VC2 size,const char *text,float alpha=1.f,const COL &colorFactor = COL(1.f, 1.f, 1.f))=0;
 	virtual void Render2D_Text(IStorm3D_Font *font,VC2 position,VC2 size,const wchar_t *text,float alpha=1.f,const COL &colorFactor = COL(1.f, 1.f, 1.f))=0;
 

@@ -158,11 +158,11 @@ void Storm3D_Scene_PicList_Font::Render()
 				float fy=(float)y*ty1;
 
                 // Create a quad
-                Vertex_P4DUV vx[4] = {
-                    {VC4(pos.x, pos.y+size.y, 0, 1), col, VC2(fx, fy + ty1)},
-                    {VC4(pos.x, pos.y, 0, 1), col, VC2(fx, fy)},
-                    {VC4(pos.x+size.x, pos.y+size.y, 0, 1), col, VC2(fx + tx1, fy + ty1)},
-                    {VC4(pos.x+size.x, pos.y+0, 0, 1), col, VC2(fx + tx1, fy)},
+                Vertex_P2DUV vx[4] = {
+                    {VC2(pos.x,        pos.y+size.y), col, VC2(fx, fy + ty1)},
+                    {VC2(pos.x,        pos.y),        col, VC2(fx, fy)},
+                    {VC2(pos.x+size.x, pos.y+size.y), col, VC2(fx + tx1, fy + ty1)},
+                    {VC2(pos.x+size.x, pos.y),        col, VC2(fx + tx1, fy)},
                 };
 
 				// Clip
@@ -178,18 +178,23 @@ void Storm3D_Scene_PicList_Font::Render()
 					vx[3].p.x=vx[2].p.x;
 					vx[3].uv.x=vx[2].uv.x;
 
-					for(int i = 0; i < 4; ++i)
-					{
-						vx[i].p.x -= .5f;
-						vx[i].p.y -= .5f;
-					}
+                    Storm3D_SurfaceInfo si = Storm3D2->GetScreenSize();
 
-					// Render it
-					Storm3D2->GetD3DDevice().SetVertexShader(0);
-					Storm3D2->GetD3DDevice().SetFVF(FVF_P4DUV);
+                    for (int i = 0; i < 4; ++i)
+                    {
+                        vx[i].p.x -= .5f;
+                        vx[i].p.y -= .5f;
 
-					Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(Vertex_P4DUV));
-					scene->AddPolyCounter(2);
+                        vx[i].p.x = vx[i].p.x * 2.0f / si.width - 1.0f;
+                        vx[i].p.y = 1.0f - vx[i].p.y * 2.0f / si.height;
+                    }
+
+                    // Render it
+                    Storm3D2->GetD3DDevice().SetStdProgram(GfxDevice::SSF_2D_POS | GfxDevice::SSF_COLOR | GfxDevice::SSF_TEXTURE);
+                    Storm3D2->GetD3DDevice().SetFVF(FVF_P2DUV);
+
+                    Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vx, sizeof(Vertex_P2DUV));
+                    scene->AddPolyCounter(2);
 				}
 			}
 

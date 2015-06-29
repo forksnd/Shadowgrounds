@@ -1019,6 +1019,10 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 	Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
 	Storm3D2->device.SetTexture(0,0);
 
+    //TODO: remove!!!!
+    device.SetVertexShader(0);
+    device.SetPixelShader(0);
+
 	// End REAL scene rendering
 	Storm3D2->device.EndScene();
 }
@@ -1219,7 +1223,7 @@ void Storm3D_Scene::Render2D_Picture(IStorm3D_Material *mat,VC2 position,VC2 siz
 //------------------------------------------------------------------
 // Storm3D_Scene::Render2D_Picture
 //------------------------------------------------------------------
-void Storm3D_Scene::Render2D_Picture(IStorm3D_Material *mat,struct Vertex_P4DUV *vertices, int numVertices, float alpha, bool wrap)
+void Storm3D_Scene::Render2D_Picture(IStorm3D_Material *mat,struct Vertex_P2DUV *vertices, int numVertices, float alpha, bool wrap)
 {
 	// Create new
 	Storm3D_Scene_PicList_Picture *pl=new Storm3D_Scene_PicList_Picture(Storm3D2,this,(Storm3D_Material*)mat,VC2(0,0),VC2(1,1),alpha,0,0,0,1,1,wrap);

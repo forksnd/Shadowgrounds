@@ -16,7 +16,7 @@
 // Clip2DRectangle
 // Returns false if rectancle is completely outside screen
 //------------------------------------------------------------------
-bool Clip2DRectangle(Storm3D *st,Vertex_P4DUV &ul,Vertex_P4DUV &dr)
+bool Clip2DRectangle(Storm3D *st,Vertex_P2DUV &ul,Vertex_P2DUV &dr)
 {
 	// Get Screen coordinates
 	Storm3D_SurfaceInfo ss=st->GetScreenSize();
