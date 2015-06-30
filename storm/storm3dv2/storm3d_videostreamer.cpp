@@ -9,7 +9,6 @@
 #include "storm3d_texture.h"
 #include "storm3d_material.h"
 #include "storm3d_scene.h"
-#include "storm3d_string_util.h"
 #include "treader.h"
 
 #include "../../system/Timer.h"

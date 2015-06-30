@@ -141,9 +141,6 @@
     <ClCompile Include="Storm3D_ShaderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="storm3d_string_util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Storm3d_Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -306,9 +303,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Storm3D_ShaderManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="storm3d_string_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="storm3d_texture.h">
