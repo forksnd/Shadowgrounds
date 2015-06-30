@@ -253,10 +253,6 @@ OutputDebugString(msg.c_str());
 			}
 		}
 	}
-
-    //TODO: Remove!!!!!
-	device.SetVertexShader(0);
-	device.SetPixelShader(0);
 }
 
 void Storm3D_ParticleSystem::Clear() 

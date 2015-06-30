@@ -83,8 +83,8 @@ void Storm3D_Line::Render(GfxDevice& device)
 	rebuild_vertices = false;
 	rebuild_indices = false;
 
-	device.SetVertexShader(0);
-	device.SetFVF(FVF_P3D);
+    device.SetStdProgram(GfxDevice::SSF_COLOR);
+    device.SetFVF(FVF_P3D);
 
     // Render
     if (!pixel_line)
