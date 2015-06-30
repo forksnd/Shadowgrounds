@@ -77,8 +77,14 @@ private:
     LPDIRECT3DVERTEXSHADER9 stdVS[STD_SHADER_COUNT];
     LPDIRECT3DPIXELSHADER9  stdPS[STD_SHADER_COUNT];
 
-    void createFrameResources();
+    void createFrameResources(D3DPRESENT_PARAMETERS& params);
     void destroyFrameResources();
+
+    VC2   fViewportDim;
+    VC2I  iViewportDim;
+    VC2   pxSize;
+
+    void setViewportSize(int w, int h);
 
 public:
     enum
@@ -126,6 +132,9 @@ public:
     {
         return lockDynVtx(count, sizeof(T), (void**)ptr, baseVertex);
     }
+
+
+    VC2 pixelSize() {return pxSize;}
 
 
     //Fixed function imitation

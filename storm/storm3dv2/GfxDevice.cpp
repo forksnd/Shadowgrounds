@@ -209,7 +209,7 @@ bool GfxDevice::init(LPDIRECT3D9 d3d, UINT Adapter, HWND hWnd, D3DPRESENT_PARAME
 
     for (auto& q: frame_sync) q = 0;
 
-    createFrameResources();
+    createFrameResources(params);
 
     for (size_t i = 0; i < FVF_COUNT; ++i)
         device->CreateVertexDeclaration(vtxFmtDescs[i], &vtxFmtSet[i]);
@@ -279,7 +279,7 @@ bool GfxDevice::reset(D3DPRESENT_PARAMETERS& params)
 
     if (SUCCEEDED(device->Reset(&params)))
     {
-        createFrameResources();
+        createFrameResources(params);
         return true;
     }
 
@@ -416,6 +416,13 @@ void GfxDevice::CommitConstants()
     SetVertexShaderConstantF(0, MVP, 4);
 }
 
+void GfxDevice::setViewportSize(int w, int h)
+{
+    iViewportDim = VC2I(w, h);
+    fViewportDim = VC2((float)w, (float)h);
+    pxSize       = VC2(2.0f / fViewportDim.x, 2.0f / fViewportDim.y);
+}
+
 void GfxDevice::SetFVF(FVF vtxFmt)
 {
     SetVertexDeclaration(vtxFmtSet[vtxFmt]);
@@ -447,7 +454,7 @@ void GfxDevice::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT PrimitiveCou
     DrawPrimitive(PrimitiveType, baseVertex, PrimitiveCount);
 }
 
-void GfxDevice::createFrameResources()
+void GfxDevice::createFrameResources(D3DPRESENT_PARAMETERS& params)
 {
     for (auto& q: frame_sync)
     {
@@ -480,6 +487,7 @@ void GfxDevice::createFrameResources()
     }
 
     frame_id = 0;
+    setViewportSize(params.BackBufferWidth, params.BackBufferHeight);
 }
 
 void GfxDevice::destroyFrameResources()
@@ -605,6 +613,9 @@ HRESULT GfxDevice::CreateOffscreenPlainSurface(UINT Width,UINT Height,D3DFORMAT 
 
 HRESULT GfxDevice::SetRenderTarget(DWORD RenderTargetIndex,IDirect3DSurface9* pRenderTarget)
 {
+    D3DSURFACE_DESC desc;
+    pRenderTarget->GetDesc(&desc);
+    setViewportSize(desc.Width, desc.Height);
     return device->SetRenderTarget(RenderTargetIndex, pRenderTarget);
 }
 
@@ -615,6 +626,9 @@ HRESULT GfxDevice::GetRenderTarget(DWORD RenderTargetIndex,IDirect3DSurface9** p
 
 HRESULT GfxDevice::SetDepthStencilSurface(IDirect3DSurface9* pNewZStencil)
 {
+    D3DSURFACE_DESC desc;
+    pNewZStencil->GetDesc(&desc);
+    setViewportSize(desc.Width, desc.Height);
     return device->SetDepthStencilSurface(pNewZStencil);
 }
 
@@ -645,6 +659,7 @@ HRESULT GfxDevice::SetTransform(D3DTRANSFORMSTATETYPE State,CONST D3DMATRIX* pMa
 
 HRESULT GfxDevice::SetViewport(CONST D3DVIEWPORT9* pViewport)
 {
+    setViewportSize(pViewport->Width, pViewport->Height);
     return device->SetViewport(pViewport);
 }
 

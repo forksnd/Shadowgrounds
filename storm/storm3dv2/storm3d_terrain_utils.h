@@ -239,6 +239,8 @@ public:
 	operator bool() const;
 };
 
+inline float convX_SCtoDS(float x, float pixszx) {return x*pixszx - 1.0f;}
+inline float convY_SCtoDS(float y, float pixszy) {return 1.0f - y*pixszy;}
 
 void readFile(std::string &result, const std::string &fileName);
 
