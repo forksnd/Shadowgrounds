@@ -91,7 +91,7 @@ void Storm3D_Scene_PicList_Picture::Render()
     Storm3D2->GetD3DDevice().SetStdProgram(GfxDevice::SSF_2D_POS | GfxDevice::SSF_COLOR | GfxDevice::SSF_TEXTURE);
     Storm3D2->GetD3DDevice().SetFVF(FVF_P2DUV);
 
-    Storm3D_SurfaceInfo si = Storm3D2->GetScreenSize();
+    VC2 pixsz = Storm3D2->GetD3DDevice().pixelSize();
 
 	// render with custom shape
 	if(customShape && customShape->vertices)
@@ -109,10 +109,8 @@ void Storm3D_Scene_PicList_Picture::Render()
             c &= 0x00FFFFFF;
             c |= (newAlpha & 0xFF) << 24;
             customShape->vertices[i].d = c;
-            customShape->vertices[i].p.x -= .5f;
-            customShape->vertices[i].p.y -= .5f;
-            customShape->vertices[i].p.x = customShape->vertices[i].p.x * 2.0f / si.width - 1.0f;
-            customShape->vertices[i].p.y = 1.0f - customShape->vertices[i].p.y * 2.0f / si.height;
+            customShape->vertices[i].p.x = frozenbyte::storm::convX_SCtoDS(customShape->vertices[i].p.x-0.5f, pixsz.x);
+            customShape->vertices[i].p.y = frozenbyte::storm::convY_SCtoDS(customShape->vertices[i].p.y-0.5f, pixsz.y);
         }
 		Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLELIST,customShape->numVertices/3,customShape->vertices,sizeof(Vertex_P2DUV));
 		scene->AddPolyCounter(customShape->numVertices/3);
@@ -154,11 +152,8 @@ void Storm3D_Scene_PicList_Picture::Render()
 
         for (int i = 0; i < 4; ++i)
         {
-            vx[i].p.x -= .5f;
-            vx[i].p.y -= .5f;
-
-            vx[i].p.x = vx[i].p.x * 2.0f / si.width - 1.0f;
-            vx[i].p.y = 1.0f - vx[i].p.y * 2.0f / si.height;
+            vx[i].p.x = frozenbyte::storm::convX_SCtoDS(vx[i].p.x-0.5f, pixsz.x);
+            vx[i].p.y = frozenbyte::storm::convY_SCtoDS(vx[i].p.y-0.5f, pixsz.y);
         }
 
 		Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(Vertex_P2DUV));

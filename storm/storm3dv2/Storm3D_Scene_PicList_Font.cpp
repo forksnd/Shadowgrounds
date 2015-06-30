@@ -178,15 +178,12 @@ void Storm3D_Scene_PicList_Font::Render()
 					vx[3].p.x=vx[2].p.x;
 					vx[3].uv.x=vx[2].uv.x;
 
-                    Storm3D_SurfaceInfo si = Storm3D2->GetScreenSize();
+                    VC2 pixsz = Storm3D2->GetD3DDevice().pixelSize();
 
                     for (int i = 0; i < 4; ++i)
                     {
-                        vx[i].p.x -= .5f;
-                        vx[i].p.y -= .5f;
-
-                        vx[i].p.x = vx[i].p.x * 2.0f / si.width - 1.0f;
-                        vx[i].p.y = 1.0f - vx[i].p.y * 2.0f / si.height;
+                        vx[i].p.x = frozenbyte::storm::convX_SCtoDS(vx[i].p.x-0.5f, pixsz.x);
+                        vx[i].p.y = frozenbyte::storm::convY_SCtoDS(vx[i].p.y-0.5f, pixsz.y);
                     }
 
                     // Render it

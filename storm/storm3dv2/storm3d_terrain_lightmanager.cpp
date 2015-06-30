@@ -360,43 +360,39 @@ struct Storm3D_TerrainLightManager::Data
 		device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 		device.SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 
-		device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
-		device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TEXTURE);
-		device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-		device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-		device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-		device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-
 		//device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 		device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVDESTCOLOR);
 		device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 		device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 
-		device.SetVertexShader(0);
-		device.SetPixelShader(0);
-		device.SetFVF(FVF_P4DUV);
+        device.SetStdProgram(GfxDevice::SSF_2D_POS | GfxDevice::SSF_COLOR | GfxDevice::SSF_TEXTURE);
+        device.SetFVF(FVF_P2DUV);
+
+        VC2 pixsz = device.pixelSize();
+        float scalex = renderSize.x * pixsz.x;
+        float scaley = renderSize.y * pixsz.y;
 
 		FakeLightList::iterator it = fakeLights.begin();
 		for(; it != fakeLights.end(); ++it)
 		{
 			Storm3D_LightTexture &lightTexture = *it;
-			DWORD color = lightTexture.color.GetAsD3DCompatibleARGB();
+			DWORD color = 0xFF000000 | lightTexture.color.GetAsD3DCompatibleARGB();
 
-			float x1 = lightTexture.start.x * renderSize.x;
-			float y1 = lightTexture.start.y * renderSize.y;
-			float x2 = lightTexture.end.x * renderSize.x;
-			float y2 = lightTexture.end.y * renderSize.y;
+			float x1 = frozenbyte::storm::convX_SCtoDS(lightTexture.start.x, scalex);
+			float y1 = frozenbyte::storm::convY_SCtoDS(lightTexture.start.y, scaley);
+			float x2 = frozenbyte::storm::convX_SCtoDS(lightTexture.end.x, scalex);
+			float y2 = frozenbyte::storm::convY_SCtoDS(lightTexture.end.y, scaley);
 
-            Vertex_P4DUV buffer[4] = {
-                { VC4(x1, y2, 1.f, 1.f), color, VC2(0.f, 1.f) },
-                { VC4(x1, y1, 1.f, 1.f), color, VC2(0.f, 0.f) },
-                { VC4(x2, y2, 1.f, 1.f), color, VC2(1.f, 1.f) },
-                { VC4(x2, y1, 1.f, 1.f), color, VC2(1.f, 0.f) },
+            Vertex_P2DUV buffer[4] = {
+                { VC2(x1, y2), color, VC2(0.f, 1.f) },
+                { VC2(x1, y1), color, VC2(0.f, 0.f) },
+                { VC2(x2, y2), color, VC2(1.f, 1.f) },
+                { VC2(x2, y1), color, VC2(1.f, 0.f) },
             };
 
 			lightTexture.texture->Apply(0);
-			device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
+			device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P2DUV));
 		}
 
 		device.SetTexture(0, 0);
