@@ -8,6 +8,8 @@
 
 #define NUM_FRAMES_DELAY 2
 
+#define MAX_CONSTS 224
+
 struct GfxDevice
 {
     LPDIRECT3DDEVICE9 device;
@@ -85,6 +87,17 @@ private:
     VC2   pxSize;
 
     void setViewportSize(int w, int h);
+
+    D3DXVECTOR4 vertex_consts[MAX_CONSTS];
+    D3DXVECTOR4 pixel_consts[MAX_CONSTS];
+
+    UINT vconsts_range_min;
+    UINT vconsts_range_max;
+
+    UINT pconsts_range_min;
+    UINT pconsts_range_max;
+
+    void SetShaderConsts();
 
 public:
     enum

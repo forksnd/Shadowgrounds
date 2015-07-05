@@ -200,6 +200,12 @@ void GfxDevice::resetCache()
     bitset32_clear(rs_valid);
     bitset32_clear(tex_valid);
     bitset32_clear(res_states);
+
+    vconsts_range_min = MAX_CONSTS;
+    vconsts_range_max = 0;
+
+    pconsts_range_min = MAX_CONSTS;
+    pconsts_range_max = 0;
 }
 
 bool GfxDevice::init(LPDIRECT3D9 d3d, UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params)
@@ -414,6 +420,31 @@ void GfxDevice::CommitConstants()
     D3DXMatrixMultiply(&MVP, &world_mat, &MVP);
 
     SetVertexShaderConstantF(0, MVP, 4);
+}
+
+void GfxDevice::SetShaderConsts()
+{
+    if (vconsts_range_min<vconsts_range_max)
+    {
+        device->SetVertexShaderConstantF(
+            vconsts_range_min,
+            vertex_consts[vconsts_range_min],
+            vconsts_range_max-vconsts_range_min
+        );
+        vconsts_range_min = MAX_CONSTS;
+        vconsts_range_max = 0;
+    }
+
+    if (pconsts_range_min<pconsts_range_max)
+    {
+        device->SetPixelShaderConstantF(
+            pconsts_range_min,
+            pixel_consts[pconsts_range_min],
+            pconsts_range_max-pconsts_range_min
+        );
+        pconsts_range_min = MAX_CONSTS;
+        pconsts_range_max = 0;
+    }
 }
 
 void GfxDevice::setViewportSize(int w, int h)
@@ -744,11 +775,13 @@ HRESULT GfxDevice::SetScissorRect(CONST RECT* pRect)
 
 HRESULT GfxDevice::DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType,UINT StartVertex,UINT PrimitiveCount)
 {
+    SetShaderConsts();
     return device->DrawPrimitive(PrimitiveType, StartVertex, PrimitiveCount);
 }
 
 HRESULT GfxDevice::DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType,INT BaseVertexIndex,UINT MinVertexIndex,UINT NumVertices,UINT startIndex,UINT primCount)
 {
+    SetShaderConsts();
     return device->DrawIndexedPrimitive(PrimitiveType, BaseVertexIndex, MinVertexIndex, NumVertices, startIndex, primCount);
 }
 
@@ -788,7 +821,16 @@ HRESULT GfxDevice::SetVertexShader(IDirect3DVertexShader9* pShader)
 
 HRESULT GfxDevice::SetVertexShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount)
 {
-    return device->SetVertexShaderConstantF(StartRegister, pConstantData, Vector4fCount);
+    assert(StartRegister<MAX_CONSTS);
+    assert(StartRegisterVector4fCount<=MAX_CONSTS);
+    vconsts_range_min = min(vconsts_range_min, StartRegister);
+    while(Vector4fCount--)
+    {
+        vertex_consts[StartRegister++] = D3DXVECTOR4(pConstantData);
+        pConstantData += 4;
+    }
+    vconsts_range_max = max(vconsts_range_max, StartRegister);
+    return S_OK;
 }
 
 HRESULT GfxDevice::SetVertexShaderConstantI(UINT StartRegister,CONST int* pConstantData,UINT Vector4iCount)
@@ -856,7 +898,16 @@ HRESULT GfxDevice::SetPixelShader(IDirect3DPixelShader9* pShader)
 
 HRESULT GfxDevice::SetPixelShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount)
 {
-    return device->SetPixelShaderConstantF(StartRegister, pConstantData, Vector4fCount);
+    assert(StartRegister<MAX_CONSTS);
+    assert(StartRegisterVector4fCount<=MAX_CONSTS);
+    pconsts_range_min = min(pconsts_range_min, StartRegister);
+    while(Vector4fCount--)
+    {
+        pixel_consts[StartRegister++] = D3DXVECTOR4(pConstantData);
+        pConstantData += 4;
+    }
+    pconsts_range_max = max(pconsts_range_max, StartRegister);
+    return S_OK;
 }
 
 HRESULT GfxDevice::SetPixelShaderConstantI(UINT StartRegister,CONST int* pConstantData,UINT Vector4iCount)

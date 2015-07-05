@@ -243,12 +243,11 @@ void Storm3D_Camera::Apply()
 		}
 	}
 
-	if(forcedOrthogonalProjection)
-	{
-		matProj = matForcedOrtho;
-	}
-
-	Storm3D2->GetD3DDevice().SetTransform(D3DTS_PROJECTION,&matProj);
+    if (forcedOrthogonalProjection)
+    {
+        matProj = matForcedOrtho;
+        Storm3D2->GetD3DDevice().SetTransform(D3DTS_PROJECTION, &matProj);
+    }
 
 //	Storm3D_ShaderManager::GetSingleton()->SetViewMatrix(mv);
 //	Storm3D_ShaderManager::GetSingleton()->SetProjectionMatrix(matProj);

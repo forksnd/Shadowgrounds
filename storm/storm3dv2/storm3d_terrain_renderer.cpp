@@ -846,20 +846,17 @@ t->Apply(4);
 
 	void renderFakelights(Storm3D_Scene &scene)
 	{
-        GFX_TRACE_SCOPE("renderFakelights");
 		if(renderFakeShadows)
 			lightManager.renderProjectedFakeLights(scene, renderSpotShadows);
 	}
 
 	void renderProjectedLightsSolid(Storm3D_Scene &scene)
 	{
-        GFX_TRACE_SCOPE("renderProjectedLightsSolid");
 		lightManager.renderProjectedLightsSolid(scene, renderSpotShadows);
 	}
 
 	void renderProjectedLightsAlpha(Storm3D_Scene &scene)
 	{
-        GFX_TRACE_SCOPE("renderProjectedLightsAlpha");
 		lightManager.renderProjectedLightsAlpha(scene, renderSpotShadows);
 	}
 
