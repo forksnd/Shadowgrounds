@@ -296,9 +296,8 @@ struct Storm3D_TerrainHeightmapData
 	int heightmapShiftMult;
 
 	float radius;
-	bool ps13;
 
-	Storm3D_TerrainHeightmapData(Storm3D &storm_, bool ps13_)
+	Storm3D_TerrainHeightmapData(Storm3D &storm_)
 	:	storm(storm_),
 		device(storm.GetD3DDevice()),
 		textureDetail(0),
@@ -327,31 +326,27 @@ struct Storm3D_TerrainHeightmapData
 		obstaclemapShiftMult(0),
 		heightmapMultiplier(1),
 		heightmapShiftMult(0),
-		radius(0),
-		ps13(ps13_)
+		radius(0)
 	{
 		lightPixelShader.createTerrainLightShader();
 
-		if(ps13)
-		{
-			pixelShader.createTerrainShader();
+		pixelShader.createTerrainShader();
 			
-			atiDefaultShader.createAtiTerrainShader();
-			atiLightingShader.createAtiLightingShader();
-			atiShadowShaderDirectional.createAtiTerrainShadowShaderDirectional();
-			atiShadowShaderPoint.createAtiTerrainShadowShaderPoint();
-			atiShadowShaderFlat.createAtiTerrainShadowShaderFlat();
-			atiShadowTerrainShaderDirectional.createAtiTerrainShadowShaderDirectional();
-			atiShadowTerrainShaderPoint.createAtiTerrainShadowShaderPoint();
-			atiShadowTerrainShaderFlat.createAtiTerrainShadowShaderFlat();
-			atiDepthShader.createAtiDepthTerrainShader();
+		atiDefaultShader.createAtiTerrainShader();
+		atiLightingShader.createAtiLightingShader();
+		atiShadowShaderDirectional.createAtiTerrainShadowShaderDirectional();
+		atiShadowShaderPoint.createAtiTerrainShadowShaderPoint();
+		atiShadowShaderFlat.createAtiTerrainShadowShaderFlat();
+		atiShadowTerrainShaderDirectional.createAtiTerrainShadowShaderDirectional();
+		atiShadowTerrainShaderPoint.createAtiTerrainShadowShaderPoint();
+		atiShadowTerrainShaderFlat.createAtiTerrainShadowShaderFlat();
+		atiDepthShader.createAtiDepthTerrainShader();
 
-			nvDefaultShader.createNvTerrainShader();
-			nvLightingShader.createNvLightingShader();
-			nvShadowShaderDirectional.createNvTerrainShadowShaderDirectional();
-			nvShadowShaderPoint.createNvTerrainShadowShaderPoint();
-			nvShadowShaderFlat.createNvTerrainShadowShaderFlat();
-		}
+		nvDefaultShader.createNvTerrainShader();
+		nvLightingShader.createNvLightingShader();
+		nvShadowShaderDirectional.createNvTerrainShadowShaderDirectional();
+		nvShadowShaderPoint.createNvTerrainShadowShaderPoint();
+		nvShadowShaderFlat.createNvTerrainShadowShaderFlat();
 	}
 
 	void createVertexBuffer(float textureDetail)
@@ -703,9 +698,9 @@ struct Storm3D_TerrainHeightmapData
 
 };
 
-Storm3D_TerrainHeightmap::Storm3D_TerrainHeightmap(Storm3D &storm, bool ps13)
+Storm3D_TerrainHeightmap::Storm3D_TerrainHeightmap(Storm3D &storm)
 {
-	data = new Storm3D_TerrainHeightmapData(storm, ps13);
+	data = new Storm3D_TerrainHeightmapData(storm);
 }
 
 Storm3D_TerrainHeightmap::~Storm3D_TerrainHeightmap()
@@ -1096,29 +1091,12 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene, bool atiShad
 	Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
 
 	if(atiShader)
-	{
 		data->atiDefaultShader.apply();
-	}
 	else
 		data->nvDefaultShader.apply();
 
-	if(data->ps13)
-		data->pixelShader.apply();
-	else
-	{
-		device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-		device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-		device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-
-		device.SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		device.SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
-		device.SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
-		device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE);
-		device.SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-
-		device.SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	}
+	assert(data->ps13);
+	data->pixelShader.apply();
 
 	data->vertexBuffer.apply(device, 1);
 	std::vector<RenderBlock> &visibleBlocks = data->visibleBlocks;
@@ -1406,9 +1384,6 @@ void Storm3D_TerrainHeightmap::setBlendMap(int blockIndex, Storm3D_Texture &blen
 	assert(blockIndex >= 0 && blockIndex < int(data->blocks.size())); 
 	assert(textureA >= 0 && textureA < int(data->textures.size()));
 	assert(textureB >= -1 && textureB < int(data->textures.size()));
-
-	if(!data->ps13)
-		assert(textureB == -1);
 
 	std::vector<TexturePass> &passes = data->blocks[blockIndex].passes;
 	

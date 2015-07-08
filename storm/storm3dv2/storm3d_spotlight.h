@@ -24,7 +24,7 @@ public:
 		AtiBuffer = 2
 	};
 
-	Storm3D_Spotlight(Storm3D &storm, GfxDevice &device, bool ps14, bool ps20);
+	Storm3D_Spotlight(Storm3D &storm, GfxDevice &device);
 	~Storm3D_Spotlight();
 
 	void testVisibility(Storm3D_Camera &camera);
@@ -75,8 +75,8 @@ public:
 	void releaseDynamicResources();
 	void recreateDynamicResources();
 
-	static void querySizes(Storm3D &storm, bool ps14, int shadowQuality);
-	static void createShadowBuffers(Storm3D &storm, GfxDevice &device, bool ps14, bool ps20, int shadowQuality);
+	static void querySizes(Storm3D &storm, int shadowQuality);
+	static void createShadowBuffers(Storm3D &storm, GfxDevice &device, int shadowQuality);
 	static void freeShadowBuffers();
 	static void clearCache();
 	static SpotType getSpotType();

@@ -362,13 +362,15 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 	screen_size.height = present_params.BackBufferHeight;
 	viewport_size      = screen_size;
 
-	if((adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)==0)
+    if ((adapters[active_adapter].caps & Storm3D_Adapter::CAPS_HWSHADER) == 0 ||
+        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)     == 0 ||
+        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0)
     {
-		MessageBox(NULL,"Unsupported graphics card","Storm3D Error",0);
-		return false;
+        MessageBox(NULL, "Unsupported graphics card", "Storm3D Error", 0);
+        return false;
     }
 
-	// Create the device
+    // Create the device
 	if (!device.init(D3D, active_adapter, window_handle, present_params))
 	{
 		//MessageBox(NULL,"Error creating fullscreen device","Storm3D Error",0);
@@ -387,22 +389,15 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 	}
 	gammaPeakEnabled = false;
 
-	bool ps14 = false;
-	if(adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)
-		ps14 = true;
-	bool ps20 = false;
-	if(adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)
-		ps20 = true;
-
 	setNeededDepthTarget(VC2I(width, height));
 
 	Storm3D_TerrainRenderer::querySizes(*this, true);
-	Storm3D_Spotlight::querySizes(*this, ps14, shadow_quality);
+	Storm3D_Spotlight::querySizes(*this, shadow_quality);
 	Storm3D_FakeSpotlight::querySizes(*this, fake_shadow_quality);
 	createTargets();
 	createRenderTargets();
 	Storm3D_TerrainRenderer::createRenderBuffers(*this, lighting_quality);
-	Storm3D_Spotlight::createShadowBuffers(*this, device, ps14, ps20, shadow_quality);
+	Storm3D_Spotlight::createShadowBuffers(*this, device, shadow_quality);
 	Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
@@ -482,10 +477,12 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 	screen_size.height = present_params.BackBufferHeight;
 	viewport_size      = screen_size;
 
-	if((adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)==0)
+    if ((adapters[active_adapter].caps & Storm3D_Adapter::CAPS_HWSHADER) == 0 ||
+        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)     == 0 ||
+        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0)
     {
-		MessageBox(NULL,"Unsupported graphics card","Storm3D Error",0);
-		return false;
+        MessageBox(NULL, "Unsupported graphics card", "Storm3D Error", 0);
+        return false;
     }
 
     // Create the device
@@ -508,21 +505,14 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 
 	gammaPeakEnabled = false;
 
-	bool ps14 = false;
-	if(adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)
-		ps14 = true;
-	bool ps20 = false;
-	if(adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)
-		ps20 = true;
-
 	setNeededDepthTarget(VC2I(width, height));
 	Storm3D_TerrainRenderer::querySizes(*this, true);
-	Storm3D_Spotlight::querySizes(*this, ps14, shadow_quality);
+	Storm3D_Spotlight::querySizes(*this, shadow_quality);
 	Storm3D_FakeSpotlight::querySizes(*this, fake_shadow_quality);
 	createTargets();
 	createRenderTargets();
 	Storm3D_TerrainRenderer::createRenderBuffers(*this, lighting_quality);
-	Storm3D_Spotlight::createShadowBuffers(*this, device, ps14, ps20, shadow_quality);
+	Storm3D_Spotlight::createShadowBuffers(*this, device, shadow_quality);
 	Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
@@ -586,10 +576,12 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 	screen_size.height=present_params.BackBufferHeight;
 	viewport_size=screen_size;
 
-	if((adapters[active_adapter].caps&Storm3D_Adapter::CAPS_HWSHADER)==0)
+    if ((adapters[active_adapter].caps & Storm3D_Adapter::CAPS_HWSHADER) == 0 ||
+        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)     == 0 ||
+        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0)
     {
-		MessageBox(NULL,"Unsupported graphics card","Storm3D Error",0);
-		return false;
+        MessageBox(NULL, "Unsupported graphics card", "Storm3D Error", 0);
+        return false;
     }
 
     // Create the device
@@ -611,20 +603,13 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 	}
 	gammaPeakEnabled = false;
 
-	bool ps14 = false;
-	if(adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)
-		ps14 = true;
-	bool ps20 = false;
-	if(adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)
-		ps20 = true;
-
 	needValueTargets = true;
 	setNeededDepthTarget(VC2I(width, height));
 
 	//if(!disableBuffers)
 	{
 		Storm3D_TerrainRenderer::querySizes(*this, true);
-		Storm3D_Spotlight::querySizes(*this, ps14, shadow_quality);
+		Storm3D_Spotlight::querySizes(*this, shadow_quality);
 		Storm3D_FakeSpotlight::querySizes(*this, fake_shadow_quality);
 	}
 
@@ -634,7 +619,7 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 	//if(!disableBuffers)
 	{
 		Storm3D_TerrainRenderer::createRenderBuffers(*this, lighting_quality);
-		Storm3D_Spotlight::createShadowBuffers(*this, device, ps14, ps20, shadow_quality);
+		Storm3D_Spotlight::createShadowBuffers(*this, device, shadow_quality);
 		Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
 		Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 	}
@@ -1857,18 +1842,11 @@ void Storm3D::Remove(IStorm3D_Font *ifont)
 //------------------------------------------------------------------
 IStorm3D_Terrain *Storm3D::CreateNewTerrain( int block_size )
 {
-	bool ps13 = false;
-	bool ps14 = false;
-	bool ps20 = false;
+	assert(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_PS13);
+	assert(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_PS14);
+	assert(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_PS20);
 
-	if(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_PS13)
-		ps13 = true;
-	if(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_PS14)
-		ps14 = true;
-	if(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_PS20)
-		ps20 = true;
-
-	Storm3D_Terrain *terrain = new Storm3D_Terrain(*this, ps13, ps14, ps20);
+	Storm3D_Terrain *terrain = new Storm3D_Terrain(*this);
 	terrain->getRenderer().enableFeature(IStorm3D_TerrainRenderer::Glow, enable_glow);
 	terrain->getRenderer().enableFeature(IStorm3D_TerrainRenderer::Distortion, enable_distortion);
 	terrains.insert(terrain);
@@ -2534,16 +2512,12 @@ void Storm3D::RecreateDynamicResources()
 		logger->debug("Storm3D::RecreateDynamicResources - recreating dynamic resources");
 	}
 
-	bool ps14 = false;
-	if(adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)
-		ps14 = true;
-	bool ps20 = false;
-	if(adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)
-		ps20 = true;
+	assert(adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14);
+	assert(adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20);
 
 	createTargets();
 	Storm3D_TerrainRenderer::createRenderBuffers(*this, lighting_quality);
-	Storm3D_Spotlight::createShadowBuffers(*this, device, ps14, ps20, shadow_quality);
+	Storm3D_Spotlight::createShadowBuffers(*this, device, shadow_quality);
 	Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
 
 	for(std::set<IStorm3D_Line*>::iterator il=lines.begin();il!=lines.end();++il)

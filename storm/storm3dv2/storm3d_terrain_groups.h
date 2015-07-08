@@ -19,7 +19,7 @@ class Storm3D_TerrainGroup
 	Storm3D_TerrainGroupData* data;
 
 public:
-	Storm3D_TerrainGroup(Storm3D &storm, Storm3D_TerrainModels &models, bool ps14);
+	Storm3D_TerrainGroup(Storm3D &storm, Storm3D_TerrainModels &models);
 	~Storm3D_TerrainGroup();
 
 	int addModel(boost::shared_ptr<Storm3D_Model> model, boost::shared_ptr<Storm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation);

@@ -30,7 +30,7 @@ class Storm3D_TerrainRenderer:
 	Storm3D_TerrainRendererData* data;
 
 public:
-	Storm3D_TerrainRenderer(Storm3D &storm, Storm3D_TerrainHeightmap &heightMap, Storm3D_TerrainGroup &groups, Storm3D_TerrainModels &models, Storm3D_TerrainDecalSystem &decalSystem, bool ps14, bool ps20);
+	Storm3D_TerrainRenderer(Storm3D &storm, Storm3D_TerrainHeightmap &heightMap, Storm3D_TerrainGroup &groups, Storm3D_TerrainModels &models, Storm3D_TerrainDecalSystem &decalSystem);
 	~Storm3D_TerrainRenderer();
 
 	boost::shared_ptr<IStorm3D_Spotlight> createSpot();

@@ -127,8 +127,6 @@ struct Storm3D_TerrainRendererData
 	CComPtr<IDirect3DTexture9> coneFadeTexture;
 	CComPtr<IDirect3DTexture9> noFadeTexture;
 
-	bool ps14;
-	bool ps20;
 	frozenbyte::storm::PixelShader glowShader;
 	frozenbyte::storm::PixelShader glowPs2Shader;
 	frozenbyte::storm::PixelShader glowPs14Shader;
@@ -214,7 +212,7 @@ struct Storm3D_TerrainRendererData
 	COL forcedDirectionalLightColor;
 	VC3 forcedDirectionalLightDirection;
 
-	Storm3D_TerrainRendererData(Storm3D &storm_, IStorm3D_TerrainRendererBase &rendererBase, Storm3D_TerrainHeightmap &heightMap_, Storm3D_TerrainGroup &groups_, Storm3D_TerrainModels &models_, Storm3D_TerrainDecalSystem &decalSystem_, bool ps14_, bool ps20_)
+	Storm3D_TerrainRendererData(Storm3D &storm_, IStorm3D_TerrainRendererBase &rendererBase, Storm3D_TerrainHeightmap &heightMap_, Storm3D_TerrainGroup &groups_, Storm3D_TerrainModels &models_, Storm3D_TerrainDecalSystem &decalSystem_)
 	:	storm(storm_),
 		heightMap(heightMap_),
 		groups(groups_),
@@ -224,8 +222,6 @@ struct Storm3D_TerrainRendererData
 		lightmapMultiplier(1.f, 1.f, 1.f),
 		outdoorLightmapMultiplier(1.f, 1.f, 1.f),
 		skyBox(0),
-		ps14(ps14_),
-		ps20(ps20_),
 		glowShader(storm.GetD3DDevice()),
 		glowPs2Shader(storm.GetD3DDevice()),
 		glowPs14Shader(storm.GetD3DDevice()),
@@ -298,30 +294,22 @@ struct Storm3D_TerrainRendererData
 		colorEffectShader.createColorEffectPixelShader();
 		blackWhiteShader.createBlackWhiteShader();
 
-		if(ps14)
-			glowPs14Shader.createGlowPs14Shader();
-		if(ps14 && ps20)
-		{
-			colorEffectOffsetShader.createColorEffectOffsetPixelShader();
-			colorEffectOffsetShader_NoGamma.createColorEffectOffsetPixelShader_NoGamma();
-		}
-		if(ps20)
-			glowPs2Shader.createGlowTex8Shader();
+		glowPs14Shader.createGlowPs14Shader();
+		colorEffectOffsetShader.createColorEffectOffsetPixelShader();
+		colorEffectOffsetShader_NoGamma.createColorEffectOffsetPixelShader_NoGamma();
+		glowPs2Shader.createGlowTex8Shader();
 
-		if(ps14)
-		{
-			Storm3D_ShaderManager::GetSingleton()->CreateAtiShaders(device);
-			device.CreateTexture(2048, 1, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &depthLookupTexture, 0);
+		Storm3D_ShaderManager::GetSingleton()->CreateAtiShaders(device);
+		device.CreateTexture(2048, 1, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &depthLookupTexture, 0);
 
-			D3DLOCKED_RECT lockedRect = { 0 };
-			depthLookupTexture->LockRect(0, &lockedRect, 0, 0);
+		D3DLOCKED_RECT lockedRect = { 0 };
+		depthLookupTexture->LockRect(0, &lockedRect, 0, 0);
 
-			DWORD *buffer = reinterpret_cast<DWORD *> (lockedRect.pBits);
-			for(int i = 0; i < 2048; ++i)
-				*buffer++ = D3DCOLOR_RGBA(i & 0xFF, (i & 0xFF00) >> 3, 0, 0);
+		DWORD *buffer = reinterpret_cast<DWORD *> (lockedRect.pBits);
+		for(int i = 0; i < 2048; ++i)
+			*buffer++ = D3DCOLOR_RGBA(i & 0xFF, (i & 0xFF00) >> 3, 0, 0);
 
-			depthLookupTexture->UnlockRect(0);
-		}
+		depthLookupTexture->UnlockRect(0);
 
 		// Spot fade texture
 		{
@@ -965,9 +953,9 @@ VC2I Storm3D_TerrainRendererData::fakeSize;
 VC2I Storm3D_TerrainRendererData::fakeTargetSize;
 VC2I Storm3D_TerrainRendererData::glowSize;
 
-Storm3D_TerrainRenderer::Storm3D_TerrainRenderer(Storm3D &storm, Storm3D_TerrainHeightmap &heightMap, Storm3D_TerrainGroup &groups, Storm3D_TerrainModels &models, Storm3D_TerrainDecalSystem &decalSystem, bool ps14, bool ps20)
+Storm3D_TerrainRenderer::Storm3D_TerrainRenderer(Storm3D &storm, Storm3D_TerrainHeightmap &heightMap, Storm3D_TerrainGroup &groups, Storm3D_TerrainModels &models, Storm3D_TerrainDecalSystem &decalSystem)
 {
-	data = new Storm3D_TerrainRendererData(storm, *this, heightMap, groups, models, decalSystem, ps14, ps20);
+	data = new Storm3D_TerrainRendererData(storm, *this, heightMap, groups, models, decalSystem);
 
 	setFog(false, 150.f, -50.f, COL(1.f, 0.5f, 0.5f));
 
@@ -985,7 +973,7 @@ boost::shared_ptr<IStorm3D_Spotlight> Storm3D_TerrainRenderer::createSpot()
 {
 	GfxDevice &device = data->storm.GetD3DDevice();
 
-	boost::shared_ptr<Storm3D_Spotlight> spot(new Storm3D_Spotlight(data->storm, device, data->ps14, data->ps20));
+	boost::shared_ptr<Storm3D_Spotlight> spot(new Storm3D_Spotlight(data->storm, device));
 	spot->enableSmoothing(data->smoothShadows);
 	data->spots.push_back(spot);
 
@@ -1071,8 +1059,7 @@ bool Storm3D_TerrainRenderer::enableFeature(RenderFeature feature, bool enable)
 	else if(feature == IStorm3D_TerrainRenderer::Distortion)
 	{
 		oldValue = data->renderOffsets;
-		if(data->offsetTexture && data->ps14 && data->ps20)
-			data->renderOffsets = enable;
+		data->renderOffsets = enable;
 	}
 	else if(feature == IStorm3D_TerrainRenderer::SmoothShadows)
 	{
@@ -1652,6 +1639,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 		if(data->renderGlows)
 		{
+            GFX_TRACE_SCOPE("Render Glows");
 			Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
 
 			CComPtr<IDirect3DSurface9> glowSurface1;
@@ -1767,12 +1755,13 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 			int glowPasses = (data->multipassGlow) ? 2 : 1;
 			for(int i = 0; i < glowPasses; ++i)
 			{
+                GFX_TRACE_SCOPE("Glow pass");
 				// Filter glow texture
 				{
 					device.SetVertexShader(0);
 
 					bool singlePass = false; //(data->ps20);
-					bool betterGlow = data->betterGlowSampling && data->ps14;
+					bool betterGlow = data->betterGlowSampling;
 					int stages = (singlePass) ? 8 : ((betterGlow) ? 6 : 4);
 
 					if(betterGlow)

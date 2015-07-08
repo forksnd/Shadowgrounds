@@ -26,7 +26,7 @@ class Storm3D_TerrainHeightmap
 	Storm3D_TerrainHeightmapData* data;
 
 public:
-	Storm3D_TerrainHeightmap(Storm3D &storm, bool ps13);
+	Storm3D_TerrainHeightmap(Storm3D &storm);
 	~Storm3D_TerrainHeightmap();
 
 	void setHeightMap(const unsigned short *buffer, const VC2I &resolution, const VC3 &size, int textureDetail, unsigned short *forceMap, int heightmapMultiplier, int obstaclemapMultiplier);

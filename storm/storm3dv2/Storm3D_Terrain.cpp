@@ -35,13 +35,13 @@ struct Storm3D_TerrainData
 	Storm3D_TerrainDecalSystem decalSystem;
 	Storm3D_TerrainRenderer renderer;
 
-	Storm3D_TerrainData(Storm3D &storm_, bool ps13_, bool ps14_, bool ps20_)
+	Storm3D_TerrainData(Storm3D &storm_)
 	:	storm(storm_),
-		heightMap(storm, ps13_),
+		heightMap(storm),
 		models(storm),
-		modelGroups(storm, models, ps14_),
+		modelGroups(storm, models),
 		decalSystem(storm),
-		renderer(storm, heightMap, modelGroups, models, decalSystem, ps14_, ps20_)
+		renderer(storm, heightMap, modelGroups, models, decalSystem)
 	{
 	}
 
@@ -51,9 +51,9 @@ struct Storm3D_TerrainData
 	}
 };
 
-Storm3D_Terrain::Storm3D_Terrain(Storm3D &storm, bool ps13, bool ps14, bool ps20)
+Storm3D_Terrain::Storm3D_Terrain(Storm3D &storm)
 {
-	data = new Storm3D_TerrainData(storm, ps13, ps14, ps20);
+	data = new Storm3D_TerrainData(storm);
 }
 
 Storm3D_Terrain::~Storm3D_Terrain()

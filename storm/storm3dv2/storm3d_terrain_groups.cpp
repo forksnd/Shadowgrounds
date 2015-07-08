@@ -228,7 +228,7 @@ struct Storm3D_TerrainGroupData
 
 	InstanceMap instanceMap;
 
-	Storm3D_TerrainGroupData(Storm3D &storm_, Storm3D_TerrainModels &terrainModels_, bool ps14)
+	Storm3D_TerrainGroupData(Storm3D &storm_, Storm3D_TerrainModels &terrainModels_)
 	:	storm(storm_),
 		device(storm.GetD3DDevice()),
 		terrainModels(terrainModels_)
@@ -308,9 +308,9 @@ namespace {
 
 } // unnamed
 
-Storm3D_TerrainGroup::Storm3D_TerrainGroup(Storm3D &storm, Storm3D_TerrainModels &models, bool ps14)
+Storm3D_TerrainGroup::Storm3D_TerrainGroup(Storm3D &storm, Storm3D_TerrainModels &models)
 {
-	data = new Storm3D_TerrainGroupData(storm, models, ps14);
+	data = new Storm3D_TerrainGroupData(storm, models);
 }
 
 Storm3D_TerrainGroup::~Storm3D_TerrainGroup()

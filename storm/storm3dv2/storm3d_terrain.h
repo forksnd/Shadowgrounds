@@ -20,7 +20,7 @@ class Storm3D_Terrain: public IStorm3D_Terrain
 	Storm3D_TerrainData* data;
 
 public:
-	Storm3D_Terrain(Storm3D &storm, bool ps13, bool ps14, bool ps20);
+	Storm3D_Terrain(Storm3D &storm);
 	~Storm3D_Terrain();
 
 	void setHeightMap(const unsigned short *buffer, const VC2I &resolution, const VC3 &size, int textureDetail, unsigned short *forceMap, int heightmapMultiplier, int obstaclemapMultiplier);
