@@ -523,19 +523,19 @@ void GfxDevice::createFrameResources(D3DPRESENT_PARAMETERS& params)
 
 void GfxDevice::destroyFrameResources()
 {
-    for (auto q: frame_sync)
+    for (auto& q: frame_sync)
     {
         if (q) q->Release();
         q = 0;
     }
 
-    for (auto vb: frame_vb)
+    for (auto& vb: frame_vb)
     {
         if (vb) vb->Release();
         vb = 0;
     }
 
-    for (auto ib: frame_ib16)
+    for (auto& ib: frame_ib16)
     {
         if (ib) ib->Release();
         ib = 0;
@@ -822,7 +822,7 @@ HRESULT GfxDevice::SetVertexShader(IDirect3DVertexShader9* pShader)
 HRESULT GfxDevice::SetVertexShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount)
 {
     assert(StartRegister<MAX_CONSTS);
-    assert(StartRegisterVector4fCount<=MAX_CONSTS);
+    assert(StartRegister+Vector4fCount<=MAX_CONSTS);
     vconsts_range_min = min(vconsts_range_min, StartRegister);
     while(Vector4fCount--)
     {
@@ -899,7 +899,7 @@ HRESULT GfxDevice::SetPixelShader(IDirect3DPixelShader9* pShader)
 HRESULT GfxDevice::SetPixelShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount)
 {
     assert(StartRegister<MAX_CONSTS);
-    assert(StartRegisterVector4fCount<=MAX_CONSTS);
+    assert(StartRegister+Vector4fCount<=MAX_CONSTS);
     pconsts_range_min = min(pconsts_range_min, StartRegister);
     while(Vector4fCount--)
     {

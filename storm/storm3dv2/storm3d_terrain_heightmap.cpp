@@ -212,15 +212,7 @@
 		}
 	};
 
-	struct TerrainTexture
-	{
-		boost::shared_ptr<Storm3D_Texture> texture;
-
-		explicit TerrainTexture(boost::shared_ptr<Storm3D_Texture> texture_)
-		:	texture(texture_)
-		{
-		}
-	};
+	typedef  boost::shared_ptr<Storm3D_Texture> SharedTexture;
 
 	struct RenderBlock
 	{
@@ -282,8 +274,7 @@ struct Storm3D_TerrainHeightmapData
 	std::vector<TerrainBlock> blocks;
 	boost::shared_ptr<Storm3D_TerrainLod> indexBuffer;
 
-	std::vector<TerrainTexture> textures;
-	boost::shared_ptr<Storm3D_Texture> lightmap;
+	std::vector<SharedTexture> textures;
 
 	const unsigned short *obstacleHeightmap;
 	const util::AreaMap *areaMap;
@@ -1095,7 +1086,6 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene, bool atiShad
 	else
 		data->nvDefaultShader.apply();
 
-	assert(data->ps13);
 	data->pixelShader.apply();
 
 	data->vertexBuffer.apply(device, 1);
@@ -1138,13 +1128,13 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene, bool atiShad
 
 			if(p.textureA != textureA)
 			{
-				data->textures[p.textureA].texture->Apply(1);
+				data->textures[p.textureA]->Apply(1);
 				textureA = p.textureA;
 			}
 			if(p.textureB != textureB)
 			{
 				if(p.textureB >= 0)
-					data->textures[p.textureB].texture->Apply(2);
+					data->textures[p.textureB]->Apply(2);
 				else
 					device.SetTexture(2, 0);
 
@@ -1369,7 +1359,7 @@ void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera 
 
 int Storm3D_TerrainHeightmap::addTerrainTexture(Storm3D_Texture &texture)
 {
-	data->textures.push_back(TerrainTexture(frozenbyte::storm::createSharedTexture(&texture)));
+	data->textures.push_back(frozenbyte::storm::createSharedTexture(&texture));
 	return data->textures.size() - 1;
 }
 
