@@ -12,6 +12,7 @@
 #include "storm3d_resourcemanager.h"
 #include "Storm3D_ProceduralManager.h"
 #include <atlbase.h>
+#include "storm3d_terrain_utils.h"
 
 // Forward declarations
 class IStorm3D_BoneAnimation;
@@ -156,7 +157,11 @@ private:
 	bool hasNeededBuffers();
 	bool force_reset;
 
+    IndexStorage16  indices;
+
 public:
+
+    IndexStorage16& getIndexStorage16() {return indices;}
 
 	// 3d-supports (currect, mode depencent, not adapter depencent)
 	bool support_stencil;

@@ -8,6 +8,7 @@
 #include "GfxDevice.h"
 #include <atlbase.h>
 #include <vector>
+#include <etlsf.h>
 
 class Storm3D_Texture;
 class IStorm3D_Logger;
@@ -256,5 +257,23 @@ void setCulling(GfxDevice& device, DWORD type);
 
 } // storm
 } // frozenbyte
+
+struct IndexStorage16
+{
+    LPDIRECT3DINDEXBUFFER9 indices;
+    etlsf_t                allocator;
+    uint16_t               locked;
+
+    void init(GfxDevice& device, uint32_t size, uint16_t max_allocs = 0xFFFF);
+    void fini();
+
+    uint16_t alloc(uint32_t numIndices);
+    void free(uint16_t id);
+
+    uint16_t* lock(uint16_t id);
+    void      unlock();
+
+    uint32_t baseIndex(uint16_t id);
+};
 
 #endif

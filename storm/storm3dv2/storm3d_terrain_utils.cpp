@@ -2289,8 +2289,6 @@ IndexBuffer::operator bool() const
 	return buffer != 0;
 }
 
-// --
-
 boost::shared_ptr<Storm3D_Texture> createSharedTexture(Storm3D_Texture *texture)
 {
 	if(texture)
@@ -2383,4 +2381,61 @@ void setCulling(GfxDevice& device, DWORD type)
 
 } // storm
 } // frozenbyte
+
+void IndexStorage16::init(GfxDevice& device, uint32_t size, uint16_t max_allocs)
+{
+    device.CreateIndexBuffer(size, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &indices, NULL);
+    allocator = etlsf_create(size, max_allocs);
+    locked    = 0;
+}
+
+void IndexStorage16::fini()
+{
+    etlsf_destroy(allocator);
+    indices->Release();
+
+    locked    = 0;
+    indices   = 0;
+    allocator = 0;
+}
+
+uint16_t IndexStorage16::alloc(uint32_t numIndices)
+{
+    return etlsf_alloc(allocator, numIndices * sizeof(uint16_t));
+}
+
+void IndexStorage16::free(uint16_t id)
+{
+    etlsf_free(allocator, id);
+}
+
+uint16_t* IndexStorage16::lock(uint16_t id)
+{
+    assert(locked == 0);
+    assert(etlsf_is_block_valid(allocator, id));
+    
+    locked = id;
+
+    uint32_t offset = etlsf_block_offset(allocator, id);
+    uint32_t size   = etlsf_block_size(allocator, id);
+
+    void* ptr = 0;
+    indices->Lock(offset, size, &ptr, 0);
+
+    return (uint16_t*)ptr;
+}
+
+void IndexStorage16::unlock()
+{
+    assert(locked != 0);
+
+    indices->Unlock();
+
+    locked = 0;
+}
+
+uint32_t IndexStorage16::baseIndex(uint16_t id)
+{
+    return etlsf_block_offset(allocator, id) / sizeof(uint16_t);
+}
 

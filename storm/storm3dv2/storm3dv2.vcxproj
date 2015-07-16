@@ -479,6 +479,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='shadowground no physics|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="etlsf.c" />
     <ClCompile Include="GfxDevice.cpp" />
     <ClCompile Include="IStorm3D.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1254,6 +1255,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Clipper.h" />
+    <ClInclude Include="etlsf.h" />
     <ClInclude Include="GfxDevice.h" />
     <ClInclude Include="DatatypeDef.h" />
     <ClInclude Include="Iterator.h" />

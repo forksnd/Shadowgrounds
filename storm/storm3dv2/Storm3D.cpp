@@ -43,6 +43,8 @@
 
 using namespace frozenbyte;
 
+static const size_t INDEX_STORAGE_SIZE = 20 * (1<<20);
+
 // HACK: for statistics
 extern int storm3d_model_boneanimation_allocs;
 extern int storm3d_model_loads;
@@ -401,6 +403,8 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 	Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
+    indices.init(device, INDEX_STORAGE_SIZE);
+
 	// Create shader manager
 	new Storm3D_ShaderManager(device);
 
@@ -516,6 +520,8 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 	Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
+    indices.init(device, INDEX_STORAGE_SIZE);
+
 	// Create shader manager
 	new Storm3D_ShaderManager(device);
 
@@ -623,6 +629,8 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 		Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
 		Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 	}
+
+    indices.init(device, INDEX_STORAGE_SIZE);
 
 	// Create shader manager
 	new Storm3D_ShaderManager(device);
@@ -786,6 +794,7 @@ Storm3D::~Storm3D()
 		delete (*textures.begin());
 	}
 
+    indices.fini();
 	// Release Direct3D stuff
     device.fini();
     if(D3D) D3D->Release();
