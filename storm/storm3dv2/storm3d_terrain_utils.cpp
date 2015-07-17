@@ -2384,7 +2384,7 @@ void setCulling(GfxDevice& device, DWORD type)
 
 void IndexStorage16::init(GfxDevice& device, uint32_t size, uint16_t max_allocs)
 {
-    device.CreateIndexBuffer(size, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &indices, NULL);
+    device.CreateIndexBuffer(size, D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_MANAGED, &indices, NULL);
     allocator = etlsf_create(size, max_allocs);
     locked    = 0;
 }

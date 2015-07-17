@@ -12,6 +12,7 @@
 #include "storm3d_resourcemanager.h"
 #include <c2_sphere.h>
 #include <vector>
+#include <stdint.h>
 
 class Storm3D_Bone;
 
@@ -32,60 +33,20 @@ struct Storm3D_Weight
 
 struct Storm3D_BoneChunk
 {
-	Storm3D_BoneChunk()
-	:	index_buffer(0),
-		vertex_buffer(0),
-		index_count(0),
-		vertex_count(0)
-	{
-	}
+    Storm3D_BoneChunk()
+      : idx_id(0),
+        vertex_buffer(0),
+        index_count(0),
+        vertex_count(0)
+    {
+    }
 
-	Storm3D_BoneChunk(const Storm3D_BoneChunk &other)
-	:	index_buffer(0),
-		vertex_buffer(0),
-		index_count(0),
-		vertex_count(0)
-	{
-		*this = other;
-	}
-
-	~Storm3D_BoneChunk() 
-	{ 
-		if(index_buffer)
-			index_buffer->Release();
-		if(vertex_buffer)
-			vertex_buffer->Release();
-	}
-
-	Storm3D_BoneChunk &operator = (const Storm3D_BoneChunk &other)
-	{
-		if(index_buffer)
-			index_buffer->Release();
-		if(vertex_buffer)
-			vertex_buffer->Release();
-		
-		bone_indices = other.bone_indices;
-
-		vertex_count = other.vertex_count;
-		vertex_buffer = other.vertex_buffer;
-		if(vertex_buffer)
-			vertex_buffer->AddRef();
-
-		index_count = other.index_count;
-		index_buffer = other.index_buffer;
-		if(index_buffer)
-			index_buffer->AddRef();
-
-		return *this;
-	}
-
-	// Bone index, shader index
-	//std::vector<std::pair<int, int> > bone_indices;
-	std::vector<int> bone_indices;
-	LPDIRECT3DINDEXBUFFER9 index_buffer;
-	LPDIRECT3DVERTEXBUFFER9 vertex_buffer;
-	int index_count;
-	int vertex_count;
+    std::vector<int> bone_indices;
+    uint16_t idx_id;
+    LPDIRECT3DVERTEXBUFFER9 vertex_buffer;
+    int base_index;
+    int index_count;
+    int vertex_count;
 };
 
 
@@ -103,6 +64,7 @@ class Storm3D_Mesh : public IStorm3D_Mesh
 
 	// Vertex/face data (temporary)
 	int face_amount[LOD_AMOUNT];
+    int base_index[LOD_AMOUNT];
 	int vertex_amount;
 	int render_face_amount[LOD_AMOUNT];
 	int render_vertex_amount;
@@ -118,7 +80,7 @@ class Storm3D_Mesh : public IStorm3D_Mesh
 
 	// DirectX Buffers (temporary)
 	LPDIRECT3DVERTEXBUFFER9 dx_vbuf;	// Vertexbuffer (in videomemory)
-	LPDIRECT3DINDEXBUFFER9 dx_ibuf[LOD_AMOUNT]; // Indexbuffer (in videomemory)
+    uint16_t indicesId[LOD_AMOUNT];
 	int vbuf_vsize;
 	DWORD vbuf_fvf;
 	
@@ -150,6 +112,8 @@ class Storm3D_Mesh : public IStorm3D_Mesh
 	mutable bool sphere_ok;
 	mutable bool box_ok;
 
+    void clearBoneChunks();
+
 public:
 	const Sphere &getBoundingSphere() const;
 	const AABB &getBoundingBox() const;
@@ -164,7 +128,6 @@ public:
 
 	// Rendering
 	void RenderBuffers(Storm3D_Model_Object *object);		// Renders buffers only
-	void RenderBuffersWithoutTransformation();				// Renders buffers only
 	void Render(Storm3D_Scene *scene,bool mirrored,Storm3D_Model_Object *object);		// Applies material, animates, renders (use this mainly)
 	void RenderWithoutMaterial(Storm3D_Scene *scene,bool mirrored,Storm3D_Model_Object *object);
 	void RenderToBackground(Storm3D_Scene *scene,Storm3D_Model_Object *object);
@@ -207,9 +170,6 @@ public:
 	// Test ray collision (these return true if collided)
 	bool RayTrace(const VC3 &position,const VC3 &direction_normalized,float ray_length,Storm3D_CollisionInfo &rti, bool accurate);
 	bool SphereCollision(const VC3 &position,float radius,Storm3D_CollisionInfo &cinf, bool accurate);
-
-	void applyBuffers();
-	int renderPrimitives(float range);
 
 	friend class Storm3D_Model;
 	friend class Storm3D_Mesh_CollisionTable;
