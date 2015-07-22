@@ -35,7 +35,9 @@ struct Storm3D_BoneChunk
 {
     Storm3D_BoneChunk()
       : idx_id(0),
-        vertex_buffer(0),
+        vtx_id(0),
+        base_index(0),
+        base_vertex(0),
         index_count(0),
         vertex_count(0)
     {
@@ -43,9 +45,10 @@ struct Storm3D_BoneChunk
 
     std::vector<int> bone_indices;
     uint16_t idx_id;
-    LPDIRECT3DVERTEXBUFFER9 vertex_buffer;
+    uint16_t vtx_id;
     int base_index;
     int index_count;
+    int base_vertex;
     int vertex_count;
 };
 
@@ -66,6 +69,7 @@ class Storm3D_Mesh : public IStorm3D_Mesh
 	int face_amount[LOD_AMOUNT];
     int base_index[LOD_AMOUNT];
 	int vertex_amount;
+    int base_vertex;
 	int render_face_amount[LOD_AMOUNT];
 	int render_vertex_amount;
 	bool hasLods;
@@ -79,8 +83,9 @@ class Storm3D_Mesh : public IStorm3D_Mesh
 	std::vector<Storm3D_BoneChunk> bone_chunks[LOD_AMOUNT];
 
 	// DirectX Buffers (temporary)
-	LPDIRECT3DVERTEXBUFFER9 dx_vbuf;	// Vertexbuffer (in videomemory)
-    uint16_t indicesId[LOD_AMOUNT];
+    uint16_t vertices_id;
+    uint16_t indices_id[LOD_AMOUNT];
+
 	int vbuf_vsize;
 	DWORD vbuf_fvf;
 	

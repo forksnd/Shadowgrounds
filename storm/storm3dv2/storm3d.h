@@ -158,10 +158,12 @@ private:
 	bool force_reset;
 
     IndexStorage16  indices;
+    VertexStorage   vertices;
 
 public:
 
     IndexStorage16& getIndexStorage16() {return indices;}
+    VertexStorage&  getVertexStorage()  {return vertices;}
 
 	// 3d-supports (currect, mode depencent, not adapter depencent)
 	bool support_stencil;

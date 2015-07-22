@@ -36,7 +36,7 @@ Storm3D_Mesh::Storm3D_Mesh(Storm3D *s2, Storm3D_ResourceManager &resourceManager
 	hasLods(false),
 	vertexes(NULL),
 	bone_weights(NULL),
-	dx_vbuf(NULL),
+	vertices_id(0),
 	radius(0),
 	sq_radius(0),
 	radius2d(0),
@@ -54,7 +54,7 @@ Storm3D_Mesh::Storm3D_Mesh(Storm3D *s2, Storm3D_ResourceManager &resourceManager
 		render_face_amount[i] = 0;
 		face_amount[i] = 0;
 		faces[i] = 0;
-		indicesId[i] = 0;
+		indices_id[i] = 0;
 	}
 	storm3d_mesh_allocs++;
 }
@@ -147,16 +147,17 @@ Storm3D_Mesh::~Storm3D_Mesh()
 	delete[] bone_weights;
 
 	// Release buffers
-	if (dx_vbuf) 
-		dx_vbuf->Release();
-
+    
+    VertexStorage&  vtxStorage = Storm3D2->getVertexStorage();
     IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
+
+    vtxStorage.free(vertices_id);
 
 	for(int i = 0; i < LOD_AMOUNT; ++i)
 	{
 		delete[] faces[i];
 		
-        idxStorage.free(indicesId[i]);
+        idxStorage.free(indices_id[i]);
 	}
 
 	if(material)
@@ -370,17 +371,14 @@ void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_O
 //------------------------------------------------------------------
 void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
 {
-    // Test
-    if (dx_vbuf == NULL)
-        return;
-    if (indicesId[0] == NULL)
-        return;
-
     int lod = object->parent_model->lodLevel;
     if (!hasLods)
         lod = 0;
 
+    VertexStorage& vtxStorage = Storm3D2->getVertexStorage();
     IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
+
+    Storm3D2->device.SetStreamSource(0, vtxStorage.vertices, 0, vbuf_vsize);
     Storm3D2->device.SetIndices(idxStorage.indices);
 
     if (bone_weights)
@@ -390,11 +388,10 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
             Storm3D_ShaderManager *manager = Storm3D_ShaderManager::GetSingleton();
             manager->SetShader(Storm3D2->device, bone_chunks[lod][i].bone_indices);
 
-            Storm3D2->device.SetStreamSource(0, bone_chunks[lod][i].vertex_buffer, 0, vbuf_vsize);
 
             Storm3D2->device.DrawIndexedPrimitive(
                 D3DPT_TRIANGLELIST,
-                0, 0, bone_chunks[lod][i].vertex_count,
+                bone_chunks[lod][i].base_vertex, 0, bone_chunks[lod][i].vertex_count,
                 bone_chunks[lod][i].base_index, bone_chunks[lod][i].index_count
             );
 
@@ -403,11 +400,9 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
     }
     else
     {
-        Storm3D2->device.SetStreamSource(0, dx_vbuf, 0, vbuf_vsize);
-
         Storm3D2->device.DrawIndexedPrimitive(
             D3DPT_TRIANGLELIST,
-            0, 0, render_vertex_amount,
+            base_vertex, 0, render_vertex_amount,
             base_index[lod], render_face_amount[lod]
         );
 
@@ -425,8 +420,8 @@ void Storm3D_Mesh::Render(Storm3D_Scene *scene,bool mirrored,Storm3D_Model_Objec
 	PrepareForRender(scene,object);
 
 	// Test
-	if (dx_vbuf==NULL) return;
-	if (indicesId[0]==NULL) return;
+	if (vertices_id==NULL) return;
+	if (indices_id[0]==NULL) return;
 
 	// Prepare material for rendering (v3)
 	PrepareMaterialForRender(scene,object);
@@ -469,8 +464,8 @@ void Storm3D_Mesh::RenderWithoutMaterial(Storm3D_Scene *scene,bool mirrored,Stor
 	PrepareForRender(scene,object);
 
 	// Test
-	if (dx_vbuf==NULL) return;
-	if (indicesId[0]==NULL) return;
+	if (vertices_id==NULL) return;
+	if (indices_id[0]==NULL) return;
 
 	// Reverse culling if mirrored
 	if (mirrored)
@@ -503,8 +498,8 @@ void Storm3D_Mesh::RenderToBackground(Storm3D_Scene *scene,Storm3D_Model_Object 
 	PrepareForRender(scene,object);
 
 	// Test
-	if (dx_vbuf==NULL) return;
-	if (indicesId[0]==NULL) return;
+	if (vertices_id==NULL) return;
+	if (indices_id[0]==NULL) return;
 
 	// Prepare material for rendering (v3)
 	PrepareMaterialForRender(scene,object);
@@ -526,6 +521,7 @@ void Storm3D_Mesh::clearBoneChunks()
 {
     int lodLevels = hasLods ? LOD_AMOUNT : 1;
     IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
+    VertexStorage&  vtxStorage = Storm3D2->getVertexStorage();
 
     for(int lod = 0; lod < lodLevels; ++lod)
     {
@@ -533,8 +529,7 @@ void Storm3D_Mesh::clearBoneChunks()
         {
             auto chunk = bone_chunks[lod][i];
             idxStorage.free(chunk.idx_id);
-            if (chunk.vertex_buffer)
-                chunk.vertex_buffer->Release();
+            vtxStorage.free(chunk.vtx_id);
         }
 
         bone_chunks[lod].clear();
@@ -555,32 +550,19 @@ void Storm3D_Mesh::ReBuild()
     if (vertex_amount < 1) return;
 
     // Select format for vertexbuffer
-    int size = sizeof(Vertex_P3NUV2);
-
-    vbuf_fvf = FVF_P3NUV2;
-
     if (bone_weights)
     {
-        size = sizeof(Vertex_P3NUV4);
+        vbuf_vsize = sizeof(Vertex_P3NUV4);
         vbuf_fvf = FVF_P3NUV4;
     }
-
-    // Test if failed
-    if (size < 1) return;
-
-    // Save size/fvf to object
-    vbuf_vsize = size;
-
-    // Create DX8 vertex/index buffers...
-
-    if (update_vx_amount)
+    else
     {
-        // Create new vertexbuffer (and release old)
-        if (dx_vbuf) dx_vbuf->Release();
-
-        Storm3D2->device.CreateVertexBuffer(vertex_amount*size, D3DUSAGE_WRITEONLY,
-            0, D3DPOOL_MANAGED, &dx_vbuf, 0);
+        vbuf_vsize = sizeof(Vertex_P3NUV2);
+        vbuf_fvf = FVF_P3NUV2;
     }
+
+    IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
+    VertexStorage&  vtxStorage = Storm3D2->getVertexStorage();
 
     int lodLevels = hasLods ? LOD_AMOUNT : 1;
 
@@ -588,8 +570,6 @@ void Storm3D_Mesh::ReBuild()
     if ((bone_weights) && ((update_vx) || (update_fc)))
     {
         clearBoneChunks();
-
-        IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
 
         for (int lod = 0; lod < lodLevels; ++lod)
         {
@@ -743,16 +723,13 @@ void Storm3D_Mesh::ReBuild()
 
                 // Create vertex buffer
                 {
-                    if (chunk.vertex_buffer)
-                        chunk.vertex_buffer->Release();
+                    assert(vbuf_vsize==sizeof(Vertex_P3NUV4));
 
-                    Storm3D2->device.CreateVertexBuffer(vertex_list.size() * size, D3DUSAGE_WRITEONLY,
-                        0, D3DPOOL_MANAGED, &chunk.vertex_buffer, 0);
+                    vtxStorage.free(chunk.vtx_id);
 
-                    BYTE *vp = 0;
-                    chunk.vertex_buffer->Lock(0, 0, (void**)&vp, 0);
+                    chunk.vtx_id = vtxStorage.alloc<Vertex_P3NUV4>(vertex_list.size());
 
-                    Vertex_P3NUV4 *v = (Vertex_P3NUV4*)vp;
+                    Vertex_P3NUV4 *v = vtxStorage.lock<Vertex_P3NUV4>(chunk.vtx_id);
                     float weight[4] = { 0 };
 
                     for (unsigned int i = 0; i < vertex_list.size(); ++i)
@@ -816,14 +793,13 @@ void Storm3D_Mesh::ReBuild()
                         };
                     }
 
-                    chunk.vertex_buffer->Unlock();
+                    vtxStorage.unlock();
                     chunk.vertex_count = vertex_list.size();
+                    chunk.base_vertex = vtxStorage.baseVertex<Vertex_P3NUV4>(chunk.vtx_id);
                 }
             }
         }
     }
-
-    IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
 
     for (int i = 0; i < lodLevels; ++i)
     {
@@ -833,10 +809,10 @@ void Storm3D_Mesh::ReBuild()
         if (update_fc_amount)
         {
             // Create new indexbuffer (and delete old)
-            idxStorage.free(indicesId[i]);
+            idxStorage.free(indices_id[i]);
 
-            indicesId[i] = idxStorage.alloc(face_amount[i] * 3);
-            base_index[i] = idxStorage.baseIndex(indicesId[i]);
+            indices_id[i] = idxStorage.alloc(face_amount[i] * 3);
+            base_index[i] = idxStorage.baseIndex(indices_id[i]);
 
             //update_fc_amount = false;
         }
@@ -844,7 +820,7 @@ void Storm3D_Mesh::ReBuild()
         if (update_fc)
         {
             // Copy data to indexbuffer
-            uint16_t *ip = idxStorage.lock(indicesId[i]);
+            uint16_t *ip = idxStorage.lock(indices_id[i]);
             if (ip)
             {
                 for (int j = 0; j < face_amount[i]; j++)
@@ -863,14 +839,13 @@ void Storm3D_Mesh::ReBuild()
 
     if ((update_vx) && (!bone_weights))
     {
-        // Copy data to vertexbuffer
-        BYTE *vp;
-        dx_vbuf->Lock(0, 0, (void**)&vp, 0);
-        if (vp == NULL) return;
+        assert(vbuf_vsize==sizeof(Vertex_P3NUV2));
 
-        // Typecast (to simplify code)
-        Vertex_P3NUV2 *v = (Vertex_P3NUV2*)vp;
+        vtxStorage.free(vertices_id);
 
+        vertices_id = vtxStorage.alloc<Vertex_P3NUV2>(vertex_amount);
+
+        Vertex_P3NUV2 *v = vtxStorage.lock<Vertex_P3NUV2>(vertices_id);
         for(int i=0;i<vertex_amount;i++)
         {
             v[i] = {
@@ -880,8 +855,9 @@ void Storm3D_Mesh::ReBuild()
                 vertexes[i].texturecoordinates2
             };
         }
+        vtxStorage.unlock();
 
-        dx_vbuf->Unlock();
+        base_vertex = vtxStorage.baseVertex<Vertex_P3NUV2>(vertices_id);
     }
 
     // Crear the markers

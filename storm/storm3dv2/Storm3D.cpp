@@ -44,6 +44,7 @@
 using namespace frozenbyte;
 
 static const size_t INDEX_STORAGE_SIZE = 20 * (1<<20);
+static const size_t VERTEX_STORAGE_SIZE = 200 * (1<<20);
 
 // HACK: for statistics
 extern int storm3d_model_boneanimation_allocs;
@@ -404,6 +405,7 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
     indices.init(device, INDEX_STORAGE_SIZE);
+    vertices.init(device, VERTEX_STORAGE_SIZE);
 
 	// Create shader manager
 	new Storm3D_ShaderManager(device);
@@ -521,6 +523,7 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
     indices.init(device, INDEX_STORAGE_SIZE);
+    vertices.init(device, VERTEX_STORAGE_SIZE);
 
 	// Create shader manager
 	new Storm3D_ShaderManager(device);
@@ -631,6 +634,7 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 	}
 
     indices.init(device, INDEX_STORAGE_SIZE);
+    vertices.init(device, VERTEX_STORAGE_SIZE);
 
 	// Create shader manager
 	new Storm3D_ShaderManager(device);
@@ -795,7 +799,9 @@ Storm3D::~Storm3D()
 	}
 
     indices.fini();
-	// Release Direct3D stuff
+    vertices.fini();
+
+    // Release Direct3D stuff
     device.fini();
     if(D3D) D3D->Release();
 
