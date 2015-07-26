@@ -39,7 +39,7 @@ public:
 	unsigned short *getCollisionHeightmap();
 
 	void calculateVisibility(Storm3D_Scene &scene);
-	void renderTextures(Storm3D_Scene &scene, bool atiShader);
+	void renderTextures(Storm3D_Scene &scene);
 
 	enum RenderMode
 	{
@@ -47,14 +47,8 @@ public:
 		Depth,
 		Projection,
 	};
-	enum RenderType
-	{
-		Ati,
-		Nv
-	};
 
-	void renderDepth(Storm3D_Scene &scene, Storm3D_Camera *camera, RenderMode mode, RenderType type, IStorm3D_Spotlight::Type spot_type, Storm3D_Spotlight *spot);
-	//void renderDepth(Storm3D_Scene &scene, Storm3D_Camera *camera, bool atiShader, bool atiLightingShader, int spot_type);
+	void renderDepth(Storm3D_Scene &scene, Storm3D_Camera *camera, RenderMode mode, IStorm3D_Spotlight::Type spot_type, Storm3D_Spotlight *spot);
 
 	// Texturing
 	int addTerrainTexture(Storm3D_Texture &texture);

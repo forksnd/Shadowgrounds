@@ -255,14 +255,6 @@ struct Storm3D_TerrainHeightmapData
 	frozenbyte::storm::PixelShader pixelShader;
 	frozenbyte::storm::PixelShader lightPixelShader;
 
-	frozenbyte::storm::VertexShader atiDefaultShader;
-	frozenbyte::storm::VertexShader atiLightingShader;
-	frozenbyte::storm::VertexShader atiShadowShaderDirectional;
-	frozenbyte::storm::VertexShader atiShadowShaderPoint;
-	frozenbyte::storm::VertexShader atiShadowShaderFlat;
-	frozenbyte::storm::VertexShader atiShadowTerrainShaderDirectional;
-	frozenbyte::storm::VertexShader atiShadowTerrainShaderPoint;
-	frozenbyte::storm::VertexShader atiShadowTerrainShaderFlat;
 	frozenbyte::storm::VertexShader atiDepthShader;
 	frozenbyte::storm::VertexShader nvDefaultShader;
 	frozenbyte::storm::VertexShader nvLightingShader;
@@ -296,14 +288,6 @@ struct Storm3D_TerrainHeightmapData
 
 		pixelShader(device),
 		lightPixelShader(device),
-		atiDefaultShader(device),
-		atiLightingShader(device),
-		atiShadowShaderDirectional(device),
-		atiShadowShaderPoint(device),
-		atiShadowShaderFlat(device),
-		atiShadowTerrainShaderDirectional(device),
-		atiShadowTerrainShaderPoint(device),
-		atiShadowTerrainShaderFlat(device),
 		atiDepthShader(device),
 		nvDefaultShader(device),
 		nvLightingShader(device),
@@ -324,16 +308,7 @@ struct Storm3D_TerrainHeightmapData
 
 		pixelShader.createTerrainShader();
 			
-		atiDefaultShader.createAtiTerrainShader();
-		atiLightingShader.createAtiLightingShader();
-		atiShadowShaderDirectional.createAtiTerrainShadowShaderDirectional();
-		atiShadowShaderPoint.createAtiTerrainShadowShaderPoint();
-		atiShadowShaderFlat.createAtiTerrainShadowShaderFlat();
-		atiShadowTerrainShaderDirectional.createAtiTerrainShadowShaderDirectional();
-		atiShadowTerrainShaderPoint.createAtiTerrainShadowShaderPoint();
-		atiShadowTerrainShaderFlat.createAtiTerrainShadowShaderFlat();
 		atiDepthShader.createAtiDepthTerrainShader();
-
 		nvDefaultShader.createNvTerrainShader();
 		nvLightingShader.createNvLightingShader();
 		nvShadowShaderDirectional.createNvTerrainShadowShaderDirectional();
@@ -1088,7 +1063,7 @@ void Storm3D_TerrainHeightmap::calculateVisibility(Storm3D_Scene &scene)
 	data->collectVisibleBlocks(scene, visibleBlocks);
 }
 
-void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene, bool atiShader)
+void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainHeightmap::renderTextures");
 	GfxDevice& device = data->device;
@@ -1099,10 +1074,7 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene, bool atiShad
 	D3DXMATRIX tm = dm;
 	Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
 
-	if(atiShader)
-		data->atiDefaultShader.apply();
-	else
-		data->nvDefaultShader.apply();
+	data->nvDefaultShader.apply();
 
 	data->pixelShader.apply();
 
@@ -1188,7 +1160,7 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene, bool atiShad
 	device.SetStreamSource(1, 0, 0, 0);
 }
 
-void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera *camera, RenderMode mode, RenderType type, IStorm3D_Spotlight::Type spot_type, Storm3D_Spotlight *spot)
+void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera *camera, RenderMode mode, IStorm3D_Spotlight::Type spot_type, Storm3D_Spotlight *spot)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainHeightmap::renderDepth");
 	GfxDevice& device = data->device;
@@ -1218,28 +1190,14 @@ void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera 
 			frustum2 = &realFrustum2;
 		}
 
-		if(type == Ati)
-		{
-			if(spot_type == IStorm3D_Spotlight::Directional)
-				data->atiShadowShaderDirectional.apply();
-			if(spot_type == IStorm3D_Spotlight::Point)
-				data->atiShadowShaderPoint.apply();
-			if(spot_type == IStorm3D_Spotlight::Flat)
-				data->atiShadowShaderFlat.apply();
-			if(spot_type == -1)
-				data->atiDefaultShader.apply();
-		}
-		else if(type == Nv)
-		{
-			if(spot_type == IStorm3D_Spotlight::Directional)
-				data->nvShadowShaderDirectional.apply();
-			if(spot_type == IStorm3D_Spotlight::Point)
-				data->nvShadowShaderPoint.apply();
-			if(spot_type == IStorm3D_Spotlight::Flat)
-				data->nvShadowShaderFlat.apply();
-			if(spot_type == -1)
-				data->nvDefaultShader.apply();
-		}
+		if(spot_type == IStorm3D_Spotlight::Directional)
+			data->nvShadowShaderDirectional.apply();
+		if(spot_type == IStorm3D_Spotlight::Point)
+			data->nvShadowShaderPoint.apply();
+		if(spot_type == IStorm3D_Spotlight::Flat)
+			data->nvShadowShaderFlat.apply();
+		if(spot_type == -1)
+			data->nvDefaultShader.apply();
 	}
 	else if(mode == Lighting)
 	{
@@ -1256,10 +1214,7 @@ void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera 
 		Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm, false, true);
 		Storm3D_ShaderManager::GetSingleton()->ApplyForceAmbient(device);
 
-		if(type == Ati)
-			data->atiLightingShader.apply();
-		else if(type == Nv)
-			data->nvLightingShader.apply();
+		data->nvLightingShader.apply();
 
 		data->lightPixelShader.apply();
 

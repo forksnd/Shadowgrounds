@@ -17,13 +17,6 @@ class Storm3D_Spotlight: public IStorm3D_Spotlight
 	Storm3D_SpotlightData* data;
 
 public:
-	enum SpotType
-	{
-		Legacy = 0,
-		DepthBuffer = 1,
-		AtiBuffer = 2
-	};
-
 	Storm3D_Spotlight(Storm3D &storm, GfxDevice &device);
 	~Storm3D_Spotlight();
 
@@ -79,7 +72,6 @@ public:
 	static void createShadowBuffers(Storm3D &storm, GfxDevice &device, int shadowQuality);
 	static void freeShadowBuffers();
 	static void clearCache();
-	static SpotType getSpotType();
 };
 
 #endif

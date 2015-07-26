@@ -43,8 +43,6 @@ public:
 	void create2DShader2Tex();
 
 	void createTerrainShader();
-	void createAtiTerrainShader();
-	void createAtiLightingShader();
 	void createNvTerrainShader();
 	void createNvLightingShader();
 
@@ -93,23 +91,11 @@ public:
 	void createBoneProjectionShaderPoint();
 	void createBoneProjectionShaderFlat();
 
-	void createAtiDepthShader();
 	void createAtiDepthTerrainShader();
-	void createAtiBoneDepthShader();
-	void createAtiShadowShaderDirectional();
-	void createAtiShadowShaderPoint();
-	void createAtiShadowShaderFlat();
-	void createAtiBoneShadowShaderDirectional();
-	void createAtiBoneShadowShaderPoint();
-	void createAtiBoneShadowShaderFlat();
-	void createAtiTerrainShadowShaderDirectional();
-	void createAtiTerrainShadowShaderPoint();
-	void createAtiTerrainShadowShaderFlat();
 	void createNvTerrainShadowShaderDirectional();
 	void createNvTerrainShadowShaderPoint();
 	void createNvTerrainShadowShaderFlat();
 
-	void createAtiConeShader();
 	void createNvConeShader();
 	void createConeStencilShader();
 	void createDecalShader();
@@ -148,21 +134,6 @@ public:
 	void createGlowPs14Shader();
 	void createGlowFinalShader();
 	void createLightShader();
-	void createAtiLightConeShader_Texture();
-	void createAtiLightConeShader_NoTexture();
-	void createAtiFloatLightConeShader_Texture();
-	void createAtiFloatLightConeShader_NoTexture();
-	void createAtiDepthPixelShader();
-	void createAtiShadowPixelShader();
-	void createAtiShadowSolidPixelShader();
-	void createAtiShadowTerrainPixelShader();
-	void createAtiNoShadowPixelShader();
-	void createAtiNoShadowTerrainPixelShader();
-	void createAtiFloatDepthPixelShader();
-	void createAtiFloatShadowPixelShader();
-	void createAtiFloatShadowTerrainPixelShader();
-	void createAtiFloatNoShadowPixelShader();
-	void createAtiFloatNoShadowTerrainPixelShader();
 	void createNvShadowShader();
 	void createNvSmoothShadowShader();
 	void createNvNoShadowShader();

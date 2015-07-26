@@ -803,12 +803,8 @@ struct Storm3D_TerrainDecalSystem::Data
 	void renderProjection(Storm3D_Scene &scene, Storm3D_Spotlight *spot)
 	{
 		GfxDevice &device = storm.GetD3DDevice();
-		bool atiShader = false;
-		if(Storm3D_Spotlight::getSpotType() == Storm3D_Spotlight::AtiBuffer)
-			atiShader = true;
 
-		if(!atiShader)
-			device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+		device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 
 		if(!decals.empty())
 		{
@@ -875,8 +871,7 @@ struct Storm3D_TerrainDecalSystem::Data
 			device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		}
 
-		if(!atiShader)
-			device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+		device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 	}
 
 	void releaseDynamic()

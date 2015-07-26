@@ -24,13 +24,6 @@ typedef std::vector<boost::shared_ptr<Storm3D_Spotlight> > SpotList;
 typedef std::vector<boost::shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
 typedef std::vector<Storm3D_LightTexture> FakeLightList;
 
-namespace {
-
-	void setSpotBufferProperties(IDirect3DDevice9 &device, bool atiShaders)
-	{
-	}
-}
-
 // Storm3D_LightTexture
 
 Storm3D_LightTexture::Storm3D_LightTexture(const VC2 &start_, const VC2 &end_, IStorm3D_Texture &texture_, const COL &color_)
@@ -73,7 +66,6 @@ struct Storm3D_TerrainLightManager::Data
 		coneAtiVertexShader(device),
 		coneNvVertexShader(device)
 	{
-		coneAtiVertexShader.createAtiConeShader();
 		coneNvVertexShader.createNvConeShader();
 	}
 
@@ -81,18 +73,8 @@ struct Storm3D_TerrainLightManager::Data
 	{
         GFX_TRACE_SCOPE("renderSpotBuffers");
 
-		bool atiShaders = false;
-		int spotType = Storm3D_Spotlight::getSpotType();
-		if(spotType == Storm3D_Spotlight::AtiBuffer)
-			atiShaders = true;
-
-		if(atiShaders)
-			Storm3D_ShaderManager::GetSingleton()->setAtiDepthShaders();
-		else
-		{
-			device.SetRenderState(D3DRS_COLORWRITEENABLE, 0);
-			Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
-		}
+		device.SetRenderState(D3DRS_COLORWRITEENABLE, 0);
+		Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
 
 		Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
 		Storm3D_Spotlight::clearCache();
@@ -192,15 +174,8 @@ struct Storm3D_TerrainLightManager::Data
 
 		// this renders spotlight light & shadows
 		//setTracing(true);
-		bool atiShaders = false;
-		int spotType = Storm3D_Spotlight::getSpotType();
-		if(spotType == Storm3D_Spotlight::AtiBuffer)
-			atiShaders = true;
 
-		if(atiShaders)
-			Storm3D_ShaderManager::GetSingleton()->setAtiShadowShaders();
-		else
-			Storm3D_ShaderManager::GetSingleton()->setProjectedShaders();
+		Storm3D_ShaderManager::GetSingleton()->setProjectedShaders();
 
 		device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 		device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
@@ -231,7 +206,7 @@ struct Storm3D_TerrainLightManager::Data
 				continue;
 			device.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 
-			if(!atiShaders)
+			if(!false)
 			{
 				device.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 				device.SetTextureStageState(1, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
@@ -407,24 +382,11 @@ struct Storm3D_TerrainLightManager::Data
 	void renderCones(Storm3D_Scene &scene, bool renderShadows, float timeFactor, bool renderGlows)
 	{
 		// this draws spotlight cone
-		bool atiShaders = false;
-		int spotType = Storm3D_Spotlight::getSpotType();
-		if(spotType == Storm3D_Spotlight::AtiBuffer)
-			atiShaders = true;
+		device.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
+		device.SetPixelShader(0);
 
-		if(atiShaders)
-		{
-			Storm3D_ShaderManager::GetSingleton()->setAtiShadowShaders();
-			coneAtiVertexShader.apply();
-		}
-		else
-		{
-			device.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
-			device.SetPixelShader(0);
-
-			Storm3D_ShaderManager::GetSingleton()->setProjectedShaders();
-			coneNvVertexShader.apply();
-		}
+		Storm3D_ShaderManager::GetSingleton()->setProjectedShaders();
+		coneNvVertexShader.apply();
 
 		Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
 

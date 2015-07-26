@@ -367,7 +367,9 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 
     if ((adapters[active_adapter].caps & Storm3D_Adapter::CAPS_HWSHADER) == 0 ||
         (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)     == 0 ||
-        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0)
+        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0 ||
+        FAILED(D3D->CheckDeviceFormat(active_adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D24S8))
+       )
     {
         MessageBox(NULL, "Unsupported graphics card", "Storm3D Error", 0);
         return false;
@@ -485,7 +487,9 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 
     if ((adapters[active_adapter].caps & Storm3D_Adapter::CAPS_HWSHADER) == 0 ||
         (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)     == 0 ||
-        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0)
+        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0 ||
+        FAILED(D3D->CheckDeviceFormat(active_adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D24S8))
+       )
     {
         MessageBox(NULL, "Unsupported graphics card", "Storm3D Error", 0);
         return false;
@@ -587,7 +591,9 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 
     if ((adapters[active_adapter].caps & Storm3D_Adapter::CAPS_HWSHADER) == 0 ||
         (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)     == 0 ||
-        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0)
+        (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0 ||
+        FAILED(D3D->CheckDeviceFormat(active_adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D24S8))
+       )
     {
         MessageBox(NULL, "Unsupported graphics card", "Storm3D Error", 0);
         return false;

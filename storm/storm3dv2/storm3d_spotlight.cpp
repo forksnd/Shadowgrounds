@@ -24,53 +24,24 @@
 
 #include "../../util/Debug_MemoryManager.h"
 
-	int SHADOW_WIDTH = 512;
-	int SHADOW_HEIGHT = 512;
-	int SHADOW_DEPTH = 24;
-	static const bool SHARE_BUFFERS = true;
+int SHADOW_WIDTH = 512;
+int SHADOW_HEIGHT = 512;
+static const bool SHARE_BUFFERS = true;
 
-	static const int CONE_CIRCLE_VERTICES = 100;
-	static const int CONE_BASE_VERTICES = CONE_CIRCLE_VERTICES;
-	static const int CONE_VERTICES = CONE_CIRCLE_VERTICES + CONE_BASE_VERTICES + 1;
-	static const int CONE_FACES = (CONE_CIRCLE_VERTICES);
+static const int CONE_CIRCLE_VERTICES = 100;
+static const int CONE_BASE_VERTICES = CONE_CIRCLE_VERTICES;
+static const int CONE_VERTICES = CONE_CIRCLE_VERTICES + CONE_BASE_VERTICES + 1;
+static const int CONE_FACES = (CONE_CIRCLE_VERTICES);
 
-	static bool spotTargetActive = false;
+static bool spotTargetActive = false;
+
 namespace {
 	struct StaticBuffers;
-
-	bool checkDepthSupport(IDirect3D9 &d3d)
-	{
-/*
-#pragma message("**************************")
-#pragma message("*******   REMOVEEEE   ****")
-#pragma message("**************************")
-		return false;
-*/
-		HRESULT hr = 0;
-		if(SHADOW_DEPTH == 24)
-			hr = d3d.CheckDeviceFormat(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D24S8);
-		else
-			hr = d3d.CheckDeviceFormat(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D16);
-
-		if(FAILED(hr))
-			return false;
-
-		return true;
-	}
-
-	Storm3D_Spotlight::SpotType spotType = Storm3D_Spotlight::Legacy;
-
-	void findDepthType(IDirect3D9 &d3d, bool enableFloats)
-	{
-		spotType = checkDepthSupport(d3d) ? Storm3D_Spotlight::DepthBuffer : Storm3D_Spotlight::AtiBuffer;
-	}
-
 }
 
 	struct ShadowMap
 	{
 		GfxDevice &device;
-		bool depthSupport;
 
 		CComPtr<IDirect3DTexture9> color;
 		CComPtr<IDirect3DTexture9> depthTexture;
@@ -86,12 +57,8 @@ namespace {
 	public:
 		ShadowMap(GfxDevice &device_, CComPtr<IDirect3DTexture9> sharedColor, CComPtr<IDirect3DTexture9> sharedDepthTexture, CComPtr<IDirect3DSurface9> sharedDepth, const VC2I &pos_)
 		:	device(device_),
-			depthSupport(false),
 			pos(pos_)
 		{
-			if(spotType == Storm3D_Spotlight::DepthBuffer)
-				depthSupport = true;
-
 			color = sharedColor;
 			depthSurface = sharedDepth;
 			depthTexture = sharedDepthTexture;
@@ -99,27 +66,12 @@ namespace {
 			device.EvictManagedResources();
 			if(!color)
 			{
-				if(depthSupport)
-					//device.CreateTexture(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &color, 0);
-					device.CreateTexture(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &color, 0);
-				else
-					device.CreateTexture(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &color, 0);
+				device.CreateTexture(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &color, 0);
 			}
 
-			if(depthSupport)
+			if(!depthTexture)
 			{
-				if(!depthTexture)
-				{
-					if(SHADOW_DEPTH == 24)
-						device.CreateTexture(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2, 1, D3DUSAGE_DEPTHSTENCIL, D3DFMT_D24S8, D3DPOOL_DEFAULT, &depthTexture, 0);
-					else
-						device.CreateTexture(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2, 1, D3DUSAGE_DEPTHSTENCIL, D3DFMT_D16, D3DPOOL_DEFAULT, &depthTexture, 0);
-				}
-			}
-			else
-			{
-				if(!depthSurface)
-					device.CreateDepthStencilSurface(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, D3DMULTISAMPLE_NONE, FALSE, &depthSurface, 0);
+				device.CreateTexture(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2, 1, D3DUSAGE_DEPTHSTENCIL, D3DFMT_D24S8, D3DPOOL_DEFAULT, &depthTexture, 0);
 			}
 
 			if(!hasInitialized())
@@ -139,10 +91,7 @@ namespace {
 				color->GetSurfaceLevel(0, &colorSurface);
 
 				CComPtr<IDirect3DSurface9> surface;
-				if(depthSupport)
-					depthTexture->GetSurfaceLevel(0, &surface);
-				else
-					surface = depthSurface;
+				depthTexture->GetSurfaceLevel(0, &surface);
 
 				HRESULT hr = device.SetRenderTarget(0, colorSurface);
 				if(FAILED(hr))
@@ -152,10 +101,7 @@ namespace {
 				if(FAILED(hr))
 					return false;
 
-				if(depthSupport)
-					device.Clear(0, 0, D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, 0x00000000, 1.0f, 0);
-				else
-					device.Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, 0xFFFFFFFF, 1.0f, 0);
+				device.Clear(0, 0, D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, 0x00000000, 1.0f, 0);
 			}
 
 			D3DVIEWPORT9 vp;
@@ -182,20 +128,12 @@ namespace {
 
 		void apply(int stage)
 		{
-			if(depthSupport)
-				device.SetTexture(stage, depthTexture);
-			else
-				device.SetTexture(stage, color);
+    		device.SetTexture(stage, depthTexture);
 		}
 
 		void applyColor(int stage)
 		{
 			device.SetTexture(stage, color);
-		}
-
-		bool hasDepthSupport() const
-		{
-			return depthSupport;
 		}
 
 		friend struct StaticBuffers;
@@ -248,14 +186,6 @@ namespace {
 		bool createAll(Storm3D &storm, GfxDevice &device, int quality)
 		{
 			freeAll();
-
-			if(SHARE_BUFFERS)
-			{
-				if(spotType != Storm3D_Spotlight::DepthBuffer)
-					sharedDepth = storm.getDepthTarget();
-				//else
-					//sharedColor = storm.getColorTarget();
-			}
 
 			for(unsigned int i = 0; i < SHADOW_BUFFER_LIMIT; ++i)
 			{
@@ -381,24 +311,9 @@ struct Storm3D_SpotlightData
 
 	bool spotlightAlwaysVisible;
 
-	static frozenbyte::storm::PixelShader *atiDepthPixelShader;
-	static frozenbyte::storm::PixelShader *atiShadowPixelShader;
-	static frozenbyte::storm::PixelShader *atiShadowSolidPixelShader;
-	static frozenbyte::storm::PixelShader *atiShadowTerrainPixelShader;
-	static frozenbyte::storm::PixelShader *atiNoShadowPixelShader;
-	static frozenbyte::storm::PixelShader *atiNoShadowTerrainPixelShader;
-	static frozenbyte::storm::PixelShader *atiFloatDepthPixelShader;
-	static frozenbyte::storm::PixelShader *atiFloatShadowPixelShader;
-	static frozenbyte::storm::PixelShader *atiFloatShadowTerrainPixelShader;
-	static frozenbyte::storm::PixelShader *atiFloatNoShadowPixelShader;
-	static frozenbyte::storm::PixelShader *atiFloatNoShadowTerrainPixelShader;
 	static frozenbyte::storm::PixelShader *nvShadowPixelShader;
 	static frozenbyte::storm::PixelShader *nvSmoothShadowPixelShader;
 	static frozenbyte::storm::PixelShader *nvNoShadowPixelShader;
-	static frozenbyte::storm::PixelShader *coneAtiPixelShader_Texture;
-	static frozenbyte::storm::PixelShader *coneAtiPixelShader_NoTexture;
-	static frozenbyte::storm::PixelShader *coneAtiFloatPixelShader_Texture;
-	static frozenbyte::storm::PixelShader *coneAtiFloatPixelShader_NoTexture;
 	static frozenbyte::storm::PixelShader *coneNvPixelShader_Texture;
 	static frozenbyte::storm::PixelShader *coneNvPixelShader_NoTexture;
 	static frozenbyte::storm::VertexShader *coneStencilVertexShader;
@@ -436,11 +351,7 @@ struct Storm3D_SpotlightData
 
 	float getBias() const
 	{
-		float bias = 0.9989f;
-		if(spotType == Storm3D_Spotlight::AtiBuffer)
-			bias = 0.975f;
-
-		return bias;
+		return 0.9989f;
 	}
 
 	void updateMatrices(const float *cameraView)
@@ -674,27 +585,9 @@ struct Storm3D_SpotlightData
 	}
 };
 
-//Storm3D_Spotlight::SpotType Storm3D_SpotlightData::type = Storm3D_Spotlight::Legacy;
-//Storm3D_Spotlight::SpotType Storm3D_SpotlightData::type = Storm3D_Spotlight::DepthBuffer;
-
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiDepthPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiShadowPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiShadowSolidPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiShadowTerrainPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiNoShadowPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiNoShadowTerrainPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiFloatDepthPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiFloatShadowPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiFloatShadowTerrainPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiFloatNoShadowPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::atiFloatNoShadowTerrainPixelShader = 0;
 frozenbyte::storm::PixelShader *Storm3D_SpotlightData::nvShadowPixelShader = 0;
 frozenbyte::storm::PixelShader *Storm3D_SpotlightData::nvSmoothShadowPixelShader = 0;
 frozenbyte::storm::PixelShader *Storm3D_SpotlightData::nvNoShadowPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneAtiPixelShader_Texture = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneAtiPixelShader_NoTexture = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneAtiFloatPixelShader_Texture = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneAtiFloatPixelShader_NoTexture = 0;
 frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneNvPixelShader_Texture = 0;
 frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneNvPixelShader_NoTexture = 0;
 frozenbyte::storm::VertexShader *Storm3D_SpotlightData::coneStencilVertexShader = 0;
@@ -932,22 +825,12 @@ bool Storm3D_Spotlight::setAsRenderTarget(const float *cameraView)
 			Storm3D_ShaderManager::GetSingleton()->SetViewProjectionMatrix(data->properties.lightViewProjection[1], data->properties.lightViewProjection[1]);
 			Storm3D_ShaderManager::GetSingleton()->setSpot(data->properties.color, data->properties.position, data->properties.direction, data->properties.range, .1f);
 
-			if(spotType == Storm3D_Spotlight::AtiBuffer)
-			{
-				data->device.SetSamplerState(1, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-				data->device.SetSamplerState(1, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-
-				data->atiDepthPixelShader->apply();
-			}
-			else
-			{
-				data->device.SetPixelShader(0);
-				data->device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-				data->device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-				data->device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-				data->device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-				data->device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-			}
+			data->device.SetPixelShader(0);
+			data->device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+			data->device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+			data->device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+			data->device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+			data->device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 
 			return true;
 		}
@@ -1017,75 +900,17 @@ void Storm3D_Spotlight::applyTextures(const float *cameraView, const float *came
 	if(renderShadows && data->shadowMap && data->shadowMap->hasInitialized())
 		data->shadowMap->apply(shadow);
 
-	//data->device.SetTexture(0, data->shadowMap->color);
-
-	if(spotType == Storm3D_Spotlight::AtiBuffer)
+	if(data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized())
 	{
-		if(data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized())
-			data->atiShadowPixelShader->apply();
+		if(data->smoothing)
+			data->nvSmoothShadowPixelShader->apply();
 		else
-			data->atiNoShadowPixelShader->apply();
+			data->nvShadowPixelShader->apply();
 	}
-	else if(spotType == Storm3D_Spotlight::DepthBuffer)
-	{
-		/*
-		IDirect3DDevice9 &device = data->device;
-		device.SetPixelShader(0);
-		device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
-		device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TEXTURE);
-		device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-		device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-		device.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_TEXTURE);
-		device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	else
+		data->nvNoShadowPixelShader->apply();
 
-		device.SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
-		device.SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TEXTURE);
-		device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE);
-		device.SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
-		device.SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-
-		device.SetTextureStageState(2, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		device.SetTextureStageState(2, D3DTSS_COLORARG2, D3DTA_CURRENT);
-		device.SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_MODULATE);
-		device.SetTextureStageState(2, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-		device.SetTextureStageState(2, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
-		device.SetTextureStageState(2, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-
-		device.SetTextureStageState(3, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		device.SetTextureStageState(3, D3DTSS_COLORARG2, D3DTA_CURRENT);
-		device.SetTextureStageState(3, D3DTSS_COLOROP, D3DTOP_MODULATE);
-		device.SetTextureStageState(3, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
-		device.SetTextureStageState(3, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-		device.SetTextureStageState(4, D3DTSS_COLOROP, D3DTOP_DISABLE);
-
-		if(data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized())
-		{
-			data->device.SetTextureStageState(shadow, D3DTSS_COLOROP, D3DTOP_MODULATE);
-			//data->device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE);
-		}
-		else
-		{
-			data->device.SetTextureStageState(shadow, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-			//data->device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_SELECTARG2);
-		}
-		*/
-		if(data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized())
-		{
-			if(data->smoothing)
-				data->nvSmoothShadowPixelShader->apply();
-			else
-				data->nvShadowPixelShader->apply();
-		}
-		else
-			data->nvNoShadowPixelShader->apply();
-		/*data->device.SetPixelShader(0);
-		data->device.SetTexture(1, 0);
-		data->device.SetTexture(2, 0);
-		data->device.SetTexture(3, 0);*/
-
-
-		data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
-	}
+	data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 
 	Storm3D_ShaderManager::GetSingleton()->setSpot(data->properties.color, data->properties.position, data->properties.direction, data->properties.range, .1f);
 	if(shadow == 1)
@@ -1110,39 +935,31 @@ void Storm3D_Spotlight::applyTextures(const float *cameraView, const float *came
 	//float c[4] = { color.r, color.g, color.b, 1.f };
 	//data->device.SetVertexShaderConstantF(17, c, 1);
 
-	if(spotType == Storm3D_Spotlight::AtiBuffer)
-	{
-		frozenbyte::storm::enableMinMagFiltering(data->device, shadow, shadow, true);
-		frozenbyte::storm::enableMinMagFiltering(data->device, projection, projection, true);
-	}
-	else
-	{
-		frozenbyte::storm::enableMinMagFiltering(data->device, shadow, shadow, true);
-		frozenbyte::storm::enableMinMagFiltering(data->device, projection, projection, true);
+	frozenbyte::storm::enableMinMagFiltering(data->device, shadow, shadow, true);
+	frozenbyte::storm::enableMinMagFiltering(data->device, projection, projection, true);
 
-		if(data->smoothing)
+	if(data->smoothing)
+	{
+		float c[8][4] = 
 		{
-			float c[8][4] = 
-			{
-				{ -2.5f,   3.f, 0, 0 },
-				{  -1.f,   1.f, 0, 0 },
-				{ -0.5f,   4.f, 0, 0 },
-				{  2.5f,   2.f, 0, 0 },
-				{ -1.5f,  -2.f, 0, 0 },
-				{ -0.5f,  -4.f, 0, 0 },
-				{  0.5f, -0.5f, 0, 0 },
-				{  1.5f,  -3.f, 0, 0 }
-			};
+			{ -2.5f,   3.f, 0, 0 },
+			{  -1.f,   1.f, 0, 0 },
+			{ -0.5f,   4.f, 0, 0 },
+			{  2.5f,   2.f, 0, 0 },
+			{ -1.5f,  -2.f, 0, 0 },
+			{ -0.5f,  -4.f, 0, 0 },
+			{  0.5f, -0.5f, 0, 0 },
+			{  1.5f,  -3.f, 0, 0 }
+		};
 
-			for(int i = 0; i < 8; ++i)
-			{
-				c[i][0] *= data->smoothness * 0.0009765625f;
-				//c[i][1] *= data->smoothness * 0.0013020833f;
-				c[i][1] *= data->smoothness * 1.5f * 0.0013020833f;
-			}
-
-			data->device.SetPixelShaderConstantF(5, &c[0][0], 8);
+		for(int i = 0; i < 8; ++i)
+		{
+			c[i][0] *= data->smoothness * 0.0009765625f;
+			//c[i][1] *= data->smoothness * 0.0013020833f;
+			c[i][1] *= data->smoothness * 1.5f * 0.0013020833f;
 		}
+
+		data->device.SetPixelShaderConstantF(5, &c[0][0], 8);
 	}
 }
 
@@ -1152,34 +969,16 @@ void Storm3D_Spotlight::applyTerrainShader(bool renderShadows)
 	float c[4] = { color.r, color.g, color.b, 1.f };
 	data->device.SetVertexShaderConstantF(17, c, 1);
 
-	if(spotType == Storm3D_Spotlight::AtiBuffer)
-	{
-		if(data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized())
-			data->atiShadowTerrainPixelShader->apply();
-		else
-			data->atiNoShadowTerrainPixelShader->apply();
-	}
-	else
-		data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
+	data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 }
 
 void Storm3D_Spotlight::applySolidShader(bool renderShadows)
 {
-	if(spotType == Storm3D_Spotlight::AtiBuffer && renderShadows && data->hasShadows && data->shadowMap && data->shadowMap->hasInitialized())
-		data->atiShadowSolidPixelShader->apply();
 }
 
 void Storm3D_Spotlight::applyNormalShader(bool renderShadows)
 {
-	if(spotType == Storm3D_Spotlight::AtiBuffer)
-	{
-		if(data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized())
-			data->atiShadowPixelShader->apply();
-		else
-			data->atiNoShadowPixelShader->apply();
-	}
-	else
-		data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
+	data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 }
 
 void Storm3D_Spotlight::renderCone(Storm3D_Camera &camera, float timeFactor, bool renderGlows)
@@ -1222,27 +1021,13 @@ void Storm3D_Spotlight::renderCone(Storm3D_Camera &camera, float timeFactor, boo
 		data->coneTexture->AnimateVideo();
 		data->coneTexture->Apply(3);
 
-		if(spotType == AtiBuffer)
-			data->coneTexture->Apply(4);
-		else
-			data->coneTexture->Apply(1);
+		data->coneTexture->Apply(1);
 	}
 
-	if(spotType == AtiBuffer)
-	{
-		if(data->coneTexture)
-			data->coneAtiPixelShader_Texture->apply();
-		else
-			data->coneAtiPixelShader_NoTexture->apply();
-
-	}
+	if(data->coneTexture)
+		data->coneNvPixelShader_Texture->apply();
 	else
-	{
-		if(data->coneTexture)
-			data->coneNvPixelShader_Texture->apply();
-		else
-			data->coneNvPixelShader_NoTexture->apply();
-	}
+		data->coneNvPixelShader_NoTexture->apply();
 
 	float colorMul = data->coneColorMultiplier;
 	float colorData[4] = { data->properties.color.r * colorMul, data->properties.color.g * colorMul, data->properties.color.b * colorMul, 1.f };
@@ -1355,43 +1140,6 @@ void Storm3D_Spotlight::querySizes(Storm3D &storm, int shadowQuality)
 		SHADOW_WIDTH = 256;
 		SHADOW_HEIGHT = 256;
 	}
-
-	/*
-	if(shadowQuality >= 100)
-	{
-		SHADOW_WIDTH = 768;
-		SHADOW_HEIGHT = 768;
-	}
-	else if(shadowQuality >= 66)
-	{
-		SHADOW_WIDTH = 512;
-		SHADOW_HEIGHT = 512;
-	}
-	else if(shadowQuality >= 33)
-	{
-		SHADOW_WIDTH = 384;
-		SHADOW_HEIGHT = 384;
-	}
-	else
-	{
-		SHADOW_WIDTH = 256;
-		SHADOW_HEIGHT = 256;
-	}
-	*/
-
-	if(spotType == Legacy)
-	{
-		bool enableFloats = true;
-		if(shadowQuality <= 33)
-			enableFloats = false;
-
-		findDepthType(*storm.D3D, enableFloats);
-	}
-
-	if(spotType != DepthBuffer)
-		storm.setNeededDepthTarget(VC2I(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2));
-	//else
-		//storm.setNeededColorTarget(VC2I(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2));
 }
 
 void Storm3D_Spotlight::createShadowBuffers(Storm3D &storm, GfxDevice &device, int shadowQuality)
@@ -1412,39 +1160,19 @@ void Storm3D_Spotlight::createShadowBuffers(Storm3D &storm, GfxDevice &device, i
 	if(logger && !staticBuffers.buffers[0]->hasInitialized())
 		logger->warning("Failed creating light's shadow depth rendertargets - shadows disabled!");
 
-	Storm3D_SpotlightData::atiDepthPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::atiDepthPixelShader->createAtiDepthPixelShader();
-	Storm3D_SpotlightData::atiShadowPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::atiShadowPixelShader->createAtiShadowPixelShader();
-	Storm3D_SpotlightData::atiShadowSolidPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::atiShadowSolidPixelShader->createAtiShadowSolidPixelShader();
-	Storm3D_SpotlightData::atiShadowTerrainPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::atiShadowTerrainPixelShader->createAtiShadowTerrainPixelShader();
-	Storm3D_SpotlightData::atiNoShadowPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::atiNoShadowPixelShader->createAtiNoShadowPixelShader();
-	Storm3D_SpotlightData::atiNoShadowTerrainPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::atiNoShadowTerrainPixelShader->createAtiNoShadowTerrainPixelShader();
 
-	Storm3D_SpotlightData::coneAtiPixelShader_Texture = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::coneAtiPixelShader_Texture->createAtiLightConeShader_Texture();
-	Storm3D_SpotlightData::coneAtiPixelShader_NoTexture = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::coneAtiPixelShader_NoTexture->createAtiLightConeShader_NoTexture();
+	Storm3D_SpotlightData::nvSmoothShadowPixelShader = new frozenbyte::storm::PixelShader(device);
+	Storm3D_SpotlightData::nvSmoothShadowPixelShader->createNvSmoothShadowShader();
 
-    if(spotType == Storm3D_Spotlight::DepthBuffer)
-	{
-		Storm3D_SpotlightData::nvSmoothShadowPixelShader = new frozenbyte::storm::PixelShader(device);
-		Storm3D_SpotlightData::nvSmoothShadowPixelShader->createNvSmoothShadowShader();
+	Storm3D_SpotlightData::nvShadowPixelShader = new frozenbyte::storm::PixelShader(device);
+	Storm3D_SpotlightData::nvShadowPixelShader->createNvShadowShader();
+	Storm3D_SpotlightData::nvNoShadowPixelShader = new frozenbyte::storm::PixelShader(device);
+	Storm3D_SpotlightData::nvNoShadowPixelShader->createNvNoShadowShader();
 
-		Storm3D_SpotlightData::nvShadowPixelShader = new frozenbyte::storm::PixelShader(device);
-		Storm3D_SpotlightData::nvShadowPixelShader->createNvShadowShader();
-		Storm3D_SpotlightData::nvNoShadowPixelShader = new frozenbyte::storm::PixelShader(device);
-		Storm3D_SpotlightData::nvNoShadowPixelShader->createNvNoShadowShader();
-
-		Storm3D_SpotlightData::coneNvPixelShader_Texture = new frozenbyte::storm::PixelShader(device);
-		Storm3D_SpotlightData::coneNvPixelShader_Texture->createNvConeShader_Texture();
-		Storm3D_SpotlightData::coneNvPixelShader_NoTexture = new frozenbyte::storm::PixelShader(device);
-		Storm3D_SpotlightData::coneNvPixelShader_NoTexture->createNvConeShader_NoTexture();
-	}
+	Storm3D_SpotlightData::coneNvPixelShader_Texture = new frozenbyte::storm::PixelShader(device);
+	Storm3D_SpotlightData::coneNvPixelShader_Texture->createNvConeShader_Texture();
+	Storm3D_SpotlightData::coneNvPixelShader_NoTexture = new frozenbyte::storm::PixelShader(device);
+	Storm3D_SpotlightData::coneNvPixelShader_NoTexture->createNvConeShader_NoTexture();
 
 	Storm3D_SpotlightData::coneStencilVertexShader = new frozenbyte::storm::VertexShader(device);
 	Storm3D_SpotlightData::coneStencilVertexShader->createConeStencilShader();
@@ -1452,25 +1180,10 @@ void Storm3D_Spotlight::createShadowBuffers(Storm3D &storm, GfxDevice &device, i
 
 void Storm3D_Spotlight::freeShadowBuffers()
 {
-	delete Storm3D_SpotlightData::atiFloatDepthPixelShader; Storm3D_SpotlightData::atiFloatDepthPixelShader = 0;
-	delete Storm3D_SpotlightData::atiFloatShadowPixelShader; Storm3D_SpotlightData::atiFloatShadowPixelShader = 0;
-	delete Storm3D_SpotlightData::atiFloatShadowTerrainPixelShader; Storm3D_SpotlightData::atiFloatShadowTerrainPixelShader = 0;
-	delete Storm3D_SpotlightData::atiFloatNoShadowPixelShader;  Storm3D_SpotlightData::atiFloatNoShadowPixelShader = 0;
-	delete Storm3D_SpotlightData::atiFloatNoShadowTerrainPixelShader;  Storm3D_SpotlightData::atiFloatNoShadowTerrainPixelShader = 0;
-	delete Storm3D_SpotlightData::atiDepthPixelShader; Storm3D_SpotlightData::atiDepthPixelShader = 0;
-	delete Storm3D_SpotlightData::atiShadowPixelShader; Storm3D_SpotlightData::atiShadowPixelShader = 0,
-	delete Storm3D_SpotlightData::atiShadowSolidPixelShader; Storm3D_SpotlightData::atiShadowSolidPixelShader = 0,
-	delete Storm3D_SpotlightData::atiShadowTerrainPixelShader; Storm3D_SpotlightData::atiShadowTerrainPixelShader = 0,
-	delete Storm3D_SpotlightData::atiNoShadowPixelShader; Storm3D_SpotlightData::atiNoShadowPixelShader = 0;
-	delete Storm3D_SpotlightData::atiNoShadowTerrainPixelShader; Storm3D_SpotlightData::atiNoShadowTerrainPixelShader = 0;
 	delete Storm3D_SpotlightData::nvShadowPixelShader; Storm3D_SpotlightData::nvShadowPixelShader = 0;
 	delete Storm3D_SpotlightData::nvSmoothShadowPixelShader; Storm3D_SpotlightData::nvSmoothShadowPixelShader = 0;
 	delete Storm3D_SpotlightData::nvNoShadowPixelShader; Storm3D_SpotlightData::nvNoShadowPixelShader = 0;
 
-	delete Storm3D_SpotlightData::coneAtiPixelShader_Texture; Storm3D_SpotlightData::coneAtiPixelShader_Texture = 0;
-	delete Storm3D_SpotlightData::coneAtiPixelShader_NoTexture; Storm3D_SpotlightData::coneAtiPixelShader_NoTexture = 0;
-	delete Storm3D_SpotlightData::coneAtiFloatPixelShader_Texture; Storm3D_SpotlightData::coneAtiFloatPixelShader_Texture = 0;
-	delete Storm3D_SpotlightData::coneAtiFloatPixelShader_NoTexture; Storm3D_SpotlightData::coneAtiFloatPixelShader_NoTexture = 0;
 	delete Storm3D_SpotlightData::coneNvPixelShader_Texture; Storm3D_SpotlightData::coneNvPixelShader_Texture = 0;
 	delete Storm3D_SpotlightData::coneNvPixelShader_NoTexture; Storm3D_SpotlightData::coneNvPixelShader_NoTexture = 0;
 
@@ -1482,11 +1195,6 @@ void Storm3D_Spotlight::freeShadowBuffers()
 void Storm3D_Spotlight::clearCache()
 {
 	spotTargetActive = false;
-}
-
-Storm3D_Spotlight::SpotType Storm3D_Spotlight::getSpotType()
-{
-	return spotType;
 }
 
 void Storm3D_Spotlight::setEnableClip(bool enableClip)

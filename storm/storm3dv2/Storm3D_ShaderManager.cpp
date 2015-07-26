@@ -35,15 +35,6 @@ namespace {
 	static const int BONE_PROJECTED_SHADER_POINT = 7;
 	static const int BONE_PROJECTED_SHADER_FLAT = 8;
 
-	static const int ATI_DEPTH_SHADER = 9;
-	static const int ATI_DEPTH_BONE_SHADER = 10;
-	static const int ATI_SHADOW_SHADER_DIRECTIONAL = 11;
-	static const int ATI_SHADOW_SHADER_POINT = 12;
-	static const int ATI_SHADOW_SHADER_FLAT = 13;
-	static const int ATI_SHADOW_BONE_SHADER_DIRECTIONAL = 14;
-	static const int ATI_SHADOW_BONE_SHADER_POINT = 15;
-	static const int ATI_SHADOW_BONE_SHADER_FLAT = 16;
-
 	static const int FAKE_DEPTH_SHADER = 17;
 	static const int FAKE_SHADOW_SHADER = 18;
 	static const int FAKE_DEPTH_BONE_SHADER = 19;
@@ -123,15 +114,6 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(GfxDevice& device)
 	bone_projected_shader_point(device),
 	bone_projected_shader_flat(device),
 
-	ati_depth_default_shader(device),
-	ati_depth_bone_shader(device),
-	ati_shadow_default_shader_directional(device),
-	ati_shadow_default_shader_point(device),
-	ati_shadow_default_shader_flat(device),
-	ati_shadow_bone_shader_directional(device),
-	ati_shadow_bone_shader_point(device),
-	ati_shadow_bone_shader_flat(device),
-
 	fake_depth_shader(device),
 	fake_shadow_shader(device),
 	fake_depth_bone_shader(device),
@@ -139,8 +121,6 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(GfxDevice& device)
 
 	current_shader(0),
 	projected_shaders(false),
-	ati_depth_shaders(false),
-	ati_shadow_shaders(false),
 	fake_depth_shaders(false),
 	fake_shadow_shaders(false),
 	model(0),
@@ -231,18 +211,6 @@ void Storm3D_ShaderManager::CreateShaders(GfxDevice& device)
 	D3DXMATRIX identity;
 	D3DXMatrixIdentity(&identity);
 	device.SetVertexShaderConstantF(BONE_INDEX_START, identity, 3);
-}
-
-void Storm3D_ShaderManager::CreateAtiShaders(GfxDevice& device)
-{
-	ati_depth_default_shader.createAtiDepthShader();
-	ati_depth_bone_shader.createAtiBoneDepthShader();	
-	ati_shadow_default_shader_directional.createAtiShadowShaderDirectional();
-	ati_shadow_default_shader_point.createAtiShadowShaderPoint();
-	ati_shadow_default_shader_flat.createAtiShadowShaderFlat();
-	ati_shadow_bone_shader_directional.createAtiBoneShadowShaderDirectional();
-	ati_shadow_bone_shader_point.createAtiBoneShadowShaderPoint();
-	ati_shadow_bone_shader_flat.createAtiBoneShadowShaderFlat();
 }
 
 void Storm3D_ShaderManager::setLightingParameters(bool reflection_, bool local_reflection_, int light_count_)
@@ -427,36 +395,6 @@ void Storm3D_ShaderManager::setProjectedShaders()
 
 	lighting_shaders = false;
 	projected_shaders = true;
-	ati_depth_shaders = false;
-	ati_shadow_shaders = false;
-	fake_depth_shaders = false;
-	fake_shadow_shaders = false;
-}
-
-void Storm3D_ShaderManager::setAtiDepthShaders()
-{
-	current_shader = 0;
-	update_values = true;
-	model = 0;
-
-	lighting_shaders = false;
-	projected_shaders = false;
-	ati_depth_shaders = true;
-	ati_shadow_shaders = false;
-	fake_depth_shaders = false;
-	fake_shadow_shaders = false;
-}
-
-void Storm3D_ShaderManager::setAtiShadowShaders()
-{
-	current_shader = 0;
-	update_values = true;
-	model = 0;
-
-	lighting_shaders = false;
-	projected_shaders = false;
-	ati_depth_shaders = false;
-	ati_shadow_shaders = true;
 	fake_depth_shaders = false;
 	fake_shadow_shaders = false;
 }
@@ -465,8 +403,6 @@ void Storm3D_ShaderManager::setLightingShaders()
 {
 	lighting_shaders = true;
 	projected_shaders = false;
-	ati_depth_shaders = false;
-	ati_shadow_shaders = false;
 	fake_depth_shaders = false;
 	fake_shadow_shaders = false;
 }
@@ -479,8 +415,6 @@ void Storm3D_ShaderManager::setNormalShaders()
 
 	lighting_shaders = false;
 	projected_shaders = false;
-	ati_depth_shaders = false;
-	ati_shadow_shaders = false;
 	fake_depth_shaders = false;
 	fake_shadow_shaders = false;
 }
@@ -493,8 +427,6 @@ void Storm3D_ShaderManager::setFakeDepthShaders()
 
 	lighting_shaders = false;
 	projected_shaders = false;
-	ati_depth_shaders = false;
-	ati_shadow_shaders = false;
 	fake_depth_shaders = true;
 	fake_shadow_shaders = false;
 }
@@ -507,8 +439,6 @@ void Storm3D_ShaderManager::setFakeShadowShaders()
 
 	lighting_shaders = false;
 	projected_shaders = false;
-	ati_depth_shaders = false;
-	ati_shadow_shaders = false;
 	fake_depth_shaders = false;
 	fake_shadow_shaders = true;
 }
@@ -555,10 +485,6 @@ bool Storm3D_ShaderManager::BoneShader()
 		case BONE_PROJECTED_SHADER_DIRECTIONAL:
 		case BONE_PROJECTED_SHADER_POINT:
 		case BONE_PROJECTED_SHADER_FLAT:
-		case ATI_DEPTH_BONE_SHADER:
-		case ATI_SHADOW_BONE_SHADER_DIRECTIONAL:
-		case ATI_SHADOW_BONE_SHADER_POINT:
-		case ATI_SHADOW_BONE_SHADER_FLAT:
 		case FAKE_DEPTH_BONE_SHADER:
 		case FAKE_SHADOW_BONE_SHADER:
 			return true;
@@ -579,7 +505,7 @@ void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *o
 	float alpha = 1.f;
 
 	float force_alpha = object->force_alpha;
-	if((projected_shaders || ati_shadow_shaders) && object->force_lighting_alpha_enable)
+	if(projected_shaders && object->force_lighting_alpha_enable)
 		force_alpha = object->force_lighting_alpha;
 
 	IStorm3D_Material::ATYPE a = m->GetAlphaType();
@@ -598,7 +524,7 @@ void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *o
 //if(!lighting_shaders && !projected_shaders && !ati_depth_shaders && !ati_shadow_shaders && !fake_depth_shaders && !fake_shadow_shaders)
 //	alpha = 0.8f;
 
-	if(!projected_shaders && !ati_shadow_shaders && !fake_shadow_shaders && !fake_depth_shaders)
+	if(!projected_shaders && !fake_shadow_shaders && !fake_depth_shaders)
 	{
 		D3DXMatrixTranspose(&object_tm, &object_tm);
 		device.SetVertexShaderConstantF(4, object_tm, 3);
@@ -645,7 +571,7 @@ void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *o
 		device.SetVertexShaderConstantF(7, ambient, 1);
 	}
 
-	if(projected_shaders || ati_shadow_shaders)
+	if(projected_shaders)
 	{
 		D3DXVECTOR4 dif = object_diffuse_color;
 		dif.x *= spot_color.x;
@@ -745,37 +671,6 @@ void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *o
 				current_shader = DEFAULT_PROJECTED_SHADER_FLAT;
 			}
 		}
-		else if(ati_depth_shaders)
-		{
-			if(current_shader != ATI_DEPTH_SHADER)
-			{
-				ati_depth_default_shader.apply();
-				current_shader = ATI_DEPTH_SHADER;
-			}
-		}
-		else if(ati_shadow_shaders)
-		{
-			if(spot_type == Directional)
-			if(current_shader != ATI_SHADOW_SHADER_DIRECTIONAL)
-			{
-				ati_shadow_default_shader_directional.apply();
-				current_shader = ATI_SHADOW_SHADER_DIRECTIONAL;
-			}
-
-			if(spot_type == Point)
-			if(current_shader != ATI_SHADOW_SHADER_POINT)
-			{
-				ati_shadow_default_shader_point.apply();
-				current_shader = ATI_SHADOW_SHADER_POINT;
-			}
-
-			if(spot_type == Flat)
-			if(current_shader != ATI_SHADOW_SHADER_FLAT)
-			{
-				ati_shadow_default_shader_flat.apply();
-				current_shader = ATI_SHADOW_SHADER_FLAT;
-			}
-		}
 		else if(fake_depth_shaders)
 		{
 			if(current_shader != FAKE_DEPTH_SHADER)
@@ -867,38 +762,6 @@ void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *o
 			}
 
 		}
-		else if(ati_depth_shaders)
-		{
-			if(current_shader != ATI_DEPTH_BONE_SHADER)
-			{
-				ati_depth_bone_shader.apply();
-				current_shader = ATI_DEPTH_BONE_SHADER;
-			}
-		}
-		else if(ati_shadow_shaders)
-		{
-			if(spot_type == Directional)
-			if(current_shader != ATI_SHADOW_BONE_SHADER_DIRECTIONAL)
-			{
-				ati_shadow_bone_shader_directional.apply();
-				current_shader = ATI_SHADOW_BONE_SHADER_DIRECTIONAL;
-			}
-
-			if(spot_type == Point)
-			if(current_shader != ATI_SHADOW_BONE_SHADER_POINT)
-			{
-				ati_shadow_bone_shader_point.apply();
-				current_shader = ATI_SHADOW_BONE_SHADER_POINT;
-			}
-
-			if(spot_type == Flat)
-			if(current_shader != ATI_SHADOW_BONE_SHADER_FLAT)
-			{
-				ati_shadow_bone_shader_flat.apply();
-				current_shader = ATI_SHADOW_BONE_SHADER_FLAT;
-			}
-
-		}
 		else if(fake_depth_shaders)
 		{
 			if(current_shader != FAKE_DEPTH_BONE_SHADER)
@@ -986,8 +849,6 @@ void Storm3D_ShaderManager::ResetShader()
 	projected_shaders = false;
 	lighting_shaders = false;
 	// ...
-	ati_depth_shaders = false;
-	ati_shadow_shaders = false;
 	fake_depth_shaders = false;
 	fake_shadow_shaders = false;
 
@@ -1073,7 +934,7 @@ void Storm3D_ShaderManager::SetWorldTransform(GfxDevice &device, const D3DXMATRI
 	// ViewProj matrix
 	device.SetVertexShaderConstantF(0, result, 4);
 
-	if(projected_shaders || ati_shadow_shaders || fake_shadow_shaders || fake_depth_shaders || forceTextureTm)
+	if(projected_shaders || fake_shadow_shaders || fake_depth_shaders || forceTextureTm)
 	{
 		D3DXMATRIX foo = tm;
 		D3DXMatrixTranspose(&foo, &foo);
@@ -1154,7 +1015,7 @@ void Storm3D_ShaderManager::SetWorldTransform(GfxDevice &device, const D3DXMATRI
 	}
 
 	//if(projected_shaders || ati_shadow_shaders || fake_depth_shaders)
-	if(projected_shaders || ati_shadow_shaders || fake_depth_shaders || fake_shadow_shaders)
+	if(projected_shaders || fake_depth_shaders || fake_shadow_shaders)
 	{
 		D3DXMATRIX foo = tm;
 		D3DXMatrixTranspose(&foo, &foo);
@@ -1164,7 +1025,7 @@ void Storm3D_ShaderManager::SetWorldTransform(GfxDevice &device, const D3DXMATRI
 		device.SetVertexShaderConstantF(16, textureOffset, 1);
 	}
 
-	if(!projected_shaders && !ati_depth_shaders && !ati_shadow_shaders && !fake_depth_shaders && !fake_shadow_shaders)
+	if(!projected_shaders && !fake_depth_shaders && !fake_shadow_shaders)
 	{
 		if(!lighting_shaders)
 			device.SetVertexShaderConstantF(12, textureOffset, 1);

@@ -299,7 +299,6 @@ struct Storm3D_TerrainRendererData
 		colorEffectOffsetShader_NoGamma.createColorEffectOffsetPixelShader_NoGamma();
 		glowPs2Shader.createGlowTex8Shader();
 
-		Storm3D_ShaderManager::GetSingleton()->CreateAtiShaders(device);
 		device.CreateTexture(2048, 1, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &depthLookupTexture, 0);
 
 		D3DLOCKED_RECT lockedRect = { 0 };
@@ -646,7 +645,7 @@ struct Storm3D_TerrainRendererData
 		Alpha
 	};
 
-	void renderPass(Storm3D_Scene &scene, Pass pass, bool atiShader)
+	void renderPass(Storm3D_Scene &scene, Pass pass)
 	{
 		Storm3D_ShaderManager::GetSingleton()->setLightingShaders();
 
@@ -697,9 +696,6 @@ t->Apply(4);
 				device.SetPixelShaderConstantF(0, mult, 1);
 
 				Storm3D_TerrainHeightmap::RenderMode mode = Storm3D_TerrainHeightmap::Lighting;
-				Storm3D_TerrainHeightmap::RenderType type = Storm3D_TerrainHeightmap::Nv;
-				if(atiShader)
-					type = Storm3D_TerrainHeightmap::Ati;
 
 				D3DXMATRIX tm;
 				D3DXMatrixIdentity(&tm);
@@ -729,7 +725,7 @@ t->Apply(4);
 					Storm3D_ShaderManager::GetSingleton()->SetSun(VC3(), 0.f);
 
 				frozenbyte::storm::enableMipFiltering(device, 2, 3, false);
-				heightMap.renderDepth(scene, 0, mode, type, IStorm3D_Spotlight::None, 0);
+				heightMap.renderDepth(scene, 0, mode, IStorm3D_Spotlight::None, 0);
 				frozenbyte::storm::enableMipFiltering(device, 2, 3, true);
 
 				Storm3D_ShaderManager::GetSingleton()->SetSun(VC3(), 0.f);
@@ -1431,10 +1427,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 	data->models.setCollisionRendering(data->renderCollision);
 
-	bool atiShader = false;
-	if(Storm3D_Spotlight::getSpotType() == Storm3D_Spotlight::AtiBuffer)
-		atiShader = true;
-
 	// Rendertarget stuff
 	{		
 		CComPtr<IDirect3DSurface9> originalFrameBuffer;
@@ -1526,7 +1518,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 			// this draws terrain textures (snow etc.)
 			// (not rocks etc.)
 			if(data->renderHeightmap && data->renderTerrainTextures)
-				data->heightMap.renderTextures(scene, atiShader);
+				data->heightMap.renderTextures(scene);
 
 			CComPtr<IDirect3DSurface9> terrainSurface;
 			data->terrainTexture->GetSurfaceLevel(0, &terrainSurface);
@@ -1547,7 +1539,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 			// this renders terrain
             // not lights and terrain models
 			device.SetRenderState(D3DRS_FOGENABLE, TRUE);
-			data->renderPass(scene, data->Solid, atiShader);
+			data->renderPass(scene, data->Solid);
 			device.SetRenderState(D3DRS_FOGENABLE, FALSE);
 
 			if(data->skyBox && !data->renderWireframe && data->renderSkyBox)
@@ -1596,7 +1588,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 			device.SetScissorRect(&data->scissorRect);
 			device.SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
 
-			data->renderPass(scene, data->Alpha, atiShader);
+			data->renderPass(scene, data->Alpha);
 			data->renderProjectedLightsAlpha(scene);
 			device.SetScissorRect(&data->scissorRect);
 			device.SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
@@ -2272,10 +2264,6 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 	data->models.setCollisionRendering(data->renderCollision);
 	data->models.setForcedDirectional(data->forcedDirectionalLightEnabled, data->forcedDirectionalLightDirection, data->forcedDirectionalLightColor);
 
-	bool atiShader = false;
-	if(Storm3D_Spotlight::getSpotType() == Storm3D_Spotlight::AtiBuffer)
-		atiShader = true;
-
 	Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
 
 	Storm3D_SurfaceInfo info = data->storm.GetScreenSize();
@@ -2533,22 +2521,14 @@ void Storm3D_TerrainRenderer::render(IStorm3D_TerrainRendererBase::RenderMode mo
 	Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
 	GfxDevice &device = data->storm.GetD3DDevice();
 
-	bool atiShader = false;
-	int spotType = Storm3D_Spotlight::getSpotType();
-	if(spotType == Storm3D_Spotlight::AtiBuffer)
-		atiShader = true;
-
 	if(mode == SpotBuffer && spot)
 	{
-		if(spotType == Storm3D_Spotlight::AtiBuffer)
-			device.SetTexture(1, data->depthLookupTexture);
-
 		// removing this will break shadows
 		if(data->renderModels)
 			data->models.renderDepth(scene, camera, *spot, spot->getNoShadowModel());
 
 		if(data->renderHeightmap)
-			data->heightMap.renderDepth(scene, &camera, Storm3D_TerrainHeightmap::Depth, Storm3D_TerrainHeightmap::Nv, spot->getType(), spot);
+			data->heightMap.renderDepth(scene, &camera, Storm3D_TerrainHeightmap::Depth, spot->getType(), spot);
 
 	}
 	else if((mode == SpotProjectionSolid || mode == SpotProjectionDecal || mode == SpotProjectionAlpha) && spot)
@@ -2580,16 +2560,13 @@ void Storm3D_TerrainRenderer::render(IStorm3D_TerrainRendererBase::RenderMode mo
 			if(data->renderHeightmap)
 			{
 				Storm3D_TerrainHeightmap::RenderMode mode = Storm3D_TerrainHeightmap::Projection;
-				Storm3D_TerrainHeightmap::RenderType type = Storm3D_TerrainHeightmap::Nv;
-				if(atiShader)
-					type = Storm3D_TerrainHeightmap::Ati;
 
 				Storm3D_ShaderManager::GetSingleton()->SetObjectDiffuse(COL(1.f, 1.f, 1.f));
 				device.SetTexture(2, data->terrainTexture);
 				device.SetVertexShaderConstantF(18, data->terrainTextureProjection, 4);
 
 				frozenbyte::storm::enableMipFiltering(device, 2, 2, false);
-				data->heightMap.renderDepth(scene, &spotCamera, mode, type, spot->getType(), spot);
+				data->heightMap.renderDepth(scene, &spotCamera, mode, spot->getType(), spot);
 				frozenbyte::storm::enableMipFiltering(device, 2, 2, true);
 			}
 		}

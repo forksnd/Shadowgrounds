@@ -148,15 +148,6 @@ class Storm3D_ShaderManager: public Singleton<Storm3D_ShaderManager>
 	frozenbyte::storm::VertexShader bone_projected_shader_point;
 	frozenbyte::storm::VertexShader bone_projected_shader_flat;
 
-	frozenbyte::storm::VertexShader ati_depth_default_shader;
-	frozenbyte::storm::VertexShader ati_depth_bone_shader;
-	frozenbyte::storm::VertexShader ati_shadow_default_shader_directional;
-	frozenbyte::storm::VertexShader ati_shadow_default_shader_point;
-	frozenbyte::storm::VertexShader ati_shadow_default_shader_flat;
-	frozenbyte::storm::VertexShader ati_shadow_bone_shader_directional;
-	frozenbyte::storm::VertexShader ati_shadow_bone_shader_point;
-	frozenbyte::storm::VertexShader ati_shadow_bone_shader_flat;
-
 	frozenbyte::storm::VertexShader fake_depth_shader;
 	frozenbyte::storm::VertexShader fake_shadow_shader;	
 	frozenbyte::storm::VertexShader fake_depth_bone_shader;
@@ -166,8 +157,6 @@ class Storm3D_ShaderManager: public Singleton<Storm3D_ShaderManager>
 
 	bool lighting_shaders;
 	bool projected_shaders;
-	bool ati_depth_shaders;
-	bool ati_shadow_shaders;
 	bool fake_depth_shaders;
 	bool fake_shadow_shaders;
 
@@ -190,7 +179,6 @@ public:
 	
 	// Create shaders
 	void CreateShaders(GfxDevice& device);
-	void CreateAtiShaders(GfxDevice& device);
 
 	void setLightingParameters(bool reflection_, bool local_reflection_, int light_count_);
 
@@ -211,8 +199,6 @@ public:
 	void SetObjectDiffuse(const Color &color);
 
 	void setProjectedShaders();
-	void setAtiDepthShaders();
-	void setAtiShadowShaders();
 	void setFakeDepthShaders();
 	void setFakeShadowShaders();
 	void setLightingShaders();
