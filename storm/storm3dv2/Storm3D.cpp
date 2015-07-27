@@ -44,7 +44,10 @@
 using namespace frozenbyte;
 
 static const size_t INDEX_STORAGE_SIZE = 20 * (1<<20);
-static const size_t VERTEX_STORAGE_SIZE = 200 * (1<<20);
+static const size_t VERTEX_STORAGE_SIZE = 80 * (1<<20);
+static const size_t MAX_QUAD_COUNT = 0x4000;
+
+static_assert(MAX_QUAD_COUNT*4<=0x10000, "Vertex count should be less then 65536(0x10000)");
 
 // HACK: for statistics
 extern int storm3d_model_boneanimation_allocs;
@@ -267,6 +270,53 @@ void Storm3D::SetApplicationName(const char *shortName, const char *applicationN
 	this->application_shortname = shortName;
 }
 
+void Storm3D::setQuadIndices()
+{
+    device.SetIndices(indices.indices);
+}
+
+UINT Storm3D::baseQuadIndex()
+{
+    return indices.baseIndex(quadIdxAlloc);
+}
+
+void Storm3D::createManagedResources()
+{
+    // Create shader manager
+    new Storm3D_ShaderManager(device);
+    Storm3D_ShaderManager::GetSingleton()->CreateShaders(device);
+
+    indices.init(device, INDEX_STORAGE_SIZE);
+    vertices.init(device, VERTEX_STORAGE_SIZE);
+
+    //Create quad indices
+    quadIdxAlloc = indices.alloc(MAX_QUAD_COUNT * 6);
+    assert(quadIdxAlloc);
+
+    uint16_t* buffer = indices.lock(quadIdxAlloc);
+    for (uint16_t i = 0; i < MAX_QUAD_COUNT; ++i)
+    {
+        uint16_t base  = i * 4;
+
+        *buffer++ = base + 0;
+        *buffer++ = base + 2;
+        *buffer++ = base + 1;
+        *buffer++ = base + 1;
+        *buffer++ = base + 2;
+        *buffer++ = base + 3;
+    }
+    indices.unlock();
+}
+
+void Storm3D::destroyManagedResources()
+{
+    indices.fini();
+    vertices.fini();
+
+	// Delete shader manager
+	delete Storm3D_ShaderManager::GetSingleton();
+}
+
 
 //------------------------------------------------------------------
 // Storm3D::SetFullScreenMode
@@ -406,13 +456,7 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 	Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
-    indices.init(device, INDEX_STORAGE_SIZE);
-    vertices.init(device, VERTEX_STORAGE_SIZE);
-
-	// Create shader manager
-	new Storm3D_ShaderManager(device);
-
-	Storm3D_ShaderManager::GetSingleton()->CreateShaders(device);
+    createManagedResources();
 
 	//device.SetDepthStencilSurface(depthTarget);
 
@@ -526,13 +570,7 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 	Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
-    indices.init(device, INDEX_STORAGE_SIZE);
-    vertices.init(device, VERTEX_STORAGE_SIZE);
-
-	// Create shader manager
-	new Storm3D_ShaderManager(device);
-
-	Storm3D_ShaderManager::GetSingleton()->CreateShaders(device);
+    createManagedResources();
 
 	//device.SetDepthStencilSurface(depthTarget);
 
@@ -639,13 +677,7 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 		Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 	}
 
-    indices.init(device, INDEX_STORAGE_SIZE);
-    vertices.init(device, VERTEX_STORAGE_SIZE);
-
-	// Create shader manager
-	new Storm3D_ShaderManager(device);
-
-	Storm3D_ShaderManager::GetSingleton()->CreateShaders(device);
+    createManagedResources();
 
 	//device.SetDepthStencilSurface(depthTarget);
 
@@ -707,7 +739,8 @@ Storm3D::Storm3D(bool _no_info, filesystem::FilePackageManager *fileManager, ISt
 	needValueTargets(false),
 	antialiasing_level(0),
 	allocate_procedural_target(true),
-	force_reset(false)
+	force_reset(false),
+    quadIdxAlloc(0)
 { 
 	if(fileManager)
 		filesystem::FilePackageManager::setInstancePtr(fileManager);
@@ -793,9 +826,6 @@ Storm3D::~Storm3D()
 
 	freeRenderTargets();
 
-	// Delete shader manager
-	delete Storm3D_ShaderManager::GetSingleton();
-
 	proceduralManager.reset();
 
 	// May now leak memory, but otherwise crashes on Windows
@@ -804,8 +834,7 @@ Storm3D::~Storm3D()
 		delete (*textures.begin());
 	}
 
-    indices.fini();
-    vertices.fini();
+    destroyManagedResources();
 
     // Release Direct3D stuff
     device.fini();

@@ -38,7 +38,6 @@ int Storm3D_ParticleSystem::LineArray::m_maxParticles = 0;
 
 namespace {
 
-	frozenbyte::storm::IndexBuffer indexBuffer;
 	frozenbyte::storm::VertexBuffer vertexBuffer[2];
 	char *temporaryPointer[2] = { 0, 0};
 	//int allocateIndexAmount = 4096 * 6; // 4096 particles in one call
@@ -60,28 +59,6 @@ namespace {
 
 			delete[] temporaryPointer[index];
 			temporaryPointer[index] = new char[vertexAmount * sizeof(Vertex_P3DUV2)];
-		}
-
-		if(!indexBuffer)
-		{
-			int particleAmount = allocateIndexAmount / 6;
-			indexBuffer.create(device, particleAmount * 2, false);
-
-			unsigned short int *buffer = indexBuffer.lock();
-			int position = 0;
-
-			for(int i = 0; i < particleAmount; ++i)
-			{
-				buffer[position + 0] = i*4 + 0;
-				buffer[position + 1] = i*4 + 1;
-				buffer[position + 2] = i*4 + 2;
-				buffer[position + 3] = i*4 + 2;
-				buffer[position + 4] = i*4 + 1;
-				buffer[position + 5] = i*4 + 3;
-				position += 6;
-			}
-
-			indexBuffer.unlock();
 		}
 	}
 
@@ -109,8 +86,6 @@ void releaseBuffers()
 	delete[] temporaryPointer[1];
 	temporaryPointer[0] = 0;
 	temporaryPointer[1] = 0;
-
-	indexBuffer.release();
 }
 
 void Storm3D_ParticleSystem::Render(Storm3D_Scene* scene, bool distortion) 
@@ -211,6 +186,7 @@ OutputDebugString(msg.c_str());
 	}
 
 	vertexBuffer[index].apply(device, 0);
+    Storm3D2->setQuadIndices();
 
     device.SetStdProgram(GfxDevice::SSF_COLOR|GfxDevice::SSF_TEXTURE);
     device.SetFVF(FVF_P3DUV2);
@@ -246,7 +222,7 @@ OutputDebugString(msg.c_str());
 */
 //if(!oldVertexBufferOffset)
 //continue;
-					indexBuffer.render(device, particleAmount * 2, particleAmount * 4, vertexOffset + oldVertexBufferOffset);
+                    device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, vertexOffset + oldVertexBufferOffset, 0, particleAmount * 4, Storm3D2->baseQuadIndex(), particleAmount * 2);
 				}
 
 				scene->AddPolyCounter(particleAmount);

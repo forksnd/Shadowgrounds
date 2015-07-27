@@ -28,7 +28,6 @@ using namespace frozenbyte::storm;
 struct Decal;
 struct Material;
 typedef std::deque<Decal> DecalList;
-typedef std::vector<VertexBuffer> VertexBufferList;
 typedef std::vector<Material> MaterialList;
 
 // position + normal + texcoord + color 
@@ -398,7 +397,6 @@ struct Storm3D_TerrainDecalSystem::Data
 
 	VertexBuffer vertices;
 	VertexBuffer shadowVertices;
-	IndexBuffer indices;
     LPDIRECT3DVERTEXDECLARATION9 VtxFmt_DECAL;
 
 	boost::scoped_ptr<Tree> tree;
@@ -572,30 +570,6 @@ struct Storm3D_TerrainDecalSystem::Data
 		}
 	}
 
-	void createIndexBuffers(GfxDevice &device)
-	{
-		if(!indices)
-		{
-			indices.create(device, MAX_DECAL_AMOUNT * 2, false);
-			unsigned short int *buffer = indices.lock();
-
-			for(int i = 0; i < MAX_DECAL_AMOUNT; ++i)
-			{
-				unsigned short int base = i * 4;
-				int index = i * 6;
-
-				buffer[index] = base;
-				buffer[index + 1] = base + 2;
-				buffer[index + 2] = base + 1;
-				buffer[index + 3] = base + 1;
-				buffer[index + 4] = base + 2;
-				buffer[index + 5] = base + 3;
-			}
-
-			indices.unlock();
-		}
-	}
-
 	void createVertexBuffers(GfxDevice &device)
 	{
 		if(!decals.empty())
@@ -625,7 +599,6 @@ struct Storm3D_TerrainDecalSystem::Data
 		findDecals(scene);
 
 		GfxDevice &device = storm.GetD3DDevice();
-		createIndexBuffers(device);
 		createVertexBuffers(device);
 
 		// Render
@@ -637,13 +610,8 @@ struct Storm3D_TerrainDecalSystem::Data
 			device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 			device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
-			float tmValues[16] = { 0 };
-			D3DXMATRIX tm(tmValues);
-			tm._11 = 1.f;
-			tm._22 = 1.f;
-			tm._33 = 1.f;
-			tm._44 = 1.f;
-
+			D3DXMATRIX tm;
+            D3DXMatrixIdentity(&tm);
 			Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
 			pixelShader.apply();
 			vertexShader.apply();
@@ -657,6 +625,8 @@ struct Storm3D_TerrainDecalSystem::Data
 			int materialIndex = 0;
 			int startIndex = 0;
 			int endIndex = 0;
+
+            storm.setQuadIndices();
 
 			for(;;)
 			{
@@ -674,7 +644,8 @@ struct Storm3D_TerrainDecalSystem::Data
 
 				int renderAmount = endIndex - startIndex + 1;
 
-				indices.render(device, renderAmount * 2, renderAmount * 4, startIndex * 4);
+                device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, startIndex * 4, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
+
 				startIndex = ++endIndex;
 
 				scene.AddPolyCounter(renderAmount * 2);
@@ -686,119 +657,110 @@ struct Storm3D_TerrainDecalSystem::Data
 		}
 	}
 
-	void renderShadows(Storm3D_Scene &scene)
-	{
-		GfxDevice &device = storm.GetD3DDevice();
-		createIndexBuffers(device);
+    void renderShadows(Storm3D_Scene &scene)
+    {
+        if (shadowDecals.empty() || !shadowMaterial)
+            return;
 
-		int renderAmount = 0;
-		if(!shadowDecals.empty())
-		{
-			IStorm3D_Camera *camera = scene.GetCamera();
-			Storm3D_Camera *stormCamera = reinterpret_cast<Storm3D_Camera *> (camera);
-			Frustum frustum = stormCamera->getFrustum();
+        GfxDevice &device = storm.GetD3DDevice();
 
-			shadowVertices.create(device, shadowDecals.size() * 4, VERTEX_SIZE, true);
+        int renderAmount = 0;
 
-			int rawSize = shadowDecals.size() * 4 * VERTEX_SIZE;
-			void *ramBuffer = malloc(rawSize);
-			void *lockPointer = shadowVertices.lock();
-			Vertex_DECAL *buffer = reinterpret_cast<Vertex_DECAL*> (ramBuffer);
+        IStorm3D_Camera *camera = scene.GetCamera();
+        Storm3D_Camera *stormCamera = reinterpret_cast<Storm3D_Camera *> (camera);
+        Frustum frustum = stormCamera->getFrustum();
 
-			float inverseRange =1.f / fogRange;
-			for(unsigned int i = 0; i < shadowDecals.size(); ++i)
-			{
-				const Decal &decal = shadowDecals[i];
-				Sphere sphere(decal.position, decal.getRadius());
-				if(frustum.visibility(sphere))
-				{
-					float factor = decal.position.y - fogEnd;
-					factor *= inverseRange;
-					if(factor < 0.f)
-						factor = 0.f;
-					if(factor > 1.f)
-						factor = 1.f;
-					factor = 1.f - factor;
+        shadowVertices.create(device, shadowDecals.size() * 4, VERTEX_SIZE, true);
 
-					COL color = decal.light;
-					color.r += factor * (1.f - color.r);
-					color.g += factor * (1.f - color.g);
-					color.b += factor * (1.f - color.b);
+        int rawSize = shadowDecals.size() * 4 * VERTEX_SIZE;
+        void *lockPointer = shadowVertices.lock();
+        Vertex_DECAL *buffer = reinterpret_cast<Vertex_DECAL*> (lockPointer);
 
-					DWORD vertexColor = color.GetAsD3DCompatibleARGB() & 0x00FFFFFF;
+        float inverseRange = 1.f / fogRange;
+        for (unsigned int i = 0; i < shadowDecals.size() && renderAmount < MAX_DECAL_AMOUNT; ++i)
+        {
+            const Decal &decal = shadowDecals[i];
+            Sphere sphere(decal.position, decal.getRadius());
+            if (frustum.visibility(sphere))
+            {
+                float factor = decal.position.y - fogEnd;
+                factor *= inverseRange;
+                if (factor < 0.f)
+                    factor = 0.f;
+                if (factor > 1.f)
+                    factor = 1.f;
+                factor = 1.f - factor;
 
-					/*
-					DWORD vertexColor = decal.vertexColor;
-					int alpha = decal.alpha - int(factor * 255.f);
-					if(alpha < 0)
-						alpha = 0;
-					vertexColor |= alpha << 24;
-					DWORD oldColor = decal.vertexColor;
-					*/
+                COL color = decal.light;
+                color.r += factor * (1.f - color.r);
+                color.g += factor * (1.f - color.g);
+                color.b += factor * (1.f - color.b);
 
-					DWORD oldColor = decal.vertexColor;
-					decal.vertexColor = vertexColor;
-					decal.insert(buffer);
-					decal.vertexColor = oldColor;
+                DWORD vertexColor = color.GetAsD3DCompatibleARGB() & 0x00FFFFFF;
 
-					buffer += 4;
-					++renderAmount;
-				}
-			}
+                /*
+                DWORD vertexColor = decal.vertexColor;
+                int alpha = decal.alpha - int(factor * 255.f);
+                if(alpha < 0)
+                alpha = 0;
+                vertexColor |= alpha << 24;
+                DWORD oldColor = decal.vertexColor;
+                */
 
-			if(renderAmount)
-			{
-				if(renderAmount > MAX_DECAL_AMOUNT)
-					renderAmount = MAX_DECAL_AMOUNT;
-				memcpy(lockPointer, ramBuffer, renderAmount * 4 * VERTEX_SIZE);
-			}
+                DWORD oldColor = decal.vertexColor;
+                decal.vertexColor = vertexColor;
+                decal.insert(buffer);
+                decal.vertexColor = oldColor;
 
-			free(ramBuffer);
-			shadowVertices.unlock();
-		}
+                buffer += 4;
+                ++renderAmount;
+            }
+        }
 
-		float tmValues[16] = { 0 };
-		D3DXMATRIX tm(tmValues);
-		tm._11 = 1.f;
-		tm._22 = 1.f;
-		tm._33 = 1.f;
-		tm._44 = 1.f;
-		//Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
+        shadowVertices.unlock();
 
-		device.SetVertexShader(0);
-		device.SetPixelShader(0);
-		device.SetTransform(D3DTS_WORLD, &tm);
+        if (renderAmount == 0)
+            return;
 
-		//vertexShader.applyDeclaration();
-		device.SetVertexDeclaration(VtxFmt_DECAL);
-		device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-		device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_ADD);
-		device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-		device.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-		device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-		device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+        D3DXMATRIX tm;
+        D3DXMatrixIdentity(&tm);
 
-		device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-		device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-		device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
-		device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
-		device.SetRenderState(D3DRS_LIGHTING, FALSE);
+        //Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
 
-		if(renderAmount && shadowMaterial)
-		{
-			shadowVertices.apply(device, 0);
-			shadowMaterial->applyShadow(device);
+        device.SetVertexShader(0);
+        device.SetPixelShader(0);
+        device.SetTransform(D3DTS_WORLD, &tm);
 
-			indices.render(device, renderAmount * 2, renderAmount * 4, 0);
-			scene.AddPolyCounter(renderAmount * 2);
-		}
+        //vertexShader.applyDeclaration();
+        device.SetVertexDeclaration(VtxFmt_DECAL);
+        device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+        device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+        device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_ADD);
+        device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+        device.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+        device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+        device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 
-		device.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-		device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-		shadowDecals.clear();
-	}
+        device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+        device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+        device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+        device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+        device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
+        device.SetRenderState(D3DRS_LIGHTING, FALSE);
+
+        shadowVertices.apply(device, 0);
+        shadowMaterial->applyShadow(device);
+
+        storm.setQuadIndices();
+        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
+
+        scene.AddPolyCounter(renderAmount * 2);
+
+        device.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+        device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+
+        shadowDecals.clear();
+    }
 
 	void renderProjection(Storm3D_Scene &scene, Storm3D_Spotlight *spot)
 	{
@@ -817,12 +779,8 @@ struct Storm3D_TerrainDecalSystem::Data
 			//device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 			//device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
-			float tmValues[16] = { 0 };
-			D3DXMATRIX tm(tmValues);
-			tm._11 = 1.f;
-			tm._22 = 1.f;
-			tm._33 = 1.f;
-			tm._44 = 1.f;
+			D3DXMATRIX tm;
+            D3DXMatrixIdentity(&tm);
 
 			Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
 			vertices.apply(device, 0);
@@ -840,6 +798,7 @@ struct Storm3D_TerrainDecalSystem::Data
 
 			Storm3D_ShaderManager::GetSingleton()->SetTransparencyFactor(0.75f);
 
+            storm.setQuadIndices();
 			for(;;)
 			{
 				materialIndex = decals[startIndex]->materialIndex;
@@ -856,8 +815,9 @@ struct Storm3D_TerrainDecalSystem::Data
 
 				int renderAmount = endIndex - startIndex + 1;
 
-				indices.render(device, renderAmount * 2, renderAmount * 4, startIndex * 4);
-				startIndex = ++endIndex;
+                device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, startIndex * 4, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
+
+                startIndex = ++endIndex;
 
 				scene.AddPolyCounter(renderAmount * 2);
 				if(startIndex >= decalAmount)
@@ -878,7 +838,6 @@ struct Storm3D_TerrainDecalSystem::Data
 	{
 		vertices.release();
 		shadowVertices.release();
-		indices.release();
 	}
 
 	void recreateDynamic()
@@ -970,6 +929,7 @@ void Storm3D_TerrainDecalSystem::renderShadows(Storm3D_Scene &scene)
 
 void Storm3D_TerrainDecalSystem::renderProjection(Storm3D_Scene &scene, Storm3D_Spotlight *spot)
 {
+    GFX_TRACE_SCOPE("Storm3D_TerrainDecalSystem::renderProjection");
 	data->renderProjection(scene, spot);
 }
 

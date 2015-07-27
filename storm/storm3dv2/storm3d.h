@@ -157,13 +157,21 @@ private:
 	bool hasNeededBuffers();
 	bool force_reset;
 
-    IndexStorage16  indices;
-    VertexStorage   vertices;
+    uint16_t quadIdxAlloc;
 
 public:
 
+    IndexStorage16  indices;
+    VertexStorage   vertices;
+
     IndexStorage16& getIndexStorage16() {return indices;}
     VertexStorage&  getVertexStorage()  {return vertices;}
+
+    void setQuadIndices();
+    UINT baseQuadIndex();
+
+    void createManagedResources();
+    void destroyManagedResources();
 
 	// 3d-supports (currect, mode depencent, not adapter depencent)
 	bool support_stencil;
