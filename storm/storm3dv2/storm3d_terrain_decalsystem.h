@@ -39,9 +39,6 @@ public:
 	void setShadowMaterial(IStorm3D_Material *material);
 	void setShadowDecal(const VC3 &position, const QUAT &rotation, const VC2 &size, float alpha);
 	void clearShadowDecals();
-
-	void releaseDynamicResources();
-	void recreateDynamicResources();
 };
 
 #endif

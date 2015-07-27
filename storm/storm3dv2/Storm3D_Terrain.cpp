@@ -288,13 +288,11 @@ IStorm3D_TerrainDecalSystem &Storm3D_Terrain::getDecalSystem()
 void Storm3D_Terrain::releaseDynamicResources()
 {
 	data->renderer.releaseDynamicResources();
-	data->decalSystem.releaseDynamicResources();
 }
 
 void Storm3D_Terrain::recreateDynamicResources()
 {
 	data->renderer.recreateDynamicResources();
-	data->decalSystem.recreateDynamicResources();
 }
 
 boost::shared_ptr<IStorm3D_TerrainModelIterator> Storm3D_Terrain::getModelIterator(const VC3 &position, float radius)

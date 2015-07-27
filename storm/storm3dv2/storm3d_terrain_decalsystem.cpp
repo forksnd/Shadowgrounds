@@ -395,8 +395,7 @@ struct Storm3D_TerrainDecalSystem::Data
 	VertexShader dirVertexShader;
 	VertexShader flatVertexShader;
 
-	VertexBuffer vertices;
-	VertexBuffer shadowVertices;
+    UINT baseDecalVertex;
     LPDIRECT3DVERTEXDECLARATION9 VtxFmt_DECAL;
 
 	boost::scoped_ptr<Tree> tree;
@@ -570,36 +569,24 @@ struct Storm3D_TerrainDecalSystem::Data
 		}
 	}
 
-	void createVertexBuffers(GfxDevice &device)
-	{
-		if(!decals.empty())
-		{
-			vertices.create(device, decals.size() * 4, VERTEX_SIZE, true);
-
-			int rawSize = decals.size() * 4 * VERTEX_SIZE;
-			void *ramBuffer = malloc(rawSize);
-			void *lockPointer = vertices.lock();
-			Vertex_DECAL *buffer = reinterpret_cast<Vertex_DECAL*> (ramBuffer);
-
-			for(unsigned int i = 0; i < decals.size(); ++i)
-			{
-				decals[i]->insert(buffer);
-				buffer += 4;
-			}
-
-			memcpy(lockPointer, ramBuffer, rawSize);
-			free(ramBuffer);
-
-			vertices.unlock();
-		}
-	}
-
 	void render(Storm3D_Scene &scene)
 	{
+        baseDecalVertex = 0;
+
 		findDecals(scene);
+		if(decals.empty())
+            return;
 
 		GfxDevice &device = storm.GetD3DDevice();
-		createVertexBuffers(device);
+
+        Vertex_DECAL *buffer = 0;
+        device.lockDynVtx<Vertex_DECAL>(decals.size() * 4, &buffer, &baseDecalVertex);
+        for (unsigned int i = 0; i < decals.size(); ++i)
+        {
+            decals[i]->insert(buffer);
+            buffer += 4;
+        }
+        device.unlockDynVtx();
 
 		// Render
 		if(!decals.empty())
@@ -615,7 +602,9 @@ struct Storm3D_TerrainDecalSystem::Data
 			Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
 			pixelShader.apply();
 			vertexShader.apply();
-			vertices.apply(device, 0);
+
+            device.SetDynVtxBuffer<Vertex_DECAL>();
+            storm.setQuadIndices();
 
 			D3DXVECTOR4 outfactor(outFactor.r, outFactor.g, outFactor.b, 1.f);
 			device.SetVertexShaderConstantF(8, outfactor, 1);
@@ -626,7 +615,6 @@ struct Storm3D_TerrainDecalSystem::Data
 			int startIndex = 0;
 			int endIndex = 0;
 
-            storm.setQuadIndices();
 
 			for(;;)
 			{
@@ -644,7 +632,7 @@ struct Storm3D_TerrainDecalSystem::Data
 
 				int renderAmount = endIndex - startIndex + 1;
 
-                device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, startIndex * 4, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
+                device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseDecalVertex+startIndex * 4, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
 
 				startIndex = ++endIndex;
 
@@ -670,11 +658,9 @@ struct Storm3D_TerrainDecalSystem::Data
         Storm3D_Camera *stormCamera = reinterpret_cast<Storm3D_Camera *> (camera);
         Frustum frustum = stormCamera->getFrustum();
 
-        shadowVertices.create(device, shadowDecals.size() * 4, VERTEX_SIZE, true);
-
-        int rawSize = shadowDecals.size() * 4 * VERTEX_SIZE;
-        void *lockPointer = shadowVertices.lock();
-        Vertex_DECAL *buffer = reinterpret_cast<Vertex_DECAL*> (lockPointer);
+        UINT baseVertex = 0;
+        Vertex_DECAL *buffer = 0;;
+        device.lockDynVtx<Vertex_DECAL>(shadowDecals.size() * 4, &buffer, &baseVertex);
 
         float inverseRange = 1.f / fogRange;
         for (unsigned int i = 0; i < shadowDecals.size() && renderAmount < MAX_DECAL_AMOUNT; ++i)
@@ -717,7 +703,7 @@ struct Storm3D_TerrainDecalSystem::Data
             }
         }
 
-        shadowVertices.unlock();
+        device.unlockDynVtx();
 
         if (renderAmount == 0)
             return;
@@ -748,11 +734,12 @@ struct Storm3D_TerrainDecalSystem::Data
         device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
         device.SetRenderState(D3DRS_LIGHTING, FALSE);
 
-        shadowVertices.apply(device, 0);
+
         shadowMaterial->applyShadow(device);
 
+        device.SetDynVtxBuffer<Vertex_DECAL>();
         storm.setQuadIndices();
-        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
+        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVertex, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
 
         scene.AddPolyCounter(renderAmount * 2);
 
@@ -783,7 +770,9 @@ struct Storm3D_TerrainDecalSystem::Data
             D3DXMatrixIdentity(&tm);
 
 			Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
-			vertices.apply(device, 0);
+
+            device.SetDynVtxBuffer<Vertex_DECAL>();
+            storm.setQuadIndices();
 
 			int materialIndex = 0;
 			int startIndex = 0;
@@ -798,7 +787,6 @@ struct Storm3D_TerrainDecalSystem::Data
 
 			Storm3D_ShaderManager::GetSingleton()->SetTransparencyFactor(0.75f);
 
-            storm.setQuadIndices();
 			for(;;)
 			{
 				materialIndex = decals[startIndex]->materialIndex;
@@ -815,7 +803,7 @@ struct Storm3D_TerrainDecalSystem::Data
 
 				int renderAmount = endIndex - startIndex + 1;
 
-                device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, startIndex * 4, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
+                device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseDecalVertex+startIndex * 4, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
 
                 startIndex = ++endIndex;
 
@@ -832,16 +820,6 @@ struct Storm3D_TerrainDecalSystem::Data
 		}
 
 		device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-	}
-
-	void releaseDynamic()
-	{
-		vertices.release();
-		shadowVertices.release();
-	}
-
-	void recreateDynamic()
-	{
 	}
 };
 
@@ -950,14 +928,4 @@ void Storm3D_TerrainDecalSystem::setShadowDecal(const VC3 &position, const QUAT 
 void Storm3D_TerrainDecalSystem::clearShadowDecals()
 {
 	data->shadowDecals.clear();
-}
-
-void Storm3D_TerrainDecalSystem::releaseDynamicResources()
-{
-	data->releaseDynamic();
-}
-
-void Storm3D_TerrainDecalSystem::recreateDynamicResources()
-{
-	data->recreateDynamic();
 }
