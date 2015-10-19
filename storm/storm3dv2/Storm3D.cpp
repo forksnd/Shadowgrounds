@@ -43,8 +43,8 @@
 
 using namespace frozenbyte;
 
-static const size_t INDEX_STORAGE_SIZE = 20 * (1<<20);
-static const size_t VERTEX_STORAGE_SIZE = 80 * (1<<20);
+static const size_t INDEX_STORAGE_SIZE = 40 * (1<<20);
+static const size_t VERTEX_STORAGE_SIZE = 100 * (1<<20);
 static const size_t MAX_QUAD_COUNT = 0x4000;
 
 static_assert(MAX_QUAD_COUNT*4<=0x10000, "Vertex count should be less then 65536(0x10000)");
