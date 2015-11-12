@@ -6,8 +6,6 @@
 #include "../system/Logger.h"
 #include "../convert/str2int.h"
 
-#include "../util/UberCrypt.h"
-
 #include "PartType.h"
 #include "PartTypeParser.h"
 
@@ -129,13 +127,6 @@ namespace game
     buf = new char[size + 1];
     int datalen = filesystem::fb_fread(buf, sizeof(char), size, f);
     buf[datalen] = '\0';
-
-		if (strlen(filename) > 4
-			&& (strcmp(&filename[strlen(filename) - 4], ".dhu") == 0
-			|| strcmp(&filename[strlen(filename) - 4], ".DHU") == 0))
-		{
-			util::UberCrypt::decrypt(buf, datalen);
-		}
 
     PartType *parsePart = NULL;
     UnitType *parseUnit = NULL;
