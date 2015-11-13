@@ -1259,7 +1259,6 @@
     <ClInclude Include="GfxDevice.h" />
     <ClInclude Include="DatatypeDef.h" />
     <ClInclude Include="Iterator.h" />
-    <ClInclude Include="Iterator_TRBMOList.h" />
     <ClInclude Include="RenderWindow.h" />
     <ClInclude Include="S3D_ModelFile.h" />
     <ClInclude Include="Storm3d.h" />

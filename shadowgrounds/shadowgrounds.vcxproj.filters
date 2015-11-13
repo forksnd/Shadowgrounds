@@ -1254,9 +1254,6 @@
     <ClCompile Include="..\util\TextureSwitcher.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\util\UberCrypt.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\util\UnicodeConverter.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -2625,9 +2622,6 @@
       <Filter>Header Files\storm3d h</Filter>
     </ClInclude>
     <ClInclude Include="..\storm\include\IStorm3D_Texture.h">
-      <Filter>Header Files\storm3d h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\storm\include\Iterator_TRBMOList.h">
       <Filter>Header Files\storm3d h</Filter>
     </ClInclude>
     <ClInclude Include="..\storm\include\Storm3D_Common.h">
