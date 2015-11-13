@@ -521,29 +521,23 @@ try {
 		boost::shared_ptr<IFilePackage> standardPackage(new StandardPackage());
 		
 		boost::shared_ptr<IFilePackage> zipPackage1(new ZipPackage("data1.fbz"));
-#ifndef DEMOVERSION
 		boost::shared_ptr<IFilePackage> zipPackage2(new ZipPackage("data2.fbz"));
 		boost::shared_ptr<IFilePackage> zipPackage3(new ZipPackage("data3.fbz"));
 		boost::shared_ptr<IFilePackage> zipPackage4(new ZipPackage("data4.fbz"));
-#endif
 
 		FilePackageManager &manager = FilePackageManager::getInstance();
 		manager.addPackage(standardPackage, 999);
 
 		manager.addPackage(zipPackage1, 1);
-#ifndef DEMOVERSION
 		manager.addPackage(zipPackage2, 2);
 		manager.addPackage(zipPackage3, 3);
 		manager.addPackage(zipPackage4, 4);
-#endif
 	}
 
 	// initialize...
 
-#ifndef DEMOVERSION
 	util::ModSelector modSelector;
 	modSelector.changeDir();
-#endif
 
 #ifdef CHANGE_TO_PARENT_DIR
 	// for profiling
@@ -555,8 +549,6 @@ try {
 	//printf(curdir);
 #endif
 
-	bool version_branch_failure = false;
-
 	bool show_fps = false;
 	bool show_polys = false;
 	bool show_terrain_mem_info = false;
@@ -567,97 +559,6 @@ try {
 
 	Timer::init();
 
-	/*
-	{
-		FILE *vbf = fopen("Data/Version/version_branch.txt", "rb");
-		if (vbf != NULL)
-		{
-			fseek(vbf, 0, SEEK_END);
-			int vbf_size = ftell(vbf);
-			fseek(vbf, 0, SEEK_SET);
-
-			char *vbf_buf = new char[vbf_size + 1];
-			int vbf_got = fread(vbf_buf, vbf_size, 1, vbf);
-			if (vbf_got == 1)
-			{
-				vbf_buf[vbf_size] = '\0';
-				if (strncmp(vbf_buf, version_branch_name, strlen(version_branch_name)) != 0)
-				{
-					version_branch_failure = true;					
-				}
-			} else {
-				version_branch_failure = true;
-			}
-			delete [] vbf_buf;
-			fclose(vbf);
-		} else {
-			version_branch_failure = true;
-		}
-	}
-
-	{
-		char fname_buf[256];
-		strcpy(fname_buf, "Data/Version/");
-		strcat(fname_buf, version_branch_name);
-		strcat(fname_buf, ".txt");
-		FILE *vbf = fopen(fname_buf, "rb");
-		if (vbf != NULL)
-		{
-			fclose(vbf);
-		} else {
-			version_branch_failure = true;
-		}
-	}
-	*/
-
-#ifndef DEMOVERSION
-	// don't allow demo, require actual full game data
-	{
-		char fname_buf[256];
-		strcpy(fname_buf, "Data/Models/Buildings/AlienMothership/DockingBay.s3d");
-		frozenbyte::filesystem::FB_FILE *vbf = frozenbyte::filesystem::fb_fopen(fname_buf, "rb");
-		if (vbf != NULL)
-		{
-			int size = frozenbyte::filesystem::fb_fsize(vbf);
-			if (size < 25 * 1024*1024)
-			{
-				version_branch_failure = true;
-			}
-			frozenbyte::filesystem::fb_fclose(vbf);
-		} else {
-			version_branch_failure = true;
-		}
-	}
-	{
-		char fname_buf[256];
-		strcpy(fname_buf, "Data/Models/Buildings/Provectus/Provectus_level2.s3d");
-		frozenbyte::filesystem::FB_FILE *vbf = frozenbyte::filesystem::fb_fopen(fname_buf, "rb");
-		if (vbf != NULL)
-		{
-			int size = frozenbyte::filesystem::fb_fsize(vbf);
-			if (size < 10 * 1024*1024)
-			{
-				version_branch_failure = true;
-			}
-			frozenbyte::filesystem::fb_fclose(vbf);
-		} else {
-			version_branch_failure = true;
-		}
-	}
-#endif
-
-	/*
-	int chksum1 = 3019411528;
-	int chksize1 = 22357374;
-	chksum1 ^= 1300166741;
-	chksize1 ^= 21000334;
-	bool checksumfailure = false;
-	if (!util::Checksummer::doesChecksumAndSizeMatchFile(chksum1, chksize1, "Data/GUI/Windows/command.dds"))
-	{
-		checksumfailure = true;
-	}
-	*/
-
 	editor::EditorParser main_config;
 	filesystem::InputStream configFile = filesystem::FilePackageManager::getInstance().getFile("Config/main.txt");
 	configFile >> main_config;
@@ -665,26 +566,6 @@ try {
 	GameOptionManager::getInstance()->load();
 	atexit(&GameConfigs::cleanInstance);
 	atexit(&GameOptionManager::cleanInstance);
-	/*
-	if (checksumfailure)
-	{
-		Logger::getInstance()->error("Checksum mismatch.");
-		MessageBox(0,"Checksum mismatch or required data missing.\nMake sure you have all the application files properly installed.\n\nContact Frozenbyte for more info.","Error",MB_OK); 
-		assert(!"Checksum mismatch");
-		return 0;
-	}
-	*/
-	/*
-	if (version_branch_failure)
-	{
-		Logger::getInstance()->error("Version data incorrect.");
-		MessageBox(0,"Version mismatch or required data missing.\nMake sure you have all the application files properly installed.\n\nSee game website for more info.","Error",MB_OK); 
-		assert(!"Version data incorrect");
-		abort();
-		return 0;
-	}
-	*/
-
 
 	int windowedMode = -1;
 	bool compileOnly = false;
@@ -1529,9 +1410,6 @@ try {
 	}
 
 	// HACK: end splash screen.
-#ifdef DEMOVERSION
-	SimpleOptions::setBool(DH_OPT_B_SHOW_SPLASH_SCREEN, true);
-#endif
 	if (SimpleOptions::getBool(DH_OPT_B_SHOW_SPLASH_SCREEN))
 	{
 #ifdef PROJECT_SHADOWGROUNDS

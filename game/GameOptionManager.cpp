@@ -544,11 +544,7 @@ namespace game
 		"physics_default_dynamic_friction", "f", "Physics", "0.8f", "-", "-",
 		"physics_default_restitution", "f", "Physics", "0.3f", "-", "-",
 		"debug_visualize_trackers", "b", "Debug", "0", "-", "-",
-#ifdef DEMOVERSION
-		"show_splash_screen", "b", "GUI", "1", "-", "-",
-#else
 		"show_splash_screen", "b", "GUI", "0", "-", "-",
-#endif
 		"ast_preprocessor", "s", "Precalc", "", "-", "-",
 		"ast_preprocessor_check", "s", "Precalc", "", "-", "-",
 		"force_ast_preprocess", "b", "Precalc", "0", "-", "-",
