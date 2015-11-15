@@ -1337,9 +1337,6 @@
     <ClInclude Include="storm3d_particle.h" />
     <ClInclude Include="..\include\IStorm3D_ProceduralManager.h" />
     <ClInclude Include="Storm3D_ProceduralManager.h" />
-    <ClInclude Include="wmvsync\reader.h" />
-    <ClInclude Include="wmvsync\rostream.h" />
-    <ClInclude Include="wmvsync\StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\Snapshot\storm.txt" />

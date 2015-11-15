@@ -6,7 +6,7 @@
 #include <fstream>
 #include <map>
 
-#include "LipsyncManager.h"
+#include "AvatarManager.h"
 #include "../sound/LipsyncManager.h"
 #include "../editor/parser.h"
 #include "../editor/string_conversions.h"
@@ -22,7 +22,7 @@
 using namespace frozenbyte;
 using namespace frozenbyte::editor;
 
-namespace util {
+namespace ui {
 
 	struct TextureReleaser
 	{
@@ -132,7 +132,7 @@ namespace util {
 	typedef std::map<std::string, Character> CharacterMap;
 
 
-struct LipsyncManager::Data
+struct AvatarManager::Data
 {
 	IStorm3D *storm;
 	IStorm3D_Terrain *terrain;
@@ -356,54 +356,54 @@ struct LipsyncManager::Data
 	}
 };
 
-LipsyncManager::LipsyncManager(IStorm3D *storm, IStorm3D_Terrain *terrain)
+AvatarManager::AvatarManager(IStorm3D *storm, IStorm3D_Terrain *terrain)
 {
 	data =  new Data(storm, terrain);
 	data->init();
 }
 
-LipsyncManager::~LipsyncManager()
+AvatarManager::~AvatarManager()
 {
     assert(data);
     delete data;
 }
 
-const std::string &LipsyncManager::getCharacter(CharPosition position) const
+const std::string &AvatarManager::getCharacter(CharPosition position) const
 {
 	return data->activeCharacters[position].id;
 }
 
-boost::shared_ptr<sfx::AmplitudeArray> LipsyncManager::getAmplitudeBuffer(const std::string &file) const
+boost::shared_ptr<sfx::AmplitudeArray> AvatarManager::getAmplitudeBuffer(const std::string &file) const
 {
 	return data->manager.getAmplitudeBuffer(file);
 }
 
-bool LipsyncManager::isActive() const
+bool AvatarManager::isActive() const
 {
 	return data->active;
 }
 
-void LipsyncManager::setCharacter(CharPosition position, const std::string &id)
+void AvatarManager::setCharacter(CharPosition position, const std::string &id)
 {
 	data->setCharacter(position, id);
 }
 
-void LipsyncManager::setIdle(const std::string &character, const std::string &idleAnimation, int fadeTime)
+void AvatarManager::setIdle(const std::string &character, const std::string &idleAnimation, int fadeTime)
 {
 	data->setIdle(character, idleAnimation, fadeTime);
 }
 
-void LipsyncManager::setExpression(const std::string &character, const std::string &idleAnimation, int fadeTime)
+void AvatarManager::setExpression(const std::string &character, const std::string &idleAnimation, int fadeTime)
 {
 	data->setExpression(character, idleAnimation, fadeTime);
 }
 
-void LipsyncManager::playSpeech(const std::string &character, const boost::shared_ptr<sfx::AmplitudeArray> &amplitudes, int time)
+void AvatarManager::playSpeech(const std::string &character, const boost::shared_ptr<sfx::AmplitudeArray> &amplitudes, int time)
 {
 	data->play(character, amplitudes, time);
 }
 
-void LipsyncManager::setActive(bool active, int numChars)
+void AvatarManager::setActive(bool active, int numChars)
 {
 	if(numChars >= 2)
 		numChars = 2;
@@ -412,12 +412,12 @@ void LipsyncManager::setActive(bool active, int numChars)
 	data->numCharacters = numChars;
 }
 
-void LipsyncManager::update()
+void AvatarManager::update()
 {
 	data->update();
 }
 
-void LipsyncManager::setCamera(CharPosition pos, const VC3 &cameraPos, const VC3 &cameraTarget, float aspectRatio)
+void AvatarManager::setCamera(CharPosition pos, const VC3 &cameraPos, const VC3 &cameraTarget, float aspectRatio)
 {
 	data->activeCharacters[pos].cameraPosition = cameraPos;
 	data->activeCharacters[pos].cameraTarget = cameraTarget;
@@ -428,19 +428,19 @@ void LipsyncManager::setCamera(CharPosition pos, const VC3 &cameraPos, const VC3
 	}
 }
 
-void LipsyncManager::resetCamera(CharPosition pos)
+void AvatarManager::resetCamera(CharPosition pos)
 {
 	data->activeCharacters[pos].cameraPosition = data->originalCameraPosition;
 	data->activeCharacters[pos].cameraTarget = data->originalCameraTarget;
 	data->activeCharacters[pos].update();
 }
 
-void LipsyncManager::setBackground(CharPosition pos, COL color)
+void AvatarManager::setBackground(CharPosition pos, COL color)
 {
 	data->activeCharacters[pos].scene->SetBackgroundColor(color);
 }
 
-void LipsyncManager::resetBackground(CharPosition pos)
+void AvatarManager::resetBackground(CharPosition pos)
 {
 	data->activeCharacters[pos].scene->SetBackgroundColor(data->originalBackgroundColor);
 }

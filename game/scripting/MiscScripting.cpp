@@ -36,7 +36,7 @@
 #include "../options/options_players.h"
 #include "../../ui/GameController.h"
 #include "../../ui/CombatWindow.h"
-#include "../../util/LipsyncManager.h"
+#include "../../ui/AvatarManager.h"
 #include "../../util/StringUtil.h"
 
 #include "../../system/Logger.h"
@@ -336,7 +336,7 @@ namespace game
 						{
 							int renderTargetNumber = 0;
 							GameUI::MESSAGE_TYPE radioSide = GameUI::MESSAGE_TYPE_RADIO;
-							if (game->gameUI->getLipsyncManager()->getCharacter(util::LipsyncManager::Right) ==
+							if (game->gameUI->getAvatarManager()->getCharacter(ui::AvatarManager::Right) ==
 								unit->getCharacter()->getLipsyncId())
 							{
 								// this character was on right side...
@@ -362,9 +362,9 @@ namespace game
 								}
 							}
 
-							if (!game->gameUI->getLipsyncManager()->isActive())
+							if (!game->gameUI->getAvatarManager()->isActive())
 							{
-								sp->warning("GameScripting::process - Attempt to characterMessage when lipsync manager is inactive.");
+								sp->warning("GameScripting::process - Attempt to characterMessage when avatar manager is inactive.");
 							}
 
 							game->gameUI->gameMessage(convertLocaleSubtitleString(usestr), vis2d, 
@@ -398,10 +398,10 @@ namespace game
 						if (unit->getCharacter() != NULL
 							&& unit->getCharacter()->getLipsyncId() != NULL)
 						{
-							boost::shared_ptr<sfx::AmplitudeArray> amplitudes = game->gameUI->getLipsyncManager()->getAmplitudeBuffer(convertLocaleSpeechString(usestr));
-							game->gameUI->getLipsyncManager()->playSpeech(unit->getCharacter()->getLipsyncId(), amplitudes, lipsync_start_time);
+							boost::shared_ptr<sfx::AmplitudeArray> amplitudes = game->gameUI->getAvatarManager()->getAmplitudeBuffer(convertLocaleSpeechString(usestr));
+							game->gameUI->getAvatarManager()->playSpeech(unit->getCharacter()->getLipsyncId(), amplitudes, lipsync_start_time);
 
-							if (!game->gameUI->getLipsyncManager()->isActive())
+							if (!game->gameUI->getAvatarManager()->isActive())
 							{
 								sp->warning("GameScripting::process - Attempt to playLipsync when lipsync manager is inactive.");
 							}

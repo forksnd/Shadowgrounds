@@ -83,9 +83,6 @@
     <Filter Include="Source Files\util\trigger">
       <UniqueIdentifier>{21a9133f-78d9-41bb-9e8b-4b8673005b13}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\util\lipsync">
-      <UniqueIdentifier>{27968312-d026-4c35-a0c1-5d8e73090c47}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\util\procedural_properties">
       <UniqueIdentifier>{1e27b0e6-3286-4b72-a3bd-bbfc958ab3c4}</UniqueIdentifier>
     </Filter>
@@ -215,9 +212,6 @@
     </Filter>
     <Filter Include="Header Files\util h\trigger.h">
       <UniqueIdentifier>{affb5876-98b4-408d-84ca-3c375fded864}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\util h\lipsync.h">
-      <UniqueIdentifier>{16ff269e-b80f-4405-a327-a2f9a8b0e62c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\util h\procedurals">
       <UniqueIdentifier>{233bca99-26f1-40a9-b8f8-3ab9aae0e6a6}</UniqueIdentifier>
@@ -1275,9 +1269,6 @@
     <ClCompile Include="..\util\CircleAreaTracker.cpp">
       <Filter>Source Files\util\trigger</Filter>
     </ClCompile>
-    <ClCompile Include="..\util\LipsyncManager.cpp">
-      <Filter>Source Files\util\lipsync</Filter>
-    </ClCompile>
     <ClCompile Include="..\util\procedural_applier.cpp">
       <Filter>Source Files\util\procedural_properties</Filter>
     </ClCompile>
@@ -1487,6 +1478,9 @@
     </ClCompile>
     <ClCompile Include="..\sound\fmod\SoundLib.cpp">
       <Filter>Source Files\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\AvatarManager.cpp">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2408,9 +2402,6 @@
     <ClInclude Include="..\util\ITriggerListener.h">
       <Filter>Header Files\util h\trigger.h</Filter>
     </ClInclude>
-    <ClInclude Include="..\util\LipsyncManager.h">
-      <Filter>Header Files\util h\lipsync.h</Filter>
-    </ClInclude>
     <ClInclude Include="..\util\procedural_applier.h">
       <Filter>Header Files\util h\procedurals</Filter>
     </ClInclude>
@@ -2686,6 +2677,9 @@
     </ClInclude>
     <ClInclude Include="..\filesystem\detail\unzip.h">
       <Filter>Source Files\filesys\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\AvatarManager.h">
+      <Filter>Header Files\ui h</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

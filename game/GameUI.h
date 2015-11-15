@@ -82,12 +82,12 @@ namespace frozenbyte
 namespace util
 {
 	class TextureSwitcher;
-	class LipsyncManager;
 	class GridOcclusionCuller;
 }
 
 namespace ui
 {
+	class AvatarManager;
 	class VisualEffectManager;
 	class TerrainCreator;
 	class ArmorConstructWindow;
@@ -488,7 +488,7 @@ namespace game
 		void updateCameraDependedElements();
 
 		void setPlayerSelfIlluminationEnabled(bool enabled);
-		util::LipsyncManager *getLipsyncManager();
+		ui::AvatarManager *getAvatarManager();
 
 		util::GridOcclusionCuller *getGridOcclusionCuller() { return this->gridOcclusionCuller; }
 
@@ -667,9 +667,9 @@ namespace game
 
 		VC2 clientUnitScreenPos[MAX_PLAYERS_PER_CLIENT];
 
-    // TODO: move this to own class...
-    ui::VisualEffect *lightningVisualEffect;
-    int lightningTime;
+        // TODO: move this to own class...
+        ui::VisualEffect *lightningVisualEffect;
+        int lightningTime;
 
 		bool scrollyEnabled;
 		bool scrollyTemporarilyDisabled;
@@ -680,7 +680,7 @@ namespace game
 
 		ui::LightManager *lightManager;
 		ui::DynamicLightManager *dynamicLightManager;
-		boost::scoped_ptr<util::LipsyncManager> lipsyncManager;
+		boost::scoped_ptr<ui::AvatarManager> avatarManager;
 
 		VC3 listenerPosition;
 		std::vector<int> loopingSoundEffectHandles;

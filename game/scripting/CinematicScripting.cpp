@@ -17,6 +17,7 @@
 #include "../Game.h"
 #include "../GameUI.h"
 #include "GameScriptingUtils.h"
+#include "../../ui/AvatarManager.h"
 #include "../../ui/GameVideoPlayer.h"
 #include "../GameScene.h"
 #include "../Character.h"
@@ -25,7 +26,6 @@
 #include "../../convert/str2int.h"
 #include "../../util/ScriptProcess.h"
 #include "../../util/Script.h"
-#include "../../util/LipsyncManager.h"
 #include <istorm3D_terrain_renderer.h>
 #include "../../sound/SoundMixer.h"
 #include "../game/options/options_camera.h"
@@ -353,28 +353,28 @@ namespace game
 			break;
 
 		case GS_CMD_ENDCONVERSATION:
-			if (game->gameUI->getLipsyncManager() != NULL)
+			if (game->gameUI->getAvatarManager() != NULL)
 			{
 				std::string str = "";
-				game->gameUI->getLipsyncManager()->setCharacter(util::LipsyncManager::Left, str);
-				game->gameUI->getLipsyncManager()->setCharacter(util::LipsyncManager::Right, str);
-				game->gameUI->getLipsyncManager()->setActive(false);
+				game->gameUI->getAvatarManager()->setCharacter(ui::AvatarManager::Left, str);
+				game->gameUI->getAvatarManager()->setCharacter(ui::AvatarManager::Right, str);
+				game->gameUI->getAvatarManager()->setActive(false);
 			} else {
 				sp->warning("CinematicScripting::process - Attempt to call endConversation when no lipsync manager available (not in combat).");
 			}
 			break;
 
 		case GS_CMD_STARTCONVERSATION:
-			if (game->gameUI->getLipsyncManager() != NULL)
+			if (game->gameUI->getAvatarManager() != NULL)
 			{
-				game->gameUI->getLipsyncManager()->setActive(true);
+				game->gameUI->getAvatarManager()->setActive(true);
 			} else {
 				sp->warning("CinematicScripting::process - Attempt to call startConversation when no lipsync manager available (not in combat).");
 			}
 			break;
 
 		case GS_CMD_SETCONVERSATIONUNITLEFT:
-			if (game->gameUI->getLipsyncManager() != NULL)
+			if (game->gameUI->getAvatarManager() != NULL)
 			{
 				if (gsd->unit != NULL)
 				{
@@ -383,7 +383,7 @@ namespace game
 						if (gsd->unit->getCharacter()->getLipsyncId() != NULL)
 						{
 							std::string str = std::string(gsd->unit->getCharacter()->getLipsyncId());
-							game->gameUI->getLipsyncManager()->setCharacter(util::LipsyncManager::Left, str);
+							game->gameUI->getAvatarManager()->setCharacter(ui::AvatarManager::Left, str);
 						} else {
 							sp->warning("CinematicScripting::process - Attempt to call setConversationUnitLeft for character with no lipsync id.");
 						}
@@ -399,7 +399,7 @@ namespace game
 			break;
 
 		case GS_CMD_SETCONVERSATIONUNITRIGHT:
-			if (game->gameUI->getLipsyncManager() != NULL)
+			if (game->gameUI->getAvatarManager() != NULL)
 			{
 				if (gsd->unit != NULL)
 				{
@@ -408,7 +408,7 @@ namespace game
 						if (gsd->unit->getCharacter()->getLipsyncId() != NULL)
 						{
 							std::string str = std::string(gsd->unit->getCharacter()->getLipsyncId());
-							game->gameUI->getLipsyncManager()->setCharacter(util::LipsyncManager::Right, str);
+							game->gameUI->getAvatarManager()->setCharacter(ui::AvatarManager::Right, str);
 						} else {
 							sp->warning("CinematicScripting::process - Attempt to call setConversationUnitRight for character with no lipsync id.");
 						}
@@ -424,7 +424,7 @@ namespace game
 			break;
 
 		case GS_CMD_SETCONVERSATIONIDLEANIMATIONFORUNIT:
-			if (game->gameUI->getLipsyncManager() != NULL)
+			if (game->gameUI->getAvatarManager() != NULL)
 			{
 				if (gsd->unit != NULL)
 				{
@@ -436,7 +436,7 @@ namespace game
 							{
 								std::string str = std::string(gsd->unit->getCharacter()->getLipsyncId());
 								std::string strval = std::string(stringData);
-								game->gameUI->getLipsyncManager()->setIdle(str, strval);
+								game->gameUI->getAvatarManager()->setIdle(str, strval);
 							} else {
 								sp->warning("CinematicScripting::process - Attempt to setConversationIdleAnimationForUnit for character with no lipsync id.");
 							}
@@ -455,7 +455,7 @@ namespace game
 			break;
 
 		case GS_CMD_SETCONVERSATIONEXPRESSIONANIMATIONFORUNIT:
-			if (game->gameUI->getLipsyncManager() != NULL)
+			if (game->gameUI->getAvatarManager() != NULL)
 			{
 				if (gsd->unit != NULL)
 				{
@@ -467,7 +467,7 @@ namespace game
 							{
 								std::string str = std::string(gsd->unit->getCharacter()->getLipsyncId());
 								std::string strval = std::string(stringData);
-								game->gameUI->getLipsyncManager()->setExpression(str, strval);
+								game->gameUI->getAvatarManager()->setExpression(str, strval);
 							} else {
 								sp->warning("CinematicScripting::process - Attempt to setConversationExpressionAnimationForUnit for character with no lipsync id.");
 							}
@@ -498,7 +498,7 @@ namespace game
 			break;
 
 		case GS_CMD_setConversationNoiseForUnit:
-			if (game->gameUI->getLipsyncManager() != NULL)
+			if (game->gameUI->getAvatarManager() != NULL)
 			{
 				if (gsd->unit != NULL)
 				{
@@ -508,9 +508,9 @@ namespace game
 						{
 							std::string str = std::string(gsd->unit->getCharacter()->getLipsyncId());
 							int side = -1;
-							if(game->gameUI->getLipsyncManager()->getCharacter(util::LipsyncManager::Left) == str)
+							if(game->gameUI->getAvatarManager()->getCharacter(ui::AvatarManager::Left) == str)
 								side = 0;
-							else if(game->gameUI->getLipsyncManager()->getCharacter(util::LipsyncManager::Right) == str)
+							else if(game->gameUI->getAvatarManager()->getCharacter(ui::AvatarManager::Right) == str)
 								side = 1;
 
 							if(side >= 0)

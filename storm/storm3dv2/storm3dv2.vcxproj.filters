@@ -45,9 +45,6 @@
     <Filter Include="Header Files\misc.h">
       <UniqueIdentifier>{62bfa29d-dbf6-434d-9c9c-d49a5165bb77}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\wmvsync.h">
-      <UniqueIdentifier>{c27f62f5-74d3-4c4b-8687-a15d6bc9b0e0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{620a893a-e4b7-42fa-8bf6-888c5e5876e9}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
@@ -475,15 +472,6 @@
     </ClInclude>
     <ClInclude Include="Storm3D_ProceduralManager.h">
       <Filter>Header Files\misc.h</Filter>
-    </ClInclude>
-    <ClInclude Include="wmvsync\reader.h">
-      <Filter>Header Files\wmvsync.h</Filter>
-    </ClInclude>
-    <ClInclude Include="wmvsync\rostream.h">
-      <Filter>Header Files\wmvsync.h</Filter>
-    </ClInclude>
-    <ClInclude Include="wmvsync\StdAfx.h">
-      <Filter>Header Files\wmvsync.h</Filter>
     </ClInclude>
     <ClInclude Include="treader.h">
       <Filter>Header Files</Filter>

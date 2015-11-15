@@ -66,9 +66,9 @@
 #include "../util/ColorMap.h"
 #include "../util/TextureCache.h"
 #include "../util/TextureSwitcher.h"
-#include "../util/LipsyncManager.h"
 #include "../util/HelperPositionCalculator.h"
 
+#include "../ui/AvatarManager.h"
 #include "../ui/DecalPositionCalculator.h"
 #include "../ui/cursordefs.h"
 #include "../ui/UIState.h"
@@ -2259,7 +2259,7 @@ namespace game
 		{
 			//scene->RemoveTerrain(renderTerrain);
 
-			lipsyncManager.reset(0);
+			avatarManager.reset(0);
 
 			game_anyBurnableTrackableObjectFactory->removeImplementation(renderTerrain);
 			visualEffectManager->freeDecalEffects();
@@ -2298,7 +2298,7 @@ namespace game
 			lightManager->setMaxLightAmount(SimpleOptions::getInt(DH_OPT_I_RENDER_MAX_POINTLIGHTS));
 			renderTerrain->setLightManager(lightManager);
 			dynamicLightManager = new ui::DynamicLightManager(lightManager);
-			lipsyncManager.reset(new util::LipsyncManager(storm3d, renderTerrain->GetTerrain()));
+			avatarManager.reset(new ui::AvatarManager(storm3d, renderTerrain->GetTerrain()));
 
 			//scene->AddTerrain(renderTerrain);
 			OptionApplier::applyDisplayOptions(storm3d, scene, renderTerrain->GetTerrain(), lightManager);
@@ -2349,9 +2349,9 @@ namespace game
 
 		textureCache->update(currentTime - lastRunUITime);
 
-		if (this->lipsyncManager)
+		if (this->avatarManager)
 		{
-			this->lipsyncManager->update();
+			this->avatarManager->update();
 		}
 
 		game->getGamePhysics()->renderedScene();
@@ -6442,7 +6442,7 @@ if (unit->isPhysicsObjectLock() && !unit->isDestroyed()
 		oguiStormDriver->prepareForNextStormGeneration(this->scene);
 
 		oguiStormDriver->deleteTextureCache();
-		lipsyncManager.reset();
+		avatarManager.reset();
 
 		storm3d->Empty();
 
@@ -6876,10 +6876,10 @@ if (unit->isPhysicsObjectLock() && !unit->isDestroyed()
 	}
 
 
-	util::LipsyncManager *GameUI::getLipsyncManager()
+	ui::AvatarManager *GameUI::getAvatarManager()
 	{
-		if(lipsyncManager)
-			return lipsyncManager.get();
+		if (avatarManager)
+			return avatarManager.get();
 		else
 			return 0;
 	}

@@ -14,16 +14,16 @@ namespace sfx {
 	class AmplitudeArray;
 } // sfx
 
-namespace util {
+namespace ui {
 
-class LipsyncManager
+class AvatarManager
 {
 	struct Data;
 	Data* data;
 
 public:
-	LipsyncManager(IStorm3D *storm, IStorm3D_Terrain *terrain);
-	~LipsyncManager();
+	AvatarManager(IStorm3D *storm, IStorm3D_Terrain *terrain);
+	~AvatarManager();
 
 	enum CharPosition
 	{
