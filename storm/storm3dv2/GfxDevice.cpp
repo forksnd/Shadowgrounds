@@ -823,13 +823,12 @@ HRESULT GfxDevice::SetVertexShaderConstantF(UINT StartRegister,CONST float* pCon
 {
     assert(StartRegister<MAX_CONSTS);
     assert(StartRegister+Vector4fCount<=MAX_CONSTS);
+
+    memcpy(vertex_consts+StartRegister, pConstantData, 4*sizeof(float)*Vector4fCount);
+
     vconsts_range_min = min(vconsts_range_min, StartRegister);
-    while(Vector4fCount--)
-    {
-        vertex_consts[StartRegister++] = D3DXVECTOR4(pConstantData);
-        pConstantData += 4;
-    }
-    vconsts_range_max = max(vconsts_range_max, StartRegister);
+    vconsts_range_max = max(vconsts_range_max, StartRegister+Vector4fCount);
+
     return S_OK;
 }
 
@@ -900,13 +899,12 @@ HRESULT GfxDevice::SetPixelShaderConstantF(UINT StartRegister,CONST float* pCons
 {
     assert(StartRegister<MAX_CONSTS);
     assert(StartRegister+Vector4fCount<=MAX_CONSTS);
+
+    memcpy(pixel_consts+StartRegister, pConstantData, 4*sizeof(float)*Vector4fCount);
+
     pconsts_range_min = min(pconsts_range_min, StartRegister);
-    while(Vector4fCount--)
-    {
-        pixel_consts[StartRegister++] = D3DXVECTOR4(pConstantData);
-        pConstantData += 4;
-    }
-    pconsts_range_max = max(pconsts_range_max, StartRegister);
+    pconsts_range_max = max(pconsts_range_max, StartRegister+Vector4fCount);
+
     return S_OK;
 }
 
