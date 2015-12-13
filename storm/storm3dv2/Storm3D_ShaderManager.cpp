@@ -7,12 +7,7 @@
 //------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------
-#include <vector>
-#include <string>
-#include <stdio.h>
-
-#include <d3d9.h>
-#include <d3dx9core.h>
+#include <GfxDevice.h>
 
 #include "Storm3D_ShaderManager.h"
 #include "storm3d_model.h"
@@ -43,6 +38,7 @@ namespace {
 	static const int LIGHTING_SHADER = 21;
 	static const int BONE_LIGHTING_SHADER = 22;
 
+	static const int CUSTOM_SHADER = 0x100;
 }
 
 	//HAXHAX
@@ -151,10 +147,34 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(GfxDevice& device)
 	D3DXMatrixIdentity(&reflection_matrix);
 	reflection_matrix._22 = -1.f;
 	reflection_matrix._42 = 2 * reflection_height;
+
+    const char* mesh_vs_defines[] = {
+        "ENABLE_REFLECTION",
+        "ENABLE_LOCAL_REFLECTION",
+        "ENABLE_SKELETAL_ANIMATION"
+    };
+
+    compileShaderSet(&device, "Data\\shaders\\mesh.vs", mesh_vs_defines, meshVS);
+
+    const char* mesh_ps_defines[] = {
+        "ENABLE_COLOR",
+        "ENABLE_TEXTURE",
+    };
+
+    compileShaderSet(&device, "Data\\shaders\\std.ps", mesh_ps_defines, meshPS);
 }
 
 Storm3D_ShaderManager::~Storm3D_ShaderManager()
 {
+    for (size_t i=0; i<MESH_VS_SHADER_COUNT; ++i)
+    {
+        if (meshVS[i]) meshVS[i]->Release();
+    }
+
+    for (size_t i=0; i<MESH_PS_SHADER_COUNT; ++i)
+    {
+        if (meshPS[i]) meshPS[i]->Release();
+    }
 }
 
 void Storm3D_ShaderManager::CreateShaders(GfxDevice& device)
@@ -478,19 +498,150 @@ void Storm3D_ShaderManager::setSpotType(SpotType type)
 
 bool Storm3D_ShaderManager::BoneShader()
 {
-	switch(current_shader)
-	{
-		case BONE_SHADER:
-		case BONE_LIGHTING_SHADER:
-		case BONE_PROJECTED_SHADER_DIRECTIONAL:
-		case BONE_PROJECTED_SHADER_POINT:
-		case BONE_PROJECTED_SHADER_FLAT:
-		case FAKE_DEPTH_BONE_SHADER:
-		case FAKE_SHADOW_BONE_SHADER:
-			return true;
-	}
+    switch (current_shader)
+    {
+        case BONE_SHADER:
+        case BONE_LIGHTING_SHADER:
+        case BONE_PROJECTED_SHADER_DIRECTIONAL:
+        case BONE_PROJECTED_SHADER_POINT:
+        case BONE_PROJECTED_SHADER_FLAT:
+        case FAKE_DEPTH_BONE_SHADER:
+        case FAKE_SHADOW_BONE_SHADER:
+            return true;
+        case CUSTOM_SHADER:
+            return (currentVertexShader&MESH_ENABLE_SKELETAL_ANIMATION) != 0;
+    }
 
-	return false;
+    return false;
+}
+
+void Storm3D_ShaderManager::SetShaders(
+    GfxDevice& device,
+    uint32_t vertexShader,
+    uint32_t pixelShader,
+    Storm3D_Model_Object *object
+)
+{
+	assert(device.device);
+    assert(vertexShader<MESH_VS_SHADER_COUNT);
+    assert(pixelShader<MESH_PS_SHADER_COUNT);
+
+    currentVertexShader = vertexShader;
+    currentPixelShader  = pixelShader;
+
+    D3DXMATRIX object_tm;
+    object->GetMXG().GetAsD3DCompatible4x4((float *)&object_tm);
+    SetWorldTransform(device, object_tm);
+
+    IStorm3D_Material *m = object->GetMesh()->GetMaterial();
+    float alpha = 1.f;
+
+    float force_alpha = object->force_alpha;
+    if (projected_shaders && object->force_lighting_alpha_enable)
+        force_alpha = object->force_lighting_alpha;
+
+    IStorm3D_Material::ATYPE a = m->GetAlphaType();
+    if (a == IStorm3D_Material::ATYPE_USE_TRANSPARENCY)
+        alpha = 1.f - m->GetTransparency() - force_alpha;
+    else if (a == IStorm3D_Material::ATYPE_USE_TEXTRANSPARENCY || force_alpha > 0.0001f)
+        alpha = 1.f - m->GetTransparency() - force_alpha;
+    else if (a == IStorm3D_Material::ATYPE_USE_ALPHATEST)
+        alpha = 1.f - m->GetTransparency();
+
+    if (alpha < 0)
+        alpha = 0;
+
+    {
+        D3DXMatrixTranspose(&object_tm, &object_tm);
+        device.SetVertexShaderConstantF(4, object_tm, 3);
+
+        //if(update_values == true)
+        {
+            // Constants
+            device.SetVertexShaderConstantF(7, object_ambient_color, 1);
+            device.SetVertexShaderConstantF(8, object_diffuse_color, 1);
+            update_values = false;
+        }
+
+        // Set transparency?
+        D3DXVECTOR4 ambient = ambient_color;
+        ambient *= sun_properties.w;
+        ambient += model_ambient_color + ambient_force_color;
+        //ambient += object_ambient_color;
+
+        ambient.x = max(ambient.x, object_ambient_color.x);
+        ambient.y = max(ambient.y, object_ambient_color.y);
+        ambient.z = max(ambient.z, object_ambient_color.z);
+
+#ifdef HACKY_SG_AMBIENT_LIGHT_FIX
+        // EVIL HAX around too dark characters etc.
+        const float MIN_AMBIENT_LIGHT = 0.05f;
+        ambient.x = max(ambient.x, MIN_AMBIENT_LIGHT);
+        ambient.y = max(ambient.y, MIN_AMBIENT_LIGHT);
+        ambient.z = max(ambient.z, MIN_AMBIENT_LIGHT);
+
+        ambient.x = min(ambient.x, 1.0f);
+        ambient.y = min(ambient.y, 1.0f);
+        ambient.z = min(ambient.z, 1.0f);
+#else
+        if (ambient.x > 1.f)
+            ambient.x = 1.f;
+        if (ambient.y > 1.f)
+            ambient.y = 1.f;
+        if (ambient.z > 1.f)
+            ambient.z = 1.f;
+#endif
+
+        ambient.w = alpha; //1.f;
+
+        device.SetVertexShaderConstantF(7, ambient, 1);
+    }
+
+    // Set actual shader
+    model =
+        (
+            object->parent_model->bones.empty() ||
+            !static_cast<Storm3D_Mesh *>(object->GetMesh())->HasWeights()
+        ) ? NULL : object->parent_model;
+
+    D3DXVECTOR4 sun_temp = sun_properties;
+    sun_temp.w = textureOffset.x;
+    device.SetVertexShaderConstantF(11, sun_temp, 1);
+
+    device.SetVertexShaderConstantF(9, textureOffset, 1);
+
+    device.SetVertexShaderConstantF(18, view_position, 1);
+    device.SetVertexShaderConstantF(19, fog, 1);
+
+    if (local_reflection)
+    {
+        D3DXMATRIX reflection_matrix(0.5f, 0.0f, 0.0f, 0.5f,
+            0.0f, -0.5f, 0.0f, 0.5f,
+            0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f);
+
+        device.SetVertexShaderConstantF(27, reflection_matrix, 4);
+    }
+
+    int lightCount[4] = { LIGHT_MAX_AMOUNT, 0, 0, 0 };
+    device.SetVertexShaderConstantI(0, lightCount, 1);
+
+    static_assert(LIGHT_MAX_AMOUNT >= 2 && LIGHT_MAX_AMOUNT <= 5, "Light count should be 2-5.");
+    for (int i = 0; i < LIGHT_MAX_AMOUNT; ++i)
+    {
+        D3DXVECTOR4 lightPosInvRange = light_position[i];
+        D3DXVECTOR4 lightColor = light_color[i];
+        lightPosInvRange.w = lightColor.w;
+        lightColor.w = 1.0f;
+
+        device.SetVertexShaderConstantF(32 + i * 2, lightPosInvRange, 1);
+        device.SetVertexShaderConstantF(33 + i * 2, lightColor, 1);
+    }
+
+    device.SetVertexShader(meshVS[vertexShader]);
+    device.SetPixelShader(meshPS[pixelShader]);
+
+    current_shader = CUSTOM_SHADER;
 }
 
 void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *object)
@@ -791,53 +942,50 @@ void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *o
 
 void Storm3D_ShaderManager::SetShader(GfxDevice &device, const std::vector<int> &bone_indices)
 {
-	bool setIndices = false;
+    bool setIndices = BoneShader() && !bone_indices.empty() && model;
 
-	if(BoneShader())
-	{
-		if(!bone_indices.empty() && model)
-			setIndices = true;
-	}
+    if (!setIndices) return;
 
-	if(setIndices)
-	{
-		float array[96 * 4];
-		int bone_amount = model->bones.size();
+    float array[96 * 4];
+    int bone_amount = model->bones.size();
+    int bone_index_start =
+        current_shader == CUSTOM_SHADER
+        ? 42
+        : BONE_INDEX_START;
 
-		D3DXMATRIX foo;
-		for(unsigned int i = 0; i < bone_indices.size(); ++i)
-		{
-			int index = bone_indices[i];
-			int shader_index = i; //bone_indices[i].second;
+    D3DXMATRIX foo;
+    for (unsigned int i = 0; i < bone_indices.size(); ++i)
+    {
+        int index = bone_indices[i];
+        int shader_index = i; //bone_indices[i].second;
 
-			if(index >= bone_amount)
-				continue;
+        if (index >= bone_amount)
+            continue;
 
-			const MAT &vertexTm = model->bones[index]->GetVertexTransform();
-			//vertexTm.GetAsD3DCompatible4x4((float *) foo);
-			//D3DXMatrixTranspose(&foo, &foo);
-			//device->SetVertexShaderConstantF(BONE_INDEX_START + ((shader_index)*3), foo, 3);
+        const MAT &vertexTm = model->bones[index]->GetVertexTransform();
+        //vertexTm.GetAsD3DCompatible4x4((float *) foo);
+        //D3DXMatrixTranspose(&foo, &foo);
+        //device->SetVertexShaderConstantF(BONE_INDEX_START + ((shader_index)*3), foo, 3);
 
-			int arrayIndex = shader_index * 3 * 4;
-			//for(unsigned int j = 0; j < 12; ++j)
-			//	array[arrayIndex++] = foo[j];
+        int arrayIndex = shader_index * 3 * 4;
+        //for(unsigned int j = 0; j < 12; ++j)
+        //	array[arrayIndex++] = foo[j];
 
-			array[arrayIndex++] = vertexTm.Get(0);
-			array[arrayIndex++] = vertexTm.Get(4);
-			array[arrayIndex++] = vertexTm.Get(8);
-			array[arrayIndex++] = vertexTm.Get(12);
-			array[arrayIndex++] = vertexTm.Get(1);
-			array[arrayIndex++] = vertexTm.Get(5);
-			array[arrayIndex++] = vertexTm.Get(9);
-			array[arrayIndex++] = vertexTm.Get(13);
-			array[arrayIndex++] = vertexTm.Get(2);
-			array[arrayIndex++] = vertexTm.Get(6);
-			array[arrayIndex++] = vertexTm.Get(10);
-			array[arrayIndex++] = vertexTm.Get(14);
-		}
+        array[arrayIndex++] = vertexTm.Get(0);
+        array[arrayIndex++] = vertexTm.Get(4);
+        array[arrayIndex++] = vertexTm.Get(8);
+        array[arrayIndex++] = vertexTm.Get(12);
+        array[arrayIndex++] = vertexTm.Get(1);
+        array[arrayIndex++] = vertexTm.Get(5);
+        array[arrayIndex++] = vertexTm.Get(9);
+        array[arrayIndex++] = vertexTm.Get(13);
+        array[arrayIndex++] = vertexTm.Get(2);
+        array[arrayIndex++] = vertexTm.Get(6);
+        array[arrayIndex++] = vertexTm.Get(10);
+        array[arrayIndex++] = vertexTm.Get(14);
+    }
 
-		device.SetVertexShaderConstantF(BONE_INDEX_START, array, 3 * bone_indices.size());
-	}
+    device.SetVertexShaderConstantF(bone_index_start, array, 3 * bone_indices.size());
 }
 
 void Storm3D_ShaderManager::ResetShader()

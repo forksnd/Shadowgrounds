@@ -81,8 +81,8 @@ typedef Storm3D_Texture *PStorm3D_Texture;
 //------------------------------------------------------------------
 // Defines etc.
 //------------------------------------------------------------------
-#define STORM3DV2_MAX_ACTIVELIGHTS		8
-#define STORM3DV2_SHADOWMAP_SIZE		512
+#define STORM3DV2_MAX_ACTIVELIGHTS      8
+#define STORM3DV2_SHADOWMAP_SIZE        512
 
 #define SAFE_RELEASE(p)      {if(p) {(p)->Release();(p)=NULL;}}
 

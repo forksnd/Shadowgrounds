@@ -2,6 +2,7 @@
 
 #include <d3d9.h>
 #include <d3dx9.h>
+#include <D3Dcompiler.h>
 #include <stdint.h>
 
 #include <VertexFormats.h>
@@ -9,6 +10,37 @@
 #define NUM_FRAMES_DELAY 2
 
 #define MAX_CONSTS 224
+
+struct GfxDevice;
+
+bool compileShaderSet(
+    GfxDevice* device,
+    size_t path_len, const char* path,
+    size_t define_count, const char** defines,
+    size_t shader_count, IDirect3DVertexShader9** shader_set
+);
+bool compileShaderSet(
+    GfxDevice* device,
+    size_t path_len, const char* path,
+    size_t define_count, const char** defines,
+    size_t shader_count, IDirect3DPixelShader9** shader_set
+);
+
+template <typename IShaderType, size_t path_len, size_t define_count, size_t shader_count>
+bool compileShaderSet(
+    GfxDevice* device,
+    const char (&path)[path_len],
+    const char* (&defines)[define_count],
+    IShaderType (&shader_set)[shader_count]
+)
+{
+    return compileShaderSet(
+        device,
+        path_len, path,
+        define_count, defines,
+        shader_count, shader_set
+    );
+}
 
 struct GfxDevice
 {

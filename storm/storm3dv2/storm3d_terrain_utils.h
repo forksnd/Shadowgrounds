@@ -72,7 +72,6 @@ public:
 	void createDefaultProjectionShaderPoint();
 	void createDefaultProjectionShaderFlat();
 	void createBoneShader();
-	void createBasicBoneLightingShader();
 	//void createBoneLightingShader();
 	void createBoneLightingShader_0light_noreflection();
 	void createBoneLightingShader_0light_reflection();

@@ -714,25 +714,6 @@ void VertexShader::createBoneShader()
 	device.CreateVertexDeclaration(&elements[0], &declaration);
 }
 
-
-void VertexShader::createBasicBoneLightingShader()
-{
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(0, 6*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(0, 8*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(createElement(0, 10*4, D3DDECLTYPE_FLOAT4, D3DDECLUSAGE_TEXCOORD, 2));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\basic_bone_lighting_shader_1.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\basic_bone_lighting_shader_1.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
 /*
 void VertexShader::createBoneLightingShader()
 {

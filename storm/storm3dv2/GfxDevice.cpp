@@ -1,7 +1,6 @@
 #include "GfxDevice.h"
 #include "storm3d_terrain_utils.h"
 #include <assert.h>
-#include <D3Dcompiler.h>
 
 D3DVERTEXELEMENT9 VertexDesc_P3NUV2[] = {
     {0,  0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
@@ -71,7 +70,6 @@ LPD3DVERTEXELEMENT9 vtxFmtDescs[FVF_COUNT] = {
     VertexDesc_P2UV
 };
 
-
 enum ShaderProfile
 {
     VERTEX_SHADER_3_0,
@@ -96,9 +94,9 @@ ID3DBlob* compileShader(ShaderProfile profile, size_t source_len, const char* so
         NULL, defines, NULL,
         "main", profile_id_string[profile],
 #ifdef _DEBUG
-        D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR|D3DCOMPILE_OPTIMIZATION_LEVEL3|D3DCOMPILE_DEBUG,
+        D3DCOMPILE_PACK_MATRIX_ROW_MAJOR|D3DCOMPILE_OPTIMIZATION_LEVEL3|D3DCOMPILE_DEBUG,
 #else
-        D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR|D3DCOMPILE_OPTIMIZATION_LEVEL3,
+        D3DCOMPILE_PACK_MATRIX_ROW_MAJOR|D3DCOMPILE_OPTIMIZATION_LEVEL3,
 #endif
         0, &code, &msgs
     );
@@ -163,8 +161,8 @@ bool compileShaderSet(
 )
 {
     assert(define_count<32);
-    
-    static const size_t generated_shader_count = 1<<define_count;
+
+    const size_t generated_shader_count = 1<<define_count;
     assert(shader_count >= generated_shader_count);
 
     bool success = true;
@@ -229,22 +227,6 @@ bool compileShaderSet(
 )
 {
     return compileShaderSet<IDirect3DPixelShader9>(
-        device,
-        path_len, path,
-        define_count, defines,
-        shader_count, shader_set
-    );
-}
-
-template <typename IShaderType, size_t path_len, size_t define_count, size_t shader_count>
-bool compileShaderSet(
-    GfxDevice* device,
-    const char (&path)[path_len],
-    const char* (&defines)[define_count],
-    IShaderType (&shader_set)[shader_count]
-)
-{
-    return compileShaderSet(
         device,
         path_len, path,
         define_count, defines,
@@ -501,6 +483,7 @@ void GfxDevice::CommitConstants()
 
     D3DXMatrixMultiply(&MVP, &view_mat, &proj_mat);
     D3DXMatrixMultiply(&MVP, &world_mat, &MVP);
+    D3DXMatrixTranspose(&MVP, &MVP);
 
     SetVertexShaderConstantF(0, MVP, 4);
 }

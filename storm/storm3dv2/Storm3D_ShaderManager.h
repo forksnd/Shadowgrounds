@@ -67,7 +67,38 @@ template<class T> T* Singleton<T>::instance = 0;
 //------------------------------------------------------------------
 class Storm3D_ShaderManager: public Singleton<Storm3D_ShaderManager>
 {
-	// View matrix
+public:
+    enum
+    {
+        MESH_VS_SHADER_COUNT = 8,
+        MESH_ENABLE_REFLECTION  = (1<<0),
+        MESH_ENABLE_LOCAL_REFLECTION   = (1<<1),
+        MESH_ENABLE_SKELETAL_ANIMATION = (1<<2),
+    };
+
+    enum
+    {
+        MESH_PS_SHADER_COUNT = 4,
+        SSF_COLOR   = (1<<0),
+        SSF_TEXTURE = (1<<1),
+    };
+
+public:
+    void SetShaders(
+        GfxDevice& device,
+        uint32_t vertexShader,
+        uint32_t pixelShader,
+        Storm3D_Model_Object *object
+    );
+
+private:
+    LPDIRECT3DVERTEXSHADER9 meshVS[MESH_VS_SHADER_COUNT];
+    LPDIRECT3DPIXELSHADER9  meshPS[MESH_PS_SHADER_COUNT];
+
+    uint32_t currentVertexShader = 0;
+    uint32_t currentPixelShader = 0;
+
+    // View matrix
 	D3DXMATRIX view_projection_tm;
 	D3DXMATRIX view_tm;
 	D3DXMATRIX texture_matrix;

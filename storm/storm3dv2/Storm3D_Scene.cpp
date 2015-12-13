@@ -58,10 +58,8 @@ Storm3D_Scene::Storm3D_Scene(Storm3D *s2) :
 	time(0),
 	scene_paused(false),
 	draw_bones(false),
-	basic_shader(s2->GetD3DDevice()),
 	camera(Storm3D2)
 {
-	basic_shader.createBasicBoneLightingShader();
 	// Create iterators
 	ITModel=new ICreateIM_Set<IStorm3D_Model*>(&(models));
 	ITTerrain=new ICreateIM_Set<IStorm3D_Terrain*>(&(terrains));
@@ -576,160 +574,128 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 
 	//Storm3D2->device.SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
 
+    if (renderlist_obj && renderlist_obj[0])
     {
         GFX_TRACE_SCOPE("Render renderlist objects");
+
+        Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+        Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+
+        //Storm3D_ShaderManager::GetSingleton()->SetForceAmbient(COL());
+        this->camera.Apply();
+
         // Render objects in list (to screen)
-	    for (int i=0;renderlist_obj[i];i++)
-	    {
+        for (int i = 0; renderlist_obj[i]; i++)
+        {
             GFX_TRACE_SCOPE("Object");
-		    if(i == 0)
-		    {
-			    Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_TEXTURE);
-			    Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG2,D3DTA_DIFFUSE);
-			    Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
-			    Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
-			    Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-			    Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
-			    Storm3D2->device.SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
-			    Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
-			    Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
 
-			    //Storm3D_ShaderManager::GetSingleton()->SetForceAmbient(COL());
-			    this->camera.Apply();
-		    }
+            // Set shader constants
+            Storm3D_Material *m = static_cast<Storm3D_Material *> (renderlist_obj[i]->mesh->GetMaterial());
+            Storm3D_Model *mod = renderlist_obj[i]->parent_model;
 
-		    // Set shader constants
-		    Storm3D_Material *m = static_cast<Storm3D_Material *> (renderlist_obj[i]->mesh->GetMaterial());
-		    Storm3D_Model *mod = renderlist_obj[i]->parent_model;
+            uint32_t pixelShader = Storm3D_ShaderManager::SSF_COLOR;
 
-		    //Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
-		    //Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG2);
+            if (m)
+            {
+                Storm3D_ShaderManager::GetSingleton()->SetObjectAmbient(m->GetSelfIllumination());
+                Storm3D_ShaderManager::GetSingleton()->SetObjectDiffuse(m->GetColor());
+                Storm3D_Texture *t = (Storm3D_Texture *)m->GetBaseTexture();
 
-		    if(m)
-		    {
-			    Storm3D_ShaderManager::GetSingleton()->SetObjectAmbient(m->GetSelfIllumination());
-			    Storm3D_ShaderManager::GetSingleton()->SetObjectDiffuse(m->GetColor());
-			    Storm3D_Texture *t = (Storm3D_Texture *) m->GetBaseTexture();
-		
-			    if(t)
-			    {
-				    t->Apply(0);
-				    Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_MODULATE);
-				    Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE);
-			    }
-			    else
-			    {
-				    Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG2);
-				    Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_SELECTARG2);
-			    }
+                if (t)
+                {
+                    t->Apply(0);
+                    pixelShader |= Storm3D_ShaderManager::SSF_TEXTURE;
+                }
 
-			    GfxDevice& device = Storm3D2->device;
-			    int alphaType = m->GetAlphaType();
-			    if(alphaType == IStorm3D_Material::ATYPE_NONE)
-			    {
-				    device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
-			    }
-			    else
-			    {
-				    device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+                GfxDevice& device = Storm3D2->device;
+                int alphaType = m->GetAlphaType();
+                if (alphaType == IStorm3D_Material::ATYPE_NONE)
+                {
+                    device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+                }
+                else
+                {
+                    device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 
-				    if(alphaType == IStorm3D_Material::ATYPE_ADD)
-				    {
-					    device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);				
-					    device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-				    }
-				    else if(alphaType == IStorm3D_Material::ATYPE_MUL)
-				    {
-					    device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
-					    device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
-				    }
-				    else if(alphaType == IStorm3D_Material::ATYPE_USE_TRANSPARENCY)
-				    {
-					    device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-					    device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-				    }
-				    else if(alphaType == IStorm3D_Material::ATYPE_USE_TEXTRANSPARENCY || renderlist_obj[i]->force_alpha > 0.0001f)
-				    {
-					    device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-					    device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-				    }
-			    }
+                    if (alphaType == IStorm3D_Material::ATYPE_ADD)
+                    {
+                        device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+                        device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+                    }
+                    else if (alphaType == IStorm3D_Material::ATYPE_MUL)
+                    {
+                        device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+                        device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
+                    }
+                    else if (alphaType == IStorm3D_Material::ATYPE_USE_TRANSPARENCY)
+                    {
+                        device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+                        device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+                    }
+                    else if (alphaType == IStorm3D_Material::ATYPE_USE_TEXTRANSPARENCY || renderlist_obj[i]->force_alpha > 0.0001f)
+                    {
+                        device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+                        device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+                    }
+                }
 
-			    Storm3D_ShaderManager::GetSingleton()->SetTextureOffset(m->getScrollOffset1());
+                Storm3D_ShaderManager::GetSingleton()->SetTextureOffset(m->getScrollOffset1());
 
-		    }
-		    else
-		    {
-			    Storm3D_ShaderManager::GetSingleton()->SetObjectAmbient(Color(1.f,1.f,1.f));
-			    Storm3D_ShaderManager::GetSingleton()->SetObjectDiffuse(Color(1.f,1.f,1.f));
-		    }
+            }
+            else
+            {
+                Storm3D_ShaderManager::GetSingleton()->SetObjectAmbient(Color(1.f, 1.f, 1.f));
+                Storm3D_ShaderManager::GetSingleton()->SetObjectDiffuse(Color(1.f, 1.f, 1.f));
+            }
 
-		    Storm3D_ShaderManager::GetSingleton()->SetModelAmbient(mod->self_illumination + ambient);
-		    //Storm3D_ShaderManager::GetSingleton()->SetLight(0, mod->light_position1, mod->light_color1, mod->light_range1);
-		    //Storm3D_ShaderManager::GetSingleton()->SetLight(1, mod->light_position2, mod->light_color2, mod->light_range2);
-		
-		    // Horrible ...
-		    {
-			    /*
-			    for(set<IStorm3D_Terrain*>::iterator itr=terrains.begin();itr!=terrains.end();++itr)
-			    {
-				    Storm3D_Terrain *terrain = (Storm3D_Terrain *) *itr;
+            Storm3D_ShaderManager::GetSingleton()->SetModelAmbient(mod->self_illumination + ambient);
+            //Storm3D_ShaderManager::GetSingleton()->SetLight(0, mod->light_position1, mod->light_color1, mod->light_range1);
+            //Storm3D_ShaderManager::GetSingleton()->SetLight(1, mod->light_position2, mod->light_color2, mod->light_range2);
 
-				    for(int i = 0; i < LIGHT_MAX_AMOUNT; ++i)
-				    {
-					    int index = mod->light_index[i];
-					    if(index != -1)
-					    {
-						    Light l = terrain->getModels().getLight(index);
-						    Storm3D_ShaderManager::GetSingleton()->SetLight(i, l.position, l.color, l.radius);
-					    }
-					    else
-					    {
-						    Storm3D_ShaderManager::GetSingleton()->SetLight(i, VC3(), COL(), 1.f);
-					    }
-				    }
-				    //Storm3D_TerrainRenderer &renderer = static_cast<Storm3D_TerrainRenderer &> (terra->getRenderer());
-			    }
-			    */
+            // Horrible ...
+            {
+                Storm3D_ShaderManager::GetSingleton()->setLightingParameters(false, false, 1);
 
-			    Storm3D_ShaderManager::GetSingleton()->setLightingParameters(false, false, 1);
+                if (mod->type_flag == 0)
+                    Storm3D_ShaderManager::GetSingleton()->SetLight(0, VC3(-2.5f, 5.f, -10.f), COL(0.3f, 0.3f, 0.3f), 20.f);
+                else
+                    Storm3D_ShaderManager::GetSingleton()->SetLight(0, VC3(2.5f, 5.f, -10.f), COL(0.3f, 0.3f, 0.3f), 20.f);
 
-			    if(mod->type_flag == 0)
-				    Storm3D_ShaderManager::GetSingleton()->SetLight(0, VC3(-2.5f, 5.f, -10.f), COL(0.03f, 0.03f, 0.03f), 20.f);
-			    else
-				    Storm3D_ShaderManager::GetSingleton()->SetLight(0, VC3( 2.5f, 5.f, -10.f), COL(0.03f, 0.03f, 0.03f), 20.f);
+                for (int i = 1; i < LIGHT_MAX_AMOUNT; ++i)
+                    Storm3D_ShaderManager::GetSingleton()->SetLight(i, VC3(), COL(), 1.f);
+            }
 
-			    for(int i = 1; i < LIGHT_MAX_AMOUNT; ++i)
-				    Storm3D_ShaderManager::GetSingleton()->SetLight(i, VC3(), COL(), 1.f);
-		    }
+            Storm3D_ShaderManager::GetSingleton()->SetSun(VC3(), 0.f);
 
-		    Storm3D_ShaderManager::GetSingleton()->SetSun(VC3(), 0.f);
+            // Set correct shader
+            Storm3D_ShaderManager::GetSingleton()->SetShaders(
+                Storm3D2->device,
+                Storm3D_ShaderManager::MESH_ENABLE_SKELETAL_ANIMATION,
+                pixelShader,
+                renderlist_obj[i]
+            );
 
-		    // Set correct shader
-		    Storm3D_ShaderManager::GetSingleton()->SetShader(Storm3D2->device, renderlist_obj[i]);
-		    basic_shader.apply();
+            if (!renderlist_obj[i]->parent_model->bones.empty())
+            {
+                renderlist_obj[i]->mesh->ReBuild();
+                renderlist_obj[i]->mesh->RenderBuffers(renderlist_obj[i]);
+            }
 
-		    if(!renderlist_obj[i]->parent_model->bones.empty())
-		    {
-			    renderlist_obj[i]->mesh->ReBuild();
-			    renderlist_obj[i]->mesh->RenderBuffers(renderlist_obj[i]);
-		    }
-
-		    Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
-		    // Render it
-		    //renderlist_obj[i]->mesh->Render(this,false,renderlist_obj[i]); // always has a mesh!
-	    }
+            Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+            // Render it
+            //renderlist_obj[i]->mesh->Render(this,false,renderlist_obj[i]); // always has a mesh!
+        }
     }
 
-	//Storm3D2->device.SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
+    //Storm3D2->device.SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
 
     //TODO: Remove, FF
-	// Set renderstates (for shadows/particles/sprites)
-	Storm3D2->device.SetRenderState(D3DRS_LIGHTING,FALSE);
-	Storm3D2->device.SetRenderState(D3DRS_SPECULARENABLE,FALSE);
-	Storm3D2->device.SetRenderState(D3DRS_FOGENABLE,FALSE);
-	Storm3D2->device.SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
-	Storm3D2->device.SetRenderState(D3DRS_FILLMODE,D3DFILL_SOLID);
+    // Set renderstates (for shadows/particles/sprites)
+    Storm3D2->device.SetRenderState(D3DRS_LIGHTING, FALSE);
+    Storm3D2->device.SetRenderState(D3DRS_SPECULARENABLE, FALSE);
+    Storm3D2->device.SetRenderState(D3DRS_FOGENABLE, FALSE);
+    Storm3D2->device.SetRenderState(D3DRS_NORMALIZENORMALS, FALSE);
+    Storm3D2->device.SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 
     D3DXMATRIX dm;
     D3DXMatrixIdentity(&dm);

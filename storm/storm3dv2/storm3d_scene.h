@@ -68,7 +68,6 @@ class Storm3D_Scene : public IStorm3D_Scene
 	// Lines
 	std::vector<Storm3D_Line *> depth_lines;
 	std::vector<Storm3D_Line *> no_depth_lines;
-	frozenbyte::storm::VertexShader basic_shader;
 
 	struct Debug3
 	{
