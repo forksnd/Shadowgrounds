@@ -8,7 +8,7 @@
 enum FVF //Fixed Vertex Format
 {
     FVF_P3NUV2,
-    FVF_P3NUV4,
+    FVF_P3NUV2BW,
     FVF_P3D,
     FVF_P3DUV2,
     FVF_P4DUV,
@@ -26,14 +26,13 @@ struct Vertex_P3NUV2
     VC2 uv1;
 };
 
-struct Vertex_P3NUV4
+struct Vertex_P3NUV2BW
 {
     VC3 p;
     VC3 n;
     VC2 uv0;
     VC2 uv1;
-    VC2 uv2;
-    VC2 uv3;
+    VC4 uv2;
 };
 
 struct Vertex_P3D

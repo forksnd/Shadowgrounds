@@ -6,6 +6,7 @@
 //------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------
+#include "GfxDevice.h"
 #include "storm3d_common_imp.h"
 #include "IStorm3D_Mesh.h"
 #include "storm3d_mesh_collisiontable.h"
@@ -87,7 +88,7 @@ class Storm3D_Mesh : public IStorm3D_Mesh
     uint16_t indices_id[LOD_AMOUNT];
 
 	int vbuf_vsize;
-	DWORD vbuf_fvf;
+	FVF vbuf_fvf;
 	
 	// Collision table
 	Storm3D_Mesh_CollisionTable collision;

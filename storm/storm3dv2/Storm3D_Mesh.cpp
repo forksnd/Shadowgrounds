@@ -225,7 +225,7 @@ void Storm3D_Mesh::PrepareForRender(Storm3D_Scene *scene,Storm3D_Model_Object *o
 	// buffers to be rebuilt.
 	if(bone_weights)
 	{
-		if (vbuf_fvf!=FVF_P3NUV4)
+		if (vbuf_fvf!=FVF_P3NUV2BW)
 		{
 			update_vx=true;
 			update_vx_amount=true;
@@ -378,6 +378,7 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
     VertexStorage& vtxStorage = Storm3D2->getVertexStorage();
     IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
 
+    Storm3D2->device.SetFVF(vbuf_fvf);
     Storm3D2->device.SetStreamSource(0, vtxStorage.vertices, 0, vbuf_vsize);
     Storm3D2->device.SetIndices(idxStorage.indices);
 
@@ -552,8 +553,8 @@ void Storm3D_Mesh::ReBuild()
     // Select format for vertexbuffer
     if (bone_weights)
     {
-        vbuf_vsize = sizeof(Vertex_P3NUV4);
-        vbuf_fvf = FVF_P3NUV4;
+        vbuf_vsize = sizeof(Vertex_P3NUV2BW);
+        vbuf_fvf = FVF_P3NUV2BW;
     }
     else
     {
@@ -723,13 +724,13 @@ void Storm3D_Mesh::ReBuild()
 
                 // Create vertex buffer
                 {
-                    assert(vbuf_vsize==sizeof(Vertex_P3NUV4));
+                    assert(vbuf_vsize==sizeof(Vertex_P3NUV2BW));
 
                     vtxStorage.free(chunk.vtx_id);
 
-                    chunk.vtx_id = vtxStorage.alloc<Vertex_P3NUV4>(vertex_list.size());
+                    chunk.vtx_id = vtxStorage.alloc<Vertex_P3NUV2BW>(vertex_list.size());
 
-                    Vertex_P3NUV4 *v = vtxStorage.lock<Vertex_P3NUV4>(chunk.vtx_id);
+                    Vertex_P3NUV2BW *v = vtxStorage.lock<Vertex_P3NUV2BW>(chunk.vtx_id);
                     float weight[4] = { 0 };
 
                     for (unsigned int i = 0; i < vertex_list.size(); ++i)
@@ -788,14 +789,13 @@ void Storm3D_Mesh::ReBuild()
                             vertexes[vertex_index].normal,
                             vertexes[vertex_index].texturecoordinates,
                             vertexes[vertex_index].texturecoordinates2,
-                            VC2(weight[0], weight[1]),
-                            VC2(weight[2], weight[3])
+                            VC4(weight[0], weight[1], weight[2], weight[3])
                         };
                     }
 
                     vtxStorage.unlock();
                     chunk.vertex_count = vertex_list.size();
-                    chunk.base_vertex = vtxStorage.baseVertex<Vertex_P3NUV4>(chunk.vtx_id);
+                    chunk.base_vertex = vtxStorage.baseVertex<Vertex_P3NUV2BW>(chunk.vtx_id);
                 }
             }
         }
