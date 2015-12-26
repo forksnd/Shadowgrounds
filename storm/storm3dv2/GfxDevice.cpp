@@ -72,43 +72,31 @@ LPD3DVERTEXELEMENT9 vtxFmtDescs[FVF_COUNT] = {
 };
 
 
-
-enum ShaderType
+enum ShaderProfile
 {
-    VERTEX_SHADER,
-    PIXEL_SHADER
+    VERTEX_SHADER_3_0,
+    PIXEL_SHADER_3_0,
+    SHADER_PROFILE_COUNT
 };
 
-ID3DBlob* compileShader(ShaderType type, const char* path, size_t path_len, D3D_SHADER_MACRO* defines, size_t defines_count)
+ID3DBlob* compileShader(ShaderProfile profile, size_t source_len, const char* source, D3D_SHADER_MACRO* defines)
 {
-    assert(path);
+    assert(profile < SHADER_PROFILE_COUNT);
 
-    const char* target = 0;
-
-    switch (type)
-    {
-        case VERTEX_SHADER:
-            target = "vs_3_0";
-            break;
-        case PIXEL_SHADER:
-            target = "ps_3_0";
-            break;
-    }
-
-    assert(target);
-
-    std::string shaderString;
-    frozenbyte::storm::readFile(shaderString, path);
+    const char* profile_id_string[SHADER_PROFILE_COUNT] = {
+        "vs_3_0",
+        "ps_3_0"
+    };
 
     ID3DBlob*  code = 0;
     ID3DBlob*  msgs = 0;
 
     HRESULT hr = D3DCompile(
-        shaderString.c_str(), shaderString.size(),
-        path, defines, NULL,
-        "main", target,
+        source, source_len,
+        NULL, defines, NULL,
+        "main", profile_id_string[profile],
 #ifdef _DEBUG
-        D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR|D3DCOMPILE_SKIP_OPTIMIZATION|D3DCOMPILE_DEBUG,
+        D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR|D3DCOMPILE_OPTIMIZATION_LEVEL3|D3DCOMPILE_DEBUG,
 #else
         D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR|D3DCOMPILE_OPTIMIZATION_LEVEL3,
 #endif
@@ -127,13 +115,142 @@ ID3DBlob* compileShader(ShaderType type, const char* path, size_t path_len, D3D_
     return code;
 }
 
-template<size_t path_len, size_t defines_count>
-ID3DBlob* compileShader(ShaderType type, const char (&path)[path_len], D3D_SHADER_MACRO (&defines)[defines_count])
+bool createShader(
+    IDirect3DVertexShader9** shader,
+    GfxDevice* device,
+    size_t source_len,
+    const char* source,
+    D3D_SHADER_MACRO* defines
+)
 {
-    return compileShader(type, path, path_len, defines, defines_count);
+    ID3DBlob* vscode = compileShader(
+        VERTEX_SHADER_3_0, source_len, source, defines
+    );
+
+    if (!vscode) return false;
+
+    HRESULT hr = device->CreateVertexShader((const DWORD*)vscode->GetBufferPointer(), shader);
+
+    return SUCCEEDED(hr);
+}
+
+bool createShader(
+    IDirect3DPixelShader9** shader,
+    GfxDevice* device,
+    size_t source_len,
+    const char* source,
+    D3D_SHADER_MACRO* defines
+)
+{
+    ID3DBlob* pscode = compileShader(
+        PIXEL_SHADER_3_0, source_len, source, defines
+    );
+
+    if (!pscode ) return false;
+
+    HRESULT hr = device->CreatePixelShader((const DWORD*)pscode ->GetBufferPointer(), shader);
+
+    return SUCCEEDED(hr);
 }
 
 
+template <typename IShaderType>
+bool compileShaderSet(
+    GfxDevice* device,
+    size_t path_len, const char* path,
+    size_t define_count, const char** defines,
+    size_t shader_count, IShaderType** shader_set
+)
+{
+    assert(define_count<32);
+    
+    static const size_t generated_shader_count = 1<<define_count;
+    assert(shader_count >= generated_shader_count);
+
+    bool success = true;
+
+    std::string shader_source;
+    frozenbyte::storm::readFile(shader_source, path);
+
+    //TODO: replace with safer variant
+    D3D_SHADER_MACRO* macros = (D3D_SHADER_MACRO*)alloca(sizeof(D3D_SHADER_MACRO)*(define_count+1));
+    for (size_t i=0; i<generated_shader_count; ++i)
+    {
+        size_t active_define_count = 0;
+
+        for (size_t j=0; j<define_count; ++j)
+        {
+            const size_t bit = 1<<j;
+            if (i&bit)
+            {
+                macros[active_define_count].Name = defines[j];
+                macros[active_define_count].Definition = "";
+                ++active_define_count;
+            }
+        }
+
+        macros[active_define_count].Definition = 0;
+        macros[active_define_count].Name = 0;
+
+        shader_set[i] = 0;
+
+        success &= createShader(
+            &shader_set[i],
+            device,
+            shader_source.length(),
+            shader_source.c_str(),
+            macros
+        );
+    }
+
+    return success;
+}
+
+bool compileShaderSet(
+    GfxDevice* device,
+    size_t path_len, const char* path,
+    size_t define_count, const char** defines,
+    size_t shader_count, IDirect3DVertexShader9** shader_set
+)
+{
+    return compileShaderSet<IDirect3DVertexShader9>(
+        device,
+        path_len, path,
+        define_count, defines,
+        shader_count, shader_set
+    );
+}
+
+bool compileShaderSet(
+    GfxDevice* device,
+    size_t path_len, const char* path,
+    size_t define_count, const char** defines,
+    size_t shader_count, IDirect3DPixelShader9** shader_set
+)
+{
+    return compileShaderSet<IDirect3DPixelShader9>(
+        device,
+        path_len, path,
+        define_count, defines,
+        shader_count, shader_set
+    );
+}
+
+template <typename IShaderType, size_t path_len, size_t define_count, size_t shader_count>
+bool compileShaderSet(
+    GfxDevice* device,
+    const char (&path)[path_len],
+    const char* (&defines)[define_count],
+    IShaderType (&shader_set)[shader_count]
+)
+{
+    return compileShaderSet(
+        device,
+        path_len, path,
+        define_count, defines,
+        shader_count, shader_set
+    );
+}
 
 template<size_t N>
 bool bitset32_is_bit_set(uint32_t (&set)[N], size_t i)
@@ -219,47 +336,14 @@ bool GfxDevice::init(LPDIRECT3D9 d3d, UINT Adapter, HWND hWnd, D3DPRESENT_PARAME
     for (size_t i = 0; i < FVF_COUNT; ++i)
         device->CreateVertexDeclaration(vtxFmtDescs[i], &vtxFmtSet[i]);
 
-    D3D_SHADER_MACRO defines[4];
-    for (size_t i=0; i<STD_SHADER_COUNT; ++i)
-    {
-        size_t idx = 0;
+    const char* defines[] = {
+        "VS_2D_POS",
+        "ENABLE_COLOR",
+        "ENABLE_TEXTURE"
+    };
 
-        if (i&SSF_2D_POS)
-        {
-            defines[idx].Name = "VS_2D_POS";
-            defines[idx].Definition = "";
-            ++idx;
-        }
-
-        if (i & SSF_COLOR)
-        {
-            defines[idx].Name = "ENABLE_COLOR";
-            defines[idx].Definition = "";
-            ++idx;
-        }
-
-        if (i & SSF_TEXTURE)
-        {
-            defines[idx].Name = "ENABLE_TEXTURE";
-            defines[idx].Definition = "";
-            ++idx;
-        }
-
-        defines[idx].Definition = 0;
-        defines[idx].Name = 0;
-
-        ID3DBlob* vscode = compileShader(VERTEX_SHADER, "Data\\shaders\\std.vs", defines);
-        ID3DBlob* pscode = compileShader(PIXEL_SHADER,  "Data\\shaders\\std.ps", defines);
-
-        if (vscode && pscode)
-        {
-            CreateVertexShader((const DWORD*)vscode->GetBufferPointer(), &stdVS[i]);
-            CreatePixelShader((const DWORD*)pscode->GetBufferPointer(), &stdPS[i]);
-        }
-
-        if (vscode) vscode->Release();
-        if (pscode) pscode->Release();
-    }
+    compileShaderSet(this, "Data\\shaders\\std.vs", defines, stdVS);
+    compileShaderSet(this, "Data\\shaders\\std.ps", defines, stdPS);
 
     return true;
 }
