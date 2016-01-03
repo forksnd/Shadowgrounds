@@ -1,0 +1,120 @@
+//#define ENABLE_TEXTURE
+//#define ENABLE_REFLECTION
+//#define ENABLE_LOCAL_REFLECTION
+
+struct PS_IN
+{
+    float4 pos       : POSITION;
+    float4 proj_pos  : TEXCOORD0;
+    float3 world_pos : TEXCOORD1;
+    float3 normal    : NORMAL;
+    float2 uv0       : TEXCOORD2;
+    float2 uv1       : TEXCOORD3;
+#if defined(ENABLE_REFLECTION)
+    float3 uv3 : TEXCOORD4;
+#elif defined(ENABLE_LOCAL_REFLECTION)
+    float4 uv3 : TEXCOORD4;
+#endif
+
+};
+
+struct PS_OUT
+{
+    float4 rt0 : COLOR;
+};
+
+// Constant declarations:
+//   -> c[0..3] -> World x View x Projection matrix
+//   -> c[4..7] -> World matrix (first 3 rows)   
+//   -> c[7]    -> Ambient color (.w transparency)
+//   -> c[8]    -> 
+//   -> c[9]    -> Light position1 (.w 0.f for clamping)
+//   -> c[10]   -> Light color1 (.w -> 1 / range)
+//   -> c[11]   ->  (.w offset.x)
+//   -> c[12]   -> Light position2 (.w offset.y)
+//   -> c[13]   -> Light color2 (.w -> 1 / range)
+//   -> c[18]   -> 
+//   -> c[19]   -> Fog
+//   -> c[21+]  -> Lights 3-5
+   
+// Vertex data:
+//   -> v0 -> position
+//   -> v1,2 -> texture coordinates
+//   -> v3 -> normal
+//   -> v6 -> index 1 / weight 1 (x,y) & index 2 / weight 2 (z,w)
+
+#ifdef ENABLE_TEXTURE
+sampler samDiffuse : register(s0);
+#endif
+
+// Ambient color (.w transparency)
+float4   uAmbient   : register(c7);
+// Diffuse color
+float4   uDiffuse   : register(c8);
+// Sun direction
+float3   uSunDir    : register(c11);
+//TODO: remove later, use camera centric world space
+// Camera position
+float3   uCameraPos : register(c18);
+//TODO: implement
+// Fog parameters
+float4   uFog       : register(c19);
+float4   uFogColor : register(c20);
+
+// Num point lights
+int uNumLights : register(i0);
+
+struct Light
+{
+    float4 posInvRange; // position and w - inverse light range
+    float3 color; // light color
+};
+
+// Per-light data
+Light uLights[5] : register(c32);
+
+PS_OUT main(PS_IN ps_in)
+{
+    PS_OUT ps_out = (PS_OUT)0;
+
+    float3 worldPos = ps_in.world_pos;
+    float3 normal   = ps_in.normal;
+    float4 projPos  = ps_in.proj_pos;
+    float3 lighting = 0;
+    float4 color    = float4(0, 0, 0, 1);
+
+    for (int i = 0; i < uNumLights; ++i)
+    {
+        float3 vec = uLights[i].posInvRange.xyz - worldPos;
+
+        float3 dir = normalize(vec);
+
+        float LdotN = saturate(dot(normal, dir));
+
+        float dist  = length(dir);
+        float att   = saturate(1.0 - dist * uLights[i].posInvRange.w);
+
+        lighting += (att * LdotN) * uLights[i].color;
+    }
+    
+    float sunNdotL = saturate(dot(normal, uSunDir));
+
+    lighting += sunNdotL;
+
+    lighting += uAmbient.xyz;
+
+    color.xyz = saturate(lighting);
+    color.w = uAmbient.w; //Transparency
+
+    //vs_out.fog = (worldPos.y - uFog.x) * uFog.y; //Make a mad
+
+#ifdef ENABLE_TEXTURE
+    color *= tex2D(samDiffuse, ps_in.uv0);
+#endif
+
+    float fogFactor = saturate((worldPos.y - uFog.x) * uFog.y); //Make a mad
+
+    ps_out.rt0 = lerp(uFogColor, color, fogFactor);
+
+    return ps_out;
+}

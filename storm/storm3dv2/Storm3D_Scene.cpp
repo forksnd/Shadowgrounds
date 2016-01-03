@@ -565,7 +565,8 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 
 		Storm3D2->device.SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_NONE);
 		Storm3D2->device.SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_NONE );  
-	}
+        Storm3D_ShaderManager::GetSingleton()->SetFogColor(fog_color);
+    }
 
 	Storm3D_ShaderManager::GetSingleton()->ResetShader();
 	Storm3D_ShaderManager::GetSingleton()->ClearCache();
@@ -593,7 +594,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
             Storm3D_Material *m = static_cast<Storm3D_Material *> (renderlist_obj[i]->mesh->GetMaterial());
             Storm3D_Model *mod = renderlist_obj[i]->parent_model;
 
-            uint32_t pixelShader = Storm3D_ShaderManager::SSF_COLOR;
+            uint32_t pixelShader = 0;
 
             if (m)
             {

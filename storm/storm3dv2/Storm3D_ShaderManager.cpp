@@ -61,6 +61,7 @@ const int Storm3D_ShaderManager::BONE_INDICES = 23;
 Storm3D_ShaderManager::Storm3D_ShaderManager(GfxDevice& device)
 :	ambient_color(.7f,.7f,.7f,0),
 	ambient_force_color(0,0,0,0),
+    fog_color(0.0f, 0.0f, 0.0f, 1.0f),
 	fog(-20.f,1.f / 100.f,0.0f,1.f),
 
 	object_ambient_color(0,0,0,0),
@@ -157,11 +158,12 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(GfxDevice& device)
     compileShaderSet(&device, "Data\\shaders\\mesh.vs", mesh_vs_defines, meshVS);
 
     const char* mesh_ps_defines[] = {
-        "ENABLE_COLOR",
         "ENABLE_TEXTURE",
+        //"ENABLE_REFLECTION",
+        //"ENABLE_LOCAL_REFLECTION",
     };
 
-    compileShaderSet(&device, "Data\\shaders\\std.ps", mesh_ps_defines, meshPS);
+    compileShaderSet(&device, "Data\\shaders\\lighting.ps", mesh_ps_defines, meshPS);
 }
 
 Storm3D_ShaderManager::~Storm3D_ShaderManager()
@@ -328,6 +330,13 @@ void Storm3D_ShaderManager::SetForceAmbient(const Color &color)
 	ambient_force_color.x = color.r;
 	ambient_force_color.y = color.g;
 	ambient_force_color.z = color.b;
+}
+
+void Storm3D_ShaderManager::SetFogColor(const Color& color)
+{
+	fog_color.x = color.r;
+	fog_color.y = color.g;
+	fog_color.z = color.b;
 }
 
 void Storm3D_ShaderManager::SetLight(int index, const Vector &direction, const Color &color, float range)
@@ -558,8 +567,8 @@ void Storm3D_ShaderManager::SetShaders(
         //if(update_values == true)
         {
             // Constants
-            device.SetVertexShaderConstantF(7, object_ambient_color, 1);
-            device.SetVertexShaderConstantF(8, object_diffuse_color, 1);
+            device.SetPixelShaderConstantF(7, object_ambient_color, 1);
+            device.SetPixelShaderConstantF(8, object_diffuse_color, 1);
             update_values = false;
         }
 
@@ -594,7 +603,7 @@ void Storm3D_ShaderManager::SetShaders(
 
         ambient.w = alpha; //1.f;
 
-        device.SetVertexShaderConstantF(7, ambient, 1);
+        device.SetPixelShaderConstantF(7, ambient, 1);
     }
 
     // Set actual shader
@@ -606,12 +615,14 @@ void Storm3D_ShaderManager::SetShaders(
 
     D3DXVECTOR4 sun_temp = sun_properties;
     sun_temp.w = textureOffset.x;
-    device.SetVertexShaderConstantF(11, sun_temp, 1);
+    device.SetPixelShaderConstantF(11, sun_temp, 1);
 
     device.SetVertexShaderConstantF(9, textureOffset, 1);
 
     device.SetVertexShaderConstantF(18, view_position, 1);
-    device.SetVertexShaderConstantF(19, fog, 1);
+    device.SetPixelShaderConstantF(18, view_position, 1);
+    device.SetPixelShaderConstantF(19, fog, 1);
+    device.SetPixelShaderConstantF(20, fog_color, 1);
 
     if (local_reflection)
     {
@@ -624,7 +635,7 @@ void Storm3D_ShaderManager::SetShaders(
     }
 
     int lightCount[4] = { LIGHT_MAX_AMOUNT, 0, 0, 0 };
-    device.SetVertexShaderConstantI(0, lightCount, 1);
+    device.SetPixelShaderConstantI(0, lightCount, 1);
 
     static_assert(LIGHT_MAX_AMOUNT >= 2 && LIGHT_MAX_AMOUNT <= 5, "Light count should be 2-5.");
     for (int i = 0; i < LIGHT_MAX_AMOUNT; ++i)
@@ -634,8 +645,8 @@ void Storm3D_ShaderManager::SetShaders(
         lightPosInvRange.w = lightColor.w;
         lightColor.w = 1.0f;
 
-        device.SetVertexShaderConstantF(32 + i * 2, lightPosInvRange, 1);
-        device.SetVertexShaderConstantF(33 + i * 2, lightColor, 1);
+        device.SetPixelShaderConstantF(32 + i * 2, lightPosInvRange, 1);
+        device.SetPixelShaderConstantF(33 + i * 2, lightColor, 1);
     }
 
     device.SetVertexShader(meshVS[vertexShader]);

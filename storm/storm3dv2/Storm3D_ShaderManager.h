@@ -78,9 +78,8 @@ public:
 
     enum
     {
-        MESH_PS_SHADER_COUNT = 4,
-        SSF_COLOR   = (1<<0),
-        SSF_TEXTURE = (1<<1),
+        MESH_PS_SHADER_COUNT = 2,
+        SSF_TEXTURE = (1<<0),
     };
 
 public:
@@ -108,6 +107,7 @@ private:
 	D3DXVECTOR4 ambient_color;
 	D3DXVECTOR4 ambient_force_color;
 	D3DXVECTOR4 fog;
+	D3DXVECTOR4 fog_color;
 	D3DXVECTOR4 textureOffset;
 	D3DXVECTOR4 fake_properties;
 
@@ -222,6 +222,7 @@ public:
 	void SetLight(int index, const Vector &position, const Color &color, float range);
 	void SetSun(const VC3 &direction, float strength);
 	void SetFog(float start, float range);
+	void SetFogColor(const Color& color);
 	void SetTextureOffset(const VC2 &offset);
 	void setFakeProperties(float plane, float factor, float add);
 
