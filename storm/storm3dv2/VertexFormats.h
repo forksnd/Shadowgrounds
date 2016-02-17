@@ -11,6 +11,7 @@ enum FVF //Fixed Vertex Format
     FVF_P3NUV2BW,
     FVF_P3D,
     FVF_P3DUV2,
+    FVF_P3UV,
     FVF_P4DUV,
     FVF_P4UV,
     FVF_P2DUV,

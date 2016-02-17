@@ -10,8 +10,10 @@ class Storm3D_Camera;
 class Storm3D_Scene;
 struct GfxDevice;
 
+//NOTE: do we need this class at all?
 struct Storm3D_SpotlightShared
 {
+    //TODO: try to get reed of this member
 	GfxDevice &device;
 
 	VC3 position;

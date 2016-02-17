@@ -1,8 +1,8 @@
-//#define ENABLE_LIGHTING
-//#define ENABLE_LIGHTMAP
-//#define ENABLE_FAKE_LIGHT
-//#define ENABLE_FOG
-//#define TEXTURE_SOURCE 0
+#define ENABLE_LIGHTING 1
+#define ENABLE_LIGHTMAP 0
+#define ENABLE_FAKE_LIGHT 0
+#define ENABLE_FOG 0
+#define TEXTURE_SOURCE 1
 
 #define TEXSRC_NO_TEXTURE 0
 #define TEXSRC_TEXTURE 1
@@ -66,10 +66,10 @@ PS_OUT main(PS_IN ps_in)
 {
     PS_OUT ps_out = (PS_OUT)0;
 
-    float4 color = ps_in.diffuse;
+    float4 color = float4(1,0,0,1);//ps_in.diffuse;
 
 #if TEXTURE_SOURCE != TEXSRC_NO_TEXTURE
-    color *= tex2D(samDiffuse, ps_in.uv0);
+    color *= 1;//tex2D(samDiffuse, ps_in.uv0);
 #endif
 #if TEXTURE_SOURCE == TEXSRC_REFLECTION
     float3 reflection = texCUBE(samReflection, ps_in.uv3).rgb;

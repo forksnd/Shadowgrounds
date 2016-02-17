@@ -61,6 +61,8 @@ public:
 	void updateVisibility(Storm3D_Scene &scene, int timeDelta);
 	void renderTargets(Storm3D_Scene &scene);
 	void renderBase(Storm3D_Scene &scene);
+
+    //TODO: Remove this!!!!
 	void render(IStorm3D_TerrainRendererBase::RenderMode mode, Storm3D_Scene &scene, Storm3D_Spotlight *spot, Storm3D_FakeSpotlight *fakeSpot);
 
 	void releaseDynamicResources();

@@ -34,11 +34,6 @@
 #define NORMAL_ALPHA_TEST_VALUE 0x50
 
 
-// MSC6 seems to mess up object list sorting if this on
-#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
-//#pragma optimize("", off)
-#endif
-
 int storm3d_model_objects_tested = 0;
 int storm3d_model_objects_rough_passed = 0;
 int storm3d_model_objects_passed = 0;
@@ -125,12 +120,10 @@ int active_visibility = 0;
 
 	enum RenderType
 	{
-		BaseTextures,
 		BaseLighting,
 		Depth,
 		FakeDepth,
 		SpotProjection,
-		FakeProjection,
 		Glow,
 		Distortion
 	};
@@ -248,15 +241,6 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 	std::vector<Light> lights;
 
-	PixelShader lightingPixelShader_lightmap;
-	PixelShader lightingPixelShader_lightmap_reflection;
-	PixelShader lightingPixelShader_lightmap_localreflection;
-	PixelShader lightingPixelShader_lightmap_notexture;
-	PixelShader lightingPixelShader_noLightmap;
-	PixelShader lightingPixelShader_noLightmap_reflection;
-	PixelShader lightingPixelShader_noLightmap_localreflection;
-	PixelShader lightingPixelShader_noLightmap_notexture;
-
 	enum ObjectType
 	{
 		NormalObjects = 0,
@@ -304,14 +288,6 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 	Storm3D_TerrainModelsData(Storm3D &storm_)
 	:	storm(storm_),
-		lightingPixelShader_lightmap(storm.GetD3DDevice()),
-		lightingPixelShader_lightmap_reflection(storm.GetD3DDevice()),
-		lightingPixelShader_lightmap_localreflection(storm.GetD3DDevice()),
-		lightingPixelShader_lightmap_notexture(storm.GetD3DDevice()),
-		lightingPixelShader_noLightmap(storm.GetD3DDevice()),
-		lightingPixelShader_noLightmap_reflection(storm.GetD3DDevice()),
-		lightingPixelShader_noLightmap_localreflection(storm.GetD3DDevice()),
-		lightingPixelShader_noLightmap_notexture(storm.GetD3DDevice()),
 		filterLightmap(false),
 		renderCollision(false),
 		enableAlphaTest(true),
@@ -340,15 +316,6 @@ struct Storm3D_TerrainModelsData : public DataBase
 			object_counter[i] = 0;
 			model_counter[i] = 0;
 		}
-
-		lightingPixelShader_lightmap.createLightingPixelShader_Lightmap();
-		lightingPixelShader_lightmap_reflection.createLightingPixelShader_Lightmap_Reflection();
-		lightingPixelShader_lightmap_localreflection.createLightingPixelShader_Lightmap_LocalReflection();
-		lightingPixelShader_lightmap_notexture.createLightingPixelShader_LightmapNoTexture();
-		lightingPixelShader_noLightmap.createLightingPixelShader_NoLightmap();
-		lightingPixelShader_noLightmap_reflection.createLightingPixelShader_NoLightmap_Reflection();
-		lightingPixelShader_noLightmap_localreflection.createLightingPixelShader_NoLightmap_LocalReflection();
-		lightingPixelShader_noLightmap_notexture.createLightingPixelShader_NoLightmapNoTexture();
 
 		/*
 		IStorm3D_Texture *t = storm.CreateNewTexture(1, 1, IStorm3D_Texture::TEXTYPE_BASIC);
@@ -1042,11 +1009,6 @@ struct Storm3D_TerrainModelsData : public DataBase
 					return false;
 			}
 		}
-		else if(renderType == FakeProjection)
-		{
-			if(!object->parent_model->bones.empty())
-				return false;
-		}
 
 		if(renderType == FakeDepth || renderType == Depth)
 		{
@@ -1119,32 +1081,19 @@ struct Storm3D_TerrainModelsData : public DataBase
 		return false;
 	}
 
-	void applyGeneralMaterial(RenderType renderType, Storm3D_Material &material, Storm3D_Model &model, Storm3D_Model_Object &object)
+	void applyGeneralMaterial(RenderType renderType, Storm3D_Material &material, Storm3D_Model &model, Storm3D_Model_Object &object, Storm3D_Spotlight *spot)
 	{
 		Storm3D_ShaderManager *shaderManager = Storm3D_ShaderManager::GetSingleton();
 		GfxDevice &device = storm.GetD3DDevice();
 
-		if(renderType == BaseTextures)
+		if(renderType == BaseLighting)
 		{
 			if(material.getEffectTextureName().empty())
 				applyTexture(device, material.GetBaseTexture(), 0);
 			else
 				storm.getProceduralManagerImp().apply(0);
 
-			shaderManager->SetObjectDiffuse(material.GetColor());
-		}
-		else if(renderType == BaseLighting)
-		{
-			if(material.getEffectTextureName().empty())
-				applyTexture(device, material.GetBaseTexture(), 0);
-			else
-				storm.getProceduralManagerImp().apply(0);
-
-			shaderManager->SetObjectDiffuse(material.GetColor());
-
-			bool baseTex = true;
-			if(!material.GetBaseTexture())
-				baseTex = false;
+			bool baseTex = material.GetBaseTexture() != NULL;
 
 			if(forceWhiteBase)
 			{
@@ -1191,39 +1140,34 @@ struct Storm3D_TerrainModelsData : public DataBase
 				device.SetPixelShaderConstantF(1, factor, 1);
 			}
 
-			if(localReflection)
-				device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
-			else
-				device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
-
-			if(applyTexture(device, material.GetBaseTexture2(), 1))
-			{
-				if(baseTex)
-				{
-					if(localReflection)
-						lightingPixelShader_lightmap_localreflection.apply();
-					else if(reflection)
-						lightingPixelShader_lightmap_reflection.apply();
-					else
-						lightingPixelShader_lightmap.apply();
-				}
-				else
-					lightingPixelShader_lightmap_notexture.apply();
-			}
-			else
-			{
-				if(baseTex)
-				{
-					if(localReflection)
-						lightingPixelShader_noLightmap_localreflection.apply();
-					else if(reflection)
-						lightingPixelShader_noLightmap_reflection.apply();
-					else
-						lightingPixelShader_noLightmap.apply();
-				}
-				else
-					lightingPixelShader_noLightmap_notexture.apply();
-			}
+            if (applyTexture(device, material.GetBaseTexture2(), 1))
+            {
+                if (baseTex)
+                {
+                    if (localReflection)
+                        shaderManager->SetPixelShader(Storm3D_ShaderManager::LIGHTING_LMAP_LOCAL_REFLECTION);
+                    else if (reflection)
+                        shaderManager->SetPixelShader(Storm3D_ShaderManager::LIGHTING_LMAP_REFLECTION);
+                    else
+                        shaderManager->SetPixelShader(Storm3D_ShaderManager::LIGHTING_LMAP_TEXTURE);
+                }
+                else
+                    shaderManager->SetPixelShader(Storm3D_ShaderManager::LIGHTING_LMAP_NOTEXTURE);
+            }
+            else
+            {
+                if (baseTex)
+                {
+                    if (localReflection)
+                        shaderManager->SetPixelShader(Storm3D_ShaderManager::LIGHTING_NOLMAP_LOCAL_REFLECTION);
+                    else if (reflection)
+                        shaderManager->SetPixelShader(Storm3D_ShaderManager::LIGHTING_NOLMAP_REFLECTION);
+                    else
+                        shaderManager->SetPixelShader(Storm3D_ShaderManager::LIGHTING_NOLMAP_TEXTURE);
+                }
+                else
+                    shaderManager->SetPixelShader(Storm3D_ShaderManager::LIGHTING_NOLMAP_NOTEXTURE);
+            }
 
 			COL colorFactor(1.f, 1.f, 1.f);
 			if(model.terrain_object)
@@ -1343,55 +1287,69 @@ struct Storm3D_TerrainModelsData : public DataBase
 					shaderManager->SetSun(VC3(), 0.f);
 			}
 		}
-		else if(renderType == Depth)
-		{
-			if(material.getEffectTextureName().empty())
-				applyTexture(device, material.GetBaseTexture(), 0);
-			else
-				storm.getProceduralManagerImp().apply(0);
-		}
-		else if(renderType == FakeDepth)
-		{
-			if(material.getEffectTextureName().empty())
-				applyTexture(device, material.GetBaseTexture(), 0);
-			else
-				storm.getProceduralManagerImp().apply(0);
-		}
-		else if(renderType == SpotProjection)
-		{
-			if(material.getEffectTextureName().empty())
-				applyTexture(device, material.GetBaseTexture(), 2);
-			else
-				storm.getProceduralManagerImp().apply(2);
+        else if (renderType == Depth)
+        {
+            if (material.getEffectTextureName().empty())
+                applyTexture(device, material.GetBaseTexture(), 0);
+            else
+                storm.getProceduralManagerImp().apply(0);
+            Storm3D_ShaderManager::GetSingleton()->SetPixelShader(Storm3D_ShaderManager::TEXTURE_ONLY);
+        }
+        else if (renderType == FakeDepth)
+        {
+            if (material.getEffectTextureName().empty())
+                applyTexture(device, material.GetBaseTexture(), 0);
+            else
+                storm.getProceduralManagerImp().apply(0);
+            Storm3D_ShaderManager::GetSingleton()->SetPixelShader(Storm3D_ShaderManager::FAKE_DEPTH);
+        }
+        else if (renderType == SpotProjection)
+        {
+            if (material.getEffectTextureName().empty())
+                applyTexture(device, material.GetBaseTexture(), 2);
+            else
+                storm.getProceduralManagerImp().apply(2);
 
-			shaderManager->SetObjectDiffuse(material.GetColor());
-		}
-		else if(renderType == FakeProjection)
-		{
-		}
-		else if(renderType == Glow)
-		{
-			if(material.getEffectTextureName().empty())
-				applyTexture(device, material.GetBaseTexture(), 0);
-			else
-				storm.getProceduralManagerImp().apply(0);
+            shaderManager->SetObjectDiffuse(material.GetColor());
+            assert(spot);
+            shaderManager->SetPixelShader(
+                spot && spot->hasShadow()
+                    ? Storm3D_ShaderManager::PIXEL_SHADOW
+                    : Storm3D_ShaderManager::PIXEL_NO_SHADOW
+            );
+        }
+        else if (renderType == Glow)
+        {
+            if (material.getEffectTextureName().empty())
+                applyTexture(device, material.GetBaseTexture(), 0);
+            else
+                storm.getProceduralManagerImp().apply(0);
 
-			float glow = material.GetGlow() * material.GetGlowFactor();
-			if(material.GetAlphaType() != IStorm3D_Material::ATYPE_NONE && material.GetAlphaType() != IStorm3D_Material::ATYPE_ADD)
-				glow *= 1.f - material.GetTransparency();
+            float glow = material.GetGlow() * material.GetGlowFactor();
+            if (material.GetAlphaType() != IStorm3D_Material::ATYPE_NONE && material.GetAlphaType() != IStorm3D_Material::ATYPE_ADD)
+                glow *= 1.f - material.GetTransparency();
 
-			COL selfIllum(glow, glow, glow);
+            COL selfIllum(glow, glow, glow);
 
-			shaderManager->SetObjectAmbient(selfIllum);
-			shaderManager->SetObjectDiffuse(material.GetColor());
-		}
-		else if(renderType == Distortion)
-		{
-			if(material.getEffectTextureName().empty())
-				applyTexture(device, material.GetDistortionTexture(), 0);
-			else
-				storm.getProceduralManagerImp().applyOffset(0);
-		}
+            shaderManager->SetObjectAmbient(selfIllum);
+            shaderManager->SetObjectDiffuse(material.GetColor());
+            shaderManager->setLightingParameters(false, false, 0);
+            Storm3D_ShaderManager::GetSingleton()->SetPixelShader(
+                material.getEffectTextureName().empty() && !material.GetBaseTexture()
+                ? Storm3D_ShaderManager::LIGHTING_SIMPLE_NOTEXTURE
+                : Storm3D_ShaderManager::LIGHTING_SIMPLE_TEXTURE
+            );
+        }
+        else if (renderType == Distortion)
+        {
+            if (material.getEffectTextureName().empty())
+                applyTexture(device, material.GetDistortionTexture(), 0);
+            else
+                storm.getProceduralManagerImp().applyOffset(0);
+
+            Storm3D_ShaderManager::GetSingleton()->SetObjectDiffuse(Color(1, 1, 1));
+            Storm3D_ShaderManager::GetSingleton()->SetPixelShader(Storm3D_ShaderManager::TEXTURExCOLOR);
+        }
 
 		shaderManager->SetTextureOffset(material.getScrollOffset1());
 
@@ -1415,7 +1373,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 	{
 		GfxDevice &device = storm.GetD3DDevice();
 
-		applyGeneralMaterial(renderType, material, model, object);
+		applyGeneralMaterial(renderType, material, model, object, spot);
 
 		// Alpha
 		{
@@ -1424,7 +1382,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 				device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 //#ifdef PROJECT_AOV
 			// I don't want to break anything, so this is inside ifdef (although it should be ok for others as well)
-			else if(enableAlphaTest && alphaType != IStorm3D_Material::ATYPE_NONE && renderType != FakeProjection)
+			else if(enableAlphaTest && alphaType != IStorm3D_Material::ATYPE_NONE)
 //#else
 			//else if(enableAlphaTest && alphaType == IStorm3D_Material::ATYPE_USE_ALPHATEST && renderType != FakeProjection)
 //#endif
@@ -1440,7 +1398,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 		Storm3D_ShaderManager *shaderManager = Storm3D_ShaderManager::GetSingleton();
 		GfxDevice &device = storm.GetD3DDevice();
 
-		applyGeneralMaterial(renderType, material, model, object);
+		applyGeneralMaterial(renderType, material, model, object, spot);
 		int alphaType = material.GetAlphaType();
 
 		if(renderType == SpotProjection)
@@ -1525,15 +1483,13 @@ struct Storm3D_TerrainModelsData : public DataBase
 		device.SetRenderState(D3DRS_ALPHAREF, NORMAL_ALPHA_TEST_VALUE);
 		device.SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 
-		if(renderType == BaseTextures || renderType == BaseLighting)
+		if(renderType == BaseLighting)
 		{
 			device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 			device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 		}
 
 		int objectType = NormalObjects;
-		//if(renderType != BaseTextures && renderType != Glow)
-		//	objectType = LightObjects;
 		if(renderType == Depth || renderType == FakeDepth)
 			objectType = DepthObjects;
 
@@ -1645,8 +1601,6 @@ struct Storm3D_TerrainModelsData : public DataBase
 		device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 		int objectType = NormalObjects;
-		//if(renderType != BaseTextures && renderType != Glow)
-		//	objectType = LightObjects;
 
 		Frustum *frustum = 0;
 		Frustum realFrustum;
@@ -2045,30 +1999,6 @@ void Storm3D_TerrainModels::calculateVisibility(Storm3D_Scene &scene, int timeDe
 	data->findVisibleModels(camera, haxCamera, timeDelta);
 }
 
-void Storm3D_TerrainModels::renderTextures(MaterialType materialType, Storm3D_Scene &scene)
-{
-	GfxDevice &device = data->storm.GetD3DDevice();
-
-	device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-	device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-	device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-	device.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-	device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-	device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-
-	if(materialType == SolidOnly)
-		data->renderSolid(BaseTextures, scene, 0, 0, 0, None);
-	else if(materialType == AlphaOnly)
-	{
-		data->renderAlpha(BaseTextures, scene, 0, 0, 0, None);
-
-		device.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-		device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-		device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-	}
-}
-
 void Storm3D_TerrainModels::renderLighting(MaterialType materialType, Storm3D_Scene &scene)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainModels::renderLighting");
@@ -2114,53 +2044,25 @@ void Storm3D_TerrainModels::renderProjection(MaterialType materialType, Storm3D_
 	}
 }
 
-void Storm3D_TerrainModels::renderProjection(Storm3D_Scene &scene, Storm3D_FakeSpotlight &spot)
-{
-	data->renderSolid(FakeProjection, scene, 0, &spot, 0, None);
-	//data->renderAlpha(FakeProjection, scene, 0, &spot, 0, None);
-
-	GfxDevice &device = data->storm.GetD3DDevice();
-	device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
-	device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
-}
-
 void Storm3D_TerrainModels::renderGlows(Storm3D_Scene &scene)
 {
-	GfxDevice &device = data->storm.GetD3DDevice();
+    GfxDevice &device = data->storm.GetD3DDevice();
 
-	device.SetPixelShader(0);
-	device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-	device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-	device.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-	device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-	device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-	device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+    data->renderSolid(Glow, scene, 0, 0, 0, None);
+    data->renderAlpha(Glow, scene, 0, 0, 0, None);
 
-	data->renderSolid(Glow, scene, 0, 0, 0, None);
-	data->renderAlpha(Glow, scene, 0, 0, 0, None);
-
-	device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-	device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+    device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+    device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 }
 
 void Storm3D_TerrainModels::renderDistortion(Storm3D_Scene &scene)
 {
-	GfxDevice &device = data->storm.GetD3DDevice();
+    GfxDevice &device = data->storm.GetD3DDevice();
 
-	device.SetPixelShader(0);
-	device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-	device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-	device.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-	device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-	device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-	device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+    device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
-	device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-	data->renderAlpha(Distortion, scene, 0, 0, 0, None);
+    data->renderAlpha(Distortion, scene, 0, 0, 0, None);
 }
 
 void Storm3D_TerrainModels::setFillMode(FillMode mode)
@@ -2247,11 +2149,16 @@ void Storm3D_TerrainModels::renderBackground(Storm3D_Model *model)
 		data->applyTexture(device, material->GetBaseTexture(), 0);
 		shaderManager->SetObjectDiffuse(material->GetColor());
 
-		mesh->ReBuild();
-	
-		shaderManager->SetShader(device, object);
-		shaderManager->BackgroundShader(device);
-		mesh->RenderBuffers(object);
+        mesh->ReBuild();
+
+        shaderManager->SetShaders(
+            device,
+            Storm3D_ShaderManager::VERTEX_SKYBOX,
+            Storm3D_ShaderManager::TEXTURE_ONLY,
+            object
+        );
+
+        mesh->RenderBuffers(object);
 
 		//if(scene)
 		//	scene->AddPolyCounter(mesh->GetFaceCount());

@@ -1,0 +1,44 @@
+sampler samShadowProj0 : register(s0);
+sampler samShadowProj1 : register(s1);
+sampler samShadowProj2 : register(s2);
+sampler samShadowProj3 : register(s3);
+
+float uFadeK;
+
+struct PS_IN
+{
+    float  dist      : COLOR0;
+    float4 uv0       : TEXCOORD0;
+    float4 uv1       : TEXCOORD1;
+    float4 uv2       : TEXCOORD2;
+    float4 uv3       : TEXCOORD3;
+};
+
+float4 main(PS_IN ps_in):COLOR
+{
+    //def c1, 0.25f, 0.25f, 0.25f, 0.25f
+
+    //; Shadow samples
+    //tex t0
+    //tex t1
+    //tex t2
+    //tex t3
+    float shadow0 = tex2Dproj(samShadowProj0, ps_in.uv0);
+    float shadow1 = tex2Dproj(samShadowProj1, ps_in.uv1);
+    float shadow2 = tex2Dproj(samShadowProj2, ps_in.uv2);
+    float shadow3 = tex2Dproj(samShadowProj3, ps_in.uv3);
+
+    //mul r0, t0, c1
+    //mad r0, t1, c1, r0
+    //mad r0, t2, c1, r0
+    //mad r0, t3, c1, r0
+    float shadow = 0.25 * shadow0 + 0.25 * shadow1 +
+                   0.25 * shadow2 + 0.25 * shadow3;
+
+    //mad_sat r1, c0, 1-v0, v0
+    //mad r0.rgb, r1, 1-r0, r0
+    float distFade = saturate(uFadeK * (1 - ps_in.dist) + ps_in.dist);
+    float3 color = distFade * (1 - shadow) + shadow;
+
+    return float4(color, 1);
+}

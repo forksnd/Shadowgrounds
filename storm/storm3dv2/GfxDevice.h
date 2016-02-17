@@ -13,12 +13,29 @@
 
 struct GfxDevice;
 
+bool createShader(
+    IDirect3DVertexShader9** shader,
+    GfxDevice* device,
+    size_t source_len,
+    const char* source,
+    D3D_SHADER_MACRO* defines
+);
+
+bool createShader(
+    IDirect3DPixelShader9** shader,
+    GfxDevice* device,
+    size_t source_len,
+    const char* source,
+    D3D_SHADER_MACRO* defines
+);
+
 bool compileShaderSet(
     GfxDevice* device,
     size_t path_len, const char* path,
     size_t define_count, const char** defines,
     size_t shader_count, IDirect3DVertexShader9** shader_set
 );
+
 bool compileShaderSet(
     GfxDevice* device,
     size_t path_len, const char* path,

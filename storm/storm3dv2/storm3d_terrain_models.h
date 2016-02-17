@@ -53,12 +53,10 @@ public:
 	};
 
 	void calculateVisibility(Storm3D_Scene &scene, int timeDelta);
-	void renderTextures(MaterialType materialType, Storm3D_Scene &scene);
 	void renderLighting(MaterialType materialType, Storm3D_Scene &scene);
 	void renderDepth(Storm3D_Scene &scene, Storm3D_Camera &camera, Storm3D_Spotlight &spot, const IStorm3D_Model *skipModel);
 	bool renderDepth(Storm3D_Scene &scene, Storm3D_Camera &camera, Storm3D_FakeSpotlight &spot);
 	void renderProjection(MaterialType materialType, Storm3D_Scene &scene, Storm3D_Spotlight &spot);
-	void renderProjection(Storm3D_Scene &scene, Storm3D_FakeSpotlight &spot);
 	void renderGlows(Storm3D_Scene &scene);
 	void renderDistortion(Storm3D_Scene &scene);
 

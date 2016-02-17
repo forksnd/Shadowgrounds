@@ -280,7 +280,9 @@ struct Storm3D_SpotlightData
 	boost::shared_ptr<Storm3D_Texture> projectionTexture;
 	boost::shared_ptr<Storm3D_Texture> coneTexture;
 
+    //TODO: create proper rt sharing solution at higher level
 	Storm3D_SpotlightShared properties;
+
 	float coneColorMultiplier;
 	float smoothness;
 
@@ -290,6 +292,7 @@ struct Storm3D_SpotlightData
 	bool hasFade;
 	bool hasCone;
 	bool hasShadows;
+    bool shadowActive;
 	bool enabled;
 	bool visible;
 	bool coneUpdated;
@@ -329,6 +332,7 @@ struct Storm3D_SpotlightData
 		hasFade(false),
 		hasCone(false),
 		hasShadows(false),
+        shadowActive(false),
 		enabled(true),
 		visible(false),
 		coneUpdated(false),
@@ -825,13 +829,6 @@ bool Storm3D_Spotlight::setAsRenderTarget(const float *cameraView)
 			Storm3D_ShaderManager::GetSingleton()->SetViewProjectionMatrix(data->properties.lightViewProjection[1], data->properties.lightViewProjection[1]);
 			Storm3D_ShaderManager::GetSingleton()->setSpot(data->properties.color, data->properties.position, data->properties.direction, data->properties.range, .1f);
 
-			data->device.SetPixelShader(0);
-			data->device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-			data->device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-			data->device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-			data->device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-			data->device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-
 			return true;
 		}
 
@@ -900,6 +897,7 @@ void Storm3D_Spotlight::applyTextures(const float *cameraView, const float *came
 	if(renderShadows && data->shadowMap && data->shadowMap->hasInitialized())
 		data->shadowMap->apply(shadow);
 
+    data->shadowActive = data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized();
 	if(data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized())
 	{
 		if(data->smoothing)
@@ -965,7 +963,17 @@ void Storm3D_Spotlight::applyTextures(const float *cameraView, const float *came
 
 void Storm3D_Spotlight::applyTerrainShader(bool renderShadows)
 {
-	const COL &color = data->properties.color;
+	if (data->shadowActive)
+	{
+		if (data->smoothing)
+			data->nvSmoothShadowPixelShader->apply();
+		else
+			data->nvShadowPixelShader->apply();
+	}
+	else
+		data->nvNoShadowPixelShader->apply();
+
+    const COL &color = data->properties.color;
 	float c[4] = { color.r, color.g, color.b, 1.f };
 	data->device.SetVertexShaderConstantF(17, c, 1);
 
@@ -978,7 +986,16 @@ void Storm3D_Spotlight::applySolidShader(bool renderShadows)
 
 void Storm3D_Spotlight::applyNormalShader(bool renderShadows)
 {
-	data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
+	if (data->shadowActive)
+	{
+		if (data->smoothing)
+			data->nvSmoothShadowPixelShader->apply();
+		else
+			data->nvShadowPixelShader->apply();
+	}
+	else
+		data->nvNoShadowPixelShader->apply();
+    data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 }
 
 void Storm3D_Spotlight::renderCone(Storm3D_Camera &camera, float timeFactor, bool renderGlows)
@@ -1200,4 +1217,9 @@ void Storm3D_Spotlight::clearCache()
 void Storm3D_Spotlight::setEnableClip(bool enableClip)
 {
 	data->spotlightAlwaysVisible = !enableClip;
+}
+
+bool Storm3D_Spotlight::hasShadow()
+{
+    return data->shadowActive;
 }

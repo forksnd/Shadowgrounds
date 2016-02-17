@@ -7,6 +7,7 @@ class Storm3D_Scene;
 class Storm3D_Spotlight;
 class Storm3D_FakeSpotlight;
 
+//TODO: remove this!!!
 class IStorm3D_TerrainRendererBase
 {
 public:
@@ -15,7 +16,6 @@ public:
 	enum RenderMode
 	{
 		FakeSpotBuffer,
-		FakeSpotProjection,
 		SpotBuffer,
 		SpotProjectionSolid,
 		SpotProjectionDecal,

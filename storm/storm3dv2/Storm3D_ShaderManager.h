@@ -70,16 +70,44 @@ class Storm3D_ShaderManager: public Singleton<Storm3D_ShaderManager>
 public:
     enum
     {
-        MESH_VS_SHADER_COUNT = 8,
-        MESH_ENABLE_REFLECTION  = (1<<0),
-        MESH_ENABLE_LOCAL_REFLECTION   = (1<<1),
-        MESH_ENABLE_SKELETAL_ANIMATION = (1<<2),
+        MESH_BONE_SIMPLE,
+        MESH_BONE_NOREFLECTION,
+        MESH_BONE_REFLECTION,
+        MESH_NOREFLECTION,
+        MESH_REFLECTION,
+        MESH_LOCAL_REFLECTION,
+        MESH_BONE_PROJECTED_FLAT,
+        MESH_BONE_PROJECTED_POINT,
+        MESH_BONE_PROJECTED_DIRECTIONAL,
+        MESH_PROJECTED_FLAT,
+        MESH_PROJECTED_POINT,
+        MESH_PROJECTED_DIRECTIONAL,
+        VERTEX_SKYBOX,
+        VERTEX_FAKE_SPOT_SHADOW,
+        MESH_VS_SHADER_COUNT,
     };
 
     enum
     {
-        MESH_PS_SHADER_COUNT = 2,
-        SSF_TEXTURE = (1<<0),
+        DEBUG_PIXEL_SHADER,
+        FAKE_DEPTH,
+        LIGHTING_SIMPLE_NOTEXTURE,
+        LIGHTING_SIMPLE_TEXTURE,
+        LIGHTING_LMAP_NOTEXTURE,
+        LIGHTING_LMAP_TEXTURE,
+        LIGHTING_LMAP_REFLECTION,
+        LIGHTING_LMAP_LOCAL_REFLECTION,
+        LIGHTING_NOLMAP_NOTEXTURE,
+        LIGHTING_NOLMAP_TEXTURE,
+        LIGHTING_NOLMAP_REFLECTION,
+        LIGHTING_NOLMAP_LOCAL_REFLECTION,
+        PIXEL_FAKE_SPOT_SHADOW,
+        WHITE_ONLY,
+        TEXTURE_ONLY,
+        TEXTURExCOLOR,
+        PIXEL_SHADOW,
+        PIXEL_NO_SHADOW,
+        MESH_PS_SHADER_COUNT,
     };
 
 public:
@@ -89,6 +117,8 @@ public:
         uint32_t pixelShader,
         Storm3D_Model_Object *object
     );
+
+    void SetPixelShader(uint32_t pixelShader);
 
 private:
     LPDIRECT3DVERTEXSHADER9 meshVS[MESH_VS_SHADER_COUNT];
@@ -126,70 +156,20 @@ private:
 	D3DXVECTOR4 spot_color;
 	D3DXMATRIX target_matrix;
 
-	D3DXVECTOR4 model_ambient_color;	
-	D3DXVECTOR4 object_ambient_color;	
+	D3DXVECTOR4 model_ambient_color;
+	D3DXVECTOR4 object_ambient_color;
 	D3DXVECTOR4 object_diffuse_color;
 	D3DXVECTOR4 lightmap_factor;
 
 	// For lazy updating
 	bool update_values;
 
-	// Shader id's
-	frozenbyte::storm::VertexShader default_shader;
-	//frozenbyte::storm::VertexShader lighting_shader;
-	frozenbyte::storm::VertexShader lighting_shader_0light_noreflection;
-	frozenbyte::storm::VertexShader lighting_shader_0light_localreflection;
-	frozenbyte::storm::VertexShader lighting_shader_0light_reflection;
-	frozenbyte::storm::VertexShader lighting_shader_1light_noreflection;
-	frozenbyte::storm::VertexShader lighting_shader_1light_localreflection;
-	frozenbyte::storm::VertexShader lighting_shader_1light_reflection;
-	frozenbyte::storm::VertexShader lighting_shader_2light_noreflection;
-	frozenbyte::storm::VertexShader lighting_shader_2light_localreflection;
-	frozenbyte::storm::VertexShader lighting_shader_2light_reflection;
-	frozenbyte::storm::VertexShader lighting_shader_3light_noreflection;
-	frozenbyte::storm::VertexShader lighting_shader_3light_localreflection;
-	frozenbyte::storm::VertexShader lighting_shader_3light_reflection;
-	frozenbyte::storm::VertexShader lighting_shader_4light_noreflection;
-	frozenbyte::storm::VertexShader lighting_shader_4light_localreflection;
-	frozenbyte::storm::VertexShader lighting_shader_4light_reflection;
-	frozenbyte::storm::VertexShader lighting_shader_5light_noreflection;
-	frozenbyte::storm::VertexShader lighting_shader_5light_localreflection;
-	frozenbyte::storm::VertexShader lighting_shader_5light_reflection;
-
-	frozenbyte::storm::VertexShader skybox_shader;
-	frozenbyte::storm::VertexShader default_projected_shader_directional;
-	frozenbyte::storm::VertexShader default_projected_shader_point;
-	frozenbyte::storm::VertexShader default_projected_shader_flat;
-	frozenbyte::storm::VertexShader bone_shader;
-	//frozenbyte::storm::VertexShader bone_lighting_shader;
-	frozenbyte::storm::VertexShader bone_lighting_shader_0light_noreflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_0light_reflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_1light_noreflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_1light_reflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_2light_noreflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_2light_reflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_3light_noreflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_3light_reflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_4light_noreflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_4light_reflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_5light_noreflection;
-	frozenbyte::storm::VertexShader bone_lighting_shader_5light_reflection;
-
-	frozenbyte::storm::VertexShader bone_projected_shader_directional;
-	frozenbyte::storm::VertexShader bone_projected_shader_point;
-	frozenbyte::storm::VertexShader bone_projected_shader_flat;
-
-	frozenbyte::storm::VertexShader fake_depth_shader;
-	frozenbyte::storm::VertexShader fake_shadow_shader;	
-	frozenbyte::storm::VertexShader fake_depth_bone_shader;
-	frozenbyte::storm::VertexShader fake_shadow_bone_shader;	
-
-	int current_shader;
-
+    //TODO: refactor!!!!
 	bool lighting_shaders;
 	bool projected_shaders;
 	bool fake_depth_shaders;
 	bool fake_shadow_shaders;
+    bool use_custom_shader = false;
 
 	// Stored model pointer (on bone meshes)
 	Storm3D_Model *model;
@@ -256,14 +236,12 @@ public:
 	void SetShader(GfxDevice& device, const std::vector<int> &bone_indices); // not including first identity
 	void ResetShader();
 	void ClearCache();
-	void BackgroundShader(GfxDevice& device);
 
 	void SetShaderDefaultValues(GfxDevice& device);
 	void SetShaderAmbient(GfxDevice& device, const COL &color);
 	void SetShaderDiffuse(GfxDevice& device, const COL &color);
 	void SetLightmapFactor(float xf, float yf);
 
-	void ApplyDeclaration(GfxDevice& device);
 	void ApplyForceAmbient(GfxDevice& device);
 	void SetWorldTransform(GfxDevice& device, const D3DXMATRIX &tm, bool forceTextureTm = false, bool terrain = false);
 

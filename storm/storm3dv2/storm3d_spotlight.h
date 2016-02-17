@@ -72,6 +72,8 @@ public:
 	static void createShadowBuffers(Storm3D &storm, GfxDevice &device, int shadowQuality);
 	static void freeShadowBuffers();
 	static void clearCache();
+
+    bool hasShadow();
 };
 
 #endif

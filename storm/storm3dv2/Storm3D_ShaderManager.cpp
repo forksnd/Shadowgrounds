@@ -20,32 +20,11 @@
 
 using namespace frozenbyte;
 
-namespace {
-	static const int DEFAULT_SHADER = 1;
-	static const int DEFAULT_PROJECTED_SHADER_DIRECTIONAL = 2;
-	static const int DEFAULT_PROJECTED_SHADER_POINT = 3;
-	static const int DEFAULT_PROJECTED_SHADER_FLAT = 4;
-	static const int BONE_SHADER = 5;
-	static const int BONE_PROJECTED_SHADER_DIRECTIONAL = 6;
-	static const int BONE_PROJECTED_SHADER_POINT = 7;
-	static const int BONE_PROJECTED_SHADER_FLAT = 8;
-
-	static const int FAKE_DEPTH_SHADER = 17;
-	static const int FAKE_SHADOW_SHADER = 18;
-	static const int FAKE_DEPTH_BONE_SHADER = 19;
-	static const int FAKE_SHADOW_BONE_SHADER = 20;
-
-	static const int LIGHTING_SHADER = 21;
-	static const int BONE_LIGHTING_SHADER = 22;
-
-	static const int CUSTOM_SHADER = 0x100;
-}
-
-	//HAXHAX
-	bool enableLocalReflection = false;
-	float reflection_height = 0.f;
-	D3DXMATRIX reflection_matrix;
-	D3DXMATRIX clip_matrix;
+//HAXHAX
+bool enableLocalReflection = false;
+float reflection_height = 0.f;
+D3DXMATRIX reflection_matrix;
+D3DXMATRIX clip_matrix;
 
 // 106 = 21
 // 107 = 22
@@ -55,8 +34,8 @@ namespace {
 // 111 = 26
 
 // 21, 25
-const int Storm3D_ShaderManager::BONE_INDEX_START = 27;
-const int Storm3D_ShaderManager::BONE_INDICES = 23;
+const int Storm3D_ShaderManager::BONE_INDEX_START = 42;
+const int Storm3D_ShaderManager::BONE_INDICES = 48;
 
 Storm3D_ShaderManager::Storm3D_ShaderManager(GfxDevice& device)
 :	ambient_color(.7f,.7f,.7f,0),
@@ -69,54 +48,6 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(GfxDevice& device)
 
 	update_values(true),
 
-	default_shader(device),
-	lighting_shader_0light_noreflection(device),
-	lighting_shader_0light_localreflection(device),
-	lighting_shader_0light_reflection(device),
-	lighting_shader_1light_noreflection(device),
-	lighting_shader_1light_localreflection(device),
-	lighting_shader_1light_reflection(device),
-	lighting_shader_2light_noreflection(device),
-	lighting_shader_2light_localreflection(device),
-	lighting_shader_2light_reflection(device),
-	lighting_shader_3light_noreflection(device),
-	lighting_shader_3light_localreflection(device),
-	lighting_shader_3light_reflection(device),
-	lighting_shader_4light_noreflection(device),
-	lighting_shader_4light_localreflection(device),
-	lighting_shader_4light_reflection(device),
-	lighting_shader_5light_noreflection(device),
-	lighting_shader_5light_localreflection(device),
-	lighting_shader_5light_reflection(device),
-
-	skybox_shader(device),
-	default_projected_shader_directional(device),
-	default_projected_shader_point(device),
-	default_projected_shader_flat(device),
-	bone_shader(device),
-	bone_lighting_shader_0light_noreflection(device),
-	bone_lighting_shader_0light_reflection(device),
-	bone_lighting_shader_1light_noreflection(device),
-	bone_lighting_shader_1light_reflection(device),
-	bone_lighting_shader_2light_noreflection(device),
-	bone_lighting_shader_2light_reflection(device),
-	bone_lighting_shader_3light_noreflection(device),
-	bone_lighting_shader_3light_reflection(device),
-	bone_lighting_shader_4light_noreflection(device),
-	bone_lighting_shader_4light_reflection(device),
-	bone_lighting_shader_5light_noreflection(device),
-	bone_lighting_shader_5light_reflection(device),
-
-	bone_projected_shader_directional(device),
-	bone_projected_shader_point(device),
-	bone_projected_shader_flat(device),
-
-	fake_depth_shader(device),
-	fake_shadow_shader(device),
-	fake_depth_bone_shader(device),
-	fake_shadow_bone_shader(device),
-
-	current_shader(0),
 	projected_shaders(false),
 	fake_depth_shaders(false),
 	fake_shadow_shaders(false),
@@ -149,21 +80,131 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(GfxDevice& device)
 	reflection_matrix._22 = -1.f;
 	reflection_matrix._42 = 2 * reflection_height;
 
-    const char* mesh_vs_defines[] = {
-        "ENABLE_REFLECTION",
-        "ENABLE_LOCAL_REFLECTION",
-        "ENABLE_SKELETAL_ANIMATION"
+    std::string vs_shader_source, ps_shader_source;
+
+    frozenbyte::storm::readFile(vs_shader_source, "Data\\shaders\\mesh.vs");
+    frozenbyte::storm::readFile(ps_shader_source, "Data\\shaders\\lighting.ps");
+
+    D3D_SHADER_MACRO definesSimple[] = {
+        {"ENABLE_SKELETAL_ANIMATION", "1"},
+        {"ENABLE_LIGHTING", "1"},
+        {"ENABLE_LIGHTMAP", "0"},
+        {"ENABLE_FAKE_LIGHT", "0"},
+        {"ENABLE_FOG", "0"},
+        {"TEXTURE_SOURCE", "1"},
+        {0, 0}
     };
 
-    compileShaderSet(&device, "Data\\shaders\\mesh.vs", mesh_vs_defines, meshVS);
+    createShader(&meshVS[MESH_BONE_SIMPLE], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesSimple);
+    createShader(&meshPS[LIGHTING_SIMPLE_TEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesSimple);
+    definesSimple[5].Definition = "0";
+    createShader(&meshPS[LIGHTING_SIMPLE_NOTEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesSimple);
 
-    const char* mesh_ps_defines[] = {
-        "ENABLE_TEXTURE",
-        //"ENABLE_REFLECTION",
-        //"ENABLE_LOCAL_REFLECTION",
+    D3D_SHADER_MACRO definesStandard[] = {
+        {"ENABLE_SKELETAL_ANIMATION", "1"},
+        {"ENABLE_LIGHTING", "1"},
+        {"ENABLE_LIGHTMAP", "1"},
+        {"ENABLE_FAKE_LIGHT", "1"},
+        {"ENABLE_FOG", "1"},
+        {"TEXTURE_SOURCE", "1"},
+        {0, 0}
     };
 
-    compileShaderSet(&device, "Data\\shaders\\lighting.ps", mesh_ps_defines, meshPS);
+    createShader(&meshVS[MESH_BONE_NOREFLECTION], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
+    definesStandard[5].Definition = "2";
+    createShader(&meshVS[MESH_BONE_REFLECTION], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
+    definesStandard[0].Definition = "0";
+    definesStandard[5].Definition = "1";
+    createShader(&meshVS[MESH_NOREFLECTION], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
+    definesStandard[5].Definition = "2";
+    createShader(&meshVS[MESH_REFLECTION], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
+    definesStandard[5].Definition = "3";
+    createShader(&meshVS[MESH_LOCAL_REFLECTION], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
+
+    definesStandard[5].Definition = "0";
+    createShader(&meshPS[LIGHTING_LMAP_NOTEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    definesStandard[5].Definition = "1";
+    createShader(&meshPS[LIGHTING_LMAP_TEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    definesStandard[5].Definition = "2";
+    createShader(&meshPS[LIGHTING_LMAP_REFLECTION], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    definesStandard[5].Definition = "3";
+    createShader(&meshPS[LIGHTING_LMAP_LOCAL_REFLECTION], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+
+    definesStandard[5].Definition = "0";
+    createShader(&meshPS[LIGHTING_NOLMAP_NOTEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    definesStandard[5].Definition = "1";
+    createShader(&meshPS[LIGHTING_NOLMAP_TEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    definesStandard[5].Definition = "2";
+    createShader(&meshPS[LIGHTING_NOLMAP_REFLECTION], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    definesStandard[5].Definition = "3";
+    createShader(&meshPS[LIGHTING_NOLMAP_LOCAL_REFLECTION], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+
+    std::string vs_skybox_source;
+    frozenbyte::storm::readFile(vs_skybox_source, "Data\\shaders\\skybox.vs");
+    createShader(&meshVS[VERTEX_SKYBOX], &device, vs_skybox_source.length(), vs_skybox_source.c_str(), NULL);
+
+    std::string ps_std_source;
+    frozenbyte::storm::readFile(ps_std_source, "Data\\shaders\\std.ps");
+
+    D3D_SHADER_MACRO definesSTD[] = {
+        {"ENABLE_COLOR", "1"},
+        {"ENABLE_TEXTURE", "1"},
+        {0, 0}
+    };
+    createShader(&meshPS[WHITE_ONLY], &device, ps_std_source.length(), ps_std_source.c_str(), NULL);
+    createShader(&meshPS[TEXTURE_ONLY], &device, ps_std_source.length(), ps_std_source.c_str(), definesSTD+1);
+    createShader(&meshPS[TEXTURExCOLOR], &device, ps_std_source.length(), ps_std_source.c_str(), definesSTD);
+
+    std::string ps_debug_source;
+    frozenbyte::storm::readFile(ps_debug_source, "Data\\shaders\\debug.ps");
+    createShader(&meshPS[DEBUG_PIXEL_SHADER], &device, ps_debug_source.length(), ps_debug_source.c_str(), NULL);
+
+    std::string ps_fake_depth_source;
+    frozenbyte::storm::readFile(ps_fake_depth_source, "Data\\shaders\\fake_depth.ps");
+    createShader(&meshPS[FAKE_DEPTH], &device, ps_fake_depth_source.length(), ps_fake_depth_source.c_str(), NULL);
+
+    std::string vs_fake_spot_shadow_source;
+    frozenbyte::storm::readFile(vs_fake_spot_shadow_source, "Data\\shaders\\fake_spot_shadow.vs");
+    createShader(&meshVS[VERTEX_FAKE_SPOT_SHADOW], &device, vs_fake_spot_shadow_source.length(), vs_fake_spot_shadow_source.c_str(), NULL);
+
+    std::string ps_fake_spot_shadow_source;
+    frozenbyte::storm::readFile(ps_fake_spot_shadow_source, "Data\\shaders\\fake_spot_shadow.ps");
+    createShader(&meshPS[PIXEL_FAKE_SPOT_SHADOW], &device, ps_fake_spot_shadow_source.length(), ps_fake_spot_shadow_source.c_str(), NULL);
+
+    std::string vs_projected_source;
+    frozenbyte::storm::readFile(vs_projected_source, "Data\\shaders\\mesh_projected.vs");
+
+    D3D_SHADER_MACRO definesProjected[] = {
+        {"ENABLE_SKELETAL_ANIMATION", "1"},
+        {"LIGHT_TYPE", "0"},
+        {0, 0}
+    };
+
+    createShader(&meshVS[MESH_BONE_PROJECTED_FLAT], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+    definesProjected[1].Definition = "1";
+    createShader(&meshVS[MESH_BONE_PROJECTED_POINT], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+    definesProjected[1].Definition = "2";
+    createShader(&meshVS[MESH_BONE_PROJECTED_DIRECTIONAL], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+
+    definesProjected[0].Definition = "0";
+
+    definesProjected[1].Definition = "0";
+    createShader(&meshVS[MESH_PROJECTED_FLAT], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+    definesProjected[1].Definition = "1";
+    createShader(&meshVS[MESH_PROJECTED_POINT], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+    definesProjected[1].Definition = "2";
+    createShader(&meshVS[MESH_PROJECTED_DIRECTIONAL], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+
+    D3D_SHADER_MACRO definesShadow[] = {
+        {"ENABLE_SHADOW", "0"},
+        {0, 0}
+    };
+
+    std::string ps_shadow_source;
+    frozenbyte::storm::readFile(ps_shadow_source, "Data\\shaders\\shadow.ps");
+    createShader(&meshPS[PIXEL_NO_SHADOW], &device, ps_shadow_source.length(), ps_shadow_source.c_str(), definesShadow);
+    definesShadow[0].Definition = "1";
+    createShader(&meshPS[PIXEL_SHADOW], &device, ps_shadow_source.length(), ps_shadow_source.c_str(), definesShadow);
 }
 
 Storm3D_ShaderManager::~Storm3D_ShaderManager()
@@ -181,54 +222,6 @@ Storm3D_ShaderManager::~Storm3D_ShaderManager()
 
 void Storm3D_ShaderManager::CreateShaders(GfxDevice& device)
 {
-	default_shader.createDefaultShader();
-	lighting_shader_0light_noreflection.createLightingShader_0light_noreflection();
-	lighting_shader_0light_localreflection.createLightingShader_0light_localreflection();
-	lighting_shader_0light_reflection.createLightingShader_0light_reflection();
-	lighting_shader_1light_noreflection.createLightingShader_1light_noreflection();
-	lighting_shader_1light_localreflection.createLightingShader_1light_localreflection();
-	lighting_shader_1light_reflection.createLightingShader_1light_reflection();
-	lighting_shader_2light_noreflection.createLightingShader_2light_noreflection();
-	lighting_shader_2light_localreflection.createLightingShader_2light_localreflection();
-	lighting_shader_2light_reflection.createLightingShader_2light_reflection();
-	lighting_shader_3light_noreflection.createLightingShader_3light_noreflection();
-	lighting_shader_3light_localreflection.createLightingShader_3light_localreflection();
-	lighting_shader_3light_reflection.createLightingShader_3light_reflection();
-	lighting_shader_4light_noreflection.createLightingShader_4light_noreflection();
-	lighting_shader_4light_localreflection.createLightingShader_4light_localreflection();
-	lighting_shader_4light_reflection.createLightingShader_4light_reflection();
-	lighting_shader_5light_noreflection.createLightingShader_5light_noreflection();
-	lighting_shader_5light_localreflection.createLightingShader_5light_localreflection();
-	lighting_shader_5light_reflection.createLightingShader_5light_reflection();
-
-	skybox_shader.createSkyboxShader();
-	default_projected_shader_directional.createDefaultProjectionShaderDirectional();
-	default_projected_shader_point.createDefaultProjectionShaderPoint();
-	default_projected_shader_flat.createDefaultProjectionShaderFlat();
-	bone_shader.createBoneShader();
-
-	bone_lighting_shader_0light_noreflection.createBoneLightingShader_0light_noreflection();
-	bone_lighting_shader_0light_reflection.createBoneLightingShader_0light_reflection();
-	bone_lighting_shader_1light_noreflection.createBoneLightingShader_1light_noreflection();
-	bone_lighting_shader_1light_reflection.createBoneLightingShader_1light_reflection();
-	bone_lighting_shader_2light_noreflection.createBoneLightingShader_2light_noreflection();
-	bone_lighting_shader_2light_reflection.createBoneLightingShader_2light_reflection();
-	bone_lighting_shader_3light_noreflection.createBoneLightingShader_3light_noreflection();
-	bone_lighting_shader_3light_reflection.createBoneLightingShader_3light_reflection();
-	bone_lighting_shader_4light_noreflection.createBoneLightingShader_4light_noreflection();
-	bone_lighting_shader_4light_reflection.createBoneLightingShader_4light_reflection();
-	bone_lighting_shader_5light_noreflection.createBoneLightingShader_5light_noreflection();
-	bone_lighting_shader_5light_reflection.createBoneLightingShader_5light_reflection();
-
-	bone_projected_shader_directional.createBoneProjectionShaderDirectional();
-	bone_projected_shader_point.createBoneProjectionShaderPoint();
-	bone_projected_shader_flat.createBoneProjectionShaderFlat();
-
-	fake_depth_shader.createFakeDepthShader();
-	fake_shadow_shader.createFakeShadowShader();
-	fake_depth_bone_shader.createFakeDepthBoneShader();
-	fake_shadow_bone_shader.createFakeShadowBoneShader();
-
 	// Set identity matrix on card
 	D3DXMATRIX identity;
 	D3DXMatrixIdentity(&identity);
@@ -418,7 +411,6 @@ void Storm3D_ShaderManager::SetObjectDiffuse(const Color &color)
 
 void Storm3D_ShaderManager::setProjectedShaders()
 {
-	current_shader = 0;
 	update_values = true;
 	model = 0;
 
@@ -438,7 +430,6 @@ void Storm3D_ShaderManager::setLightingShaders()
 
 void Storm3D_ShaderManager::setNormalShaders()
 {
-	current_shader = 0;
 	update_values = true;
 	model = 0;
 
@@ -450,7 +441,6 @@ void Storm3D_ShaderManager::setNormalShaders()
 
 void Storm3D_ShaderManager::setFakeDepthShaders()
 {
-	current_shader = 0;
 	update_values = true;
 	model = 0;
 
@@ -462,7 +452,6 @@ void Storm3D_ShaderManager::setFakeDepthShaders()
 
 void Storm3D_ShaderManager::setFakeShadowShaders()
 {
-	current_shader = 0;
 	update_values = true;
 	model = 0;
 
@@ -507,21 +496,12 @@ void Storm3D_ShaderManager::setSpotType(SpotType type)
 
 bool Storm3D_ShaderManager::BoneShader()
 {
-    switch (current_shader)
-    {
-        case BONE_SHADER:
-        case BONE_LIGHTING_SHADER:
-        case BONE_PROJECTED_SHADER_DIRECTIONAL:
-        case BONE_PROJECTED_SHADER_POINT:
-        case BONE_PROJECTED_SHADER_FLAT:
-        case FAKE_DEPTH_BONE_SHADER:
-        case FAKE_SHADOW_BONE_SHADER:
-            return true;
-        case CUSTOM_SHADER:
-            return (currentVertexShader&MESH_ENABLE_SKELETAL_ANIMATION) != 0;
-    }
-
-    return false;
+    return currentVertexShader == MESH_BONE_SIMPLE ||
+           currentVertexShader == MESH_BONE_NOREFLECTION ||
+           currentVertexShader == MESH_BONE_REFLECTION ||
+           currentVertexShader == MESH_BONE_PROJECTED_FLAT ||
+           currentVertexShader == MESH_BONE_PROJECTED_DIRECTIONAL||
+           currentVertexShader == MESH_BONE_PROJECTED_POINT;
 }
 
 void Storm3D_ShaderManager::SetShaders(
@@ -531,46 +511,73 @@ void Storm3D_ShaderManager::SetShaders(
     Storm3D_Model_Object *object
 )
 {
-	assert(device.device);
+    assert(device.device);
     assert(vertexShader<MESH_VS_SHADER_COUNT);
     assert(pixelShader<MESH_PS_SHADER_COUNT);
 
     currentVertexShader = vertexShader;
     currentPixelShader  = pixelShader;
 
-    D3DXMATRIX object_tm;
-    object->GetMXG().GetAsD3DCompatible4x4((float *)&object_tm);
-    SetWorldTransform(device, object_tm);
+    device.SetVertexShader(meshVS[vertexShader]);
+    device.SetPixelShader(meshPS[pixelShader]);
 
-    IStorm3D_Material *m = object->GetMesh()->GetMaterial();
+    D3DXMATRIX object_tm;
     float alpha = 1.f;
 
-    float force_alpha = object->force_alpha;
-    if (projected_shaders && object->force_lighting_alpha_enable)
-        force_alpha = object->force_lighting_alpha;
+    if (object)
+    {
+        object->GetMXG().GetAsD3DCompatible4x4((float *)&object_tm);
+        SetWorldTransform(device, object_tm);
 
-    IStorm3D_Material::ATYPE a = m->GetAlphaType();
-    if (a == IStorm3D_Material::ATYPE_USE_TRANSPARENCY)
-        alpha = 1.f - m->GetTransparency() - force_alpha;
-    else if (a == IStorm3D_Material::ATYPE_USE_TEXTRANSPARENCY || force_alpha > 0.0001f)
-        alpha = 1.f - m->GetTransparency() - force_alpha;
-    else if (a == IStorm3D_Material::ATYPE_USE_ALPHATEST)
-        alpha = 1.f - m->GetTransparency();
+        bool noBones = object->parent_model->bones.empty()
+                        || (static_cast<Storm3D_Mesh *> (object->GetMesh())->HasWeights() == false);
 
-    if (alpha < 0)
-        alpha = 0;
+        model = noBones ? NULL : object->parent_model;
+
+        IStorm3D_Material *m = object->GetMesh()->GetMaterial();
+        float force_alpha = object->force_alpha;
+        if (projected_shaders && object->force_lighting_alpha_enable)
+            force_alpha = object->force_lighting_alpha;
+
+        IStorm3D_Material::ATYPE a = m->GetAlphaType();
+        if (a == IStorm3D_Material::ATYPE_USE_TRANSPARENCY)
+            alpha = 1.f - m->GetTransparency() - force_alpha;
+        else if (a == IStorm3D_Material::ATYPE_USE_TEXTRANSPARENCY || force_alpha > 0.0001f)
+            alpha = 1.f - m->GetTransparency() - force_alpha;
+        else if (a == IStorm3D_Material::ATYPE_USE_ALPHATEST)
+            alpha = 1.f - m->GetTransparency();
+
+        if (alpha < 0)
+            alpha = 0;
+    }
+
+    if (projected_shaders)
+    {
+        D3DXVECTOR4 dif = object_diffuse_color;
+        dif.x *= spot_color.x;
+        dif.y *= spot_color.y;
+        dif.z *= spot_color.z;
+
+        dif.w = alpha * transparency_factor;
+        device.SetVertexShaderConstantF(17, dif, 1);
+    }
+
+    if (vertexShader == VERTEX_FAKE_SPOT_SHADOW ||
+        vertexShader == MESH_BONE_PROJECTED_FLAT ||
+        vertexShader == MESH_BONE_PROJECTED_POINT ||
+        vertexShader == MESH_BONE_PROJECTED_DIRECTIONAL ||
+        vertexShader == MESH_PROJECTED_FLAT ||
+        vertexShader == MESH_PROJECTED_POINT ||
+        vertexShader == MESH_PROJECTED_DIRECTIONAL)
+    {
+        //TODO: remove later - atm constants should be set in SetWorldTransform,
+        //      due to fake_shadow_shaders==true
+        return;
+    }
 
     {
         D3DXMatrixTranspose(&object_tm, &object_tm);
         device.SetVertexShaderConstantF(4, object_tm, 3);
-
-        //if(update_values == true)
-        {
-            // Constants
-            device.SetPixelShaderConstantF(7, object_ambient_color, 1);
-            device.SetPixelShaderConstantF(8, object_diffuse_color, 1);
-            update_values = false;
-        }
 
         // Set transparency?
         D3DXVECTOR4 ambient = ambient_color;
@@ -601,27 +608,24 @@ void Storm3D_ShaderManager::SetShaders(
             ambient.z = 1.f;
 #endif
 
-        ambient.w = alpha; //1.f;
+        D3DXVECTOR4 diffuse = object_diffuse_color;
+        diffuse.w = alpha; //1.f;
 
-        device.SetPixelShaderConstantF(7, ambient, 1);
+        device.SetVertexShaderConstantF(7, ambient, 1);
+        if (!fake_depth_shaders)
+            device.SetVertexShaderConstantF(8, diffuse, 1);
     }
 
     // Set actual shader
-    model =
-        (
-            object->parent_model->bones.empty() ||
-            !static_cast<Storm3D_Mesh *>(object->GetMesh())->HasWeights()
-        ) ? NULL : object->parent_model;
-
     D3DXVECTOR4 sun_temp = sun_properties;
     sun_temp.w = textureOffset.x;
-    device.SetPixelShaderConstantF(11, sun_temp, 1);
+    device.SetVertexShaderConstantF(11, sun_temp, 1);
 
     device.SetVertexShaderConstantF(9, textureOffset, 1);
 
     device.SetVertexShaderConstantF(18, view_position, 1);
-    device.SetPixelShaderConstantF(18, view_position, 1);
-    device.SetPixelShaderConstantF(19, fog, 1);
+    device.SetVertexShaderConstantF(18, view_position, 1);
+    device.SetVertexShaderConstantF(19, fog, 1);
     device.SetPixelShaderConstantF(20, fog_color, 1);
 
     if (local_reflection)
@@ -635,7 +639,7 @@ void Storm3D_ShaderManager::SetShaders(
     }
 
     int lightCount[4] = { LIGHT_MAX_AMOUNT, 0, 0, 0 };
-    device.SetPixelShaderConstantI(0, lightCount, 1);
+    device.SetVertexShaderConstantI(0, lightCount, 1);
 
     static_assert(LIGHT_MAX_AMOUNT >= 2 && LIGHT_MAX_AMOUNT <= 5, "Light count should be 2-5.");
     for (int i = 0; i < LIGHT_MAX_AMOUNT; ++i)
@@ -645,310 +649,98 @@ void Storm3D_ShaderManager::SetShaders(
         lightPosInvRange.w = lightColor.w;
         lightColor.w = 1.0f;
 
-        device.SetPixelShaderConstantF(32 + i * 2, lightPosInvRange, 1);
-        device.SetPixelShaderConstantF(33 + i * 2, lightColor, 1);
+        device.SetVertexShaderConstantF(32 + i * 2, lightPosInvRange, 1);
+        device.SetVertexShaderConstantF(33 + i * 2, lightColor, 1);
     }
+}
 
-    device.SetVertexShader(meshVS[vertexShader]);
-    device.SetPixelShader(meshPS[pixelShader]);
-
-    current_shader = CUSTOM_SHADER;
+void Storm3D_ShaderManager::SetPixelShader(uint32_t pixelShader)
+{
+    currentPixelShader = pixelShader;
+    use_custom_shader = true;
 }
 
 void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *object)
 {
-	assert(device.device);
+    assert(device.device);
 
-	D3DXMATRIX object_tm;
-	object->GetMXG().GetAsD3DCompatible4x4((float *) &object_tm);
-	SetWorldTransform(device, object_tm);
+    bool noBones = object->parent_model->bones.empty()
+                    || !static_cast<Storm3D_Mesh*>(object->GetMesh())->HasWeights();
 
-	IStorm3D_Material *m = object->GetMesh()->GetMaterial();
-	float alpha = 1.f;
+    if (!use_custom_shader)
+    {
+        __asm int 3;
+    }
 
-	float force_alpha = object->force_alpha;
-	if(projected_shaders && object->force_lighting_alpha_enable)
-		force_alpha = object->force_lighting_alpha;
+    uint32_t vertexShader = 0;
+    if (projected_shaders)
+    {
+        if (noBones)
+        {
+            if (spot_type == Directional)
+            {
+                vertexShader = MESH_PROJECTED_DIRECTIONAL;
+            }
+            else if (spot_type == Point)
+            {
+                vertexShader = MESH_PROJECTED_POINT;
+            }
 
-	IStorm3D_Material::ATYPE a = m->GetAlphaType();
-	if(a == IStorm3D_Material::ATYPE_USE_TRANSPARENCY)
-		alpha = 1.f - m->GetTransparency() - force_alpha;
-	else if(a == IStorm3D_Material::ATYPE_USE_TEXTRANSPARENCY || force_alpha > 0.0001f)
-		alpha = 1.f - m->GetTransparency() - force_alpha;
-	else if(a == IStorm3D_Material::ATYPE_USE_ALPHATEST)
-		alpha = 1.f - m->GetTransparency();
-	//else if(a == IStorm3D_Material::ATYPE_MUL)
-	//	alpha = 1.f - m->GetTransparency() - force_alpha;
+            if (spot_type == Flat)
+            {
+                vertexShader = MESH_PROJECTED_FLAT;
+            }
+        }
+        else
+        {
+            if (spot_type == Directional)
+            {
+                vertexShader = MESH_BONE_PROJECTED_DIRECTIONAL;
+            }
+            else if (spot_type == Point)
+            {
+                vertexShader = MESH_BONE_PROJECTED_POINT;
+            }
 
-	if(alpha < 0)
-		alpha = 0;
+            if (spot_type == Flat)
+            {
+                vertexShader = MESH_BONE_PROJECTED_FLAT;
+            }
+        }
+    }
+    else
+    {
+        if (noBones)
+        {
+            if (reflection)
+            {
+                vertexShader = MESH_REFLECTION;
+            }
+            else if (local_reflection)
+            {
+                vertexShader = MESH_LOCAL_REFLECTION;
+            }
+            else
+            {
+                vertexShader = MESH_NOREFLECTION;
+            }
+        }
+        else
+        {
+            if (reflection)
+            {
+                vertexShader = MESH_BONE_REFLECTION;
+            }
+            else
+            {
+                vertexShader = MESH_BONE_NOREFLECTION;
+            }
+        }
 
-//if(!lighting_shaders && !projected_shaders && !ati_depth_shaders && !ati_shadow_shaders && !fake_depth_shaders && !fake_shadow_shaders)
-//	alpha = 0.8f;
+    }
 
-	if(!projected_shaders && !fake_shadow_shaders && !fake_depth_shaders)
-	{
-		D3DXMatrixTranspose(&object_tm, &object_tm);
-		device.SetVertexShaderConstantF(4, object_tm, 3);
-
-		//if(update_values == true)
-		{
-			// Constants
-			device.SetVertexShaderConstantF(7, object_ambient_color, 1);
-			device.SetVertexShaderConstantF(8, object_diffuse_color, 1);
-			update_values = false;	
-		}
-
-		// Set transparency?
-		D3DXVECTOR4 ambient = ambient_color;
-		ambient *= sun_properties.w;
-		ambient += model_ambient_color + ambient_force_color;
-		//ambient += object_ambient_color;
-
-		ambient.x = max(ambient.x, object_ambient_color.x);
-		ambient.y = max(ambient.y, object_ambient_color.y);
-		ambient.z = max(ambient.z, object_ambient_color.z);
-
-#ifdef HACKY_SG_AMBIENT_LIGHT_FIX
-		// EVIL HAX around too dark characters etc.
-		const float MIN_AMBIENT_LIGHT = 0.05f;
-		ambient.x = max(ambient.x, MIN_AMBIENT_LIGHT);
-		ambient.y = max(ambient.y, MIN_AMBIENT_LIGHT);
-		ambient.z = max(ambient.z, MIN_AMBIENT_LIGHT);
-
-		ambient.x = min(ambient.x, 1.0f);
-		ambient.y = min(ambient.y, 1.0f);
-		ambient.z = min(ambient.z, 1.0f);
-#else
-		if(ambient.x > 1.f)
-			ambient.x = 1.f;
-		if(ambient.y > 1.f)
-			ambient.y = 1.f;
-		if(ambient.z > 1.f)
-			ambient.z = 1.f;
-#endif
-
-		ambient.w = alpha; //1.f;
-
-		device.SetVertexShaderConstantF(7, ambient, 1);
-	}
-
-	if(projected_shaders)
-	{
-		D3DXVECTOR4 dif = object_diffuse_color;
-		dif.x *= spot_color.x;
-		dif.y *= spot_color.y;
-		dif.z *= spot_color.z;
-
-		dif.w = alpha * transparency_factor;
-		device.SetVertexShaderConstantF(17, dif, 1);
-	}
-
-	if(fake_depth_shaders)
-	{
-		D3DXMatrixTranspose(&object_tm, &object_tm);
-		device.SetVertexShaderConstantF(13, object_tm, 3);
-	}
-
-	// Set actual shader
-	if(object->parent_model->bones.empty() || (static_cast<Storm3D_Mesh *> (object->GetMesh())->HasWeights() == false))
-	{
-		model = NULL;
-
-		if(lighting_shaders)
-		{
-			if(current_shader != LIGHTING_SHADER || this->light_params_changed)
-			{
-				current_shader = LIGHTING_SHADER;
-
-				if(reflection)
-				{
-					if(light_count == 0)
-						lighting_shader_0light_reflection.apply();
-					else if(light_count == 1)
-						lighting_shader_1light_reflection.apply();
-					else if(light_count == 2)
-						lighting_shader_2light_reflection.apply();
-					else if(light_count == 3)
-						lighting_shader_3light_reflection.apply();
-					else if(light_count == 4)
-						lighting_shader_4light_reflection.apply();
-					else
-						lighting_shader_5light_reflection.apply();
-				}
-				else if(local_reflection)
-				{
-					if(light_count == 0)
-						lighting_shader_0light_localreflection.apply();
-					else if(light_count == 1)
-						lighting_shader_1light_localreflection.apply();
-					else if(light_count == 2)
-						lighting_shader_2light_localreflection.apply();
-					else if(light_count == 3)
-						lighting_shader_3light_localreflection.apply();
-					else if(light_count == 4)
-						lighting_shader_4light_localreflection.apply();
-					else
-						lighting_shader_5light_localreflection.apply();
-				}
-				else
-				{
-					if(light_count == 0)
-						lighting_shader_0light_noreflection.apply();
-					else if(light_count == 1)
-						lighting_shader_1light_noreflection.apply();
-					else if(light_count == 2)
-						lighting_shader_2light_noreflection.apply();
-					else if(light_count == 3)
-						lighting_shader_3light_noreflection.apply();
-					else if(light_count == 4)
-						lighting_shader_4light_noreflection.apply();
-					else
-						lighting_shader_5light_noreflection.apply();
-				}
-
-				light_params_changed = false;
-			}
-		}
-		else if(projected_shaders)
-		{
-			if(spot_type == Directional)
-			if(current_shader != DEFAULT_PROJECTED_SHADER_DIRECTIONAL)
-			{
-				default_projected_shader_directional.apply();
-				current_shader = DEFAULT_PROJECTED_SHADER_DIRECTIONAL;
-			}
-
-			if(spot_type == Point)
-			if(current_shader != DEFAULT_PROJECTED_SHADER_POINT)
-			{
-				default_projected_shader_point.apply();
-				current_shader = DEFAULT_PROJECTED_SHADER_POINT;
-			}
-
-			if(spot_type == Flat)
-			if(current_shader != DEFAULT_PROJECTED_SHADER_FLAT)
-			{
-				default_projected_shader_flat.apply();
-				current_shader = DEFAULT_PROJECTED_SHADER_FLAT;
-			}
-		}
-		else if(fake_depth_shaders)
-		{
-			if(current_shader != FAKE_DEPTH_SHADER)
-			{
-				fake_depth_shader.apply();
-				current_shader = FAKE_DEPTH_SHADER;
-			}
-		}
-		else if(fake_shadow_shaders)
-		{
-			if(current_shader != FAKE_SHADOW_SHADER)
-			{
-				fake_shadow_shader.apply();
-				current_shader = FAKE_SHADOW_SHADER;
-			}
-		}
-		else
-		{
-			if(current_shader != DEFAULT_SHADER)
-			{
-				default_shader.apply();
-				current_shader = DEFAULT_SHADER;
-			}
-		}
-	}
-	else
-	{
-		model = object->parent_model;
-
-		if(lighting_shaders)
-		{
-			if(current_shader != BONE_LIGHTING_SHADER || this->light_params_changed)
-			{
-				current_shader = BONE_LIGHTING_SHADER;
-
-				if(reflection)
-				{
-					if(light_count == 0)
-						bone_lighting_shader_0light_reflection.apply();
-					else if(light_count == 1)
-						bone_lighting_shader_1light_reflection.apply();
-					else if(light_count == 2)
-						bone_lighting_shader_2light_reflection.apply();
-					else if(light_count == 3)
-						bone_lighting_shader_3light_reflection.apply();
-					else if(light_count == 4)
-						bone_lighting_shader_4light_reflection.apply();
-					else
-						bone_lighting_shader_5light_reflection.apply();
-				}
-				else
-				{
-					if(light_count == 0)
-						bone_lighting_shader_0light_noreflection.apply();
-					else if(light_count == 1)
-						bone_lighting_shader_1light_noreflection.apply();
-					else if(light_count == 2)
-						bone_lighting_shader_2light_noreflection.apply();
-					else if(light_count == 3)
-						bone_lighting_shader_3light_noreflection.apply();
-					else if(light_count == 4)
-						bone_lighting_shader_4light_noreflection.apply();
-					else
-						bone_lighting_shader_5light_noreflection.apply();
-				}
-			}
-		}
-		else if(projected_shaders)
-		{
-			if(spot_type == Directional)
-			if(current_shader != BONE_PROJECTED_SHADER_DIRECTIONAL)
-			{
-				bone_projected_shader_directional.apply();
-				current_shader = BONE_PROJECTED_SHADER_DIRECTIONAL;
-			}
-
-			if(spot_type == Point)
-			if(current_shader != BONE_PROJECTED_SHADER_POINT)
-			{
-				bone_projected_shader_point.apply();
-				current_shader = BONE_PROJECTED_SHADER_POINT;
-			}
-
-			if(spot_type == Flat)
-			if(current_shader != BONE_PROJECTED_SHADER_FLAT)
-			{
-				bone_projected_shader_flat.apply();
-				current_shader = BONE_PROJECTED_SHADER_FLAT;
-			}
-
-		}
-		else if(fake_depth_shaders)
-		{
-			if(current_shader != FAKE_DEPTH_BONE_SHADER)
-			{
-				fake_depth_bone_shader.apply();
-				current_shader = FAKE_DEPTH_BONE_SHADER;
-			}
-		}
-		else if(fake_shadow_shaders)
-		{
-			if(current_shader != FAKE_SHADOW_BONE_SHADER)
-			{
-				fake_shadow_bone_shader.apply();
-				current_shader = FAKE_SHADOW_BONE_SHADER;
-			}
-		}
-		else
-		{
-			if(current_shader != BONE_SHADER)
-			{
-				bone_shader.apply();
-				current_shader = BONE_SHADER;
-			}
-		}
-	}
+    SetShaders(device, vertexShader, currentPixelShader, object);
+    use_custom_shader = false;
 }
 
 void Storm3D_ShaderManager::SetShader(GfxDevice &device, const std::vector<int> &bone_indices)
@@ -959,10 +751,6 @@ void Storm3D_ShaderManager::SetShader(GfxDevice &device, const std::vector<int> 
 
     float array[96 * 4];
     int bone_amount = model->bones.size();
-    int bone_index_start =
-        current_shader == CUSTOM_SHADER
-        ? 42
-        : BONE_INDEX_START;
 
     D3DXMATRIX foo;
     for (unsigned int i = 0; i < bone_indices.size(); ++i)
@@ -996,13 +784,12 @@ void Storm3D_ShaderManager::SetShader(GfxDevice &device, const std::vector<int> 
         array[arrayIndex++] = vertexTm.Get(14);
     }
 
-    device.SetVertexShaderConstantF(bone_index_start, array, 3 * bone_indices.size());
+    device.SetVertexShaderConstantF(BONE_INDEX_START, array, 3 * bone_indices.size());
 }
 
 void Storm3D_ShaderManager::ResetShader()
 {
 	light_count = 1000000000;
-	current_shader = 0;
 	model = 0;
 	update_values = true;
 	projected_shaders = false;
@@ -1018,7 +805,6 @@ void Storm3D_ShaderManager::ResetShader()
 void Storm3D_ShaderManager::ClearCache()
 {
 	transparency_factor = 1.f;
-	current_shader = 0;
 	model = 0;
 	update_values = true;
 
@@ -1033,17 +819,6 @@ void Storm3D_ShaderManager::ClearCache()
 	model_ambient_color.y = 0.f;
 	model_ambient_color.z = 0.f;
 	model_ambient_color.w = 0.f;
-}
-
-void Storm3D_ShaderManager::BackgroundShader(GfxDevice &device)
-{
-	//current_shader = 0; //DEFAULT_SHADER;
-	//update_values = false;
-
-	//SetShaderDefaultValues(device);
-	//default_shader.apply();
-	current_shader = 0;
-	skybox_shader.apply();
 }
 
 void Storm3D_ShaderManager::SetShaderDefaultValues(GfxDevice &device)
@@ -1075,11 +850,6 @@ void Storm3D_ShaderManager::SetLightmapFactor(float xf, float yf)
 	lightmap_factor.y = yf;
 	lightmap_factor.z = 0;
 	lightmap_factor.w = 0;
-}
-
-void Storm3D_ShaderManager::ApplyDeclaration(GfxDevice &device)
-{
-	default_shader.applyDeclaration();
 }
 
 void Storm3D_ShaderManager::SetWorldTransform(GfxDevice &device, const D3DXMATRIX &tm, bool forceTextureTm, bool terrain)

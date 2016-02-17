@@ -40,55 +40,9 @@ public:
 	VertexShader(GfxDevice& device);
 	~VertexShader();
 
-	void create2DShader2Tex();
-
 	void createTerrainShader();
 	void createNvTerrainShader();
 	void createNvLightingShader();
-
-	void createDefaultShader();
-	//void createLightingShader();
-	void createLightingShader_0light_noreflection();
-	void createLightingShader_0light_localreflection();
-	void createLightingShader_0light_reflection();
-	void createLightingShader_1light_noreflection();
-	void createLightingShader_1light_localreflection();
-	void createLightingShader_1light_reflection();
-	void createLightingShader_2light_noreflection();
-	void createLightingShader_2light_localreflection();
-	void createLightingShader_2light_reflection();
-	void createLightingShader_3light_noreflection();
-	void createLightingShader_3light_localreflection();
-	void createLightingShader_3light_reflection();
-	void createLightingShader_4light_noreflection();
-	void createLightingShader_4light_localreflection();
-	void createLightingShader_4light_reflection();
-	void createLightingShader_5light_noreflection();
-	void createLightingShader_5light_localreflection();
-	void createLightingShader_5light_reflection();
-
-	void createSkyboxShader();
-	void createDefaultProjectionShaderDirectional();
-	void createDefaultProjectionShaderPoint();
-	void createDefaultProjectionShaderFlat();
-	void createBoneShader();
-	//void createBoneLightingShader();
-	void createBoneLightingShader_0light_noreflection();
-	void createBoneLightingShader_0light_reflection();
-	void createBoneLightingShader_1light_noreflection();
-	void createBoneLightingShader_1light_reflection();
-	void createBoneLightingShader_2light_noreflection();
-	void createBoneLightingShader_2light_reflection();
-	void createBoneLightingShader_3light_noreflection();
-	void createBoneLightingShader_3light_reflection();
-	void createBoneLightingShader_4light_noreflection();
-	void createBoneLightingShader_4light_reflection();
-	void createBoneLightingShader_5light_noreflection();
-	void createBoneLightingShader_5light_reflection();
-
-	void createBoneProjectionShaderDirectional();
-	void createBoneProjectionShaderPoint();
-	void createBoneProjectionShaderFlat();
 
 	void createAtiDepthTerrainShader();
 	void createNvTerrainShadowShaderDirectional();
@@ -101,11 +55,6 @@ public:
 	void createDecalPointShader();
 	void createDecalDirShader();
 	void createDecalFlatShader();
-	void createFakeDepthShader();
-	void createFakeShadowShader();
-	void createFakeDepthBoneShader();
-	void createFakeShadowBoneShader();
-	void createFakePlaneShadowShader();
 	void createProceduralShader();
 
 	void applyDeclaration() const;
@@ -139,19 +88,7 @@ public:
 	void createNvConeShader_Texture();
 	void createNvConeShader_NoTexture();
 
-	void createBasePixelShader();
-	void createLightingPixelShader_Lightmap();
-	void createLightingPixelShader_Lightmap_Reflection();
-	void createLightingPixelShader_Lightmap_LocalReflection();
-	void createLightingPixelShader_LightmapNoTexture();
-	void createLightingPixelShader_NoLightmap();
-	void createLightingPixelShader_NoLightmap_Reflection();
-	void createLightingPixelShader_NoLightmap_LocalReflection();
-	void createLightingPixelShader_NoLightmapNoTexture();
-	void createDepthShader();
 	void createShadowPixelShader();
-	void createFakeDepthPixelShader();
-	void createFakeShadowPixelShader();
 	void createDecalPixelShader();
 	void createColorEffectPixelShader();
 	void createColorEffectOffsetPixelShader();

@@ -318,11 +318,14 @@
 
 struct Storm3D_FakeSpotlight::Data
 {
+    //TODO: change to manager pattern, share this higher
 	Storm3D &storm; 
 	GfxDevice &device;
 
+    //TODO: create proper rt sharing solution at higher level
 	boost::shared_ptr<RenderTarget> renderTarget;
 	Storm3D_SpotlightShared properties;
+
 	Storm3D_Camera camera;
 	ProjectionPlane plane;
 
@@ -334,9 +337,7 @@ struct Storm3D_FakeSpotlight::Data
 
 	COL renderedColor;
 
-	static frozenbyte::storm::VertexShader *shadowVertexShader;
-	static frozenbyte::storm::PixelShader *depthPixelShader;
-	static frozenbyte::storm::PixelShader *shadowPixelShader;
+    //TODO: replace with dynamic and static solution
 	static frozenbyte::storm::IndexBuffer *indexBuffer;
 	frozenbyte::storm::VertexBuffer vertexBuffer;
 
@@ -383,10 +384,8 @@ struct Storm3D_FakeSpotlight::Data
 	}
 };
 
+//TODO: make shared
 frozenbyte::storm::IndexBuffer *Storm3D_FakeSpotlight::Data::indexBuffer = 0;
-frozenbyte::storm::VertexShader *Storm3D_FakeSpotlight::Data::shadowVertexShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_FakeSpotlight::Data::depthPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_FakeSpotlight::Data::shadowPixelShader = 0;
 
 Storm3D_FakeSpotlight::Storm3D_FakeSpotlight(Storm3D &storm, GfxDevice &device)
 {
@@ -542,12 +541,11 @@ bool Storm3D_FakeSpotlight::setAsRenderTarget(const D3DXMATRIX &cameraView)
 	*/
 
 	float colorData[4] = { c.r, c.g, c.b, 0 };
-	data->device.SetVertexShaderConstantF(10, colorData, 1);
 	data->renderedColor = c;
 
-	Storm3D_ShaderManager::GetSingleton()->setFakeProperties(data->properties.position.y - data->plane.height, .1f, .3137f);
+    Storm3D_ShaderManager::GetSingleton()->SetShaderDiffuse(data->device, c);
+	//Storm3D_ShaderManager::GetSingleton()->setFakeProperties(data->properties.position.y - data->plane.height, .1f, .3137f);
 
-	data->depthPixelShader->apply();
 	return true;
 }
 
@@ -575,8 +573,6 @@ void Storm3D_FakeSpotlight::applyTextures(const D3DXMATRIX &cameraView)
 	float colorData[4] = { c.r, c.g, c.b, 0 };
 	data->device.SetPixelShaderConstantF(2, colorData, 1);
 	*/
-
-	data->shadowPixelShader->apply();
 }
 
 void Storm3D_FakeSpotlight::renderProjection()
@@ -688,7 +684,6 @@ void Storm3D_FakeSpotlight::renderProjection()
 		data->device.SetVertexShaderConstantF(8, deltas4, 1);
 	}
 
-	data->shadowVertexShader->apply();
 	data->indexBuffer->render(data->device, 4, 5);
 }
 
@@ -838,14 +833,6 @@ void Storm3D_FakeSpotlight::createBuffers(Storm3D &storm, GfxDevice &device, int
 
 		Storm3D_FakeSpotlight::Data::indexBuffer->unlock();
 	}
-
-	Storm3D_FakeSpotlight::Data::shadowVertexShader = new frozenbyte::storm::VertexShader(device);
-	Storm3D_FakeSpotlight::Data::shadowVertexShader->createFakePlaneShadowShader();
-
-	Storm3D_FakeSpotlight::Data::depthPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_FakeSpotlight::Data::depthPixelShader->createFakeDepthPixelShader();
-	Storm3D_FakeSpotlight::Data::shadowPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_FakeSpotlight::Data::shadowPixelShader->createFakeShadowPixelShader();
 }
 
 void Storm3D_FakeSpotlight::freeBuffers()
@@ -854,9 +841,6 @@ void Storm3D_FakeSpotlight::freeBuffers()
 		return;
 
 	delete Storm3D_FakeSpotlight::Data::indexBuffer; Storm3D_FakeSpotlight::Data::indexBuffer = 0;
-	delete Storm3D_FakeSpotlight::Data::shadowVertexShader; Storm3D_FakeSpotlight::Data::shadowVertexShader = 0;
-	delete Storm3D_FakeSpotlight::Data::depthPixelShader; Storm3D_FakeSpotlight::Data::depthPixelShader = 0;
-	delete Storm3D_FakeSpotlight::Data::shadowPixelShader; Storm3D_FakeSpotlight::Data::shadowPixelShader = 0;
 
 	renderTargets.freeAll();
 }

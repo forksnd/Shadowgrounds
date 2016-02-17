@@ -743,8 +743,6 @@ t->Apply(4);
 			{
                 GFX_TRACE_SCOPE("Render models");
 				device.SetVertexShaderConstantF(14, fakeTextureProjection, 4);
-				device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
-				//device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 				device.SetTexture(2, fakeTexture);
 				device.SetSamplerState(2, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 				device.SetSamplerState(2, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
@@ -760,8 +758,6 @@ t->Apply(4);
 				models.renderLighting(Storm3D_TerrainModels::SolidOnly, scene);
 				frozenbyte::storm::enableMipFiltering(device, 2, 2, true);
 
-				device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
-				device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 				device.SetSamplerState(2, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
 				device.SetSamplerState(2, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 			}
@@ -810,8 +806,6 @@ t->Apply(4);
 				device.SetPixelShaderConstantF(0, mult, 1);
 
 				device.SetVertexShaderConstantF(14, fakeTextureProjection, 4);
-				device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
-				//device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
 				device.SetSamplerState(2, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 				device.SetSamplerState(2, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 
@@ -822,8 +816,6 @@ t->Apply(4);
 
 				device.SetSamplerState(2, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
 				device.SetSamplerState(2, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-				device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
-				device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 			}
 		}
 	}
@@ -1557,13 +1549,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 					data->skyBox->SetRotation(QUAT(0,0,0));
 				}
 				data->skyBox->SetScale(VC3(20.f, 20.f, 20.f));
-
-				device.SetPixelShader(0);
-				device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-				device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-				device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-				device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-				device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 
 				device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 				data->models.renderBackground(data->skyBox);
@@ -2598,16 +2583,6 @@ void Storm3D_TerrainRenderer::render(IStorm3D_TerrainRendererBase::RenderMode mo
 
 		if(!needRender)
 			fakeSpot->disableVisibility();
-	}
-	else if(mode == FakeSpotProjection && fakeSpot)
-	{
-		//device.SetTexture(1, data->fakeFadeTexture);
-		//fakeSpot->setScissorRect(camera, data->renderSize);
-
-		//if(data->renderModels)
-		//	data->models.renderProjection(scene, *fakeSpot);
-
-		fakeSpot->renderProjection();
 	}
 }
 

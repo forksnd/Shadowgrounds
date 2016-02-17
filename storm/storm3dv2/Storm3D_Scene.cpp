@@ -582,7 +582,6 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
         Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
         Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 
-        //Storm3D_ShaderManager::GetSingleton()->SetForceAmbient(COL());
         this->camera.Apply();
 
         // Render objects in list (to screen)
@@ -594,7 +593,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
             Storm3D_Material *m = static_cast<Storm3D_Material *> (renderlist_obj[i]->mesh->GetMaterial());
             Storm3D_Model *mod = renderlist_obj[i]->parent_model;
 
-            uint32_t pixelShader = 0;
+            uint32_t pixelShader = Storm3D_ShaderManager::LIGHTING_SIMPLE_NOTEXTURE;
 
             if (m)
             {
@@ -605,7 +604,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
                 if (t)
                 {
                     t->Apply(0);
-                    pixelShader |= Storm3D_ShaderManager::SSF_TEXTURE;
+                    pixelShader = Storm3D_ShaderManager::LIGHTING_SIMPLE_TEXTURE;
                 }
 
                 GfxDevice& device = Storm3D2->device;
@@ -658,9 +657,9 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
                 Storm3D_ShaderManager::GetSingleton()->setLightingParameters(false, false, 1);
 
                 if (mod->type_flag == 0)
-                    Storm3D_ShaderManager::GetSingleton()->SetLight(0, VC3(-2.5f, 5.f, -10.f), COL(0.3f, 0.3f, 0.3f), 20.f);
+                    Storm3D_ShaderManager::GetSingleton()->SetLight(0, VC3(-2.5f, 5.f, -10.f), COL(0.03f, 0.03f, 0.03f), 20.f);
                 else
-                    Storm3D_ShaderManager::GetSingleton()->SetLight(0, VC3(2.5f, 5.f, -10.f), COL(0.3f, 0.3f, 0.3f), 20.f);
+                    Storm3D_ShaderManager::GetSingleton()->SetLight(0, VC3(2.5f, 5.f, -10.f), COL(0.03f, 0.03f, 0.03f), 20.f);
 
                 for (int i = 1; i < LIGHT_MAX_AMOUNT; ++i)
                     Storm3D_ShaderManager::GetSingleton()->SetLight(i, VC3(), COL(), 1.f);
@@ -671,7 +670,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
             // Set correct shader
             Storm3D_ShaderManager::GetSingleton()->SetShaders(
                 Storm3D2->device,
-                Storm3D_ShaderManager::MESH_ENABLE_SKELETAL_ANIMATION,
+                Storm3D_ShaderManager::MESH_BONE_SIMPLE,
                 pixelShader,
                 renderlist_obj[i]
             );
