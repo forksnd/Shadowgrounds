@@ -4,7 +4,6 @@
 #define INCLUDED_STORM3D_TERRAIN_RENDERER_H
 
 #include <istorm3D_terrain_renderer.h>
-#include "istorm3d_terrain_rendererbase.h"
 #include <boost/shared_ptr.hpp>
 #include <DatatypeDef.h>
 
@@ -23,9 +22,7 @@ class Storm3D_ParticleSystem;
 
 struct Storm3D_TerrainRendererData;
 
-class Storm3D_TerrainRenderer: 
-	public IStorm3D_TerrainRenderer,
-	public IStorm3D_TerrainRendererBase
+class Storm3D_TerrainRenderer: public IStorm3D_TerrainRenderer
 {
 	Storm3D_TerrainRendererData* data;
 
@@ -61,9 +58,6 @@ public:
 	void updateVisibility(Storm3D_Scene &scene, int timeDelta);
 	void renderTargets(Storm3D_Scene &scene);
 	void renderBase(Storm3D_Scene &scene);
-
-    //TODO: Remove this!!!!
-	void render(IStorm3D_TerrainRendererBase::RenderMode mode, Storm3D_Scene &scene, Storm3D_Spotlight *spot, Storm3D_FakeSpotlight *fakeSpot);
 
 	void releaseDynamicResources();
 	void recreateDynamicResources();

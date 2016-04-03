@@ -165,9 +165,6 @@
     <ClCompile Include="storm3d_terrain_heightmap.cpp">
       <Filter>Source Files\terrain sources</Filter>
     </ClCompile>
-    <ClCompile Include="storm3d_terrain_lightmanager.cpp">
-      <Filter>Source Files\terrain sources</Filter>
-    </ClCompile>
     <ClCompile Include="storm3d_terrain_lod.cpp">
       <Filter>Source Files\terrain sources</Filter>
     </ClCompile>
@@ -383,9 +380,6 @@
     <ClInclude Include="..\include\istorm3D_terrain_renderer.h">
       <Filter>Header Files\terrain headers</Filter>
     </ClInclude>
-    <ClInclude Include="istorm3d_terrain_rendererbase.h">
-      <Filter>Header Files\terrain headers</Filter>
-    </ClInclude>
     <ClInclude Include="storm3d_terrain.h">
       <Filter>Header Files\terrain headers</Filter>
     </ClInclude>
@@ -396,9 +390,6 @@
       <Filter>Header Files\terrain headers</Filter>
     </ClInclude>
     <ClInclude Include="storm3d_terrain_heightmap.h">
-      <Filter>Header Files\terrain headers</Filter>
-    </ClInclude>
-    <ClInclude Include="storm3d_terrain_lightmanager.h">
       <Filter>Header Files\terrain headers</Filter>
     </ClInclude>
     <ClInclude Include="storm3d_terrain_lod.h">
