@@ -77,10 +77,7 @@ public:
 
 	void createTerrainShader();
 	void createTerrainLightShader();
-	void createGlowShader();
 	void createGlowTex8Shader();
-	void createGlowPs14Shader();
-	void createGlowFinalShader();
 	void createLightShader();
 	void createNvShadowShader();
 	void createNvSmoothShadowShader();

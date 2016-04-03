@@ -50,7 +50,6 @@ public:
 	void releaseDynamicResources();
 	void recreateDynamicResources();
 
-	static void filterBuffers(Storm3D &storm, GfxDevice &device);
 	static void querySizes(Storm3D &storm, int shadowQuality);
 	static void createBuffers(Storm3D &storm, GfxDevice &device, int shadowQuality);
 	static void freeBuffers();

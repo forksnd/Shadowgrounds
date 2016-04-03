@@ -127,10 +127,7 @@ struct Storm3D_TerrainRendererData
 	CComPtr<IDirect3DTexture9> coneFadeTexture;
 	CComPtr<IDirect3DTexture9> noFadeTexture;
 
-	frozenbyte::storm::PixelShader glowShader;
 	frozenbyte::storm::PixelShader glowPs2Shader;
-	frozenbyte::storm::PixelShader glowPs14Shader;
-	frozenbyte::storm::PixelShader glowFinalShader;
 	frozenbyte::storm::PixelShader lightShader;
 	frozenbyte::storm::PixelShader colorEffectShader;
 	frozenbyte::storm::PixelShader colorEffectOffsetShader;
@@ -222,10 +219,7 @@ struct Storm3D_TerrainRendererData
 		lightmapMultiplier(1.f, 1.f, 1.f),
 		outdoorLightmapMultiplier(1.f, 1.f, 1.f),
 		skyBox(0),
-		glowShader(storm.GetD3DDevice()),
 		glowPs2Shader(storm.GetD3DDevice()),
-		glowPs14Shader(storm.GetD3DDevice()),
-		glowFinalShader(storm.GetD3DDevice()),
 		lightShader(storm.GetD3DDevice()),
 		colorEffectShader(storm.GetD3DDevice()),
 		colorEffectOffsetShader(storm.GetD3DDevice()),
@@ -289,12 +283,10 @@ struct Storm3D_TerrainRendererData
 		forcedDirectionalLightEnabled(false)
 	{
 		GfxDevice &device = storm.GetD3DDevice();
-		glowShader.createGlowShader();
 		lightShader.createLightShader();
 		colorEffectShader.createColorEffectPixelShader();
 		blackWhiteShader.createBlackWhiteShader();
 
-		glowPs14Shader.createGlowPs14Shader();
 		colorEffectOffsetShader.createColorEffectOffsetPixelShader();
 		colorEffectOffsetShader_NoGamma.createColorEffectOffsetPixelShader_NoGamma();
 		glowPs2Shader.createGlowTex8Shader();
@@ -1614,445 +1606,264 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 			device.StretchRect(originalFrameBuffer, &frameRect, renderSurface, &frameRect, D3DTEXF_NONE);
 		}
 
-		if(data->renderGlows)
-		{
+        if (data->renderGlows)
+        {
             GFX_TRACE_SCOPE("Render Glows");
-			Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
+            Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
 
-			CComPtr<IDirect3DSurface9> glowSurface1;
-			data->glowTexture1->GetSurfaceLevel(0, &glowSurface1);
-			D3DSURFACE_DESC sourceDesc1;
-			glowSurface1->GetDesc(&sourceDesc1);
-			CComPtr<IDirect3DSurface9> glowSurface2;
-			data->glowTexture2->GetSurfaceLevel(0, &glowSurface2);
-			D3DSURFACE_DESC sourceDesc2;
-			glowSurface2->GetDesc(&sourceDesc2);
+            CComPtr<IDirect3DSurface9> glowSurface1;
+            data->glowTexture1->GetSurfaceLevel(0, &glowSurface1);
+            D3DSURFACE_DESC sourceDesc1;
+            glowSurface1->GetDesc(&sourceDesc1);
+            CComPtr<IDirect3DSurface9> glowSurface2;
+            data->glowTexture2->GetSurfaceLevel(0, &glowSurface2);
+            D3DSURFACE_DESC sourceDesc2;
+            glowSurface2->GetDesc(&sourceDesc2);
 
-			int glowWidth1 = sourceDesc1.Width;
-			int glowHeight1 = sourceDesc1.Height;
-			int glowWidth2 = sourceDesc2.Width;
-			int glowHeight2 = sourceDesc2.Height;
+            int glowWidth1 = sourceDesc1.Width;
+            int glowHeight1 = sourceDesc1.Height;
+            int glowWidth2 = sourceDesc2.Width;
+            int glowHeight2 = sourceDesc2.Height;
 
-			// Material self illuminations to glow texture
-			{
-				{
-					device.SetRenderTarget(0, glowSurface2);
-					device.SetDepthStencilSurface(tempDepthSurface);
+            // Material self illuminations to glow texture
+            {
+                {
+                    device.SetRenderTarget(0, glowSurface2);
+                    device.SetDepthStencilSurface(tempDepthSurface);
 
-					int xs = int(15.f * data->renderSize.x / 1024.f + 0.5f);
-					int ys = int(15.f * data->renderSize.y / 800.f + 0.5f);
+                    int xs = int(15.f * data->renderSize.x / 1024.f + 0.5f);
+                    int ys = int(15.f * data->renderSize.y / 800.f + 0.5f);
 
-					D3DRECT rc[2] = { { 0 } };
-					rc[0].x1 = data->glowSize.x - xs;
-					rc[0].y1 = 0;
-					rc[0].x2 = data->glowSize.x + xs;
-					rc[0].y2 = data->glowSize.y + ys;
+                    D3DRECT rc[2] = { { 0 } };
+                    rc[0].x1 = data->glowSize.x - xs;
+                    rc[0].y1 = 0;
+                    rc[0].x2 = data->glowSize.x + xs;
+                    rc[0].y2 = data->glowSize.y + ys;
 
-					rc[1].x1 = 0;
-					rc[1].y1 = data->glowSize.y - ys;
-					rc[1].x2 = data->glowSize.x + xs;
-					rc[1].y2 = data->glowSize.y + ys;
-					device.Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 1.f, 0);
+                    rc[1].x1 = 0;
+                    rc[1].y1 = data->glowSize.y - ys;
+                    rc[1].x2 = data->glowSize.x + xs;
+                    rc[1].y2 = data->glowSize.y + ys;
+                    device.Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 1.f, 0);
 
-					device.SetRenderTarget(0, glowSurface1);
-					device.Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 1.f, 0);
-				}
+                    device.SetRenderTarget(0, glowSurface1);
+                    device.Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 1.f, 0);
+                }
 
-				device.SetRenderTarget(0, originalFrameBuffer);
-				device.SetDepthStencilSurface(originalDepthBuffer);
-				device.SetScissorRect(&data->scissorRect);
-				device.SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
-				device.SetViewport(&data->viewport);
+                device.SetRenderTarget(0, originalFrameBuffer);
+                device.SetDepthStencilSurface(originalDepthBuffer);
+                device.SetScissorRect(&data->scissorRect);
+                device.SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
+                device.SetViewport(&data->viewport);
 
-				if(data->glowFactor > 0.001f)
-				{
-					device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
-					device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-					device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-					device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-					device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+                if (data->glowFactor > 0.001f)
+                {
+                    device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+                    device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+                    device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+                    device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+                    device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 
-					device.SetFVF(FVF_P4DUV);
-					int c = (unsigned char) (data->glowFactor * 255.f);
-					if(c > 255)
-						c = 255;
-					else if(c < 1)
-						c = 1;
+                    device.SetFVF(FVF_P4DUV);
+                    int c = (unsigned char)(data->glowFactor * 255.f);
+                    if (c > 255)
+                        c = 255;
+                    else if (c < 1)
+                        c = 1;
 
-					DWORD color = c << 24 | c << 16 | c << 8 | c;
-					Vertex_P4DUV buffer[4];
-					float x2 = float(data->renderSize.x);
-					float y2 = float(data->renderSize.y);
-					buffer[0] = {VC4( 0, y2, 1.f, 1.f), color, VC2(0.f, 1.f)};
-					buffer[1] = {VC4( 0,  0, 1.f, 1.f), color, VC2(0.f, 0.f)};
-					buffer[2] = {VC4(x2, y2, 1.f, 1.f), color, VC2(1.f, 1.f)};
-					buffer[3] = {VC4(x2,  0, 1.f, 1.f), color, VC2(1.f, 0.f)};
+                    DWORD color = c << 24 | c << 16 | c << 8 | c;
+                    Vertex_P4DUV buffer[4];
+                    float x2 = float(data->renderSize.x);
+                    float y2 = float(data->renderSize.y);
+                    buffer[0] = { VC4(0, y2, 1.f, 1.f), color, VC2(0.f, 1.f) };
+                    buffer[1] = { VC4(0, 0, 1.f, 1.f), color, VC2(0.f, 0.f) };
+                    buffer[2] = { VC4(x2, y2, 1.f, 1.f), color, VC2(1.f, 1.f) };
+                    buffer[3] = { VC4(x2, 0, 1.f, 1.f), color, VC2(1.f, 0.f) };
 
-					device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-					device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
-					device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+                    device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+                    device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
+                    device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 
-					device.SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
-					device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-					device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
-					device.SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-				}
-				else
-					device.Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 1.f, 0);
+                    device.SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+                    device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+                    device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
+                    device.SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+                }
+                else
+                    device.Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 1.f, 0);
 
-				if(data->renderModels)
-				{
-					device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-					device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-					device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-					device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+                if (data->renderModels)
+                {
+                    device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+                    device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+                    device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+                    device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
-					data->models.renderGlows(scene);
+                    data->models.renderGlows(scene);
 
-					if(data->renderCones)
-						data->renderConeLights(scene, data->renderGlows);
-				}
+                    if (data->renderCones)
+                        data->renderConeLights(scene, data->renderGlows);
+                }
 
-				device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-				device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+                device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+                device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 
-				RECT dst = { 0 };
-				dst.right = data->glowSize.x;
-				dst.bottom = data->glowSize.y;
+                RECT dst = { 0 };
+                dst.right = data->glowSize.x;
+                dst.bottom = data->glowSize.y;
 
-				if(data->hasStretchFiltering)
-					device.StretchRect(originalFrameBuffer, &frameRect, glowSurface2, &dst, D3DTEXF_LINEAR);
-				else
-					device.StretchRect(originalFrameBuffer, &frameRect, glowSurface2, &dst, D3DTEXF_NONE);
-			}
+                if (data->hasStretchFiltering)
+                    device.StretchRect(originalFrameBuffer, &frameRect, glowSurface2, &dst, D3DTEXF_LINEAR);
+                else
+                    device.StretchRect(originalFrameBuffer, &frameRect, glowSurface2, &dst, D3DTEXF_NONE);
+            }
 
-			device.SetDepthStencilSurface(tempDepthSurface);
+            device.SetDepthStencilSurface(tempDepthSurface);
 
-			frozenbyte::storm::setCulling(device, D3DCULL_NONE);
-			int glowPasses = (data->multipassGlow) ? 2 : 1;
-			for(int i = 0; i < glowPasses; ++i)
-			{
+            frozenbyte::storm::setCulling(device, D3DCULL_NONE);
+            {
                 GFX_TRACE_SCOPE("Glow pass");
-				// Filter glow texture
-				{
-					device.SetVertexShader(0);
+                // Filter glow texture
+                {
+                    device.SetVertexShader(0);
 
-					bool singlePass = false; //(data->ps20);
-					bool betterGlow = data->betterGlowSampling;
-					int stages = (singlePass) ? 8 : ((betterGlow) ? 6 : 4);
+                    int stages = 8;
 
-					if(betterGlow)
-					{
-						float af = .60f;
-						float bf = .30f;
-						float cf = .15f;
-						float df = .075f;
-						float ef = .05f;
-						float ff = .025f;
-						float gf = 0.8f;
+                    float af = .6f;
+                    float bf = .3f;
+                    float cf = .15f;
+                    float df = .075f;
+                    float ef = 0.8f;
 
-						if(data->multipassGlow)
-							gf = 0.7f;
+                    //4,3,2,1
 
-						float a[] = { af, bf, cf, df };
-						float b[] = { ef, ff,  0, 0  };
-						float c[] = { gf, gf, gf, gf };
-						device.SetPixelShaderConstantF(0, a, 1);
-						device.SetPixelShaderConstantF(1, b, 1);
-						device.SetPixelShaderConstantF(2, c, 1);
-					}
-					else
-					{
-						float af = .6f;
-						float bf = .3f;
-						float cf = .15f;
-						float df = .075f;
-						float ef = 0.8f;
+                    float a[] = { af, af, af, af };
+                    float b[] = { bf, bf, bf, bf };
+                    float c[] = { cf, cf, cf, cf };
+                    float d[] = { df, df, df, df };
+                    float e[] = { ef, ef, ef, ef };
 
-						if(data->multipassGlow)
-							ef = 0.65f;
+                    device.SetPixelShaderConstantF(0, a, 1);
+                    device.SetPixelShaderConstantF(1, b, 1);
+                    device.SetPixelShaderConstantF(2, c, 1);
+                    device.SetPixelShaderConstantF(3, d, 1);
+                    device.SetPixelShaderConstantF(4, e, 1);
 
-						//4,3,2,1
-
-						float a[] = { af, af, af, af };
-						float b[] = { bf, bf, bf, bf };
-						float c[] = { cf, cf, cf, cf };
-						float d[] = { df, df, df, df };
-						float e[] = { ef, ef, ef, ef };
-
-						device.SetPixelShaderConstantF(0, a, 1);
-						device.SetPixelShaderConstantF(1, b, 1);
-						device.SetPixelShaderConstantF(2, c, 1);
-						device.SetPixelShaderConstantF(3, d, 1);
-						device.SetPixelShaderConstantF(4, e, 1);
-					}
-
-					for(int i = 0; i < stages; ++i)
-					{
-						device.SetSamplerState(i, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-						device.SetSamplerState(i, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-					}
-
-                    if (singlePass)
+                    for (int i = 0; i < stages; ++i)
                     {
-                        data->glowPs2Shader.apply();
-                        device.SetVertexDeclaration(data->VtxFmt_P3UV8);
-                    }
-                    else
-                    {
-                        if (betterGlow)
-                        {
-                            data->glowPs14Shader.apply();
-                            device.SetVertexDeclaration(data->VtxFmt_P3UV6);
-                        }
-                        else
-                        {
-                            data->glowShader.apply();
-                            device.SetVertexDeclaration(data->VtxFmt_P3UV4);
-                        }
+                        device.SetSamplerState(i, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+                        device.SetSamplerState(i, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
                     }
 
-					frozenbyte::storm::enableMipFiltering(device, 0, stages, false);
-					frozenbyte::storm::enableMinMagFiltering(device, 0, stages, true);
+                    data->glowPs2Shader.apply();
+                    device.SetVertexDeclaration(data->VtxFmt_P3UV8);
 
-					{
-						device.SetRenderTarget(0, glowSurface1);
-						device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-						device.SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+                    frozenbyte::storm::enableMipFiltering(device, 0, stages, false);
+                    frozenbyte::storm::enableMinMagFiltering(device, 0, stages, true);
 
-						D3DRECT rcs[2] = { { 0 }, { 0 } };
-						rcs[0].x1 = data->glowSize.x - 1;
-						rcs[0].y1 = 0;
-						rcs[0].x2 = data->glowSize.x + 11;
-						rcs[0].y2 = data->glowSize.y;
-						rcs[1].x1 = 0;
-						rcs[1].y1 = data->glowSize.y - 1;
-						rcs[1].x2 = data->glowSize.x;
-						rcs[1].y2 = data->glowSize.y + 11;
-						device.Clear(2, rcs, D3DCLEAR_TARGET, 0x00000000, 1.f, 0);
+                    {
+                        device.SetRenderTarget(0, glowSurface1);
+                        device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+                        device.SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 
-						float xs = float(data->glowSize.x) / (glowWidth2);
-						float ys = float(data->glowSize.y) / (glowHeight2);
+                        D3DRECT rcs[2] = { { 0 }, { 0 } };
+                        rcs[0].x1 = data->glowSize.x - 1;
+                        rcs[0].y1 = 0;
+                        rcs[0].x2 = data->glowSize.x + 11;
+                        rcs[0].y2 = data->glowSize.y;
+                        rcs[1].x1 = 0;
+                        rcs[1].y1 = data->glowSize.y - 1;
+                        rcs[1].x2 = data->glowSize.x;
+                        rcs[1].y2 = data->glowSize.y + 11;
+                        device.Clear(2, rcs, D3DCLEAR_TARGET, 0x00000000, 1.f, 0);
 
-						float xdp = (1.f / glowWidth2);
-						//xdp *= data->renderSize.x / 1024.f;
+                        float xs = float(data->glowSize.x) / (glowWidth2);
+                        float ys = float(data->glowSize.y) / (glowHeight2);
 
-						float xd1 = 0.5f * xdp;
-						float xd2 = 2.5f * xdp;
-						float xd3 = 4.5f * xdp;
-						float xd4 = 6.5f * xdp;
-						float xd5 = 8.5f * xdp;
-						float xd6 = 10.5f * xdp;
+                        float xdp = (1.f / glowWidth2);
+                        //xdp *= data->renderSize.x / 1024.f;
 
-						if(betterGlow)
-						{
-							xd1 = 0.5f * xdp;
-							xd2 = 2.0f * xdp;
-							xd3 = 3.7f * xdp;
-							xd4 = 5.2f * xdp;
-							xd5 = 7.1f * xdp;
-							xd6 = 8.5f * xdp;
-						}
+                        float xd1 = 0.5f * xdp;
+                        float xd2 = 2.5f * xdp;
+                        float xd3 = 4.5f * xdp;
+                        float xd4 = 6.5f * xdp;
+                        float xd5 = 8.5f * xdp;
+                        float xd6 = 10.5f * xdp;
 
-						float width = float(data->glowSize.x) - .5f;
-						float height = float(data->glowSize.y) - .5f;
+                        float width = float(data->glowSize.x) - .5f;
+                        float height = float(data->glowSize.y) - .5f;
 
-						float buffer1[] = 
-						{
-							// Position, w,             uv1,              uv2,              uv3,        uv4
-							-.5f, height,  1.f, 1.f,    0.f-xd1, ys,    0.f-xd2, ys,    0.f-xd3, ys,    0.f-xd4, ys,
-							-.5f, -.5f,    1.f, 1.f,    0.f-xd1, 0.f,   0.f-xd2, 0.f,   0.f-xd3, 0.f,   0.f-xd4, 0.f,
-							width, height, 1.f, 1.f,    xs-xd1,  ys,    xs-xd2,  ys,    xs-xd3,  ys,    xs-xd4,  ys,
-							width, -.5f,   1.f, 1.f,    xs-xd1,  0.f,   xs-xd2,  0.f,   xs-xd3,  0.f,   xs-xd4,  0.f
-						};
-						float buffer2[] = 
-						{
-							// Position, w,             uv1,              uv2,              uv3,        uv4
-							-.5f, height,  1.f, 1.f,    0.f+xd1, ys,    0.f+xd2, ys,    0.f+xd3, ys,    0.f+xd4, ys,
-							-.5f, -.5f,    1.f, 1.f,    0.f+xd1, 0.f,   0.f+xd2, 0.f,   0.f+xd3, 0.f,   0.f+xd4, 0.f,
-							width, height, 1.f, 1.f,    xs+xd1,  ys,    xs+xd2, ys,     xs+xd3,  ys,    xs+xd4,  ys,
-							width, -.5f,   1.f, 1.f,    xs+xd1,  0.f,   xs+xd2, 0.f,    xs+xd3,  0.f,   xs+xd4,  0.f
-						};
+                        float buffer3[] =
+                        {
+                            // Position, w,             uv1,              uv2,              uv3,        uv4
+                            -.5f, height, 1.f, 1.f, 0.f - xd1, ys, 0.f - xd2, ys, 0.f - xd3, ys, 0.f - xd4, ys, 0.f + xd1, ys, 0.f + xd2, ys, 0.f + xd3, ys, 0.f + xd4, ys,
+                            -.5f, -.5f, 1.f, 1.f, 0.f - xd1, 0.f, 0.f - xd2, 0.f, 0.f - xd3, 0.f, 0.f - xd4, 0.f, 0.f + xd1, 0.f, 0.f + xd2, 0.f, 0.f + xd3, 0.f, 0.f + xd4, 0.f,
+                            width, height, 1.f, 1.f, xs - xd1, ys, xs - xd2, ys, xs - xd3, ys, xs - xd4, ys, xs + xd1, ys, xs + xd2, ys, xs + xd3, ys, xs + xd4, ys,
+                            width, -.5f, 1.f, 1.f, xs - xd1, 0.f, xs - xd2, 0.f, xs - xd3, 0.f, xs - xd4, 0.f, xs + xd1, 0.f, xs + xd2, 0.f, xs + xd3, 0.f, xs + xd4, 0.f
+                        };
 
-						float buffer1_6[] = 
-						{
-							// Position, w,             uv1,              uv2,              uv3,        uv4            uv5            uv6
-							-.5f, height,  1.f, 1.f,    0.f-xd1, ys,    0.f-xd2, ys,    0.f-xd3, ys,    0.f-xd4, ys,   0.f-xd5, ys,   0.f-xd6, ys,
-							-.5f, -.5f,    1.f, 1.f,    0.f-xd1, 0.f,   0.f-xd2, 0.f,   0.f-xd3, 0.f,   0.f-xd4, 0.f,  0.f-xd5, 0.f,  0.f-xd6, 0.f,
-							width, height, 1.f, 1.f,    xs-xd1,  ys,    xs-xd2,  ys,    xs-xd3,  ys,    xs-xd4,  ys,   xs-xd5,  ys,   xs-xd6,  ys,
-							width, -.5f,   1.f, 1.f,    xs-xd1,  0.f,   xs-xd2,  0.f,   xs-xd3,  0.f,   xs-xd4,  0.f,  xs-xd5,  0.f,  xs-xd6,  0.f
-						};
-						float buffer2_6[] = 
-						{
-							// Position, w,             uv1,              uv2,              uv3,        uv4
-							-.5f, height,  1.f, 1.f,    0.f+xd1, ys,    0.f+xd2, ys,    0.f+xd3, ys,    0.f+xd4, ys,   0.f+xd5, ys,    0.f+xd6, ys,
-							-.5f, -.5f,    1.f, 1.f,    0.f+xd1, 0.f,   0.f+xd2, 0.f,   0.f+xd3, 0.f,   0.f+xd4, 0.f,  0.f+xd5, 0.f,   0.f+xd6, 0.f,
-							width, height, 1.f, 1.f,    xs+xd1,  ys,    xs+xd2, ys,     xs+xd3,  ys,    xs+xd4,  ys,   xs+xd5,  ys,    xs+xd6,  ys,
-							width, -.5f,   1.f, 1.f,    xs+xd1,  0.f,   xs+xd2, 0.f,    xs+xd3,  0.f,   xs+xd4,  0.f,  xs+xd5,  0.f,   xs+xd6,  0.f
-						};
 
-						float buffer3[] = 
-						{
-							// Position, w,             uv1,              uv2,              uv3,        uv4
-							-.5f, height,  1.f, 1.f,    0.f-xd1, ys,    0.f-xd2, ys,    0.f-xd3, ys,    0.f-xd4, ys,  0.f+xd1, ys,    0.f+xd2, ys,    0.f+xd3, ys,    0.f+xd4, ys,
-							-.5f, -.5f,    1.f, 1.f,    0.f-xd1, 0.f,   0.f-xd2, 0.f,   0.f-xd3, 0.f,   0.f-xd4, 0.f, 0.f+xd1, 0.f,   0.f+xd2, 0.f,   0.f+xd3, 0.f,   0.f+xd4, 0.f,
-							width, height, 1.f, 1.f,    xs-xd1,  ys,    xs-xd2,  ys,    xs-xd3,  ys,    xs-xd4,  ys,  xs+xd1,  ys,    xs+xd2, ys,     xs+xd3,  ys,    xs+xd4,  ys,
-							width, -.5f,   1.f, 1.f,    xs-xd1,  0.f,   xs-xd2,  0.f,   xs-xd3,  0.f,   xs-xd4,  0.f, xs+xd1,  0.f,   xs+xd2, 0.f,    xs+xd3,  0.f,   xs+xd4,  0.f
-						};
+                        device.SetTexture(0, data->glowTexture2);
+                        device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer3, sizeof(float) * 20);
+                    }
 
-						if(singlePass)
-						{
-							device.SetTexture(0, data->glowTexture2);
+                    // Blur to final
+                    {
+                        device.SetRenderTarget(0, glowSurface2);
 
-							device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer3, sizeof(float) *  20);
-						}
-						else
-						{
-							for(int stage = 0; stage < stages; ++stage)
-								device.SetTexture(stage, data->glowTexture2);
+                        float xs = float(data->glowSize.x) / (glowWidth1);
+                        float ys = float(data->glowSize.y) / (glowHeight1);
+                        float ydp = (1.f / glowHeight1);
+                        //ydp *= data->renderSize.y / 768.f;
 
-							if(betterGlow)
-								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer1_6, sizeof(float) *  16);
-							else
-								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer1, sizeof(float) *  12);
+                        float yd1 = 0.5f * ydp;
+                        float yd2 = 2.5f * ydp;
+                        float yd3 = 4.5f * ydp;
+                        float yd4 = 6.5f * ydp;
+                        float yd5 = 8.5f * ydp;
+                        float yd6 = 10.5f * ydp;
 
-							device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-							device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-							device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-							device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+                        float width = float(data->glowSize.x) - .5f;
+                        float height = float(data->glowSize.y) - .5f;
 
-							if(betterGlow)
-								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer2_6, sizeof(float) *  16);
-							else
-								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer2, sizeof(float) *  12);
+                        float buffer3[] =
+                        {
+                            // Position, w,             uv1,              uv2,              uv3,        uv4
+                            -.5f, height, 1.f, 1.f, 0.f, ys - yd1, 0.f, ys - yd2, 0.f, ys - yd3, 0.f, ys - yd4, 0.f, ys + yd1, 0.f, ys + yd2, 0.f, ys + yd3, 0.f, ys + yd4,
+                            -.5f, -.5f, 1.f, 1.f, 0.f, 0.f - yd1, 0.f, 0.f - yd2, 0.f, 0.f - yd3, 0.f, 0.f - yd4, 0.f, 0.f + yd1, 0.f, 0.f + yd2, 0.f, 0.f + yd3, 0.f, 0.f + yd4,
+                            width, height, 1.f, 1.f, xs, ys - yd1, xs, ys - yd2, xs, ys - yd3, xs, ys - yd4, xs, ys + yd1, xs, ys + yd2, xs, ys + yd3, xs, ys + yd4,
+                            width, -.5f, 1.f, 1.f, xs, 0.f - yd1, xs, 0.f - yd2, xs, 0.f - yd3, xs, 0.f - yd4, xs, 0.f + yd1, xs, 0.f + yd2, xs, 0.f + yd3, xs, 0.f + yd4
+                        };
 
-							device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-							device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-						}
-					}
+                        device.SetTexture(0, data->glowTexture1);
 
-					// Blur to final
-					{
-						device.SetRenderTarget(0, glowSurface2);
+                        device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer3, sizeof(float) * 20);
+                    }
 
-						float xs = float(data->glowSize.x) / (glowWidth1);
-						float ys = float(data->glowSize.y) / (glowHeight1);
-						float ydp = (1.f / glowHeight1);
-						//ydp *= data->renderSize.y / 768.f;
+                    for (int i = 0; i < stages; ++i)
+                    {
+                        device.SetSamplerState(i, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+                        device.SetSamplerState(i, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+                    }
 
-						float yd1 = 0.5f * ydp;
-						float yd2 = 2.5f * ydp;
-						float yd3 = 4.5f * ydp;
-						float yd4 = 6.5f * ydp;
-						float yd5 = 8.5f * ydp;
-						float yd6 = 10.5f * ydp;
+                    frozenbyte::storm::enableMipFiltering(device, 0, stages, true);
+                }
+            }
 
-						if(betterGlow)
-						{
-							yd1 = 0.5f * ydp;
-							yd2 = 2.0f * ydp;
-							yd3 = 3.7f * ydp;
-							yd4 = 5.2f * ydp;
-							yd5 = 7.1f * ydp;
-							yd6 = 8.5f * ydp;
-						}
+            frozenbyte::storm::setCulling(device, D3DCULL_CCW);
+            device.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+            device.SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 
-						float width = float(data->glowSize.x) - .5f;
-						float height = float(data->glowSize.y) - .5f;
+            device.SetTexture(0, 0);
+            device.SetTexture(1, 0);
+            device.SetTexture(2, 0);
+            device.SetTexture(3, 0);
+            device.SetPixelShader(0);
 
-						float buffer1[] = 
-						{
-							// Position, w,             uv1,              uv2,              uv3,        uv4
-							-.5f, height,  1.f, 1.f,    0.f, ys-yd1,    0.f, ys-yd2,    0.f, ys-yd3,    0.f, ys-yd4,
-							-.5f, -.5f,    1.f, 1.f,    0.f, 0.f-yd1,   0.f, 0.f-yd2,   0.f, 0.f-yd3,   0.f, 0.f-yd4,
-							width, height, 1.f, 1.f,    xs, ys-yd1,     xs, ys-yd2,     xs, ys-yd3,     xs, ys-yd4,
-							width, -.5f,   1.f, 1.f,    xs, 0.f-yd1,    xs, 0.f-yd2,    xs, 0.f-yd3,    xs, 0.f-yd4
-						};
-						float buffer2[] = 
-						{
-							// Position, w,             uv1,              uv2,              uv3,        uv4
-							-.5f, height,  1.f, 1.f,    0.f, ys+yd1,    0.f, ys+yd2,    0.f, ys+yd3,    0.f, ys+yd4,
-							-.5f, -.5f,    1.f, 1.f,    0.f, 0.f+yd1,   0.f, 0.f+yd2,   0.f, 0.f+yd3,   0.f, 0.f+yd4,
-							width, height, 1.f, 1.f,    xs, ys+yd1,     xs, ys+yd2,     xs, ys+yd3,     xs, ys+yd4,
-							width, -.5f,   1.f, 1.f,    xs, 0.f+yd1,    xs, 0.f+yd2,    xs, 0.f+yd3,    xs, 0.f+yd4
-						};
-
-						float buffer1_6[] = 
-						{
-							// Position, w,             uv1,              uv2,              uv3,        uv4
-							-.5f, height,  1.f, 1.f,    0.f, ys-yd1,    0.f, ys-yd2,    0.f, ys-yd3,    0.f, ys-yd4,   0.f, ys-yd5,    0.f, ys-yd6,
-							-.5f, -.5f,    1.f, 1.f,    0.f, 0.f-yd1,   0.f, 0.f-yd2,   0.f, 0.f-yd3,   0.f, 0.f-yd4,  0.f, 0.f-yd5,   0.f, 0.f-yd6,
-							width, height, 1.f, 1.f,    xs, ys-yd1,     xs, ys-yd2,     xs, ys-yd3,     xs, ys-yd4,    xs, ys-yd5,     xs, ys-yd6,
-							width, -.5f,   1.f, 1.f,    xs, 0.f-yd1,    xs, 0.f-yd2,    xs, 0.f-yd3,    xs, 0.f-yd4,    xs, 0.f-yd5,    xs, 0.f-yd6
-						};
-						float buffer2_6[] = 
-						{
-							// Position, w,             uv1,              uv2,              uv3,        uv4
-							-.5f, height,  1.f, 1.f,    0.f, ys+yd1,    0.f, ys+yd2,    0.f, ys+yd3,    0.f, ys+yd4,   0.f, ys+yd5,    0.f, ys+yd6,
-							-.5f, -.5f,    1.f, 1.f,    0.f, 0.f+yd1,   0.f, 0.f+yd2,   0.f, 0.f+yd3,   0.f, 0.f+yd4,  0.f, 0.f+yd5,   0.f, 0.f+yd6,
-							width, height, 1.f, 1.f,    xs, ys+yd1,     xs, ys+yd2,     xs, ys+yd3,     xs, ys+yd4,    xs, ys+yd5,     xs, ys+yd6,
-							width, -.5f,   1.f, 1.f,    xs, 0.f+yd1,    xs, 0.f+yd2,    xs, 0.f+yd3,    xs, 0.f+yd4,   xs, 0.f+yd5,    xs, 0.f+yd6
-						};
-
-						float buffer3[] = 
-						{
-							// Position, w,             uv1,              uv2,              uv3,        uv4
-							-.5f, height,  1.f, 1.f,    0.f, ys-yd1,    0.f, ys-yd2,    0.f, ys-yd3,    0.f, ys-yd4,  0.f, ys+yd1,    0.f, ys+yd2,    0.f, ys+yd3,    0.f, ys+yd4,
-							-.5f, -.5f,    1.f, 1.f,    0.f, 0.f-yd1,   0.f, 0.f-yd2,   0.f, 0.f-yd3,   0.f, 0.f-yd4, 0.f, 0.f+yd1,   0.f, 0.f+yd2,   0.f, 0.f+yd3,   0.f, 0.f+yd4,
-							width, height, 1.f, 1.f,    xs, ys-yd1,     xs, ys-yd2,     xs, ys-yd3,     xs, ys-yd4,   xs, ys+yd1,     xs, ys+yd2,     xs, ys+yd3,     xs, ys+yd4,
-							width, -.5f,   1.f, 1.f,    xs, 0.f-yd1,    xs, 0.f-yd2,    xs, 0.f-yd3,    xs, 0.f-yd4,  xs, 0.f+yd1,    xs, 0.f+yd2,    xs, 0.f+yd3,    xs, 0.f+yd4
-						};
-
-						if(singlePass)
-						{
-							device.SetTexture(0, data->glowTexture1);
-
-							device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer3, sizeof(float) *  20);
-						}
-						else
-						{
-							for(int stage = 0; stage < stages; ++stage)
-								device.SetTexture(stage, data->glowTexture1);
-
-							if(betterGlow)
-								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer1_6, sizeof(float) *  16);
-							else
-								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer1, sizeof(float) *  12);
-
-							device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-							
-							if(betterGlow)
-								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer2_6, sizeof(float) *  16);
-							else
-								device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer2, sizeof(float) *  12);
-							device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-						}
-					}
-
-					for(int i = 0; i < stages; ++i)
-					{
-						device.SetSamplerState(i, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-						device.SetSamplerState(i, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-					}
-
-					frozenbyte::storm::enableMipFiltering(device, 0, stages, true);
-				}
-			}
-
-			frozenbyte::storm::setCulling(device, D3DCULL_CCW);
-			device.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-			device.SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-
-			device.SetTexture(0, 0);
-			device.SetTexture(1, 0);
-			device.SetTexture(2, 0);
-			device.SetTexture(3, 0);
-			device.SetPixelShader(0);
-
-			device.SetRenderTarget(0, originalFrameBuffer);
-			device.SetDepthStencilSurface(originalDepthBuffer);
-			device.SetViewport(&data->viewport);
-		}
+            device.SetRenderTarget(0, originalFrameBuffer);
+            device.SetDepthStencilSurface(originalDepthBuffer);
+            device.SetViewport(&data->viewport);
+        }
 
 		if(data->renderOffsets && data->offsetTexture)
 		{

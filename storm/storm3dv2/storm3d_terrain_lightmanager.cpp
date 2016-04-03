@@ -15,8 +15,6 @@
 #include "storm3d_scene.h"
 #include "Storm3D_ShaderManager.h"
 #include "VertexFormats.h"
-#include <atlbase.h>
-#include <d3d9.h>
 
 #include "../../util/Debug_MemoryManager.h"
 

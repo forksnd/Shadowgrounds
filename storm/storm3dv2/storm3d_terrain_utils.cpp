@@ -493,24 +493,9 @@ void PixelShader::createTerrainLightShader()
 	handle = createPixelShader(device, "Data\\Shaders\\terrain_lighting_pixel_shader.txt");
 }
 
-void PixelShader::createGlowShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\glow_pixel_shader.txt");
-}
-
 void PixelShader::createGlowTex8Shader()
 {
 	handle = createPixelShader(device, "Data\\Shaders\\glow_8tex_pixel_shader.txt");
-}
-
-void PixelShader::createGlowPs14Shader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\glow_ps14_pixel_shader.txt");
-}
-
-void PixelShader::createGlowFinalShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\glow_pass_pixel_shader.txt");
 }
 
 void PixelShader::createLightShader()
@@ -604,24 +589,9 @@ void PixelShader::createTerrainLightShader()
 	handle = createPixelShader(device, "data\\shader\\terrain_lighting_pixel_shader.fps");
 }
 
-void PixelShader::createGlowShader()
-{
-	handle = createPixelShader(device, "data\\shader\\glow_pixel_shader.fps");
-}
-
 void PixelShader::createGlowTex8Shader()
 {
 	handle = createPixelShader(device, "data\\shader\\glow_8tex_pixel_shader.fps");
-}
-
-void PixelShader::createGlowPs14Shader()
-{
-	handle = createPixelShader(device, "data\\shader\\glow_ps14_pixel_shader.fps");
-}
-
-void PixelShader::createGlowFinalShader()
-{
-	handle = createPixelShader(device, "data\\shader\\glow_pass_pixel_shader.fps");
 }
 
 void PixelShader::createLightShader()

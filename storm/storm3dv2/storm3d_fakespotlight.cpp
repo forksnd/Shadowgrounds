@@ -14,8 +14,6 @@
 #include "storm3d_terrain_utils.h"
 #include "storm3d.h"
 #include <IStorm3D_Logger.h>
-#include <atlbase.h>
-#include <d3d9.h>
 
 #include "../../util/Debug_MemoryManager.h"
 
@@ -275,28 +273,6 @@
 					used[i] = false;
 				}
 			}
-		}
-
-		void filter(Storm3D &storm, GfxDevice &device)
-		{
-			CComPtr<IDirect3DTexture9> filterTexture = storm.getColorSecondaryTarget();
-			if(!filterTexture || !sharedColor)
-				return;
-
-			CComPtr<IDirect3DSurface9> colorSurface;
-			sharedColor->GetSurfaceLevel(0, &colorSurface);
-			CComPtr<IDirect3DSurface9> filterSurface;
-			filterTexture->GetSurfaceLevel(0, &filterSurface);
-
-			RECT colorRect = { 0 };
-			colorRect.right = BUFFER_WIDTH * 2;
-			colorRect.bottom = BUFFER_HEIGHT * 2;
-			RECT filterRect = { 0 };
-			filterRect.right = BUFFER_WIDTH;
-			filterRect.bottom = BUFFER_HEIGHT;
-
-			device.StretchRect(colorSurface, &colorRect, filterSurface, &filterRect, D3DTEXF_LINEAR);
-			device.StretchRect(filterSurface, &filterRect, colorSurface, &colorRect, D3DTEXF_LINEAR);
 		}
 	};
 
@@ -739,14 +715,6 @@ void Storm3D_FakeSpotlight::recreateDynamicResources()
 
 	data->createVertexBuffer();
 	data->renderTarget = renderTargets.getTarget();
-}
-
-void Storm3D_FakeSpotlight::filterBuffers(Storm3D &storm, GfxDevice &device)
-{
-	if(BUFFER_WIDTH <= 0 || BUFFER_HEIGHT <= 0)
-		return;
-
-	renderTargets.filter(storm, device);
 }
 
 void Storm3D_FakeSpotlight::querySizes(Storm3D &storm, int shadowQuality)
