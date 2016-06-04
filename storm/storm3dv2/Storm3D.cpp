@@ -762,19 +762,34 @@ Storm3D::Storm3D(bool _no_info, filesystem::FilePackageManager *fileManager, ISt
 	ITMesh=new ICreateIM_Set<IStorm3D_Mesh*>(&(meshes));
 	ITTerrain=new ICreateIM_Set<IStorm3D_Terrain*>(&(terrains));
 
-	// Create the D3D object
-	if((D3D=Direct3DCreate9(D3D_SDK_VERSION))==NULL)
-	{
-		MessageBox(NULL,"DirectX9 is needed to run this program.","Storm3D Error",0);
-		return;
-	}
+    HMODULE hD3D9DLL = LoadLibrary(TEXT("d3d9.dll"));
+    if (hD3D9DLL == NULL)
+    {
+        MessageBox(NULL, "DirectX9 is needed to run this program.", "Storm3D Error", 0);
+        return;
+    }
 
-	// Enumerate all adapters and modes
-	EnumAdaptersAndModes();
+    typedef IDirect3D9 * (WINAPI *Direct3DCreate9Func)(UINT SDKVersion);
+    Direct3DCreate9Func fnDirect3DCreate9 = reinterpret_cast<Direct3DCreate9Func>(GetProcAddress(hD3D9DLL, "Direct3DCreate9"));
+    if (!fnDirect3DCreate9)
+    {
+        MessageBox(NULL, "DirectX9 is needed to run this program.", "Storm3D Error", 0);
+        return;
+    }
 
-	timeFactor = 1.0f;
-	gammaPeakEnabled = false;
-	SetApplicationName("Storm3D", "Storm3D v2.0 - Render Window");
+    // Create the D3D object
+    if ((D3D = fnDirect3DCreate9(D3D_SDK_VERSION)) == NULL)
+    {
+        MessageBox(NULL, "DirectX9 is needed to run this program.", "Storm3D Error", 0);
+        return;
+    }
+
+    // Enumerate all adapters and modes
+    EnumAdaptersAndModes();
+
+    timeFactor = 1.0f;
+    gammaPeakEnabled = false;
+    SetApplicationName("Storm3D", "Storm3D v2.0 - Render Window");
 }
 
 
