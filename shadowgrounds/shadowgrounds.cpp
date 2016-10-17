@@ -553,9 +553,14 @@ try {
 	bool show_polys = false;
 	bool show_terrain_mem_info = false;
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0 || !SDL_GetVideoInfo())
+	if (SDL_Init(SDL_INIT_NOPARACHUTE|SDL_INIT_VIDEO))
 		return 0;   // FIXME: give error msg
 	atexit(&SDL_Quit);
+
+    SDL_Window* window = SDL_CreateWindow(get_application_name_string(),
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        800, 600, 0);
 
 	Timer::init();
 
@@ -594,11 +599,9 @@ try {
 	//	game::SimpleOptions::setBool(DH_OPT_B_AUTO_SCRIPT_PREPROCESS, false);
 	//}
 
-	IStorm3D *s3d = IStorm3D::Create_Storm3D_Interface(true, &filesystem::FilePackageManager::getInstance(), Logger::getInstance());
+	IStorm3D *s3d = IStorm3D::Create_Storm3D_Interface(window, true, &filesystem::FilePackageManager::getInstance(), Logger::getInstance());
 
 	disposable_s3d = s3d;
-
-	s3d->SetApplicationName(get_application_classname_string(), get_application_name_string());
 
 	// set lighting / shadow texture qualities now (must be set
 	// before storm3d creation)
@@ -765,7 +768,7 @@ try {
 		Logger::getInstance()->warning("No control devices enabled, forcing mouse enable.");
 		ctrlinit = KEYB3_CAPS_MOUSE;
 	}
-	Keyb3_Init(ctrlinit);
+	Keyb3_Init(window, ctrlinit);
 #ifdef FINAL_RELEASE_BUILD
 	Keyb3_SetActive(1);
 #else
@@ -1529,6 +1532,8 @@ try {
 
 	if (physicsStatsLogger != NULL)
 		delete physicsStatsLogger;
+
+    SDL_DestroyWindow(window);
 
 	SDL_Quit();
 

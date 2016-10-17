@@ -13,19 +13,20 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5C78ED70-84DB-4568-AD42-A5142199F9F5}</ProjectGuid>
     <RootNamespace>shadowgrounds</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -90,7 +91,7 @@
       <Culture>0x040b</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>dinput8.lib;dxguid.lib;winmm.lib;sdl.lib;SDLmain.lib;user32.lib;keyb3_d.lib;storm3dv2_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dinput8.lib;dxguid.lib;winmm.lib;sdl2.lib;SDL2main.lib;user32.lib;keyb3_d.lib;storm3dv2_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -144,7 +145,7 @@
       <Culture>0x040b</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;sdl.lib;SDLmain.lib;storm3dv2_lr.lib;keyb3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;sdl2.lib;SDL2main.lib;storm3dv2_lr.lib;keyb3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

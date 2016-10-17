@@ -75,8 +75,9 @@ typedef Storm3D_Texture *PStorm3D_Texture;
 #define D3D_OVERLOADS
 #include <d3d9.h>
 #include <d3dx9.h>
+#include <DirectXMath.h>
 
-
+using namespace DirectX;
 
 //------------------------------------------------------------------
 // Defines etc.

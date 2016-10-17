@@ -386,10 +386,10 @@ hiiri1 hiiri;
 joy1 *joys;
 int joyCount;
 ui::GameController *gc;
-
+SDL_Window* window;
 
 // Inits/frees Keyb3 Control System
-int Keyb3_Init(int CAPS) {		// Returns: TRUE=ok, FALSE=error
+int Keyb3_Init(SDL_Window* wnd, int CAPS) {		// Returns: TRUE=ok, FALSE=error
 	// FIXME: ignores CAPS
 
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
@@ -422,19 +422,23 @@ int Keyb3_Init(int CAPS) {		// Returns: TRUE=ok, FALSE=error
 
 	JoyNum = joyCount;
 
+    window = wnd;
+
 	return true;
 }
 
 void Keyb3_Free() {
 	if (joys != NULL) {
 		for (int i = 0; i < joyCount; i++)
-			if (SDL_JoystickOpened(i))
+			if (joys[i].sdljoy)
 				SDL_JoystickClose(joys[i].sdljoy);
 
 		joyCount = 0;
 		delete[] joys;
 		joys = NULL;
 	}
+
+    window = nullptr;
 	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
 
@@ -442,9 +446,7 @@ void Keyb3_Free() {
 // Deactivate Keyb3 when your window gets minimized.
 // Activate Keyb3 when your window gets active again.
 void Keyb3_SetActive(bool on) {
-	SDL_WM_GrabInput(on ? SDL_GRAB_ON : SDL_GRAB_OFF);
-	// for debugging so we don't steal focus from gdb
-	SDL_ShowCursor(on ? SDL_DISABLE : SDL_ENABLE);
+    SDL_SetRelativeMouseMode(on ? SDL_TRUE : SDL_FALSE);
 }
 
 #define JOY_UP      (KEYCODE_JOY_UP      - KEYCODE_JOY_UP)
@@ -455,7 +457,6 @@ void Keyb3_SetActive(bool on) {
 
 void Keyb3_AddController(ui::GameController *_gc) {
 	gc = _gc;
-	SDL_EnableUNICODE((gc != NULL) ? 1 : 0);
 }
 
 // Updates all devices
@@ -476,21 +477,18 @@ void Keyb3_UpdateDevices() {
 		switch (event.type) {
 		case SDL_KEYDOWN:
 			if (event.key.keysym.sym == SDLK_RETURN) {
-				SDLMod m = SDL_GetModState();
-				if ((m & KMOD_ALT) != 0) {
-					SDL_WM_ToggleFullScreen(SDL_GetVideoSurface());
+				if ((event.key.keysym.mod & KMOD_ALT) != 0) {
+                    Uint32 flags = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) ? 0 : SDL_WINDOW_FULLSCREEN;
+                    SDL_SetWindowFullscreen(window, flags);
 					continue;
 				}
 			} else if (event.key.keysym.sym == SDLK_g) {
-				SDLMod m = SDL_GetModState();
-				if ((m & KMOD_CTRL) != 0) {
-					SDL_GrabMode curr = SDL_WM_GrabInput(SDL_GRAB_QUERY);
-					Keyb3_SetActive(curr == SDL_GRAB_OFF);
+				if ((event.key.keysym.mod & KMOD_CTRL) != 0) {
+					Keyb3_SetActive(SDL_GetRelativeMouseMode() == SDL_FALSE);
 					continue;
 				}
 			} else if (event.key.keysym.sym == SDLK_c) {
-				SDLMod m = SDL_GetModState();
-				if ((m & KMOD_CTRL) != 0) {
+				if ((event.key.keysym.mod & KMOD_CTRL) != 0) {
 					SDL_Quit();
 					gc->suicide();
 				}
@@ -500,14 +498,17 @@ void Keyb3_UpdateDevices() {
 			{
 				if (keylookup[event.key.keysym.sym] != 0)
 					gc->addReadKey(0, keylookup[event.key.keysym.sym]);
-				else
-					gc->addReadKey(event.key.keysym.unicode, 0);
 			}
 			nappis.keysdown[keylookup[event.key.keysym.sym]] = 1;
 			break;
 		case SDL_KEYUP:
 			nappis.keysdown[keylookup[event.key.keysym.sym]] = 0;
 			break;
+        case SDL_TEXTINPUT:
+            // TODO: handle properly!
+            gc->addReadKey(event.text.text[0], 0);
+
+            break;
 		case SDL_JOYAXISMOTION:
 			joyNum = event.jaxis.which;
 			if (joyNum >= 0 && joyNum < joyCount) {
@@ -556,8 +557,15 @@ void Keyb3_UpdateDevices() {
       }
 		case SDL_MOUSEMOTION:
 			{
-				hiiri.x = event.motion.x; hiiri.y = event.motion.y;
-				//hiiri.dx = event.motion.xrel; hiiri.dy = event.motion.yrel;
+                hiiri.x = event.motion.x; hiiri.y = event.motion.y;
+                if (SDL_GetRelativeMouseMode())
+                {
+                    hiiri.dx = event.motion.xrel; hiiri.dy = event.motion.yrel;
+                }
+                else
+                {
+                    hiiri.dx = hiiri.x - hiiri.oldx; hiiri.dy = hiiri.y-hiiri.oldy;
+                }
 
 				break;
 			}
@@ -577,16 +585,6 @@ void Keyb3_UpdateDevices() {
 					b = KEYCODE_MOUSE_BUTTON2;
 					break;
 
-				case SDL_BUTTON_WHEELDOWN:
-					b = KEYCODE_MOUSE_WHEEL_DOWN;
-					event.button.state = SDL_PRESSED;
-					break;
-
-				case SDL_BUTTON_WHEELUP:
-					b = KEYCODE_MOUSE_WHEEL_UP;
-					event.button.state = SDL_PRESSED;
-					break;
-
 				case SDL_BUTTON_LEFT: // fallthrough
 				default:
 					b = KEYCODE_MOUSE_BUTTON1;
@@ -595,13 +593,19 @@ void Keyb3_UpdateDevices() {
 				nappis.keysdown[b] = (event.button.state == SDL_PRESSED);
 				break;
 			}
-    case SDL_QUIT:
-      exit(0);
+
+        case SDL_MOUSEWHEEL:
+            {
+                //TODO: handle event.wheel.direction????
+                nappis.keysdown[KEYCODE_MOUSE_WHEEL_DOWN] = event.wheel.y < 0;
+                nappis.keysdown[KEYCODE_MOUSE_WHEEL_UP] = event.wheel.y > 0;
+                break;
+            }
+
+        case SDL_QUIT:
+            exit(0);
 		}
 	}
-
-	// comment this out to break shit
-	hiiri.dx = hiiri.x - hiiri.oldx; hiiri.dy = hiiri.y - hiiri.oldy;
 
 	nappis.keysdown[KEYCODE_MOUSE_UP]         = (hiiri.dy < 0);
 	nappis.keysdown[KEYCODE_MOUSE_DOWN]       = (hiiri.dy > 0);
@@ -738,13 +742,11 @@ void Keyb3_SetMouseBorders(int max_x, int max_y, int mouseID) {
 }
 
 void Keyb3_SetMousePos(int x, int y, int mouseID) {
-	SDL_GrabMode curr = SDL_WM_GrabInput(SDL_GRAB_QUERY);
-	if (curr == SDL_GRAB_ON) {
-		hiiri.x = x; hiiri.y = y;
-		hiiri.oldx = x; hiiri.oldy = y;
-		hiiri.dx = 0; hiiri.dy = 0;
-		SDL_WarpMouse(x, y);
-	}
+    hiiri.dx = 0; hiiri.dy = 0;
+    if (SDL_GetRelativeMouseMode()) {
+        hiiri.x = x; hiiri.y = y;
+        hiiri.oldx = x; hiiri.oldy = y;
+    }
 }
 
 void Keyb3_ReleaseMouseBorders() {

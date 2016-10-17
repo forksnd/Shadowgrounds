@@ -240,7 +240,7 @@ void VideoBackgroundLoader::start()
         mState = STARTING;
         quitRequested = false;
         eof = false;
-        mThread = SDL_CreateThread(&VideoBackgroundLoader::run, this);
+        mThread = SDL_CreateThread(&VideoBackgroundLoader::run, "Video decode", this);
     }
     SDL_UnlockMutex(backgroundMutex);
     SDL_Delay(1);

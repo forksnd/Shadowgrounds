@@ -52,6 +52,7 @@ class IStorm3D_VideoStreamer;
 class IStorm3D_Line;
 class IStorm3D_Logger;
 class IStorm3D_StreamBuilder;
+struct SDL_Window;
 
 class IStorm3D_ScreenBuffer
 {
@@ -120,9 +121,6 @@ public:
 	// Set the time factor used for animations / video textures
 	virtual void setGlobalTimeFactor(float timeFactor)=0;
 
-	// Set application name (window title)
-	virtual void SetApplicationName(const char *shortName, const char *applicationName)=0;
-
 	virtual Storm3D_SurfaceInfo GetCurrentDisplayMode()=0; 
 	virtual Storm3D_SurfaceInfo GetScreenSize()=0;	// backbuffer dimension (normally same as displaymode, but not in windowed mode)
 
@@ -184,7 +182,7 @@ public:
 	ICreate<IStorm3D_Terrain*> *ITTerrain;
 
 	// Use this function to create Storm3D interface
-	static IStorm3D *Create_Storm3D_Interface(bool no_info = false, frozenbyte::filesystem::FilePackageManager *fileManager = 0, IStorm3D_Logger *logger = 0);
+	static IStorm3D *Create_Storm3D_Interface(SDL_Window* window, bool no_info = false, frozenbyte::filesystem::FilePackageManager *fileManager = 0, IStorm3D_Logger *logger = 0);
 
 	// Virtual destructor
 	virtual ~IStorm3D() {};

@@ -9,6 +9,7 @@
 // Includes
 //------------------------------------------------------------------
 #include <SDL.h>
+#include <SDL_syswm.h>
 
 #include "storm3d.h"
 #include "RenderWindow.h"
@@ -244,32 +245,6 @@ bool Storm3D::TestAdapterFeatures(int adanum)
 	return true;
 }
 
-
-
-//------------------------------------------------------------------
-// Storm3D::SetApplicationName
-//------------------------------------------------------------------
-void Storm3D::SetApplicationName(const char *shortName, const char *applicationName)
-{
-	/*
-	if (this->application_name != NULL)
-	{
-		delete [] this->application_name;
-	}
-	if (this->application_shortname != NULL)
-	{
-		delete [] this->application_shortname;
-	}
-
-  this->application_name = new char[strlen(applicationName) + 1];
-	strcpy(this->application_name, applicationName);
-  this->application_shortname = new char[strlen(shortName) + 1];
-	strcpy(this->application_shortname, shortName);
-	*/
-	this->application_name = applicationName;
-	this->application_shortname = shortName;
-}
-
 void Storm3D::setQuadIndices()
 {
     device.SetIndices(indices.indices);
@@ -323,8 +298,6 @@ void Storm3D::destroyManagedResources()
 //------------------------------------------------------------------
 bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 {
-	destroy_window = true;
-
 	// Test if adapter has all the needed features
 	if (!TestAdapterFeatures(active_adapter)) return false;
 	
@@ -391,9 +364,6 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 		MessageBox(NULL,s,"Selected mode",0);
 	}
 
-	SDL_SetVideoMode(mode->Width, mode->Height, GetDisplayModeBPP(*mode), SDL_FULLSCREEN);
-	window_handle = GetActiveWindow();
-
     // Set up the presentation parameters
     //D3DPRESENT_PARAMETERS pp; 
     ZeroMemory(&present_params,sizeof(present_params));
@@ -432,6 +402,8 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 		error_string = "Failed to create device";
 		return false;
 	}
+
+    SDL_SetWindowSize(window, width, height);
 
 	// Get original gamma ramp
 	// --jpk
@@ -474,8 +446,6 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 //------------------------------------------------------------------
 bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 {
-	destroy_window = true;
-
 	// Get the current desktop display mode (for backbuffer and z)
     D3DDISPLAYMODE desktopmode;
     if(FAILED(D3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT,&desktopmode)))
@@ -503,10 +473,6 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 			support_stencil? "Supported":"NOT supported");
 		MessageBox(NULL,s,"Selected mode",0);
 	}
-
-	SDL_SetVideoMode(width, height, GetDisplayModeBPP(desktopmode), 0);
-	SDL_WM_SetCaption(application_name, NULL);
-	window_handle = GetActiveWindow();
 
     // Set up the presentation parameters
     //D3DPRESENT_PARAMETERS pp; 
@@ -547,6 +513,8 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 		return false;
 	}
 
+    SDL_SetWindowSize(window, width, height);
+
 	// Get original gamma ramp
 	// --jpk
 	device.GetGammaRamp(0, &originalGammaRamp);
@@ -583,8 +551,6 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 
 bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 {
-	destroy_window = false;
-
 	// Get the current desktop display mode (for backbuffer and z)
     D3DDISPLAYMODE desktopmode;
     if(FAILED(D3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT,&desktopmode)))
@@ -597,7 +563,6 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 	D3DFORMAT DSFormat=GetDSBufferModeForDisplayMode(active_adapter,desktopmode);
 	support_stencil=GetDSModeStencilSupport(DSFormat);
 
-	window_handle = GetActiveWindow();
 	RECT window_rect = { 0 };
 	GetClientRect(window_handle, &window_rect);
 	int width = window_rect.right;
@@ -644,6 +609,8 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 		error_string = "Failed creating device";
 		return false;
 	}
+
+    SDL_SetWindowSize(window, width, height);
 
 	// Get original gamma ramp
 	// --jpk
@@ -707,20 +674,18 @@ void Storm3D::SetReflectionQuality(int quality)
 //------------------------------------------------------------------
 // Storm3D::Storm3D
 //------------------------------------------------------------------
-Storm3D::Storm3D(bool _no_info, filesystem::FilePackageManager *fileManager, IStorm3D_Logger *logger_) : 
+Storm3D::Storm3D(SDL_Window* wnd, bool _no_info, filesystem::FilePackageManager *fileManager, IStorm3D_Logger *logger_) :
 	logger(logger_),
 	active_material((Storm3D_Material*)1),	// NULL is not right!
 	active_mesh(NULL),
 	adapters(NULL),
 	active_adapter(D3DADAPTER_DEFAULT),
-	destroy_window(true),
+    window(wnd),
 	D3D(NULL),
 	textureLODLevel(0),
 	bbuf_orig(NULL),
 	zbuf_orig(NULL),
 	no_info(_no_info),
-	application_name(NULL),
-	application_shortname(NULL),
 	allocated_models(0),
 	allocated_meshes(0),
 	shadow_quality(100),
@@ -762,6 +727,10 @@ Storm3D::Storm3D(bool _no_info, filesystem::FilePackageManager *fileManager, ISt
 	ITMesh=new ICreateIM_Set<IStorm3D_Mesh*>(&(meshes));
 	ITTerrain=new ICreateIM_Set<IStorm3D_Terrain*>(&(terrains));
 
+    SDL_SysWMinfo info;
+    SDL_VERSION(&info.version); /* initialize info structure with SDL version info */
+    window_handle = SDL_GetWindowWMInfo(window, &info) ? info.info.win.window : (HWND)INVALID_HANDLE_VALUE;
+
     HMODULE hD3D9DLL = LoadLibrary(TEXT("d3d9.dll"));
     if (hD3D9DLL == NULL)
     {
@@ -789,7 +758,6 @@ Storm3D::Storm3D(bool _no_info, filesystem::FilePackageManager *fileManager, ISt
 
     timeFactor = 1.0f;
     gammaPeakEnabled = false;
-    SetApplicationName("Storm3D", "Storm3D v2.0 - Render Window");
 }
 
 
@@ -861,23 +829,7 @@ Storm3D::~Storm3D()
 	// Delete techniquehandler
 	//if (techniquehandler) delete techniquehandler;
 
-	/*
-	if (application_shortname != NULL)
-	{
-		delete [] application_shortname;
-		application_shortname = NULL;
-	}
-
-	if (application_name != NULL)
-	{
-		delete [] application_name;
-		application_name = NULL;
-	}
-	*/
 	freeTextureBank();
-
-	if(window_handle && destroy_window)
-		DestroyWindow(window_handle);
 }
 
 
@@ -2028,16 +1980,6 @@ void Storm3D::Empty()
 		delete (*ifo);
 	}*/
 
-	// Delete lensflares
-	while(lflares.begin()!=lflares.end())
-	{
-		delete (*lflares.begin());
-	}
-	/*for(set<IStorm3D_LensFlare*>::iterator ilf=lflares.begin();ilf!=lflares.end();ilf++)
-	{
-		delete (*ilf);
-	}*/
-
 	// Delete particles
 	/*for(set<IStorm3D_Particle*>::iterator ip=particles.begin();ip!=particles.end();ip++)
 	{
@@ -2101,7 +2043,6 @@ void Storm3D::Empty()
 	models.clear();
 	meshes.clear();
 	fonts.clear();
-	lflares.clear();
 	//particles.clear();
 	materials.clear();
 	textures.clear();

@@ -18,8 +18,10 @@
 // Functions
 //-----------------------------------------------------------------------------
 
+struct SDL_Window;
+
 // Inits/frees Keyb3 Control System
-int Keyb3_Init(int CAPS);		// Returns: TRUE=ok, FALSE=error
+int Keyb3_Init(SDL_Window* wnd, int CAPS);		// Returns: TRUE=ok, FALSE=error
 void Keyb3_Free();
 
 // Activates/Deactivates Keyb3 Control System.
