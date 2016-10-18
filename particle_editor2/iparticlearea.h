@@ -1,7 +1,7 @@
 #ifndef INCLUDED_IPARTICLE_AREA_H
 #define INCLUDED_IPARTICLE_AREA_H
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace frozenbyte {
 namespace particle {

@@ -78,8 +78,8 @@ namespace game
 					// HACK: first read all _base files!
 
 
-			boost::shared_ptr<filesystem::IFileList> baseFiles = filesystem::FilePackageManager::getInstance().findFiles(filename, "*_base.dhp");
-			boost::shared_ptr<filesystem::IFileList> files = filesystem::FilePackageManager::getInstance().findFiles(filename, "*.dhp");
+			std::shared_ptr<filesystem::IFileList> baseFiles = filesystem::FilePackageManager::getInstance().findFiles(filename, "*_base.dhp");
+			std::shared_ptr<filesystem::IFileList> files = filesystem::FilePackageManager::getInstance().findFiles(filename, "*.dhp");
 
 			std::vector<std::string> allBaseFiles;
 			filesystem::getAllFiles(*baseFiles, filename, allBaseFiles, true);

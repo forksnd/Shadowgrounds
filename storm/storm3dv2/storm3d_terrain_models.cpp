@@ -24,8 +24,6 @@
 #include "storm3d_texture.h"
 #include "Storm3D_ShaderManager.h"
 #include "storm3d.h"
-#include <boost/lexical_cast.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include "../../util/Debug_MemoryManager.h"
 
@@ -236,8 +234,8 @@ struct Storm3D_TerrainModelsData : public DataBase
 	Storm3D &storm;
 	std::set<Storm3D_Model *> models;
 
-	boost::scoped_ptr<Quadtree<Storm3D_Model> > tree;
-	std::map<Storm3D_Model *, boost::shared_ptr<IModelObserver> > observers;
+	std::unique_ptr<Quadtree<Storm3D_Model> > tree;
+	std::map<Storm3D_Model *, std::shared_ptr<IModelObserver> > observers;
 
 	std::vector<Light> lights;
 
@@ -264,7 +262,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 	bool skyModelGlowAllowed;
 
 	std::vector<Storm3D_Model *> visibleModels[MAX_VISIBILITY_STRUCTURES];
-	//boost::shared_ptr<Storm3D_Texture> white;
+	//std::shared_ptr<Storm3D_Texture> white;
 
 	COL terrainObjectColorFactorBuilding;
 	COL terrainObjectColorFactorOutside;
@@ -349,7 +347,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 		//std::vector<Storm3D_Model *> *visibleModels_ = &visibleModels[0];
 		Quadtree<Storm3D_Model>::Entity *entity = tree->insert(model, model->GetPosition(), model->bounding_radius);
-		boost::shared_ptr<ModelObserver> observer(new ModelObserver(tree.get(), entity, &visibleModels[0], this));
+		std::shared_ptr<ModelObserver> observer(new ModelObserver(tree.get(), entity, &visibleModels[0], this));
 		observers[model] = observer;
 
 		model->observer = observer.get();
@@ -553,7 +551,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 		eraseModelTree();
 
-		boost::scoped_ptr<Quadtree<Storm3D_Model> > newTree(new Quadtree<Storm3D_Model> (mmin, mmax));
+		std::unique_ptr<Quadtree<Storm3D_Model> > newTree(new Quadtree<Storm3D_Model> (mmin, mmax));
 		tree.swap(newTree);
 
 		std::set<Storm3D_Model *>::iterator it = models.begin();

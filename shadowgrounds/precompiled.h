@@ -15,13 +15,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <memory>
 
-#include <boost/lexical_cast.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <fstream>
+#include <sstream>
 #include <vector>
-#include <string>
 #include <map>
 
 #include "../util/Debug_MemoryManager.h"

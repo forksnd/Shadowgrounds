@@ -8,7 +8,7 @@
 #include <map>
 #include <vector>
 #include <cassert>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace frozenbyte {
 namespace editor {
@@ -133,7 +133,7 @@ struct ParserGroupData
 	typedef std::map<std::string, std::string> ValueMap;
 	ValueMap values;
 
-	typedef std::map<std::string, boost::shared_ptr<ParserGroup> > GroupMap;
+	typedef std::map<std::string, std::shared_ptr<ParserGroup> > GroupMap;
 	GroupMap groups;
 	
 	typedef std::vector<std::string> LineList;
@@ -156,7 +156,7 @@ struct ParserGroupData
 		std::string superName;
 
 		splitString(string, groupName, superName, ':');
-		boost::shared_ptr<ParserGroup> group(parserGroupFactory());
+		std::shared_ptr<ParserGroup> group(parserGroupFactory());
 
 		if(!superName.empty())
 		{
@@ -223,7 +223,7 @@ struct ParserGroupData
 
 		for(GroupMap::iterator it = rhs.groups.begin(); it != rhs.groups.end(); ++it)
 		{
-			boost::shared_ptr<ParserGroup> g(parserGroupFactory());
+			std::shared_ptr<ParserGroup> g(parserGroupFactory());
 			*g.get() = *(*it).second.get();
 
 			groups[(*it).first] = g;
@@ -276,13 +276,13 @@ struct ParserGroupData
 
 ParserGroup::ParserGroup()
 {
-	boost::scoped_ptr<ParserGroupData> tempData(new ParserGroupData());
+	std::unique_ptr<ParserGroupData> tempData(new ParserGroupData());
 	data.swap(tempData);
 }
 
 ParserGroup::ParserGroup(const ParserGroup &rhs)
 {
-	boost::scoped_ptr<ParserGroupData> tempData(new ParserGroupData());
+	std::unique_ptr<ParserGroupData> tempData(new ParserGroupData());
 	tempData->copy(*rhs.data.get());
 
 	data.swap(tempData);
@@ -323,7 +323,7 @@ ParserGroup &ParserGroup::getSubGroup(const std::string &name)
 	ParserGroupData::GroupMap::iterator it = data->groups.find(name);
 	if(it == data->groups.end())
 	{
-		boost::shared_ptr<ParserGroup> g(new ParserGroup());
+		std::shared_ptr<ParserGroup> g(new ParserGroup());
 		data->groups[name] = g;
 	}
 
@@ -354,7 +354,7 @@ void ParserGroup::addLine(const std::string &value)
 
 void ParserGroup::addSubGroup(const std::string &name, ParserGroup &group)
 {
-	boost::shared_ptr<ParserGroup> g(new ParserGroup());
+	std::shared_ptr<ParserGroup> g(new ParserGroup());
 	g->data->copy(*group.data.get());
 
 	data->groups[name] = g;
@@ -388,7 +388,7 @@ struct ParserData
 
 Parser::Parser()
 {
-	boost::scoped_ptr<ParserData> tempData(new ParserData());
+	std::unique_ptr<ParserData> tempData(new ParserData());
 	data.swap(tempData);
 }
 

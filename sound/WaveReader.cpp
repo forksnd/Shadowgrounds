@@ -7,8 +7,7 @@
 #include "AmplitudeArray.h"
 #include "../system/Logger.h"
 #include "../util/assert.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
+#include <memory>
 #include "../filesystem/file_package_manager.h"
 #include "../filesystem/input_stream.h"
 #include <windows.h>
@@ -53,11 +52,11 @@ struct WaveReader::Data
 {
 	std::string fileName;
 
-	boost::shared_ptr<WAVEFORMATEX> waveFormat;
+	std::shared_ptr<WAVEFORMATEX> waveFormat;
 	HMMIO ioHandle;
 	MMCKINFO riffChunk;
 
-	boost::shared_array<char> buffer;
+	std::unique_ptr<char[]> buffer;
 
 	Data()
 	:	ioHandle(0)

@@ -4,7 +4,7 @@
 
 #include "AbstractPhysicsObject.h"
 #include "DatatypeDef.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class IStorm3D_Model;
 
@@ -28,7 +28,7 @@ namespace game
 	public:
 		StaticPhysicsObject(GamePhysics *gamePhysics, const char *filename, IStorm3D_Model *model, const VC3 &position, const QUAT &rotation);
 #ifdef PHYSICS_PHYSX
-		StaticPhysicsObject(GamePhysics *gamePhysics, boost::shared_ptr<frozenbyte::physics::StaticMesh> &mesh, const VC3 &position, const QUAT &rotation);
+		StaticPhysicsObject(GamePhysics *gamePhysics, std::shared_ptr<frozenbyte::physics::StaticMesh> &mesh, const VC3 &position, const QUAT &rotation);
 #endif
 
 		virtual ~StaticPhysicsObject();

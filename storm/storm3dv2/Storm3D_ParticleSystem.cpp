@@ -17,7 +17,6 @@
 #include "VertexFormats.h"
 #include "storm3d_terrain_utils.h"
 #include "../../util/Debug_MemoryManager.h"
-#include <boost/lexical_cast.hpp>
 
 using namespace frozenbyte::storm;
 
@@ -145,18 +144,8 @@ void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion)
 
 			Vertex_P3DUV2 *vertexPointer = 0;
 			int neededVertexAmount = particleOffset * 4;
-/*
-if(neededVertexAmount)
-{
-std::string msg = "Buffer size, vertex offset, neededVertices: ";
-msg += boost::lexical_cast<std::string> (allocateVertexAmount) + std::string(", ");
-msg += boost::lexical_cast<std::string> (vertexBufferOffset) + std::string(", ");
-msg += boost::lexical_cast<std::string> (neededVertexAmount);
-msg += "\r\n";
-OutputDebugString(msg.c_str());
-}
-*/
-			if(neededVertexAmount)
+
+            if(neededVertexAmount)
 			{
 				// WTF we need this for -- DISCARD/NOOVERWRITE shoud do the trick already?
 				// Bugs only with certain explosion effect - DX issue?
@@ -211,17 +200,6 @@ OutputDebugString(msg.c_str());
 					if(particleAmount >= allocateIndexAmount / 6)
 						particleAmount = allocateIndexAmount / 6 - 1;
 
-/*
-{
-std::string msg = "\tRender offset, amount: ";
-msg += boost::lexical_cast<std::string> (vertexOffset + oldVertexBufferOffset) + std::string(", ");
-msg += boost::lexical_cast<std::string> (particleAmount * 4);
-msg += "\r\n";
-OutputDebugString(msg.c_str());
-}
-*/
-//if(!oldVertexBufferOffset)
-//continue;
                     device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, vertexOffset + oldVertexBufferOffset, 0, particleAmount * 4, Storm3D2->baseQuadIndex(), particleAmount * 2);
 				}
 

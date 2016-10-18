@@ -10,7 +10,6 @@
 #include "../ogui/OguiFormattedText.h"
 #include "../ogui/OguiLocaleWrapper.h"
 #include "../system/Timer.h"
-#include <boost/lexical_cast.hpp>
 
 #include "../game/DHLocaleManager.h"
 #include "CombatSubWindowFactory.h"
@@ -169,7 +168,7 @@ void GenericBarWindow::loadDataFromLocales( const std::string& locale_name )
 		int amount = getLocaleGuiInt(amount_locale.c_str(), 0);
 		for(int i = 0; i < amount; i++)
 		{
-			std::string prefix2 = prefix + "decoration_" + boost::lexical_cast<std::string>(i);
+			std::string prefix2 = prefix + "decoration_" + std::to_string(i);
 
 			int x = getLocaleGuiInt( (prefix2 + "_x" ).c_str(), 0);
 			int y = getLocaleGuiInt( (prefix2 + "_y" ).c_str(), 0);

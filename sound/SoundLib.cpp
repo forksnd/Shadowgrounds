@@ -1428,8 +1428,6 @@ SoundLib::SoundLib() {}
 #include "../filesystem/file_package_manager.h"
 #include "../filesystem/input_stream.h"
 
-using namespace std;
-using namespace boost;
 using namespace frozenbyte::editor;
 using namespace frozenbyte;
 

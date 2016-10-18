@@ -1,7 +1,7 @@
 #ifndef INCLUDED_UTIL_BLINKER_MANAGER_H
 #define INCLUDED_UTIL_BLINKER_MANAGER_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace util {
 
@@ -16,7 +16,7 @@ public:
 	BlinkerManager();
 	~BlinkerManager();
 
-	void addBlinker(boost::shared_ptr<BuildingBlinker> blinker);
+	void addBlinker(std::shared_ptr<BuildingBlinker> blinker);
 	void update(int timeDelta);
 }; 
 

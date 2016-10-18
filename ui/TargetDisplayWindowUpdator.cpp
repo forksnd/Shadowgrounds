@@ -2,6 +2,7 @@
 #include "precompiled.h"
 
 #include <sstream>
+#include <algorithm>
 
 #include "TargetDisplayWindowUpdator.h"
 #include "TargetDisplayButtonManager.h"

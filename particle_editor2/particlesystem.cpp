@@ -12,7 +12,8 @@
 #endif
 
 #include <Storm3D_UI.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <map>
@@ -52,16 +53,16 @@ void PointParticleRenderer::render(IStorm3D_Scene* scene, IStorm3D_Material* mtl
 	
 }
 
-boost::shared_ptr<IParticleRenderer> PointParticleRenderer::clone() {
+std::shared_ptr<IParticleRenderer> PointParticleRenderer::clone() {
 	PointParticleRenderer* p = new PointParticleRenderer();
-	boost::shared_ptr<IParticleRenderer> ptr(p);
+	std::shared_ptr<IParticleRenderer> ptr(p);
 	return ptr;
 }
 
 
-boost::shared_ptr<IParticleRenderer> QuadParticleRenderer::clone() {
+std::shared_ptr<IParticleRenderer> QuadParticleRenderer::clone() {
 	QuadParticleRenderer* p = new QuadParticleRenderer();
-	boost::shared_ptr<IParticleRenderer> ptr(p);
+	std::shared_ptr<IParticleRenderer> ptr(p);
 	return ptr;
 }
 
@@ -113,9 +114,9 @@ void QuadParticleRenderer::render(IStorm3D_Scene* scene, IStorm3D_Material* mtl,
 	scene->GetParticleSystem()->renderQuads(mtl, &m_points[0], a, &m_animInfo, factor, distortion, faceUpward);
 }
 
-boost::shared_ptr<IParticleRenderer> LineParticleRenderer1::clone() {
+std::shared_ptr<IParticleRenderer> LineParticleRenderer1::clone() {
 	LineParticleRenderer1* p = new LineParticleRenderer1();
-	boost::shared_ptr<IParticleRenderer> ptr(p);
+	std::shared_ptr<IParticleRenderer> ptr(p);
 	return ptr;
 }
 
@@ -182,9 +183,9 @@ if(!camera->TestSphereVisibility(p.position, radius))
 }
 
 
-boost::shared_ptr<IParticleRenderer> LineParticleRenderer2::clone() {
+std::shared_ptr<IParticleRenderer> LineParticleRenderer2::clone() {
 	LineParticleRenderer2* p = new LineParticleRenderer2();
-	boost::shared_ptr<IParticleRenderer> ptr(p);
+	std::shared_ptr<IParticleRenderer> ptr(p);
 	return ptr;
 }
 
@@ -273,22 +274,22 @@ GenParticleSystem::GenParticleSystem()
 
 IParticleForce* GenParticleSystem::addForce(const std::string& className) {
 	if(className == "drag") {
-		boost::shared_ptr<IParticleForce> f(new DragParticleForce);
+		std::shared_ptr<IParticleForce> f(new DragParticleForce);
 		m_forces.push_back(f);
 		return f.get();
 	}
 	if(className == "gravity") {
-		boost::shared_ptr<IParticleForce> f(new GravityParticleForce);
+		std::shared_ptr<IParticleForce> f(new GravityParticleForce);
 		m_forces.push_back(f);
 		return f.get();
 	}
 	if(className == "sidegravity") {
-		boost::shared_ptr<IParticleForce> f(new SideGravityParticleForce);
+		std::shared_ptr<IParticleForce> f(new SideGravityParticleForce);
 		m_forces.push_back(f);
 		return f.get();
 	}
 	if(className == "wind") {
-		boost::shared_ptr<IParticleForce> f(new WindParticleForce);
+		std::shared_ptr<IParticleForce> f(new WindParticleForce);
 		m_forces.push_back(f);
 		return f.get();
 	}
@@ -964,7 +965,7 @@ void GenParticleSystem::applyForces(const GenParticleSystemEditables &eds)
 
 			for(int i = 0; i < forceAmount; ++i)
 			{
-				boost::shared_ptr<IParticleForce> &iforce = m_forces[i];
+				std::shared_ptr<IParticleForce> &iforce = m_forces[i];
 				iforce->preCalc(m_time);
 
 				iforce->calcForce(force, pos, vel);
@@ -980,7 +981,7 @@ void GenParticleSystem::applyForces(const GenParticleSystemEditables &eds)
 	{
 		for(int i = 0; i < forceAmount; ++i)
 		{
-			boost::shared_ptr<IParticleForce> &iforce = m_forces[i];
+			std::shared_ptr<IParticleForce> &iforce = m_forces[i];
 
 			int forceType = iforce->getTypeId();
 			if(forceType == DragParticleForce::getType())
@@ -1184,20 +1185,20 @@ void GenParticleSystem::defaultParseFrom(const ParserGroup& pg, GenParticleSyste
 	
 	
 	if(pg.getValue("element_type", "")=="quad") {
-		boost::shared_ptr<IParticleRenderer> r(new QuadParticleRenderer());
+		std::shared_ptr<IParticleRenderer> r(new QuadParticleRenderer());
 		m_renderer.swap(r);
 	}
 	else if(pg.getValue("element_type", "")=="line_from_origin") {
-		boost::shared_ptr<IParticleRenderer> r(new LineParticleRenderer1());
+		std::shared_ptr<IParticleRenderer> r(new LineParticleRenderer1());
 		m_renderer.swap(r);
 	}
 	else if(pg.getValue("element_type", "")=="line") {
-		boost::shared_ptr<IParticleRenderer> r(new LineParticleRenderer2());
+		std::shared_ptr<IParticleRenderer> r(new LineParticleRenderer2());
 		m_renderer.swap(r);
 		eds.lineLenght = convertFromString<float>(pg.getValue("line_lenght", ""), 0.0f);
 	}
 	else {
-		boost::shared_ptr<IParticleRenderer> r(new PointParticleRenderer());
+		std::shared_ptr<IParticleRenderer> r(new PointParticleRenderer());
 		m_renderer.swap(r);	
 	}
 
@@ -1233,7 +1234,7 @@ void GenParticleSystem::defaultParseFrom(const ParserGroup& pg, GenParticleSyste
 	int nForces;
 	nForces = convertFromString<int>(pg.getValue("num_forces", "0"), 0);	
 	for(int i = 0; i < nForces; i++) {
-		std::string str = "force" + boost::lexical_cast<std::string>(i);
+		std::string str = "force" + std::to_string(i);
 		const ParserGroup& fg = pg.getSubGroup(str);
 		std::string className = fg.getValue("class", "");
 		if(className.empty())
@@ -1295,7 +1296,7 @@ void GenParticleSystem::setSpawnModel(IStorm3D_Model *model)
 		for(int i = 1; i <= 50; ++i)
 		{
 			std::string name = "HELPER_BONE_ParticleSpawn";
-			name += boost::lexical_cast<std::string> (i);
+			name += std::to_string(i);
 /*
 if(i % 2)
 	name = "HELPER_BONE_ShoulderLamp";
@@ -1329,12 +1330,12 @@ void GenParticleSystem::setExplosion(const Vector& pos, bool enable)
 	use_explosion = enable;
 }
 
-void GenParticleSystem::setArea(boost::shared_ptr<IParticleArea> &area_)
+void GenParticleSystem::setArea(std::shared_ptr<IParticleArea> &area_)
 {
 	area = area_;
 }
 
-void GenParticleSystem::setPhysics(boost::shared_ptr<ParticlePhysics> &physics_)
+void GenParticleSystem::setPhysics(std::shared_ptr<ParticlePhysics> &physics_)
 {
 	physics = physics_;
 }

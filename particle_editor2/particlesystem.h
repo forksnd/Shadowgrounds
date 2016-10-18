@@ -53,7 +53,7 @@ public:
 class IParticleSystem {
 public:
 	virtual ~IParticleSystem() {}
-	virtual boost::shared_ptr<IParticleSystem> clone()=0;
+	virtual std::shared_ptr<IParticleSystem> clone()=0;
 	virtual bool isDead()=0;
 	virtual void kill()=0;		
 	virtual void init(IStorm3D* s3d, IStorm3D_Scene* scene)=0;
@@ -71,9 +71,9 @@ public:
 	virtual void setSpawnModel(IStorm3D_Model *model) = 0;
 	virtual void setEmitFactor(float factor) = 0;
 	virtual void setLighting(const COL &ambient, const signed short int *lightIndices)=0;
-	virtual void setCollision(boost::shared_ptr<IParticleCollision> &collision) = 0;
-	virtual void setArea(boost::shared_ptr<IParticleArea> &area) = 0;
-	virtual void setPhysics(boost::shared_ptr<ParticlePhysics> &physics) {}
+	virtual void setCollision(std::shared_ptr<IParticleCollision> &collision) = 0;
+	virtual void setArea(std::shared_ptr<IParticleArea> &area) = 0;
+	virtual void setPhysics(std::shared_ptr<ParticlePhysics> &physics) {}
 	virtual void setEmitterRotation(const QUAT &rotation) = 0;
 	virtual void releasePhysicsResources() = 0;
 //	virtual int getTypeID()=0;
@@ -206,7 +206,7 @@ public:
 class IParticleRenderer {
 public:
 	virtual ~IParticleRenderer() {}
-	virtual boost::shared_ptr<IParticleRenderer> clone()=0;
+	virtual std::shared_ptr<IParticleRenderer> clone()=0;
 	virtual void prepareForLaunch(int maxParts)=0;
 	virtual void render(IStorm3D_Scene* scene, IStorm3D_Material* mtl,
 		GenParticleSystemEditables& eds, std::vector<Particle>& parts, const COL &factor, bool distortion, bool faceUpward)=0;
@@ -215,7 +215,7 @@ public:
 class PointParticleRenderer : public IParticleRenderer {
 	std::vector<Storm3D_PointParticle> m_points;
 public:
-	boost::shared_ptr<IParticleRenderer> clone();
+	std::shared_ptr<IParticleRenderer> clone();
 	void prepareForLaunch(int maxParts);
 	void render(IStorm3D_Scene* scene, IStorm3D_Material* mtl,
 		GenParticleSystemEditables& eds, std::vector<Particle>& parts, const COL &factor, bool distortion, bool faceUpward);
@@ -226,7 +226,7 @@ class QuadParticleRenderer : public IParticleRenderer {
 	std::vector<Storm3D_PointParticle> m_points;
 	Storm3D_ParticleTextureAnimationInfo m_animInfo;
 public:
-	boost::shared_ptr<IParticleRenderer> clone();
+	std::shared_ptr<IParticleRenderer> clone();
 	void prepareForLaunch(int maxParts);
 	void render(IStorm3D_Scene* scene, IStorm3D_Material* mtl,
 		GenParticleSystemEditables& eds, std::vector<Particle>& parts, const COL &factor, bool distortion, bool faceUpward);
@@ -236,7 +236,7 @@ class LineParticleRenderer1 : public IParticleRenderer {
 	std::vector<Storm3D_LineParticle> m_lines;
 	Storm3D_ParticleTextureAnimationInfo m_animInfo;
 public:
-	boost::shared_ptr<IParticleRenderer> clone();
+	std::shared_ptr<IParticleRenderer> clone();
 	void prepareForLaunch(int maxParts);
 	void render(IStorm3D_Scene* scene, IStorm3D_Material* mtl,
 		GenParticleSystemEditables& eds, std::vector<Particle>& parts, const COL &factor, bool distortion, bool faceUpward);
@@ -246,7 +246,7 @@ class LineParticleRenderer2 : public IParticleRenderer {
 	std::vector<Storm3D_LineParticle> m_lines;
 	Storm3D_ParticleTextureAnimationInfo m_animInfo;
 public:
-	boost::shared_ptr<IParticleRenderer> clone();
+	std::shared_ptr<IParticleRenderer> clone();
 	void prepareForLaunch(int maxParts);
 	void render(IStorm3D_Scene* scene, IStorm3D_Material* mtl,
 		GenParticleSystemEditables& eds, std::vector<Particle>& parts, const COL &factor, bool distortion, bool faceUpward);
@@ -257,11 +257,11 @@ class GenParticleSystem : public IParticleSystem {
 protected:
 
 	std::vector<Particle> m_parts;	
-	std::vector< boost::shared_ptr<IParticleForce> > m_forces;
+	std::vector< std::shared_ptr<IParticleForce> > m_forces;
 //	std::vector<Storm3D_PointParticle> m_mesh;
 //	std::vector<Storm3D_LineParticle> m_lineMesh;
 
-//	boost::shared_ptr<ParamBlock> m_pb;
+//	std::shared_ptr<ParamBlock> m_pb;
 //	Matrix m_tm;
 	Vector m_position;
 	Vector m_velocity;
@@ -281,13 +281,13 @@ protected:
 	bool use_explosion;
 	COL ambient;
 	IStorm3D_Material* m_mtl;
-	boost::shared_ptr<IParticleRenderer> m_renderer;
-	boost::shared_ptr<IParticleArea> area;
+	std::shared_ptr<IParticleRenderer> m_renderer;
+	std::shared_ptr<IParticleArea> area;
 	float emit_factor;
 
-	boost::shared_ptr<std::vector<Particle> > m_render_fluid_parts;	
-	boost::shared_ptr<PhysicsFluid> fluid;
-	boost::shared_ptr<ParticlePhysics> physics;
+	std::shared_ptr<std::vector<Particle> > m_render_fluid_parts;	
+	std::shared_ptr<PhysicsFluid> fluid;
+	std::shared_ptr<ParticlePhysics> physics;
 
 	IStorm3D_Model *spawnModel;
 	std::vector<IStorm3D_Helper *> spawnHelpers;
@@ -329,8 +329,8 @@ public:
 	void setEmitFactor(float factor);
 	void setLighting(const COL &ambient, const signed short int *lightIndices);
 	void setExplosion(const Vector& pos, bool enable);
-	void setArea(boost::shared_ptr<IParticleArea> &area);
-	void setPhysics(boost::shared_ptr<ParticlePhysics> &physics);
+	void setArea(std::shared_ptr<IParticleArea> &area);
+	void setPhysics(std::shared_ptr<ParticlePhysics> &physics);
 	void releasePhysicsResources();
 };
 

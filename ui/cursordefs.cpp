@@ -1,8 +1,6 @@
 
 #include "precompiled.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include "cursordefs.h"
 #include "cursordefs_files.h"
 #include "../util/Debug_MemoryManager.h"
@@ -97,7 +95,7 @@ void loadDHCursors(Ogui *ogui, int controller)
 
 	for(int j = 0; j < DH_CURSOR_AMOUNT; j++)
 	{
-		std::string locale = "gui_cursor" + boost::lexical_cast<std::string>(j);
+		std::string locale = "gui_cursor" + std::to_string(j);
 		if(!::game::DHLocaleManager::getInstance()->hasString(::game::DHLocaleManager::BANK_GUI, locale.c_str()))
 		{
 			continue;
@@ -121,7 +119,7 @@ void loadDHCursors(Ogui *ogui, int controller)
 			}
 			else
 			{
-				Logger::getInstance()->error(("Loading cursor " + boost::lexical_cast<std::string>(j) + " failed: invalid offset").c_str());
+				Logger::getInstance()->error(("Loading cursor " + std::to_string(j) + " failed: invalid offset").c_str());
 			}
 		}
 	}

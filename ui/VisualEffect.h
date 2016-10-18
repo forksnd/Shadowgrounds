@@ -4,15 +4,11 @@
 
 #include <DatatypeDef.h>
 
-#ifndef INCLUDED_BOOST_SHARED_PTR_HPP
-#define INCLUDED_BOOST_SHARED_PTR_HPP
-#include <boost/shared_ptr.hpp>
-#endif
-
 #include "../game/unified_handle_type.h"
 
 #include "../util/DecalManager.h"
 #include <vector>
+#include <memory>
 
 namespace game
 {
@@ -63,7 +59,7 @@ namespace ui
 		void setPosition(const VC3 &position);
 		void setRotation(const VC3 &rotation);
 		//void setRotation(const QUAT &rotation);
-		void setParticleEffect(boost::shared_ptr<frozenbyte::particle::IParticleEffect> effect, 
+		void setParticleEffect(std::shared_ptr<frozenbyte::particle::IParticleEffect> effect, 
 			const VC3& velocity, const VC3 &rotation);
 		void setParticleEffectEmitRate(float rate);
 		void setParticleExplosion(const VC3 &position, bool useExplosion);
@@ -100,7 +96,7 @@ namespace ui
 		bool advanceDeleteCounter;
 
 		friend class VisualEffectManager;
-		boost::shared_ptr<frozenbyte::particle::IParticleEffect> particleEffect;
+		std::shared_ptr<frozenbyte::particle::IParticleEffect> particleEffect;
 		std::vector<frozenbyte::DecalIdentifier> removableDecals;
 
 		std::string muzzleAttachment;

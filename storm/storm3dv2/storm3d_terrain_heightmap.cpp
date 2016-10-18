@@ -4,10 +4,11 @@
 #pragma warning(disable:4103)
 #endif
 
+#include <algorithm>
+#include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
-#include <fstream>
-#include <boost/scoped_array.hpp>
 
 #include "storm3d_terrain_heightmap.h"
 #include "storm3d_terrain_lod.h"
@@ -40,14 +41,14 @@
 
 	struct TexturePass
 	{
-		boost::shared_ptr<Storm3D_Texture> weights;
+		std::shared_ptr<Storm3D_Texture> weights;
 
 		int textureA;
 		int textureB;
 
 		int subMask;
 
-		TexturePass(boost::shared_ptr<Storm3D_Texture> weights_, int textureA_, int textureB_, int subMask_ = -1)
+		TexturePass(std::shared_ptr<Storm3D_Texture> weights_, int textureA_, int textureB_, int subMask_ = -1)
 		:	weights(weights_),
 			textureA(textureA_),
 			textureB(textureB_),
@@ -96,8 +97,8 @@
 		float heightMin;
 		float heightMax;
 
-		boost::shared_ptr<Storm3D_TerrainLod> indexBuffer;
-		boost::shared_ptr<Storm3D_Texture> lightMap;
+		std::shared_ptr<Storm3D_TerrainLod> indexBuffer;
+		std::shared_ptr<Storm3D_Texture> lightMap;
 
 		TerrainBlock()
 		:	positionX(0),
@@ -115,7 +116,7 @@
             heights_id = storage.alloc(VERTEX_COUNT * VERTEX_COUNT, STREAM_0_SIZE);
         }
 
-		void fillBuffer(VertexStorage& storage, const VC2I &start, const VC2I &end, boost::scoped_array<unsigned short> &buffer, int blockX, int blockY, const VC2I &resolution, const VC3 &scale, const VC3 &size)
+		void fillBuffer(VertexStorage& storage, const VC2I &start, const VC2I &end, std::unique_ptr<unsigned short[]> &buffer, int blockX, int blockY, const VC2I &resolution, const VC3 &scale, const VC3 &size)
 		{
 			float *pointer = (float*) storage.lock(heights_id, STREAM_0_SIZE);
 			if(!pointer)
@@ -213,7 +214,7 @@
 		}
 	};
 
-	typedef  boost::shared_ptr<Storm3D_Texture> SharedTexture;
+	typedef  std::shared_ptr<Storm3D_Texture> SharedTexture;
 
 	struct RenderBlock
 	{
@@ -242,8 +243,8 @@ struct Storm3D_TerrainHeightmapData
 	Storm3D &storm;
 	GfxDevice &device;
 
-	boost::scoped_array<unsigned short> heightMap;
-	boost::scoped_array<unsigned short> collisionHeightMap;
+	std::unique_ptr<unsigned short[]> heightMap;
+	std::unique_ptr<unsigned short[]> collisionHeightMap;
 	VC2I resolution;
 	VC3 size;
 	VC2I collResolution;
@@ -265,7 +266,7 @@ struct Storm3D_TerrainHeightmapData
     uint16_t vertices_id = 0;
 
 	std::vector<TerrainBlock> blocks;
-	boost::shared_ptr<Storm3D_TerrainLod> indexBuffer;
+	std::shared_ptr<Storm3D_TerrainLod> indexBuffer;
 
 	std::vector<SharedTexture> textures;
 
@@ -733,7 +734,7 @@ void Storm3D_TerrainHeightmap::setHeightMap(const unsigned short *buffer, const 
 	assert(data->obstaclemapShiftMult != -1);
 
 	int bufferSize = (resolution.x + 1) * (resolution.y + 1);
-	boost::scoped_array<unsigned short> tempBuffer(new unsigned short [bufferSize]);
+	std::unique_ptr<unsigned short[]> tempBuffer(new unsigned short [bufferSize]);
 
 	int j = 0;
 	int i = 0;
@@ -755,7 +756,7 @@ void Storm3D_TerrainHeightmap::setHeightMap(const unsigned short *buffer, const 
 	// Create correctly interpolated collision map
 	{
 		int bufferSize = data->collResolution.x * (data->collResolution.y + 1);
-		boost::scoped_array<unsigned short> tempBuffer(new unsigned short [bufferSize]);
+		std::unique_ptr<unsigned short[]> tempBuffer(new unsigned short [bufferSize]);
 
 		const VC2I &sourceRes = resolution;
 		const unsigned short *sourceBuffer = buffer;
@@ -827,11 +828,11 @@ void Storm3D_TerrainHeightmap::setHeightMap(const unsigned short *buffer, const 
 
 /*
 	int bufferSize2 = data->collResolution.x * (data->collResolution.y + 1);
-	boost::scoped_array<unsigned short> tempBuffer2(new unsigned short [bufferSize2]);
+	std::unique_ptr<unsigned short[]> tempBuffer2(new unsigned short [bufferSize2]);
 
 	// HACK: iterated scale up (by always creating a doubled map..)
 	int bufferSize3 = data->collResolution.x * (data->collResolution.y + 1);
-	boost::scoped_array<unsigned short> tempBuffer3(new unsigned short [bufferSize3]);
+	std::unique_ptr<unsigned short[]> tempBuffer3(new unsigned short [bufferSize3]);
 
 	//for(j = 0 ; j < resolution.y; ++j)
 	//{

@@ -459,7 +459,7 @@ bool Cooker::cookMesh(const char *filename, IStorm3D_Model *model)
 	std::vector<NxVec3> vertices;
 	std::vector<unsigned int> indices;
 
-	boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(model->ITObject->Begin());
+	std::unique_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(model->ITObject->Begin());
 	for(; !objectIterator->IsEnd(); objectIterator->Next())
 	{
 		IStorm3D_Model_Object *object = objectIterator->GetCurrent();

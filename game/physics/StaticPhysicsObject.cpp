@@ -21,7 +21,7 @@
 namespace game
 {
 #ifdef PHYSICS_PHYSX
-	typedef std::map<std::string, boost::shared_ptr<frozenbyte::physics::StaticMesh> > MeshHash;
+	typedef std::map<std::string, std::shared_ptr<frozenbyte::physics::StaticMesh> > MeshHash;
 #endif
 
 	class StaticPhysicsObjectImpl
@@ -34,7 +34,7 @@ namespace game
 		}
 
 #ifdef PHYSICS_PHYSX
-		StaticPhysicsObjectImpl(boost::shared_ptr<frozenbyte::physics::StaticMesh> &mesh)
+		StaticPhysicsObjectImpl(std::shared_ptr<frozenbyte::physics::StaticMesh> &mesh)
 		{
 			this->filename = std::string("");
 			this->model = NULL;
@@ -48,7 +48,7 @@ namespace game
 		}
 
 #ifdef PHYSICS_PHYSX
-		boost::shared_ptr<frozenbyte::physics::StaticMesh> getMesh(GamePhysics *gamePhysics, const VC3 &position, const QUAT &rotation)
+		std::shared_ptr<frozenbyte::physics::StaticMesh> getMesh(GamePhysics *gamePhysics, const VC3 &position, const QUAT &rotation)
 		{
 			if(mesh)
 				return mesh;
@@ -73,11 +73,11 @@ namespace game
 						sprintf( msg, "Failed generating cook file: %s", cookfile.c_str() );
 					   Logger::getInstance()->error(msg);
 					}
-					return boost::shared_ptr<frozenbyte::physics::StaticMesh>();
+					return std::shared_ptr<frozenbyte::physics::StaticMesh>();
 				}
 			}
 
-			boost::shared_ptr<frozenbyte::physics::StaticMesh> m = gamePhysics->getPhysicsLib()->createStaticMesh(cookfile.c_str());
+			std::shared_ptr<frozenbyte::physics::StaticMesh> m = gamePhysics->getPhysicsLib()->createStaticMesh(cookfile.c_str());
 
 			// loading from cooked file failed
 			if(!m || !m->getMesh())
@@ -85,10 +85,10 @@ namespace game
 				// return NULL pointer
 				::Logger::getInstance()->error("StaticPhysicsObject::getMesh - loading cooked file failed.");
 				::Logger::getInstance()->error(cookfile.c_str());
-				return boost::shared_ptr<frozenbyte::physics::StaticMesh>();
+				return std::shared_ptr<frozenbyte::physics::StaticMesh>();
 			}
 
-			meshHash.insert(std::pair<std::string, boost::shared_ptr<frozenbyte::physics::StaticMesh> >(filename, m));
+			meshHash.insert(std::pair<std::string, std::shared_ptr<frozenbyte::physics::StaticMesh> >(filename, m));
 
 			// MOVED FROM BUILDINGADDER
 			if(model)
@@ -104,7 +104,7 @@ namespace game
 		IStorm3D_Model *model;
 
 #ifdef PHYSICS_PHYSX
-		boost::shared_ptr<frozenbyte::physics::StaticMesh> mesh;
+		std::shared_ptr<frozenbyte::physics::StaticMesh> mesh;
 		static MeshHash meshHash;
 #endif
 
@@ -126,7 +126,7 @@ namespace game
 	}
 
 #ifdef PHYSICS_PHYSX
-	StaticPhysicsObject::StaticPhysicsObject(GamePhysics *gamePhysics, boost::shared_ptr<frozenbyte::physics::StaticMesh> &mesh, const VC3 &position, const QUAT &rotation)
+	StaticPhysicsObject::StaticPhysicsObject(GamePhysics *gamePhysics, std::shared_ptr<frozenbyte::physics::StaticMesh> &mesh, const VC3 &position, const QUAT &rotation)
 		: AbstractPhysicsObject(gamePhysics)
 	{
 		this->impl = new StaticPhysicsObjectImpl(mesh);
@@ -144,7 +144,7 @@ namespace game
 	PHYSICS_ACTOR StaticPhysicsObject::createImplementationObject()
 	{
 #ifdef PHYSICS_PHYSX
-		boost::shared_ptr<frozenbyte::physics::StaticMesh> staticMeshSPtr = impl->getMesh(gamePhysics, position, rotation);
+		std::shared_ptr<frozenbyte::physics::StaticMesh> staticMeshSPtr = impl->getMesh(gamePhysics, position, rotation);
 		
 		// cooking failed
 		if(!staticMeshSPtr)
@@ -153,7 +153,7 @@ namespace game
 			return PHYSICS_ACTOR();
 		}
 
-		boost::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createStaticMeshActor(staticMeshSPtr, position, rotation);
+		std::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createStaticMeshActor(staticMeshSPtr, position, rotation);
 
 		if(actor)
 			actor->setIntData(soundMaterial);

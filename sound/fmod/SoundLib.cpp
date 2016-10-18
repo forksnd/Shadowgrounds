@@ -9,9 +9,6 @@
 
 #include <fmod.h>
 
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
-
 #include "../SoundLib.h"
 #include <istorm3d_streambuffer.h>
 
@@ -451,7 +448,7 @@ bool SoundLib::initialize()
 			}
 
 			std::string foo = "Driver ";
-			foo += boost::lexical_cast<std::string> (i);
+			foo += std::to_string(i);
 			foo += "(";
 
 			std::string name = "Null";
@@ -489,7 +486,7 @@ bool SoundLib::initialize()
 		int hwchans = 0;
 		FSOUND_GetNumHWChannels(0, &hwchans, 0);
 		std::string foo = "Hardware sound channels initialized: ";
-		foo += boost::lexical_cast<std::string> (hwchans);
+		foo += std::to_string(hwchans);
 		Logger::getInstance()->debug(foo.c_str());
 
 		if(hwchans && data->useEax)
@@ -500,7 +497,7 @@ bool SoundLib::initialize()
 
 			int driver = FSOUND_GetDriver();
 			std::string foo = "Selected sound driver ";
-			foo += boost::lexical_cast<std::string> (driver);
+			foo += std::to_string(driver);
 			Logger::getInstance()->debug(foo.c_str());
 
 			{
@@ -1087,9 +1084,9 @@ signed char __stdcall streamcallback(FSOUND_STREAM *stream, void *buff, int len,
 }
 
 
-boost::shared_ptr<IStorm3D_Stream> SoundLib::createStormStream(bool stereo_, int frequency_, int bits_, float volume)
+std::shared_ptr<IStorm3D_Stream> SoundLib::createStormStream(bool stereo_, int frequency_, int bits_, float volume)
 {
-	return boost::shared_ptr<IStorm3D_Stream>(new StormStream(stereo_, frequency_, bits_, volume));
+	return std::shared_ptr<IStorm3D_Stream>(new StormStream(stereo_, frequency_, bits_, volume));
 }
 
 

@@ -6,7 +6,6 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <boost/utility.hpp>
 
 // Copyright 2002-2004 Frozenbyte Ltd.
 
@@ -37,7 +36,7 @@ namespace editor {
 	// hacking to get things work with STLport 5.1.0-RC3 and later... (intrinsic std::vector impl)
 	// TODO: make sure this does not leak.
 	struct Dir;
-	struct DirInternal : public boost::noncopyable
+	struct DirInternal
 	{
 		Dir *dir;
 		DirInternal(Dir *p_dir);
@@ -168,7 +167,7 @@ struct FileWrapper::Data
 
 	void iterateDirs(const std::string &root, const std::string &extension)
 	{
-		boost::shared_ptr<IFileList> list = FilePackageManager::getInstance().findFiles(root, extension, caseSensitive);
+		std::shared_ptr<IFileList> list = FilePackageManager::getInstance().findFiles(root, extension, caseSensitive);
 		if(!list)
 			return;
 
@@ -224,7 +223,7 @@ struct FileWrapper::Data
 
 	void iterateFiles(const std::string &root, const std::string &extension)
 	{
-		boost::shared_ptr<IFileList> list = FilePackageManager::getInstance().findFiles(root, extension, caseSensitive);
+		std::shared_ptr<IFileList> list = FilePackageManager::getInstance().findFiles(root, extension, caseSensitive);
 		if(!list)
 			return;
 
@@ -496,7 +495,7 @@ std::string FileWrapper::resolveModelName(const std::string &rootDir, const std:
 		return result;
 
 	std::string file = fileName.substr(fileName.find_last_of('\\') + 1);
-	boost::shared_ptr<IFileList> fileList = filesystem::FilePackageManager::getInstance().findFiles(rootDir, "*" + file);
+	std::shared_ptr<IFileList> fileList = filesystem::FilePackageManager::getInstance().findFiles(rootDir, "*" + file);
 	int dirs = fileList->getDirAmount(rootDir);
 	for(int i = 0; i < dirs; i++)
 	{

@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LIGHTAMOUNTMANAGER_H
 #define INCLUDED_LIGHTAMOUNTMANAGER_H
 
-#include <boost/weak_ptr.hpp>
 #include <DatatypeDef.h>
 
 class IStorm3D_Terrain;
@@ -32,7 +31,7 @@ public:
 	static LightAmountManager *getInstance();
 	static void cleanInstance();
 
-	void add(boost::weak_ptr<SpotLightCalculator> light);
+	void add(std::weak_ptr<SpotLightCalculator> light);
 
 	void setMaps(const game::GameMap *gameMap, const IStorm3D_Terrain *terrain);
 

@@ -1,7 +1,6 @@
 #include "precompiled.h"
 #include "CameraSystemAreas.h"
 
-#include <boost/lexical_cast.hpp>
 #include "../../system/Logger.h"
 
 #include "../../game/SimpleOptions.h"
@@ -137,10 +136,10 @@ void CameraSystemAreas::update( VC3 positionOfInterest, int elapsedTime )
 		if ((cameraArea[i]->getWeight()+cameraArea[i]->getTransitionWeight())==0.0f) {
 			cameraArea[i]->reset();
 		} else {
-			foofoo = foofoo + boost::lexical_cast< std::string >(i) + ": " +
-				boost::lexical_cast< std::string >(cameraArea[i]->getWeight()) + ", " +
-				boost::lexical_cast< std::string >(cameraArea[i]->getTransitionWeight()) + ", "+
-				boost::lexical_cast< std::string >(cameraArea[i]->getCameraAngle()) + "    ";
+			foofoo = foofoo + std::to_string(i) + ": " +
+				std::to_string(cameraArea[i]->getWeight()) + ", " +
+				std::to_string(cameraArea[i]->getTransitionWeight()) + ", "+
+				std::to_string(cameraArea[i]->getCameraAngle()) + "    ";
 
 			totalWeight+=cameraArea[i]->getWeight();
 			totalTWeight+=cameraArea[i]->getTransitionWeight();
@@ -225,7 +224,7 @@ void CameraSystemAreas::update( VC3 positionOfInterest, int elapsedTime )
 
 //	modeChangeTimer = 0;
 
-	foofoo = foofoo + boost::lexical_cast< std::string >(angle);
+	foofoo = foofoo + std::to_string(angle);
 	if (game::SimpleOptions::getBool(DH_OPT_B_CAMERA_SYSTEM_DEBUG)) Logger::getInstance()->error( foofoo.c_str() );
 
 

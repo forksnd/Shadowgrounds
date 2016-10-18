@@ -15,7 +15,7 @@
 
 namespace game
 {
-	typedef std::map<std::string, boost::shared_ptr<frozenbyte::physics::ConvexMesh> > ConvexMeshHash;
+	typedef std::map<std::string, std::shared_ptr<frozenbyte::physics::ConvexMesh> > ConvexMeshHash;
 
 	class ConvexPhysicsObjectImpl
 	{
@@ -30,7 +30,7 @@ namespace game
 			// nop?
 		}
 
-		boost::shared_ptr<frozenbyte::physics::ConvexMesh> getMesh(GamePhysics *gamePhysics)
+		std::shared_ptr<frozenbyte::physics::ConvexMesh> getMesh(GamePhysics *gamePhysics)
 		{
 			ConvexMeshHash::iterator iter = meshHash.find(this->filename);
 			if (iter != meshHash.end())
@@ -38,8 +38,8 @@ namespace game
 				return (*iter).second;
 			}
 
-			boost::shared_ptr<frozenbyte::physics::ConvexMesh> m = gamePhysics->getPhysicsLib()->createConvexMesh(this->filename.c_str());
-			meshHash.insert(std::pair<std::string, boost::shared_ptr<frozenbyte::physics::ConvexMesh> >(filename, m));
+			std::shared_ptr<frozenbyte::physics::ConvexMesh> m = gamePhysics->getPhysicsLib()->createConvexMesh(this->filename.c_str());
+			meshHash.insert(std::pair<std::string, std::shared_ptr<frozenbyte::physics::ConvexMesh> >(filename, m));
 			return m;
 		}
 
@@ -67,10 +67,10 @@ namespace game
 		delete impl;
 	}
 
-	boost::shared_ptr<frozenbyte::physics::ActorBase> ConvexPhysicsObject::createImplementationObject()
+	std::shared_ptr<frozenbyte::physics::ActorBase> ConvexPhysicsObject::createImplementationObject()
 	{
-		boost::shared_ptr<frozenbyte::physics::ConvexMesh> convexMeshSPtr = impl->getMesh(gamePhysics);
-		boost::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createConvexActor(convexMeshSPtr, position);
+		std::shared_ptr<frozenbyte::physics::ConvexMesh> convexMeshSPtr = impl->getMesh(gamePhysics);
+		std::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createConvexActor(convexMeshSPtr, position);
 		if(actor)
 		{
 			actor->setMass(mass);
@@ -81,7 +81,7 @@ namespace game
 		return actor;
 	}
 
-	void ConvexPhysicsObject::syncImplementationObject(boost::shared_ptr<frozenbyte::physics::ActorBase> &obj)
+	void ConvexPhysicsObject::syncImplementationObject(std::shared_ptr<frozenbyte::physics::ActorBase> &obj)
 	{
 		AbstractPhysicsObject::syncImplementationObject(obj);
 	}

@@ -4,8 +4,6 @@
 #define INCLUDED_STORM3D_TERRAIN_RENDERER_H
 
 #include <istorm3D_terrain_renderer.h>
-#include <boost/shared_ptr.hpp>
-#include <DatatypeDef.h>
 
 class Storm3D_TerrainHeightmap;
 class Storm3D_TerrainGroup;
@@ -30,10 +28,10 @@ public:
 	Storm3D_TerrainRenderer(Storm3D &storm, Storm3D_TerrainHeightmap &heightMap, Storm3D_TerrainGroup &groups, Storm3D_TerrainModels &models, Storm3D_TerrainDecalSystem &decalSystem);
 	~Storm3D_TerrainRenderer();
 
-	boost::shared_ptr<IStorm3D_Spotlight> createSpot();
-	void deleteSpot(boost::shared_ptr<IStorm3D_Spotlight> &spot);
-	boost::shared_ptr<IStorm3D_FakeSpotlight> createFakeSpot();
-	void deleteFakeSpot(boost::shared_ptr<IStorm3D_FakeSpotlight> &spot);
+	std::shared_ptr<IStorm3D_Spotlight> createSpot();
+	void deleteSpot(std::shared_ptr<IStorm3D_Spotlight> &spot);
+	std::shared_ptr<IStorm3D_FakeSpotlight> createFakeSpot();
+	void deleteFakeSpot(std::shared_ptr<IStorm3D_FakeSpotlight> &spot);
 
 	void setMovieAspectRatio(bool enable, bool fade);
 	void setParticleSystem(Storm3D_ParticleSystem *particlesystem);

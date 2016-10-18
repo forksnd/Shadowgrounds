@@ -11,7 +11,8 @@
 #include "../editor/parser.h"
 #include <map>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <algorithm>
 
 #ifdef WIN32
 #include <windows.h>
@@ -177,10 +178,10 @@ struct ModSelector::Data
 
 		/*
 		filesystem::FilePackageManager &manager = filesystem::FilePackageManager::getInstance();
-		boost::shared_ptr<filesystem::IFilePackage> zipPackage1(new filesystem::ZipPackage(dir + std::string("data1.fbz")));
-		boost::shared_ptr<filesystem::IFilePackage> zipPackage2(new filesystem::ZipPackage(dir + std::string("data2.fbz")));
-		boost::shared_ptr<filesystem::IFilePackage> zipPackage3(new filesystem::ZipPackage(dir + std::string("data3.fbz")));
-		boost::shared_ptr<filesystem::IFilePackage> zipPackage4(new filesystem::ZipPackage(dir + std::string("data4.fbz")));
+		std::shared_ptr<filesystem::IFilePackage> zipPackage1(new filesystem::ZipPackage(dir + std::string("data1.fbz")));
+		std::shared_ptr<filesystem::IFilePackage> zipPackage2(new filesystem::ZipPackage(dir + std::string("data2.fbz")));
+		std::shared_ptr<filesystem::IFilePackage> zipPackage3(new filesystem::ZipPackage(dir + std::string("data3.fbz")));
+		std::shared_ptr<filesystem::IFilePackage> zipPackage4(new filesystem::ZipPackage(dir + std::string("data4.fbz")));
 		manager.addPackage(zipPackage1, 11);
 		manager.addPackage(zipPackage2, 12);
 		manager.addPackage(zipPackage3, 13);

@@ -6,7 +6,7 @@
 #ifdef _WIN32
 
 #include <windows.h>
-#include <boost/cstdint.hpp>
+#include <stdint.h>
 
 #else  // _WIN32
 

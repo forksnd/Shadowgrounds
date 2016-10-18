@@ -12,7 +12,7 @@ namespace physics {
 class SphericalJoint: public JointBase
 {
 public:
-	SphericalJoint(NxScene &scene, const NxSphericalJointDesc &desc, boost::shared_ptr<ActorBase> &a, boost::shared_ptr<ActorBase> &b);
+	SphericalJoint(NxScene &scene, const NxSphericalJointDesc &desc, std::shared_ptr<ActorBase> &a, std::shared_ptr<ActorBase> &b);
 	~SphericalJoint();
 
 	bool isValid() const;

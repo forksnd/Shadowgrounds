@@ -18,9 +18,9 @@ namespace game
 		virtual ~TerrainPhysicsObject();
 
 	protected:
-		virtual boost::shared_ptr<frozenbyte::physics::ActorBase> createImplementationObject();
+		virtual std::shared_ptr<frozenbyte::physics::ActorBase> createImplementationObject();
 
-		virtual void syncImplementationObject(boost::shared_ptr<frozenbyte::physics::ActorBase> &obj);
+		virtual void syncImplementationObject(std::shared_ptr<frozenbyte::physics::ActorBase> &obj);
 
 		const unsigned short *buffer;
 		int samplesX;

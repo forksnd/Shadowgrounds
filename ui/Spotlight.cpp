@@ -8,10 +8,10 @@
 #include "istorm3D_terrain_renderer.h"
 #include "IStorm3D_Texture.h"
 #include "istorm3d_spotlight.h"
-#include <boost/shared_ptr.hpp>
 
 // TEMP
 #include <stdlib.h>
+#include <algorithm>
 
 #include "../system/Logger.h"
 #include "../util/AngleRotationCalculator.h"
@@ -26,13 +26,13 @@ struct SpotlightData
 {
 	IStorm3D_Terrain &terrain;
 	IStorm3D_Scene &scene;
-	boost::shared_ptr<IStorm3D_Spotlight> spot;
-	boost::shared_ptr<IStorm3D_Spotlight> spot2;
+	std::shared_ptr<IStorm3D_Spotlight> spot;
+	std::shared_ptr<IStorm3D_Spotlight> spot2;
 	VC3 currentDirection;
 	int spotAmount;
 	float fadeRange;
-	boost::shared_ptr<IStorm3D_Texture> spotTexture;
-	boost::shared_ptr<IStorm3D_Texture> coneTexture;
+	std::shared_ptr<IStorm3D_Texture> spotTexture;
+	std::shared_ptr<IStorm3D_Texture> coneTexture;
 
 	bool fakeLight;
 	COL fakeLightColor;
@@ -47,7 +47,7 @@ struct SpotlightData
 	int effectTimeElapsed;
 
 	SpotTypeProperties::FLASH_TYPE flashType;
-	boost::scoped_ptr<IStorm3D_Model> lightModel;
+	std::unique_ptr<IStorm3D_Model> lightModel;
 
 	static std::vector<SpotTypeProperties> spotTypes;
 	static int currentlyAddingSpotTypeIndex;
@@ -75,12 +75,12 @@ struct SpotlightData
 			if(!texture)
 				return;
 
-			spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+            spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture) { texture->Release(); });
 
 			IStorm3D_Texture *coneStormTexture = storm.CreateNewTexture("cone.dds");
 			if(coneStormTexture)
 			{
-				boost::shared_ptr<IStorm3D_Texture> t(coneStormTexture, NullDeleter());
+				std::shared_ptr<IStorm3D_Texture> t(coneStormTexture, NullDeleter());
 				coneTexture = t;
 			}
 
@@ -128,7 +128,7 @@ struct SpotlightData
 			if(!texture)
 				return;
 
-			spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+			spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 			spot = terrain.getRenderer().createSpot();
 			spot->setProjectionTexture(spotTexture);
@@ -150,7 +150,7 @@ struct SpotlightData
 			if(!texture)
 				return;
 
-			spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+			spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 			spotAmount = 0;
 			fadeRange = 0; //30;
@@ -166,7 +166,7 @@ struct SpotlightData
 			if(!texture)
 				return;
 
-			spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+			spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 			spotAmount = 0;
 			fadeRange = 0; //30;
@@ -182,7 +182,7 @@ struct SpotlightData
 			if(!texture)
 				return;
 
-			spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+			spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 			spotAmount = 0;
 			fadeRange = 0; //30;
@@ -198,7 +198,7 @@ struct SpotlightData
 			if(!texture)
 				return;
 
-			spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+			spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 			spotAmount = 0;
 			//fadeRange = 25;
@@ -215,7 +215,7 @@ struct SpotlightData
 			if(!texture)
 				return;
 
-			spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+			spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 			spotAmount = 0;
 			fadeRange = 12;
@@ -230,7 +230,7 @@ struct SpotlightData
 			if(!texture)
 				return;
 
-			spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+			spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 			spotAmount = 0;
 			fadeRange = 3;
@@ -248,7 +248,7 @@ struct SpotlightData
 			if(!texture)
 				return;
 
-			spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+			spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 			spotAmount = 0;
 			fadeRange = 20;
@@ -265,7 +265,7 @@ struct SpotlightData
 				if(!texture)
 					return;
 
-				spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 				spotAmount = 0;
 				fadeRange = 15;
@@ -280,7 +280,7 @@ struct SpotlightData
 				if(!texture)
 					return;
 
-				spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 				spot = terrain.getRenderer().createSpot();
 				spot->setProjectionTexture(spotTexture);
@@ -313,7 +313,7 @@ struct SpotlightData
 				if(!texture)
 					return;
 
-				spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 				spotAmount = 0;
 				fadeRange = 10;
@@ -328,7 +328,7 @@ struct SpotlightData
 				if(!texture)
 					return;
 
-				spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 				spot = terrain.getRenderer().createSpot();
 				spot->setProjectionTexture(spotTexture);
@@ -355,7 +355,7 @@ struct SpotlightData
 				if(!texture)
 					return;
 
-				spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 				spotAmount = 0;
 				fadeRange = 10;
@@ -370,7 +370,7 @@ struct SpotlightData
 				if(!texture)
 					return;
 
-				spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 				spot = terrain.getRenderer().createSpot();
 				spot->setProjectionTexture(spotTexture);
@@ -397,7 +397,7 @@ struct SpotlightData
 				if(!texture)
 					return;
 
-				spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 				spotAmount = 0;
 				fadeRange = 10;
@@ -412,7 +412,7 @@ struct SpotlightData
 				if(!texture)
 					return;
 
-				spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 				spot = terrain.getRenderer().createSpot();
 				spot->setProjectionTexture(spotTexture);
@@ -436,7 +436,7 @@ struct SpotlightData
 			if(!texture)
 				return;
 
-			spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+			spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, [](IStorm3D_Texture* texture){texture->Release();});
 
 			spot = terrain.getRenderer().createSpot();
 			spot->setProjectionTexture(spotTexture);
@@ -490,7 +490,7 @@ struct SpotlightData
 					// stop here immediately if texture load fails.
 					return;
 				}
-				spotTexture = boost::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				spotTexture = std::shared_ptr<IStorm3D_Texture>(texture, std::mem_fun(&IStorm3D_Texture::Release));
 
 				if (props.type == SpotTypeProperties::SPOT_LIGHT_MODEL_TYPE_DIRECTIONAL
 					|| props.type == SpotTypeProperties::SPOT_LIGHT_MODEL_TYPE_POINT
@@ -510,7 +510,7 @@ struct SpotlightData
 							coneStormTexture = storm.CreateNewTexture(props.coneTextureFilename.c_str());
 							if(coneStormTexture != NULL)
 							{
-								boost::shared_ptr<IStorm3D_Texture> t(coneStormTexture, NullDeleter());
+								std::shared_ptr<IStorm3D_Texture> t(coneStormTexture, NullDeleter());
 								coneTexture = t;
 							} else {
 								LOG_ERROR_W_DEBUG("Spotlight - Failed to load cone texture.", props.coneTextureFilename.c_str());
@@ -766,7 +766,7 @@ void Spotlight::setSpotlightParams(COL color)
 			float alpha = std::min(color.r, color.g);
 			alpha = std::min(alpha, color.b);
 
-			boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(data->lightModel->ITObject->Begin());
+			std::unique_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(data->lightModel->ITObject->Begin());
 			for(; !object_iterator->IsEnd(); object_iterator->Next())
 			{
 				IStorm3D_Model_Object *object = object_iterator->GetCurrent();

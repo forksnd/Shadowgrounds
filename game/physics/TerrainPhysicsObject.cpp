@@ -27,16 +27,16 @@ namespace game
 		// nop, ~AbstractPhysicsObject handles everything of any interest...
 	}
 
-	boost::shared_ptr<frozenbyte::physics::ActorBase> TerrainPhysicsObject::createImplementationObject()
+	std::shared_ptr<frozenbyte::physics::ActorBase> TerrainPhysicsObject::createImplementationObject()
 	{
-		boost::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createHeightmapActor(buffer, samplesX, samplesY, size);
+		std::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createHeightmapActor(buffer, samplesX, samplesY, size);
 		if(actor)
 			actor->setIntData(soundMaterial);
 
 		return actor;
 	}
 
-	void TerrainPhysicsObject::syncImplementationObject(boost::shared_ptr<frozenbyte::physics::ActorBase> &obj)
+	void TerrainPhysicsObject::syncImplementationObject(std::shared_ptr<frozenbyte::physics::ActorBase> &obj)
 	{
 		AbstractPhysicsObject::syncImplementationObject(obj);
 		// TODO: sync mass if it has changed... (in future, if mass changeable)

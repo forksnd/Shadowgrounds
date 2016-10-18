@@ -880,7 +880,7 @@ int OguiFormattedText::getClipPositionBottom() const
 
 void OguiFormattedText::setTransparency( int transparency )
 {
-	// Logger::getInstance()->warning( std::string( ( "FormattedText" ) + boost::lexical_cast< std::string >( transparency ) ).c_str() );
+	// Logger::getInstance()->warning( std::string( ( "FormattedText" ) + std::to_string( transparency ) ).c_str() );
 
 	std::list< OguiButton* >::iterator i;
 	for( i = buttons.begin(); i != buttons.end(); ++i )

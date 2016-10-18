@@ -31,9 +31,9 @@ namespace game
 	{
 #ifdef PHYSICS_PHYSX
 #ifdef GAME_SIDEWAYS
-		boost::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createCapsuleActor(height, radius, position, -(radius + (0.5f * height)), 2);
+		std::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createCapsuleActor(height, radius, position, -(radius + (0.5f * height)), 2);
 #else
-		boost::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createCapsuleActor(height, radius, position);
+		std::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createCapsuleActor(height, radius, position);
 #endif
 		if(actor)
 		{

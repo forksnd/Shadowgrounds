@@ -6,8 +6,6 @@
 #pragma warning( disable : 4800 )
 #endif
 
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 //#include "particlerandom.h"
 #include <vector>
 //#include <string>
@@ -97,20 +95,20 @@ public:
 CloudParticleSystem::CloudParticleSystem() {
 }
 
-boost::shared_ptr<IParticleSystem> CloudParticleSystem::createNew() {
+std::shared_ptr<IParticleSystem> CloudParticleSystem::createNew() {
 	CloudParticleSystem* ps = new CloudParticleSystem();
-	boost::shared_ptr<IParticleSystem> ptr(ps);
-	boost::shared_ptr<CloudParticleSystemEditables> eds(new CloudParticleSystemEditables);
+	std::shared_ptr<IParticleSystem> ptr(ps);
+	std::shared_ptr<CloudParticleSystemEditables> eds(new CloudParticleSystemEditables);
 	ps->m_eds.swap(eds);
 	return ptr;
 }
 
-boost::shared_ptr<IParticleSystem> CloudParticleSystem::clone() {
+std::shared_ptr<IParticleSystem> CloudParticleSystem::clone() {
 	CloudParticleSystem* ps = new CloudParticleSystem();
 	copyTo(*ps);
 	ps->m_eds = m_eds;
 	ps->m_shape = m_shape;
-	boost::shared_ptr<IParticleSystem> res(ps);
+	std::shared_ptr<IParticleSystem> res(ps);
 	return res;
 }
 
@@ -147,19 +145,19 @@ void CloudParticleSystem::parseFrom(const ParserGroup& pg, const util::SoundMate
 	m_eds->shape = pg.getValue("shape", "");
 	m_eds->randomDirection = static_cast<bool>(convertFromString<int>(pg.getValue("random_direction", ""), 0));
 	if(m_eds->shape == "sphere") {		
-		boost::shared_ptr<CloudParticleSystemShape> sphere(new CloudParticleSystemSphere);
+		std::shared_ptr<CloudParticleSystemShape> sphere(new CloudParticleSystemSphere);
 		m_shape.swap(sphere);
 		m_eds->sphereInnerRadius = convertFromString<float>(pg.getValue("sphere_inner_radius", ""), 0);
 		m_eds->sphereOuterRadius = convertFromString<float>(pg.getValue("sphere_outer_radius", ""), 0);
 	}
 	else if(m_eds->shape == "box") {
-		boost::shared_ptr<CloudParticleSystemShape> box(new CloudParticleSystemBox);
+		std::shared_ptr<CloudParticleSystemShape> box(new CloudParticleSystemBox);
 		m_shape.swap(box);
 		m_eds->boxMin = convertVectorFromString(pg.getValue("box_min", "0,0,0"));
 		m_eds->boxMax = convertVectorFromString(pg.getValue("box_max", "0,0,0"));
 	}
 	else if(m_eds->shape == "cylinder") {
-		boost::shared_ptr<CloudParticleSystemShape> cyl(new CloudParticleSystemCylinder);
+		std::shared_ptr<CloudParticleSystemShape> cyl(new CloudParticleSystemCylinder);
 		m_shape.swap(cyl);
 		m_eds->cylinderHeight = convertFromString<float>(pg.getValue("cylinder_height", ""), 0);
 		m_eds->cylinderRadius = convertFromString<float>(pg.getValue("cylinder_radius", ""), 0);	

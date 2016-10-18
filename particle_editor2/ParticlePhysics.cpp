@@ -10,7 +10,7 @@
 #include "../physics/fluid.h"
 #include "../filesystem/input_stream_wrapper.h"
 #include "../game/physics/physics_collisiongroups.h"
-#include <boost/weak_ptr.hpp>
+#include <memory>
 //#include <map>
 #include <vector>
 #include <list>
@@ -66,8 +66,8 @@ namespace particle {
 
 	struct ActorData
 	{
-		boost::weak_ptr<PhysicsActor> actor;
-		boost::weak_ptr<PhysicsMesh> mesh;
+		std::weak_ptr<PhysicsActor> actor;
+		std::weak_ptr<PhysicsMesh> mesh;
 
 		VC3 velocity;
 		VC3 angularVelocity;
@@ -88,7 +88,7 @@ namespace particle {
 
 	struct MeshData
 	{
-		boost::weak_ptr<PhysicsMesh> mesh;
+		std::weak_ptr<PhysicsMesh> mesh;
 		IStorm3D_Model_Object *object;
 		std::string filename;
 
@@ -101,7 +101,7 @@ namespace particle {
 #ifndef NX_DISABLE_FLUIDS
 	struct FluidData
 	{
-		boost::weak_ptr<PhysicsFluid> fluid;
+		std::weak_ptr<PhysicsFluid> fluid;
 		int type;
 		int maxParticles;
 
@@ -146,8 +146,8 @@ namespace particle {
 	{
 		bool operator () (const ActorData &a, const ActorData &b) const
 		{
-			boost::shared_ptr<PhysicsMesh> am = a.mesh.lock();
-			boost::shared_ptr<PhysicsMesh> bm = b.mesh.lock();
+			std::shared_ptr<PhysicsMesh> am = a.mesh.lock();
+			std::shared_ptr<PhysicsMesh> bm = b.mesh.lock();
 
 			float av = 0;
 			if(am)
@@ -166,9 +166,9 @@ namespace particle {
 #ifndef NX_DISABLE_FLUIDS
 	typedef std::vector<FluidData> FluidList;
 #endif
-	typedef std::vector<boost::shared_ptr<physics::ActorBase> > ActorBaseList;
+	typedef std::vector<std::shared_ptr<physics::ActorBase> > ActorBaseList;
 #ifndef NX_DISABLE_FLUIDS
-	typedef std::vector<boost::shared_ptr<physics::Fluid> > FluidBaseList;
+	typedef std::vector<std::shared_ptr<physics::Fluid> > FluidBaseList;
 #endif
 
 	typedef std::list<PhysicsActor *> PhysicsActorList;
@@ -178,7 +178,7 @@ namespace particle {
 
 struct ParticlePhysics::Data
 {
-	boost::shared_ptr<physics::PhysicsLib> physics;
+	std::shared_ptr<physics::PhysicsLib> physics;
 
 	int maxParticleAmount;
 	int maxParticleSpawnAmount;
@@ -215,9 +215,9 @@ struct ParticlePhysics::Data
 	{
 	}
 /*
-	boost::shared_ptr<PhysicsMesh> createConvexMesh(const char *filename, IStorm3D_Model_Object *object)
+	std::shared_ptr<PhysicsMesh> createConvexMesh(const char *filename, IStorm3D_Model_Object *object)
 	{
-		boost::shared_ptr<PhysicsMesh> mesh(new PhysicsMesh());
+		std::shared_ptr<PhysicsMesh> mesh(new PhysicsMesh());
 
 		MeshData data;
 		data.mesh = mesh;
@@ -228,9 +228,9 @@ struct ParticlePhysics::Data
 		return mesh;
 	}
 */
-	boost::shared_ptr<PhysicsActor> createActor(boost::shared_ptr<PhysicsMesh> &mesh, const VC3 &position, const QUAT &rotation, const VC3 &velocity, const VC3 &angularVelocity, float mass, int collisionGroup, int soundGroup)
+	std::shared_ptr<PhysicsActor> createActor(std::shared_ptr<PhysicsMesh> &mesh, const VC3 &position, const QUAT &rotation, const VC3 &velocity, const VC3 &angularVelocity, float mass, int collisionGroup, int soundGroup)
 	{
-		boost::shared_ptr<PhysicsActor> actor(new PhysicsActor(position, rotation));
+		std::shared_ptr<PhysicsActor> actor(new PhysicsActor(position, rotation));
 		physicsActorList.push_back(actor.get());
 
 		ActorData data;
@@ -247,9 +247,9 @@ struct ParticlePhysics::Data
 	}
 
 #ifndef NX_DISABLE_FLUIDS
-	boost::shared_ptr<PhysicsFluid> createFluid(int type, int maxParticles, float fluidStaticRestitution, float fluidStaticAdhesion, float fluidDynamicRestitution, float fluidDynamicAdhesion, float fluidDamping, float fluidStiffness, float fluidViscosity, float fluidKernelRadiusMultiplier, float fluidRestParticlesPerMeter, float fluidRestDensity, float fluidMotionLimit, int fluidPacketSizeMultiplier, int collGroup)
+	std::shared_ptr<PhysicsFluid> createFluid(int type, int maxParticles, float fluidStaticRestitution, float fluidStaticAdhesion, float fluidDynamicRestitution, float fluidDynamicAdhesion, float fluidDamping, float fluidStiffness, float fluidViscosity, float fluidKernelRadiusMultiplier, float fluidRestParticlesPerMeter, float fluidRestDensity, float fluidMotionLimit, int fluidPacketSizeMultiplier, int collGroup)
 	{
-		boost::shared_ptr<PhysicsFluid> fluid(new PhysicsFluid());
+		std::shared_ptr<PhysicsFluid> fluid(new PhysicsFluid());
 		fluidActorList.push_back(fluid.get());
 
 		FluidData data;
@@ -342,9 +342,9 @@ void ParticlePhysics::physicsExplosion(const VC3 &explosionPosition, float force
 	}
 }
 
-boost::shared_ptr<PhysicsMesh> ParticlePhysics::createConvexMesh(const char *filename, IStorm3D_Model_Object *object)
+std::shared_ptr<PhysicsMesh> ParticlePhysics::createConvexMesh(const char *filename, IStorm3D_Model_Object *object)
 {
-	boost::shared_ptr<PhysicsMesh> mesh(new PhysicsMesh());
+	std::shared_ptr<PhysicsMesh> mesh(new PhysicsMesh());
 	IStorm3D_Mesh *stormMesh = object->GetMesh();
 
 	int vertexAmount = stormMesh->GetVertexCount();
@@ -393,9 +393,9 @@ boost::shared_ptr<PhysicsMesh> ParticlePhysics::createConvexMesh(const char *fil
 	return mesh;
 }
 
-boost::shared_ptr<PhysicsActor> ParticlePhysics::createActor(boost::shared_ptr<PhysicsMesh> &mesh, const VC3 &position, const QUAT &rotation, const VC3 &velocity, const VC3 &angularVelocity, float mass, int collisionGroup, int soundGroup)
+std::shared_ptr<PhysicsActor> ParticlePhysics::createActor(std::shared_ptr<PhysicsMesh> &mesh, const VC3 &position, const QUAT &rotation, const VC3 &velocity, const VC3 &angularVelocity, float mass, int collisionGroup, int soundGroup)
 {
-	boost::shared_ptr<PhysicsActor> actor = data->createActor(mesh, position, rotation, velocity, angularVelocity, mass, collisionGroup, soundGroup);
+	std::shared_ptr<PhysicsActor> actor = data->createActor(mesh, position, rotation, velocity, angularVelocity, mass, collisionGroup, soundGroup);
 	if(actor)
 		actor->lib = data;
 
@@ -403,9 +403,9 @@ boost::shared_ptr<PhysicsActor> ParticlePhysics::createActor(boost::shared_ptr<P
 }
 
 #ifndef NX_DISABLE_FLUIDS
-boost::shared_ptr<PhysicsFluid> ParticlePhysics::createFluid(int type, int maxParticles, float fluidStaticRestitution, float fluidStaticAdhesion, float fluidDynamicRestitution, float fluidDynamicAdhesion, float fluidDamping, float fluidStiffness, float fluidViscosity, float fluidKernelRadiusMultiplier, float fluidRestParticlesPerMeter, float fluidRestDensity, float fluidMotionLimit, int fluidPacketSizeMultiplier, int collGroup)
+std::shared_ptr<PhysicsFluid> ParticlePhysics::createFluid(int type, int maxParticles, float fluidStaticRestitution, float fluidStaticAdhesion, float fluidDynamicRestitution, float fluidDynamicAdhesion, float fluidDamping, float fluidStiffness, float fluidViscosity, float fluidKernelRadiusMultiplier, float fluidRestParticlesPerMeter, float fluidRestDensity, float fluidMotionLimit, int fluidPacketSizeMultiplier, int collGroup)
 {
-	boost::shared_ptr<PhysicsFluid> fluid = data->createFluid(type, maxParticles, fluidStaticRestitution, fluidStaticAdhesion, fluidDynamicRestitution, fluidDynamicAdhesion, fluidDamping, fluidStiffness, fluidViscosity, fluidKernelRadiusMultiplier, fluidRestParticlesPerMeter, fluidRestDensity, fluidMotionLimit, fluidPacketSizeMultiplier, collGroup);
+	std::shared_ptr<PhysicsFluid> fluid = data->createFluid(type, maxParticles, fluidStaticRestitution, fluidStaticAdhesion, fluidDynamicRestitution, fluidDynamicAdhesion, fluidDamping, fluidStiffness, fluidViscosity, fluidKernelRadiusMultiplier, fluidRestParticlesPerMeter, fluidRestDensity, fluidMotionLimit, fluidPacketSizeMultiplier, collGroup);
 	if(fluid)
 		fluid->lib = data;
 
@@ -413,7 +413,7 @@ boost::shared_ptr<PhysicsFluid> ParticlePhysics::createFluid(int type, int maxPa
 }
 #endif
 
-void ParticlePhysics::setPhysics(boost::shared_ptr<physics::PhysicsLib> &physics)
+void ParticlePhysics::setPhysics(std::shared_ptr<physics::PhysicsLib> &physics)
 {
 	data->physics = physics;
 
@@ -580,7 +580,7 @@ void ParticlePhysics::update()
 		for(MeshList::iterator it = data->meshList.begin(); it != data->meshList.end(); ++it)
 		{
 			MeshData &convex = *it;
-			boost::shared_ptr<PhysicsMesh> mesh = convex.mesh.lock();
+			std::shared_ptr<PhysicsMesh> mesh = convex.mesh.lock();
 			if(!mesh)
 				continue;
 
@@ -605,7 +605,7 @@ void ParticlePhysics::update()
 		/*
 		if(actorList.size() + physicsActorList.size() > MAX_ACTOR_AMOUNT)
 		{
-			boost::shared_ptr<PhysicsActor> nullActor;
+			std::shared_ptr<PhysicsActor> nullActor;
 			return nullActor;
 		}
 		*/
@@ -639,11 +639,11 @@ void ParticlePhysics::update()
 			if(convex.createDelayCounter++ >= MAX_WAIT_FOR_CREATE)
 				continue;
 
-			boost::shared_ptr<PhysicsActor> actor = convex.actor.lock();
+			std::shared_ptr<PhysicsActor> actor = convex.actor.lock();
 			if(!actor)
 				continue;
 
-			boost::shared_ptr<PhysicsMesh> mesh = convex.mesh.lock();
+			std::shared_ptr<PhysicsMesh> mesh = convex.mesh.lock();
 			if(!mesh)
 				continue;
 
@@ -695,7 +695,7 @@ void ParticlePhysics::update()
 				break;
 
 			/*
-			boost::shared_ptr<physics::ConvexActor> convexActor = data->physics->createConvexActor(mesh->mesh, actor->position);
+			std::shared_ptr<physics::ConvexActor> convexActor = data->physics->createConvexActor(mesh->mesh, actor->position);
 			if(convexActor)
 			{
 				convexActor->setRotation(actor->rotation);
@@ -708,7 +708,7 @@ void ParticlePhysics::update()
 			}
 			*/
 
-			boost::shared_ptr<physics::BoxActor> boxActor = data->physics->createBoxActor(mesh->size, actor->position, mesh->localPosition);
+			std::shared_ptr<physics::BoxActor> boxActor = data->physics->createBoxActor(mesh->size, actor->position, mesh->localPosition);
 			if(boxActor)
 			{
 				++data->createdActors;
@@ -755,11 +755,11 @@ void ParticlePhysics::update()
 		for(FluidList::iterator it = data->fluidList.begin(); it != data->fluidList.end(); ++it)
 		{
 			FluidData &fluidData = *it;
-			boost::shared_ptr<PhysicsFluid> fluid = fluidData.fluid.lock();
+			std::shared_ptr<PhysicsFluid> fluid = fluidData.fluid.lock();
 			if(!fluid)
 				continue;
 
-			boost::shared_ptr<physics::Fluid> fluidActor = data->physics->createFluid(physics::PhysicsLib::FluidType(fluidData.type), fluidData.maxParticles, fluidData.fluidStaticRestitution, fluidData.fluidStaticAdhesion, fluidData.fluidDynamicRestitution, fluidData.fluidDynamicAdhesion, fluidData.fluidDamping, fluidData.fluidStiffness, fluidData.fluidViscosity, fluidData.fluidKernelRadiusMultiplier, fluidData.fluidRestParticlesPerMeter, fluidData.fluidRestDensity, fluidData.fluidMotionLimit, fluidData.fluidPacketSizeMultiplier, fluidData.collisionGroup);
+			std::shared_ptr<physics::Fluid> fluidActor = data->physics->createFluid(physics::PhysicsLib::FluidType(fluidData.type), fluidData.maxParticles, fluidData.fluidStaticRestitution, fluidData.fluidStaticAdhesion, fluidData.fluidDynamicRestitution, fluidData.fluidDynamicAdhesion, fluidData.fluidDamping, fluidData.fluidStiffness, fluidData.fluidViscosity, fluidData.fluidKernelRadiusMultiplier, fluidData.fluidRestParticlesPerMeter, fluidData.fluidRestDensity, fluidData.fluidMotionLimit, fluidData.fluidPacketSizeMultiplier, fluidData.collisionGroup);
 			fluid->fluid = fluidActor;
 			fluid->lib = data;
 		}
@@ -797,7 +797,7 @@ PhysicsActor::PhysicsActor(const VC3 &position_, const QUAT &rotation_)
 
 PhysicsActor::~PhysicsActor()
 {
-	boost::shared_ptr<ParticlePhysics::Data> physics = lib.lock();
+	std::shared_ptr<ParticlePhysics::Data> physics = lib.lock();
 	if(physics)
 	{
 		if(actor)
@@ -852,7 +852,7 @@ PhysicsFluid::PhysicsFluid()
 
 PhysicsFluid::~PhysicsFluid()
 {
-	boost::shared_ptr<ParticlePhysics::Data> physics = lib.lock();
+	std::shared_ptr<ParticlePhysics::Data> physics = lib.lock();
 	if(physics)
 	{
 		if(fluid)

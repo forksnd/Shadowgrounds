@@ -3,7 +3,7 @@
 #ifndef LIPSYNC_MANAGER_H
 #define LIPSYNC_MANAGER_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 class IStorm3D;
@@ -24,11 +24,11 @@ public:
 	~LipsyncManager();
 
 	const LipsyncProperties &getProperties() const;
-	boost::shared_ptr<AmplitudeArray> getAmplitudeBuffer(const std::string &file) const;
+	std::shared_ptr<AmplitudeArray> getAmplitudeBuffer(const std::string &file) const;
 
 	void setIdle(IStorm3D_Model *model, const std::string &value, int fadeTime = -1);
 	void setExpression(IStorm3D_Model *model, const std::string &value, int fadeTime = -1);
-	void play(IStorm3D_Model *model, const boost::shared_ptr<AmplitudeArray> &array, int startTime);
+	void play(IStorm3D_Model *model, const std::shared_ptr<AmplitudeArray> &array, int startTime);
 
 	void update(int ms, int currentTime);
 	void reset();

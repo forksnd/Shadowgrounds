@@ -3,7 +3,6 @@
 
 #include <assert.h>
 #include <limits.h>
-#include <boost/lexical_cast.hpp>
 
 #include "WeaponWindow.h"
 
@@ -103,7 +102,7 @@ REGISTER_COMBATSUBWINDOW( WeaponWindow );
 
 		if( coop )
 		{
-			prefix = "gui_weapon_coop" + boost::lexical_cast< std::string >( clientNum ) + "_";
+			prefix = "gui_weapon_coop" + std::to_string( clientNum ) + "_";
 		}
 
 		int xPosition = getLocaleGuiInt( (prefix + "icon_position_x" ).c_str(), 0);
@@ -126,9 +125,9 @@ REGISTER_COMBATSUBWINDOW( WeaponWindow );
 				const char *tmp = getLocaleGuiString(buf);
 				this->weaponImages[i] = ogui->LoadOguiImage(tmp);
 				
-				weaponNames[ i ] = getLocaleGuiString( ( std::string( "gui_weapon_select_text_" ) + boost::lexical_cast< std::string >( i ) ).c_str() );
+				weaponNames[ i ] = getLocaleGuiString( ( std::string( "gui_weapon_select_text_" ) + std::to_string( i ) ).c_str() );
 #else
-				std::string buf = prefix + "image_" + boost::lexical_cast< std::string >( i ); 
+				std::string buf = prefix + "image_" + std::to_string( i );
 				std::string tmp = getLocaleGuiString(buf.c_str());
 				this->weaponImages[i] = ogui->LoadOguiImage(tmp.c_str());
 				
@@ -149,7 +148,7 @@ REGISTER_COMBATSUBWINDOW( WeaponWindow );
 					}
 				}
 #endif
-				weaponNames[ i ] = getLocaleGuiString( ( std::string( prefix2 + "select_text_" ) + boost::lexical_cast< std::string >( i ) ).c_str() );
+				weaponNames[ i ] = getLocaleGuiString( ( std::string( prefix2 + "select_text_" ) + std::to_string( i ) ).c_str() );
 
 #endif
 			}
@@ -396,9 +395,9 @@ REGISTER_COMBATSUBWINDOW( WeaponWindow );
 						std::string prefix = "gui_weapon_" + profile;
 						if( coop )
 						{
-							prefix = "gui_weapon_coop" + boost::lexical_cast< std::string >( clientNum ) + "_";
+							prefix = "gui_weapon_coop" + std::to_string( clientNum ) + "_";
 						}
-						std::string buf = prefix + "image_" + boost::lexical_cast< std::string >( uinum ) + "_disabled";
+						std::string buf = prefix + "image_" + std::to_string( uinum ) + "_disabled";
 
 						if(::game::DHLocaleManager::getInstance()->hasString( DHLocaleManager::BANK_GUI, buf.c_str() ))
 						{

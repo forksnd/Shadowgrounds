@@ -9,6 +9,7 @@
 #include "file_package_manager.h"
 #include "../system/Logger.h"
 #include <vector>
+#include <assert.h>
 
 
 namespace frozenbyte {

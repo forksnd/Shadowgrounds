@@ -58,7 +58,7 @@ bool ConvexMesh::isValid() const
 // ConvexActor
 // -----------
 
-ConvexActor::ConvexActor(NxScene &scene, const boost::shared_ptr<ConvexMesh> &mesh_, const VC3 &position)
+ConvexActor::ConvexActor(NxScene &scene, const std::shared_ptr<ConvexMesh> &mesh_, const VC3 &position)
 :	mesh(mesh_)
 {
 	if(!mesh)

@@ -6,7 +6,6 @@
 #include "ITrackable.h"
 #include "ITriggerListener.h"
 #include "assert.h"
-#include <boost/shared_ptr.hpp>
 #include <c2_qtree.h>
 #include <vector>
 
@@ -24,7 +23,7 @@ namespace util {
 		}
 	};
 
-	typedef std::vector<boost::shared_ptr<Trackable> > TrackableList;
+	typedef std::vector<std::shared_ptr<Trackable> > TrackableList;
 
 	struct Trigger
 	{
@@ -60,7 +59,7 @@ namespace util {
 		}
 	};
 
-	typedef std::vector<boost::shared_ptr<Trigger> > TriggerList;
+	typedef std::vector<std::shared_ptr<Trigger> > TriggerList;
 	typedef Quadtree<Trigger> QTree;
 
 	static const int UPDATE_INTERVAL = 200;
@@ -73,7 +72,7 @@ namespace util {
 		explicit ITrackableComparator(ITrackable *given_)
 		:	given(given_) {}
 
-		bool operator () (const boost::shared_ptr<Trackable> &ptr) const
+		bool operator () (const std::shared_ptr<Trackable> &ptr) const
 		{
 			return given == ptr->ptr;
 		}
@@ -86,7 +85,7 @@ namespace util {
 		explicit TrackableComparator(Trackable *given_)
 		:	given(given_) {}
 
-		bool operator () (const boost::shared_ptr<Trackable> &ptr) const
+		bool operator () (const std::shared_ptr<Trackable> &ptr) const
 		{
 			return given == ptr.get();
 		}
@@ -95,7 +94,7 @@ namespace util {
 
 struct CircleAreaTracker::Data
 {
-	boost::scoped_ptr<QTree> tree;
+	std::unique_ptr<QTree> tree;
 	TriggerList triggers;
 	TrackableList trackables;
 
@@ -116,7 +115,7 @@ struct CircleAreaTracker::Data
 
 	int insert(const ClippedCircle &circle, ITriggerListener *listener, void *triggerData)
 	{
-		boost::shared_ptr<Trigger> trigger;
+		std::shared_ptr<Trigger> trigger;
 		int index = -1;
 
 		for(unsigned int i = 0; i < triggers.size(); ++i)
@@ -182,7 +181,7 @@ struct CircleAreaTracker::Data
 			trackables[index].reset(new Trackable());
 		}
 
-		boost::shared_ptr<Trackable> &trackable = trackables[index];
+		std::shared_ptr<Trackable> &trackable = trackables[index];
 		FB_ASSERT(trackable);
 
 		trackable->ptr = ptr;

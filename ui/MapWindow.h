@@ -2,7 +2,7 @@
 #define INCLUDED_UI_MAP_WINDOW_H
 
 #include <DatatypeDef.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 class Ogui;
@@ -21,7 +21,7 @@ class MapWindow
 	Data* data;
 
 public:
-	MapWindow(game::Game &game, Ogui &ogui, boost::shared_ptr<Map> &map);
+	MapWindow(game::Game &game, Ogui &ogui, std::shared_ptr<Map> &map);
 	~MapWindow();
 
 	enum Entity

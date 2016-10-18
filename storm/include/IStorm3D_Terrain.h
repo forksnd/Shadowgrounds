@@ -4,7 +4,7 @@
 #define INCLUDED_ISTORM3D_TERRAIN_H
 
 #include "DatatypeDef.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 class IStorm3D_TerrainRenderer;
@@ -63,7 +63,7 @@ public:
 	virtual void setLightMap(int blockIndex, IStorm3D_Texture &map) = 0;
 
 	// Terrain objects
-	virtual int addModel(boost::shared_ptr<IStorm3D_Model> model, boost::shared_ptr<IStorm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation) = 0;
+	virtual int addModel(std::shared_ptr<IStorm3D_Model> model, std::shared_ptr<IStorm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation) = 0;
 	virtual void removeModels() = 0;
 	virtual int addInstance(int modelId, const VC3 &position, const QUAT &rotation, const COL &color) = 0;
 	virtual void setInstancePosition(int modelId, int instanceId, const VC3 &position) = 0;
@@ -92,7 +92,7 @@ public:
 	virtual IStorm3D_TerrainDecalSystem &getDecalSystem() = 0;
 
 	// Querys
-	virtual boost::shared_ptr<IStorm3D_TerrainModelIterator> getModelIterator(const VC3 &position, float radius) = 0;
+	virtual std::shared_ptr<IStorm3D_TerrainModelIterator> getModelIterator(const VC3 &position, float radius) = 0;
 	virtual bool findObject(const VC3 &position, float radius, int &modelId, int &instanceId) = 0;
 	virtual VC3 getNormal(const VC2I &position) const = 0;
 	virtual VC3 getFaceNormal(const VC2 &position) const = 0;

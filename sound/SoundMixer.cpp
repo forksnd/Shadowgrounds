@@ -7,12 +7,9 @@
 #include <string>
 #include <map>
 #include <list>
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/lexical_cast.hpp>
+#include <memory>
+#include <algorithm>
 #include <assert.h>
-#include <boost/shared_ptr.hpp>
 
 #include "../convert/str2int.h"
 #include "../system/Logger.h"
@@ -98,7 +95,7 @@ namespace sfx {
 
 	struct Music
 	{
-		boost::shared_ptr<SoundStream> stream;
+		std::shared_ptr<SoundStream> stream;
 	};
 
 	struct FadeMusic
@@ -162,7 +159,7 @@ int SoundSample::getLength()
 	return data->getLength();
 }
 
-typedef std::list<boost::weak_ptr<SoundStream> > StreamList;
+typedef std::list<std::weak_ptr<SoundStream> > StreamList;
 
 struct SoundMixer::Data : public IStorm3D_StreamBuilder
 {
@@ -191,7 +188,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 	VC3 cameraPosition;
 	VC3 listenerPosition;
 
-	std::vector<boost::shared_ptr<SoundStream> > streamedSounds;
+	std::vector<std::shared_ptr<SoundStream> > streamedSounds;
 	StreamList streamList;
 
 	std::vector<SoundEvent> soundEvents;
@@ -449,7 +446,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 		}
 	}
 
-	void playStreamedSound(boost::shared_ptr<SoundStream> &stream)
+	void playStreamedSound(std::shared_ptr<SoundStream> &stream)
 	{
 		streamedSounds.push_back(stream);
 	}
@@ -649,7 +646,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 		}
 
 		{
-			std::vector<boost::shared_ptr<SoundStream> >::iterator it = streamedSounds.begin();
+			std::vector<std::shared_ptr<SoundStream> >::iterator it = streamedSounds.begin();
 			for(; it != streamedSounds.end(); )
 			{
 				if((*it)->hasEnded())
@@ -714,7 +711,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 		// New songs
 		if(!nextSong.file.empty())
 		{
-			boost::shared_ptr<SoundStream> stream = getStream(nextSong.file.c_str(), SOUNDSTREAMTYPE_MUSIC);
+			std::shared_ptr<SoundStream> stream = getStream(nextSong.file.c_str(), SOUNDSTREAMTYPE_MUSIC);
 
 			Music music;
 			if(stream)
@@ -760,21 +757,21 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 		}
 	}
 
-	boost::shared_ptr<SoundStream> getStream(const char *filename, SoundStreamType type)
+	std::shared_ptr<SoundStream> getStream(const char *filename, SoundStreamType type)
 	{
 		SoundStream *nullStream = 0;
 		if(!soundLib)
 		{
-			return boost::shared_ptr<SoundStream>(nullStream);
+			return std::shared_ptr<SoundStream>(nullStream);
 		}
 
 		if(!filename)
 		{
 			Logger::getInstance()->error("SoundMixer::loadStream - Null filename parameter given.");
-			return boost::shared_ptr<SoundStream>(nullStream);
+			return std::shared_ptr<SoundStream>(nullStream);
 		}
 
-		boost::shared_ptr<SoundStream> stream(soundLib->createStream(filename));
+		std::shared_ptr<SoundStream> stream(soundLib->createStream(filename));
 		if(!stream)
 			return stream;
 
@@ -793,7 +790,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 			stream->setBaseVolume(fxVolume);
 		}
 		
-		boost::weak_ptr<SoundStream> weakStream(stream);
+		std::weak_ptr<SoundStream> weakStream(stream);
 		streamList.push_back(weakStream);
 		return stream;
 	}
@@ -818,7 +815,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 
 		for(StreamList::iterator it = streamList.begin(); it != streamList.end(); )
 		{
-			boost::shared_ptr<SoundStream> stream = it->lock();
+			std::shared_ptr<SoundStream> stream = it->lock();
 			if(!stream)
 			{
 				it = streamList.erase(it);
@@ -887,7 +884,7 @@ struct SoundMixer::Data : public IStorm3D_StreamBuilder
 		soundLib->update();
 	}
 
-	boost::shared_ptr<IStorm3D_Stream> getStream()
+	std::shared_ptr<IStorm3D_Stream> getStream()
 	{
 		return soundLib->createStormStream(stereo, frequency, bits, fxVolume);
 	}
@@ -1056,7 +1053,7 @@ void SoundMixer::playStreamedSound(const char *filename)
 		return;
 	}
 
-	boost::shared_ptr<SoundStream> stream(data->getStream(filename, SOUNDSTREAMTYPE_EFFECT));
+	std::shared_ptr<SoundStream> stream(data->getStream(filename, SOUNDSTREAMTYPE_EFFECT));
 	if(stream)
 	{
 		stream->setVolume(data->fxVolume);
@@ -1087,7 +1084,7 @@ SoundSample *SoundMixer::loadSample(const char *filename, bool temporaryCache)
 	return data->loadSample(filename, temporaryCache);
 }
 
-boost::shared_ptr<SoundStream> SoundMixer::getStream(const char *filename, SoundStreamType type)
+std::shared_ptr<SoundStream> SoundMixer::getStream(const char *filename, SoundStreamType type)
 {
 	return data->getStream(filename, type);
 }

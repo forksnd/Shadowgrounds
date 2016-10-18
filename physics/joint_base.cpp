@@ -5,7 +5,7 @@
 namespace frozenbyte {
 namespace physics {
 
-JointBase::JointBase(NxScene &scene_, boost::shared_ptr<ActorBase> &a, boost::shared_ptr<ActorBase> &b)
+JointBase::JointBase(NxScene &scene_, std::shared_ptr<ActorBase> &a, std::shared_ptr<ActorBase> &b)
 :	joint(0),
 	scene(scene_),
 	actor1(a),

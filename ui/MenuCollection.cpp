@@ -22,8 +22,6 @@
 #include "../util/Debug_MemoryManager.h"
 #include "../sound/SoundMixer.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include "IMenuBase.h"
 
 #include "Mainmenu.h"
@@ -205,7 +203,7 @@ public:
 				backgroundAlternatives.resize(alternatives);
 				for(int i = 0; i < alternatives; i++)
 				{
-					std::string prefix = "gui_menu_background_alt" + boost::lexical_cast<std::string>(i);
+					std::string prefix = "gui_menu_background_alt" + std::to_string(i);
 					backgroundAlternatives[i].img = ogui->LoadOguiImage( getLocaleGuiString( (prefix+"_img").c_str() ) );
 					backgroundAlternatives[i].time = getLocaleGuiInt( (prefix+"_time").c_str() , 0 );
 					backgroundAlternatives[i].fade = getLocaleGuiInt( (prefix+"_fade").c_str() , 0 );

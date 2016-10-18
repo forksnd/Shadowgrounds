@@ -11,7 +11,6 @@
 #include "assert.h"
 #include "../system/Logger.h"
 
-#include <boost/lexical_cast.hpp>
 #include <string>
 
 namespace frozenbyte {
@@ -29,7 +28,7 @@ void assertImp(const char *predicateString, const char *file, int line)
 	error += " (";
 	error += file;
 	error += ", ";
-	error += boost::lexical_cast<std::string> (line);
+	error += std::to_string(line);
 	error += ")";
 
 	Logger::getInstance()->error(error.c_str());

@@ -10,7 +10,7 @@
 #include "AreaMap.h"
 #include "../game/GameMap.h"
 #include <stdio.h>
-#include <boost/scoped_array.hpp>
+#include <memory>
 #include "../util/Debug_MemoryManager.h"
 #include "../filesystem/input_file_stream.h"
 #include "../filesystem/file_package_manager.h"
@@ -39,9 +39,9 @@ struct ColorMapData
 
 /*
   // 32 bit
-	boost::scoped_array<DWORD> array;
+	std::unique_ptr<DWORD[]> array;
 */
-	boost::scoped_array<WORD> array;
+	std::unique_ptr<WORD[]> array;
 
 	ColorMapData(game::GameMap *gameMap_, const char *fileName, float scaleX, float scaleY, float scaledSizeX, float scaledSizeY)
 	:	gameMap(gameMap_),
@@ -64,7 +64,7 @@ struct ColorMapData
 			stream >> version;
 
 			stream >> resolution.x >> resolution.y;
-			boost::scoped_array<WORD> tempArray(new WORD[resolution.x * resolution.y]);
+			std::unique_ptr<WORD[]> tempArray(new WORD[resolution.x * resolution.y]);
 
 			for(int i = 0; i < resolution.x * resolution.y; ++i)
 			{
@@ -88,8 +88,8 @@ struct ColorMapData
 			return;
 
 		// 32 bit
-		//boost::scoped_array<DWORD> tempArray(new DWORD[resolution.x * resolution.y]);
-		boost::scoped_array<WORD> tempArray(new WORD[resolution.x * resolution.y]);
+		//std::unique_ptr<DWORD[]> tempArray(new DWORD[resolution.x * resolution.y]);
+		std::unique_ptr<WORD[]> tempArray(new WORD[resolution.x * resolution.y]);
 
 		for(int y = 0; y < resolution.y; ++y)
 		for(int x = 0; x < resolution.x; ++x)

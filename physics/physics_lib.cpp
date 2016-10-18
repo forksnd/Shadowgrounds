@@ -1,7 +1,6 @@
 
 #include "precompiled.h"
 
-#include <boost/lexical_cast.hpp>
 #include <map>
 
 #include "physics_lib.h"
@@ -158,7 +157,7 @@ NxPhysicsSDK *physxSDK = NULL;
 		}
 	};
 
-	static boost::scoped_ptr<Logger> logger;
+	static std::unique_ptr<Logger> logger;
 
 NxUserOutputStream *getLogger()
 {
@@ -565,30 +564,30 @@ NxScene *PhysicsLib::getScene()
 	return data->scene;
 }
 
-boost::shared_ptr<ConvexMesh> PhysicsLib::createConvexMesh(const char *filename)
+std::shared_ptr<ConvexMesh> PhysicsLib::createConvexMesh(const char *filename)
 {
 std::string msg = std::string("Loading convex cook file: ") + std::string(filename);
 ::Logger::getInstance()->debug(msg.c_str());
 
-	boost::shared_ptr<ConvexMesh> mesh(new ConvexMesh(*data->sdk, filename));
+	std::shared_ptr<ConvexMesh> mesh(new ConvexMesh(*data->sdk, filename));
 ::Logger::getInstance()->debug("Done");
 
 	return mesh;
 }
 
-boost::shared_ptr<StaticMesh> PhysicsLib::createStaticMesh(const char *filename)
+std::shared_ptr<StaticMesh> PhysicsLib::createStaticMesh(const char *filename)
 {
 std::string msg = std::string("Loading static cook file: ") + std::string(filename);
 ::Logger::getInstance()->debug(msg.c_str());
 
-	boost::shared_ptr<StaticMesh> mesh(new StaticMesh(*data->sdk, filename));
+	std::shared_ptr<StaticMesh> mesh(new StaticMesh(*data->sdk, filename));
 ::Logger::getInstance()->debug("Done");
 
 	return mesh;
 }
 
 /*
-boost::shared_ptr<SphereActor> PhysicsLib::createSphereActor(float radius)
+std::shared_ptr<SphereActor> PhysicsLib::createSphereActor(float radius)
 {
 	SphereActor *actor = 0;
 
@@ -596,10 +595,10 @@ boost::shared_ptr<SphereActor> PhysicsLib::createSphereActor(float radius)
 	{
 	}
 
-	return boost::shared_ptr<SphereActor> (actor);
+	return std::shared_ptr<SphereActor> (actor);
 }
 */
-boost::shared_ptr<BoxActor> PhysicsLib::createBoxActor(const VC3 &sizes, const VC3 &position, const VC3 &localPosition)
+std::shared_ptr<BoxActor> PhysicsLib::createBoxActor(const VC3 &sizes, const VC3 &position, const VC3 &localPosition)
 {
 	BoxActor *actor = 0;
 
@@ -613,10 +612,10 @@ boost::shared_ptr<BoxActor> PhysicsLib::createBoxActor(const VC3 &sizes, const V
 		}
 	}
 
-	return boost::shared_ptr<BoxActor> (actor);
+	return std::shared_ptr<BoxActor> (actor);
 }
 
-boost::shared_ptr<CapsuleActor> PhysicsLib::createCapsuleActor(float height, float radius, const VC3 &position, float offset, int axisNumber)
+std::shared_ptr<CapsuleActor> PhysicsLib::createCapsuleActor(float height, float radius, const VC3 &position, float offset, int axisNumber)
 {
 	CapsuleActor *actor = 0;
 
@@ -630,10 +629,10 @@ boost::shared_ptr<CapsuleActor> PhysicsLib::createCapsuleActor(float height, flo
 		}
 	}
 
-	return boost::shared_ptr<CapsuleActor> (actor);
+	return std::shared_ptr<CapsuleActor> (actor);
 }
 
-boost::shared_ptr<ConvexActor> PhysicsLib::createConvexActor(const boost::shared_ptr<ConvexMesh> &mesh, const VC3 &position)
+std::shared_ptr<ConvexActor> PhysicsLib::createConvexActor(const std::shared_ptr<ConvexMesh> &mesh, const VC3 &position)
 {
 	ConvexActor *actor = 0;
 
@@ -647,10 +646,10 @@ boost::shared_ptr<ConvexActor> PhysicsLib::createConvexActor(const boost::shared
 		}
 	}
 
-	return boost::shared_ptr<ConvexActor> (actor);
+	return std::shared_ptr<ConvexActor> (actor);
 }
 
-boost::shared_ptr<StaticMeshActor> PhysicsLib::createStaticMeshActor(const boost::shared_ptr<StaticMesh> &mesh, const VC3 &position, const QUAT &rotation)
+std::shared_ptr<StaticMeshActor> PhysicsLib::createStaticMeshActor(const std::shared_ptr<StaticMesh> &mesh, const VC3 &position, const QUAT &rotation)
 {
 	StaticMeshActor *actor = 0;
 
@@ -664,10 +663,10 @@ boost::shared_ptr<StaticMeshActor> PhysicsLib::createStaticMeshActor(const boost
 		}
 	}
 
-	return boost::shared_ptr<StaticMeshActor> (actor);
+	return std::shared_ptr<StaticMeshActor> (actor);
 }
 
-boost::shared_ptr<HeightmapActor> PhysicsLib::createHeightmapActor(const unsigned short *buffer, int samplesX, int samplesY, const VC3 &size)
+std::shared_ptr<HeightmapActor> PhysicsLib::createHeightmapActor(const unsigned short *buffer, int samplesX, int samplesY, const VC3 &size)
 {
 	HeightmapActor *actor = 0;
 
@@ -681,10 +680,10 @@ boost::shared_ptr<HeightmapActor> PhysicsLib::createHeightmapActor(const unsigne
 		}
 	}
 
-	return boost::shared_ptr<HeightmapActor> (actor);
+	return std::shared_ptr<HeightmapActor> (actor);
 }
 
-boost::shared_ptr<RackActor> PhysicsLib::createRackActor(const VC3 &position)
+std::shared_ptr<RackActor> PhysicsLib::createRackActor(const VC3 &position)
 {
 	RackActor *actor = 0;
 
@@ -698,10 +697,10 @@ boost::shared_ptr<RackActor> PhysicsLib::createRackActor(const VC3 &position)
 		}
 	}
 
-	return boost::shared_ptr<RackActor> (actor);
+	return std::shared_ptr<RackActor> (actor);
 }
 
-boost::shared_ptr<SphericalJoint> PhysicsLib::createSphericalJoint(boost::shared_ptr<ActorBase> &a, boost::shared_ptr<ActorBase> &b, const VC3 &globalAnchor)
+std::shared_ptr<SphericalJoint> PhysicsLib::createSphericalJoint(std::shared_ptr<ActorBase> &a, std::shared_ptr<ActorBase> &b, const VC3 &globalAnchor)
 {
 	SphericalJoint *joint = 0;
 
@@ -746,11 +745,11 @@ boost::shared_ptr<SphericalJoint> PhysicsLib::createSphericalJoint(boost::shared
 		}
 	}
 
-	return boost::shared_ptr<SphericalJoint> (joint);
+	return std::shared_ptr<SphericalJoint> (joint);
 }
 
 #ifndef NX_DISABLE_FLUIDS
-boost::shared_ptr<Fluid> PhysicsLib::createFluid(FluidType fluidType, int maxParticles, float fluidStaticRestitution, float fluidStaticAdhesion, float fluidDynamicRestitution, float fluidDynamicAdhesion, float fluidDamping, float fluidStiffness, float fluidViscosity, float fluidKernelRadiusMultiplier, float fluidRestParticlesPerMeter, float fluidRestDensity, float fluidMotionLimit, int fluidPacketSizeMultiplier, int collGroup)
+std::shared_ptr<Fluid> PhysicsLib::createFluid(FluidType fluidType, int maxParticles, float fluidStaticRestitution, float fluidStaticAdhesion, float fluidDynamicRestitution, float fluidDynamicAdhesion, float fluidDamping, float fluidStiffness, float fluidViscosity, float fluidKernelRadiusMultiplier, float fluidRestParticlesPerMeter, float fluidRestDensity, float fluidMotionLimit, int fluidPacketSizeMultiplier, int collGroup)
 {
 	Fluid *fluid = 0;
 
@@ -794,7 +793,7 @@ boost::shared_ptr<Fluid> PhysicsLib::createFluid(FluidType fluidType, int maxPar
 		}
 	}
 
-	return boost::shared_ptr<Fluid> (fluid);
+	return std::shared_ptr<Fluid> (fluid);
 }
 #endif
 
@@ -1043,15 +1042,15 @@ std::string PhysicsLib::getLoggableStatistics() const
 
 	if(data->scene)
 	{
-		result += std::string("") + boost::lexical_cast<std::string> (data->statsNumDynamicActors) + std::string(";");
-		result += std::string("") + boost::lexical_cast<std::string> (data->statsNumDynamicActorsInAwakeGroups) + std::string(";");
-		result += std::string("") + boost::lexical_cast<std::string> (data->statsContacts) + std::string(";");
+		result += std::string("") + std::to_string(data->statsNumDynamicActors) + std::string(";");
+		result += std::string("") + std::to_string(data->statsNumDynamicActorsInAwakeGroups) + std::string(";");
+		result += std::string("") + std::to_string(data->statsContacts) + std::string(";");
 #ifndef NX_DISABLE_FLUIDS
-		result += std::string("") + boost::lexical_cast<std::string> (getFluidBaseCount()) + std::string(";");
-		result += std::string("") + boost::lexical_cast<std::string> (physics::getFluidParticleCount()) + std::string(";");
+		result += std::string("") + std::to_string(getFluidBaseCount()) + std::string(";");
+		result += std::string("") + std::to_string(physics::getFluidParticleCount()) + std::string(";");
 #endif
-		result += std::string("") + boost::lexical_cast<std::string> (data->statsSimulationStartWaitTime) + std::string(";");
-		result += std::string("") + boost::lexical_cast<std::string> (data->statsSimulationWaitTime) + std::string(";");
+		result += std::string("") + std::to_string(data->statsSimulationStartWaitTime) + std::string(";");
+		result += std::string("") + std::to_string(data->statsSimulationWaitTime) + std::string(";");
 	}
 
 	return result;
@@ -1064,18 +1063,18 @@ std::string PhysicsLib::getStatistics() const
 
 	if(data->scene)
 	{
-		result += std::string("Actors: ") + boost::lexical_cast<std::string> (data->statsNumActors) + std::string("\n");
-		result += std::string("Dynamic actors: ") + boost::lexical_cast<std::string> (data->statsNumDynamicActors) + std::string("\n");
-		result += std::string("Active actors: ") + boost::lexical_cast<std::string> (data->statsNumDynamicActorsInAwakeGroups) + std::string("\n");
-		result += std::string("Max active actors: ") + boost::lexical_cast<std::string> (data->statsMaxDynamicActorsInAwakeGroups) + std::string("\n");
-		result += std::string("Contacts reported: ") + boost::lexical_cast<std::string> (data->statsContacts) + std::string("\n");
+		result += std::string("Actors: ") + std::to_string(data->statsNumActors) + std::string("\n");
+		result += std::string("Dynamic actors: ") + std::to_string(data->statsNumDynamicActors) + std::string("\n");
+		result += std::string("Active actors: ") + std::to_string(data->statsNumDynamicActorsInAwakeGroups) + std::string("\n");
+		result += std::string("Max active actors: ") + std::to_string(data->statsMaxDynamicActorsInAwakeGroups) + std::string("\n");
+		result += std::string("Contacts reported: ") + std::to_string(data->statsContacts) + std::string("\n");
 #ifndef NX_DISABLE_FLUIDS
-		result += std::string("Fluids: ") + boost::lexical_cast<std::string> (getFluidBaseCount()) + std::string("\n");
-		result += std::string("Fluid particles: ") + boost::lexical_cast<std::string> (physics::getFluidParticleCount()) + std::string("\n");
+		result += std::string("Fluids: ") + std::to_string(getFluidBaseCount()) + std::string("\n");
+		result += std::string("Fluid particles: ") + std::to_string(physics::getFluidParticleCount()) + std::string("\n");
 #endif
-		result += std::string("Physics time: ") + boost::lexical_cast<std::string> (data->statsSimulationTime) + std::string("\n");
-		result += std::string("Physics wait for start: ") + boost::lexical_cast<std::string> (data->statsSimulationStartWaitTime) + std::string("\n");
-		result += std::string("Physics wait for end: ") + boost::lexical_cast<std::string> (data->statsSimulationWaitTime);
+		result += std::string("Physics time: ") + std::to_string(data->statsSimulationTime) + std::string("\n");
+		result += std::string("Physics wait for start: ") + std::to_string(data->statsSimulationStartWaitTime) + std::string("\n");
+		result += std::string("Physics wait for end: ") + std::to_string(data->statsSimulationWaitTime);
 
 		if(data->crashed)
 			result += "\nPhysics lib is currently in ** CRASHED STATE **\n";
@@ -1122,7 +1121,7 @@ void PhysicsLib::enableFeature(PhysicsLib::Feature feature, bool enable)
 }
 
 #ifdef PROJECT_CLAW_PROTO
-boost::shared_ptr<CarActor> PhysicsLib::createCarActor(const VC3 &position)
+std::shared_ptr<CarActor> PhysicsLib::createCarActor(const VC3 &position)
 {
 	CarActor *actor = 0;
 
@@ -1136,7 +1135,7 @@ boost::shared_ptr<CarActor> PhysicsLib::createCarActor(const VC3 &position)
 		}
 	}
 
-	return boost::shared_ptr<CarActor> (actor);
+	return std::shared_ptr<CarActor> (actor);
 }
 #endif
 

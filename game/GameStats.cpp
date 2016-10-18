@@ -3,10 +3,6 @@
 
 #include <string>
 #include <stdio.h>
-#include <boost/lexical_cast.hpp>
-#ifdef _WIN32
-#include <malloc.h>
-#endif
 
 #include "GameStats.h"
 #include "Game.h"
@@ -217,7 +213,7 @@ namespace game
 					this->upgrades[currentEntry] = game->upgradeManager->getUpgradePartsAmount(u);
 #ifdef PROJECT_SURVIVOR
 					this->charparts[currentEntry] = game->upgradeManager->getCharacterPartsAmount(u);
-					this->exp[currentEntry] = game->gameScripting->getGlobalIntVariableValue(("survivor_current_expo[" + boost::lexical_cast<std::string>(playerNum) + "]").c_str());
+					this->exp[currentEntry] = game->gameScripting->getGlobalIntVariableValue(("survivor_current_expo[" + std::to_string(playerNum) + "]").c_str());
 #endif
 				} else {
 					this->upgrades[currentEntry] = 0;

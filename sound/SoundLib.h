@@ -2,7 +2,7 @@
 #define SOUNDLIB_H
 
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 class IStorm3D_Stream;
@@ -115,7 +115,7 @@ public:
 
 	void update();
 
-	boost::shared_ptr<IStorm3D_Stream> createStormStream(bool stereo_, int frequency_, int bits_, float volume);
+	std::shared_ptr<IStorm3D_Stream> createStormStream(bool stereo_, int frequency_, int bits_, float volume);
 };
 
 

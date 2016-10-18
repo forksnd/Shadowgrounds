@@ -1,7 +1,6 @@
 #include "precompiled.h"
 
 #include <fstream>
-#include <boost/lexical_cast.hpp>
 
 #include "GameController.h"
 
@@ -531,7 +530,7 @@ void GameController::loadConfiguration( const char *filename)
 	// Controller type
 	try
 	{
-		int type = boost::lexical_cast< int >( conf.getGlobals().getValue( controllerTypeConfName ) );
+		int type = std::stoi( conf.getGlobals().getValue( controllerTypeConfName ) );
 		// legacy support
 		if(type < 100)
 		{
@@ -1434,42 +1433,42 @@ GameController::JOYSTICK_AXIS	GameController::getDetectedAxis()
 
 			if( imax == 0 )					
 			{ 
-				//Logger::getInstance()->warning( ( std::string( "joy-axis-x         " )  + boost::lexical_cast< std::string >( max->x ) + " != " + boost::lexical_cast< std::string >( temp.x ) ).c_str() );
+				//Logger::getInstance()->warning( ( std::string( "joy-axis-x         " )  + std::to_string( max->x ) + " != " + std::to_string( temp.x ) ).c_str() );
 				max->x = temp.x;					
 				result = GameController::JOYSTICK_AXIS_X;			
 			}
 			
 			if( imax == 1 )					
 			{ 
-				//Logger::getInstance()->warning( ( std::string( "joy-axis-y         " )  + boost::lexical_cast< std::string >( max->y ) + " != " + boost::lexical_cast< std::string >( temp.y ) ).c_str() );
+				//Logger::getInstance()->warning( ( std::string( "joy-axis-y         " )  + std::to_string( max->y ) + " != " + std::to_string( temp.y ) ).c_str() );
 				max->y = temp.y;					
 				result = GameController::JOYSTICK_AXIS_Y;			
 			} 
 
 			if( imax == 2 )				
 			{ 
-				//Logger::getInstance()->warning( ( std::string( "joy-axis-rx        " )  + boost::lexical_cast< std::string >( max->rx ) + " != " + boost::lexical_cast< std::string >( temp.rx ) ).c_str() );
+				//Logger::getInstance()->warning( ( std::string( "joy-axis-rx        " )  + std::to_string( max->rx ) + " != " + std::to_string( temp.rx ) ).c_str() );
 				max->rx = temp.rx;				
 				result = GameController::JOYSTICK_AXIS_RX;			
 			}
 			
 			if( imax == 3 )				
 			{ 
-				//Logger::getInstance()->warning( ( std::string( "joy-axis-ry        " )  + boost::lexical_cast< std::string >( max->ry ) + " != " + boost::lexical_cast< std::string >( temp.ry ) ).c_str() );
+				//Logger::getInstance()->warning( ( std::string( "joy-axis-ry        " )  + std::to_string( max->ry ) + " != " + std::to_string( temp.ry ) ).c_str() );
 				max->ry = temp.ry;				
 				result = GameController::JOYSTICK_AXIS_RY;			
 			}
 			
 			if( imax == 4 )	
 			{ 
-				//Logger::getInstance()->warning( ( std::string( "joy-axis-throttle  " )  + boost::lexical_cast< std::string >( max->throttle ) + " != " + boost::lexical_cast< std::string >( temp.throttle ) ).c_str() );
+				//Logger::getInstance()->warning( ( std::string( "joy-axis-throttle  " )  + std::to_string( max->throttle ) + " != " + std::to_string( temp.throttle ) ).c_str() );
 				max->throttle = temp.throttle;	
 				result = GameController::JOYSTICK_AXIS_THROTTLE;	
 			}
 			
 			if( imax == 5 )		
 			{ 
-				//Logger::getInstance()->warning( ( std::string( "joy-axis-rudder    " )  + boost::lexical_cast< std::string >( max->rudder ) + " != " + boost::lexical_cast< std::string >( temp.rudder ) ).c_str() );
+				//Logger::getInstance()->warning( ( std::string( "joy-axis-rudder    " )  + std::to_string( max->rudder ) + " != " + std::to_string( temp.rudder ) ).c_str() );
 				max->rudder = temp.rudder;		
 				result = GameController::JOYSTICK_AXIS_RUDDER;		
 			}

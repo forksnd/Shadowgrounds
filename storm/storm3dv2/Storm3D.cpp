@@ -711,7 +711,7 @@ Storm3D::Storm3D(SDL_Window* wnd, bool _no_info, filesystem::FilePackageManager 
 		filesystem::FilePackageManager::setInstancePtr(fileManager);
 	else
 	{
-		boost::shared_ptr<filesystem::IFilePackage> standardPackage(new filesystem::StandardPackage());
+		std::shared_ptr<filesystem::IFilePackage> standardPackage(new filesystem::StandardPackage());
 		filesystem::FilePackageManager &manager = filesystem::FilePackageManager::getInstance();
 		manager.addPackage(standardPackage, 0);
 	}

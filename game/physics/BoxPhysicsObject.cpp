@@ -30,9 +30,9 @@ namespace game
 	{
 #ifdef PHYSICS_PHYSX
 #ifdef GAME_SIDEWAYS
-		boost::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createBoxActor(sizes, position, VC3(0,-sizes.y,0));
+		std::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createBoxActor(sizes, position, VC3(0,-sizes.y,0));
 #else
-		boost::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createBoxActor(sizes, position);
+		std::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createBoxActor(sizes, position);
 #endif
 		if(actor)
 		{

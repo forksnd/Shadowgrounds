@@ -3,14 +3,14 @@
 #define OGUIEFFECTEVENT_H
 
 
-#include <boost/utility.hpp>
-
-
 class OguiWindow;
 
 
-class OguiEffectEvent : public boost::noncopyable
+class OguiEffectEvent
 {
+    OguiEffectEvent(const OguiEffectEvent&) = delete;
+    OguiEffectEvent& operator=(const OguiEffectEvent&) = delete;
+
 public:
 
   enum EVENT_TYPE

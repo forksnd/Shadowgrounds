@@ -13,7 +13,6 @@
 #include <list>
 #include <istream>
 #include <ostream>
-#include <boost/shared_ptr.hpp>
 #include <Storm3D_UI.h>
 #include "../editor/string_conversions.h"
 #include "../editor/parser.h"
@@ -47,10 +46,10 @@ class ParticleEffect : public IParticleEffect
 	Vector m_position;
 	Vector m_rotation;
 		
-	std::vector< boost::shared_ptr<IParticleSystem> > m_systems;
-	boost::shared_ptr<IParticleCollision> collision;
-	boost::shared_ptr<IParticleArea> area;
-	boost::shared_ptr<ParticlePhysics> physics;
+	std::vector< std::shared_ptr<IParticleSystem> > m_systems;
+	std::shared_ptr<IParticleCollision> collision;
+	std::shared_ptr<IParticleArea> area;
+	std::shared_ptr<ParticlePhysics> physics;
 
 	bool m_dieWithEffect;
 
@@ -123,12 +122,12 @@ public:
 			lightIndices[i] = lightIndices_[i];
 	}
 
-	void setCollision(boost::shared_ptr<IParticleCollision> &collision_)
+	void setCollision(std::shared_ptr<IParticleCollision> &collision_)
 	{
 		collision = collision_;
 	}
 	
-	void setArea(boost::shared_ptr<IParticleArea> &area_)
+	void setArea(std::shared_ptr<IParticleArea> &area_)
 	{
 		area = area_;
 	}
@@ -197,7 +196,7 @@ public:
 	
 	IParticleSystem* addParticleSystem(const std::string& className) {
 
-		boost::shared_ptr<IParticleSystem> ps;
+		std::shared_ptr<IParticleSystem> ps;
 		if(className == "spray") {
 			ps = SprayParticleSystem::createNew();
 		}
@@ -262,12 +261,12 @@ bool ParticleEffectManager::loadParticleEffect(int id, const Parser& parser) {
 	ParticleEffect* proto = NULL;
 	for(int i = 0; i < nSystems; i++) {
 		
-		std::string str = "system" + boost::lexical_cast<std::string>(i);
+		std::string str = "system" + std::to_string(i);
 		const ParserGroup& sg = eg.getSubGroup(str);
 		
 		if(proto == NULL) {
 			proto = new ParticleEffect;
-			boost::shared_ptr<IParticleEffect> ptr(proto);
+			std::shared_ptr<IParticleEffect> ptr(proto);
 			m_protos[id] = ptr;
 		}
 		
@@ -298,12 +297,12 @@ int ParticleEffectManager::loadParticleEffect(const EditorParser& parser) {
 	ParticleEffect* proto = NULL;
 	for(int i = 0; i < nSystems; i++) {
 		
-		std::string str = "system" + boost::lexical_cast<std::string>(i);
+		std::string str = "system" + std::to_string(i);
 		const ParserGroup& sg = eg.getSubGroup(str);
 		
 		if(proto == NULL) {
 			proto = new ParticleEffect;
-			boost::shared_ptr<IParticleEffect> ptr(proto);
+			std::shared_ptr<IParticleEffect> ptr(proto);
 			m_protos.push_back(ptr);
 			int dieWithEffect = convertFromString<int>(eg.getValue("die_with_object", ""), 0);
 			proto->m_dieWithEffect = (dieWithEffect == 1) ? true : false;
@@ -332,22 +331,22 @@ int ParticleEffectManager::getEffectPrototypeAmount()
 	return m_protos.size();
 }
 
-boost::shared_ptr<IParticleEffect> ParticleEffectManager::getEffectPrototype(int id) 
+std::shared_ptr<IParticleEffect> ParticleEffectManager::getEffectPrototype(int id) 
 {
 	return m_protos[id];
 }
 
-boost::shared_ptr<IParticleEffect> ParticleEffectManager::addEffectToScene(int id) {
+std::shared_ptr<IParticleEffect> ParticleEffectManager::addEffectToScene(int id) {
 	
 	assert(id >= 0 && id < (int)m_protos.size());
 				
 	ParticleEffect* effect = new ParticleEffect;
-	boost::shared_ptr<IParticleEffect> ptr(effect);
+	std::shared_ptr<IParticleEffect> ptr(effect);
 	ParticleEffect* proto = static_cast<ParticleEffect*>(m_protos[id].get());
 	
 	for(int i = 0; i < (int)proto->m_systems.size(); i++) 
 	{	
-		boost::shared_ptr<IParticleSystem> ps = proto->getParticleSystem(i)->clone();
+		std::shared_ptr<IParticleSystem> ps = proto->getParticleSystem(i)->clone();
 		
 		effect->m_systems.push_back(ps);	
 		effect->m_dieWithEffect = proto->m_dieWithEffect;
@@ -361,7 +360,7 @@ boost::shared_ptr<IParticleEffect> ParticleEffectManager::addEffectToScene(int i
 	
 	return ptr;
 	
-	static boost::shared_ptr<IParticleEffect> empty;
+	static std::shared_ptr<IParticleEffect> empty;
 	return empty;
 }
 
@@ -409,7 +408,7 @@ void ParticleEffectManager::enableParticlePhysics(bool enable)
 	particlePhysicsEnabled = enable;
 }
 
-void ParticleEffectManager::setPhysics(boost::shared_ptr<physics::PhysicsLib> &physics_)
+void ParticleEffectManager::setPhysics(std::shared_ptr<physics::PhysicsLib> &physics_)
 {
 #ifdef PHYSICS_PHYSX
 	if(physics)
@@ -441,13 +440,13 @@ void ParticleEffectManager::addPhysicsExplosion(const VC3 &position, float force
 void ParticleEffectManager::releasePhysicsResources()
 {
 	{
-		std::list< boost::shared_ptr<IParticleSystem> >::iterator it = m_systems.begin();
+		std::list< std::shared_ptr<IParticleSystem> >::iterator it = m_systems.begin();
 		for(; it != m_systems.end(); ++it)
 			(*it)->releasePhysicsResources();
 	}
 
 	{
-		std::vector< boost::shared_ptr<IParticleEffect> >::iterator it = m_protos.begin();
+		std::vector< std::shared_ptr<IParticleEffect> >::iterator it = m_protos.begin();
 		for(; it != m_protos.end(); ++it)
 		{
 			ParticleEffect *proto = static_cast<ParticleEffect *> (it->get());
@@ -460,7 +459,7 @@ void ParticleEffectManager::releasePhysicsResources()
 	if(physics)
 	{
 		physics::PhysicsLib *ptr = 0;
-		boost::shared_ptr<physics::PhysicsLib> nullLib(ptr);
+		std::shared_ptr<physics::PhysicsLib> nullLib(ptr);
 		physics->setPhysics(nullLib);
 	}
 #endif
@@ -469,7 +468,7 @@ void ParticleEffectManager::releasePhysicsResources()
 void ParticleEffectManager::tick() {
 	m_stats.numParticles = 0;
 	m_stats.numSystems = 0;
-	std::list< boost::shared_ptr<IParticleSystem> >::iterator it = m_systems.begin();
+	std::list< std::shared_ptr<IParticleSystem> >::iterator it = m_systems.begin();
 	while(it != m_systems.end()) 
 	{
 		(*it)->tick(m_scene);
@@ -503,7 +502,7 @@ void ParticleEffectManager::render()
 #endif
 #endif
 
-	std::list< boost::shared_ptr<IParticleSystem> >::iterator it = m_systems.begin();
+	std::list< std::shared_ptr<IParticleSystem> >::iterator it = m_systems.begin();
 	while(it != m_systems.end()) 
 	{
 		(*it)->render(m_scene);

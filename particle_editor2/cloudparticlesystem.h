@@ -33,17 +33,17 @@ class CloudParticleSystemShape;
 
 class CloudParticleSystem : public GenParticleSystem 
 {
-	boost::shared_ptr<CloudParticleSystemShape> m_shape;		
-	boost::shared_ptr<CloudParticleSystemEditables> m_eds;	
+	std::shared_ptr<CloudParticleSystemShape> m_shape;		
+	std::shared_ptr<CloudParticleSystemEditables> m_eds;	
 
 	CloudParticleSystem();
 public:
 	
-	static boost::shared_ptr<IParticleSystem> createNew();
-	boost::shared_ptr<IParticleSystem> clone();
+	static std::shared_ptr<IParticleSystem> createNew();
+	std::shared_ptr<IParticleSystem> clone();
 	
 	void setLighting(const COL &ambient, const VC3 lightPos, const COL &lightCol, float lightRange) {}
-	void setCollision(boost::shared_ptr<IParticleCollision> &collision) {}
+	void setCollision(std::shared_ptr<IParticleCollision> &collision) {}
 	void setEmitterRotation(const QUAT &rotation) {}
 	void setParticlePosition(Vector& pos);
 	void setParticleVelocity(Vector& vel, const Vector& dir, float speed, const GenParticleSystemEditables& eds);

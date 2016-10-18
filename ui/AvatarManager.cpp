@@ -2,7 +2,6 @@
 
 // Copyright 2002-2004 Frozenbyte Ltd.
 
-#include <boost/shared_ptr.hpp>
 #include <fstream>
 #include <map>
 
@@ -35,18 +34,18 @@ namespace ui {
 
 	struct Character
 	{
-		boost::shared_ptr<IStorm3D_Model> model;
+		std::shared_ptr<IStorm3D_Model> model;
 
-		boost::shared_ptr<IStorm3D_Texture> picture;
-		boost::shared_ptr<IStorm3D_Material> pictureMaterial;
+		std::shared_ptr<IStorm3D_Texture> picture;
+		std::shared_ptr<IStorm3D_Material> pictureMaterial;
 	};
 
 	struct ActiveCharacter
 	{
 		IStorm3D_Texture *renderTarget;
-		boost::shared_ptr<IStorm3D_Model> model;
-		boost::shared_ptr<IStorm3D_Material> pictureMaterial;
-		boost::shared_ptr<IStorm3D_Scene> scene;
+		std::shared_ptr<IStorm3D_Model> model;
+		std::shared_ptr<IStorm3D_Material> pictureMaterial;
+		std::shared_ptr<IStorm3D_Scene> scene;
 
 		int lightIndex;
 		VC3 lightPosition;
@@ -136,8 +135,8 @@ struct AvatarManager::Data
 {
 	IStorm3D *storm;
 	IStorm3D_Terrain *terrain;
-	//boost::shared_ptr<IStorm3D_Material> material[2];
-	//boost::shared_ptr<IStorm3D_Texture> noise;
+	//std::shared_ptr<IStorm3D_Material> material[2];
+	//std::shared_ptr<IStorm3D_Texture> noise;
 
 	CharacterMap characters;
 
@@ -321,7 +320,7 @@ struct AvatarManager::Data
 			manager.setExpression(m, data, fadeTime);
 	}
 
-	void play(const std::string &id, const boost::shared_ptr<sfx::AmplitudeArray> &amplitudes, int time)
+	void play(const std::string &id, const std::shared_ptr<sfx::AmplitudeArray> &amplitudes, int time)
 	{
 		FB_ASSERT(!id.empty());
 		IStorm3D_Model *m = characters[id].model.get();
@@ -373,7 +372,7 @@ const std::string &AvatarManager::getCharacter(CharPosition position) const
 	return data->activeCharacters[position].id;
 }
 
-boost::shared_ptr<sfx::AmplitudeArray> AvatarManager::getAmplitudeBuffer(const std::string &file) const
+std::shared_ptr<sfx::AmplitudeArray> AvatarManager::getAmplitudeBuffer(const std::string &file) const
 {
 	return data->manager.getAmplitudeBuffer(file);
 }
@@ -398,7 +397,7 @@ void AvatarManager::setExpression(const std::string &character, const std::strin
 	data->setExpression(character, idleAnimation, fadeTime);
 }
 
-void AvatarManager::playSpeech(const std::string &character, const boost::shared_ptr<sfx::AmplitudeArray> &amplitudes, int time)
+void AvatarManager::playSpeech(const std::string &character, const std::shared_ptr<sfx::AmplitudeArray> &amplitudes, int time)
 {
 	data->play(character, amplitudes, time);
 }

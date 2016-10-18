@@ -3,11 +3,11 @@
 #ifndef INCLUDED_STORM3D_TERRAIN_UTILS_H
 #define INCLUDED_STORM3D_TERRAIN_UTILS_H
 
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include "GfxDevice.h"
 #include <atlbase.h>
 #include <vector>
+#include <memory>
 #include <etlsf.h>
 
 class Storm3D_Texture;
@@ -149,7 +149,7 @@ inline float convY_SCtoDS(float y, float pixszy) {return 1.0f - y*pixszy;}
 
 void readFile(std::string &result, const std::string &fileName);
 
-boost::shared_ptr<Storm3D_Texture> createSharedTexture(Storm3D_Texture *texture);
+std::shared_ptr<Storm3D_Texture> createSharedTexture(Storm3D_Texture *texture);
 
 void setCurrentAnisotrophy(int max);
 void applyMaxAnisotrophy(GfxDevice& device, int stageAmount);

@@ -3,10 +3,6 @@
 
 #include <sstream>
 #include <assert.h>
-#include <boost/lexical_cast.hpp>
-#ifdef _WIN32
-#include <malloc.h>
-#endif
 
 #include "ProfilesMenu.h"
 
@@ -259,7 +255,7 @@ void ProfilesMenu::createProfileInfoText()
 		for(int i = mission_max; i > 0; i--)
 		{
 			// load game
-			bool loaded = game->getInfoForSavegame( boost::lexical_cast< std::string >( i ).c_str(), "savegame" );
+			bool loaded = game->getInfoForSavegame( std::to_string( i ).c_str(), "savegame" );
 			if(loaded)
 			{
 				newest = i;
@@ -270,7 +266,7 @@ void ProfilesMenu::createProfileInfoText()
 		if(newest >= 0)
 		{
 			// load newest game
-			game->getInfoForSavegame( boost::lexical_cast< std::string >( newest ).c_str(), "savegame" );
+			game->getInfoForSavegame( std::to_string( newest ).c_str(), "savegame" );
 
 			// parse stats string
 			char varname[256];

@@ -15,6 +15,8 @@
 // might result into problems with network game synchronization.
 //
 
+#include <memory>
+
 #include "gamedefs.h"
 
 #include "gui_configuration.h"
@@ -26,8 +28,6 @@
 #include "../ui/LoadingWindow.h"
 #include "../util/CursorRayTracer.h"
 #include "../util/BuildingHandler.h"
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 
 
 
@@ -510,7 +510,7 @@ namespace game
 
 		void enableAlphaTestPass(bool enabled);
 
-		inline boost::shared_ptr<LoadingWindow> getLoadingWindow() const { return loadingWindow; };
+		inline std::shared_ptr<LoadingWindow> getLoadingWindow() const { return loadingWindow; };
 
 		void setTimeFactor(float factor);
 
@@ -567,7 +567,7 @@ namespace game
 		MenuCollection **commandWindows;
 		StorageWindow **storageWindows;
 		CombatWindow **combatWindows;
-		boost::shared_ptr<LoadingWindow> loadingWindow;
+		std::shared_ptr<LoadingWindow> loadingWindow;
 		AniRecorderWindow *aniRecorderWindow;
 		MessageBoxWindow **armorIncompleteConfirmWindows;
 		MessageBoxWindow **quitBox;
@@ -680,7 +680,7 @@ namespace game
 
 		ui::LightManager *lightManager;
 		ui::DynamicLightManager *dynamicLightManager;
-		boost::scoped_ptr<ui::AvatarManager> avatarManager;
+		std::unique_ptr<ui::AvatarManager> avatarManager;
 
 		VC3 listenerPosition;
 		std::vector<int> loopingSoundEffectHandles;

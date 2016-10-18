@@ -3,12 +3,8 @@
 #ifndef INCLUDED_FILESYSTEM_MEMORY_STREAM_H
 #define INCLUDED_FILESYSTEM_MEMORY_STREAM_H
 
-#ifndef INCLUDED_FILESYSTEM_INPUT_STREAM_H
 #include "input_stream.h"
-#endif
-#ifndef INCLUDED_FILESYSTEM_OUTPUT_STREAM_H
 #include "output_stream.h"
-#endif
 
 namespace frozenbyte {
 namespace filesystem {

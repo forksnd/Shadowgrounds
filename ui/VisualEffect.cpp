@@ -361,7 +361,7 @@ namespace ui
 	}
 
 
-	void VisualEffect::setParticleEffect(boost::shared_ptr<IParticleEffect> effect,
+	void VisualEffect::setParticleEffect(std::shared_ptr<IParticleEffect> effect,
 		const Vector& velocity, const VC3 &rotation) {
 		particleEffect = effect;
 		if(particleEffect.get()) {	

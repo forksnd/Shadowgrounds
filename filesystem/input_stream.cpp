@@ -13,7 +13,6 @@
 
 #include "input_stream.h"
 #include "convert_type.h"
-#include <boost/static_assert.hpp>
 
 #include <limits.h>
 
@@ -27,8 +26,8 @@ typedef unsigned short uint16_t;
 
 #endif
 
-BOOST_STATIC_ASSERT(sizeof(uint16_t) * CHAR_BIT == 16);
-BOOST_STATIC_ASSERT(CHAR_BIT == 8);
+static_assert(sizeof(uint16_t) * CHAR_BIT == 16, "");
+static_assert(CHAR_BIT == 8, "");
 
 #include "../util/Debug_MemoryManager.h"
 
@@ -54,7 +53,7 @@ InputStream::~InputStream()
 {
 }
 
-void InputStream::setBuffer(boost::shared_ptr<IInputStreamBuffer> streamBuffer_)
+void InputStream::setBuffer(std::shared_ptr<IInputStreamBuffer> streamBuffer_)
 {
 	assert(streamBuffer_);
 	streamBuffer = streamBuffer_;

@@ -11,6 +11,7 @@
 #include "empty_buffer.h"
 #include "file_list.h"
 #include <map>
+#include <assert.h>
 
 #include "../system/Logger.h"
 
@@ -25,31 +26,7 @@ namespace frozenbyte {
 namespace filesystem {
 namespace {
 
-/*
-	struct EmptyBuffer: public IInputStreamBuffer
-	{
-		unsigned char popByte()
-		{
-			return 0;
-		}
-
-		bool isEof() const
-		{
-			return true;
-		}
-
-		int getSize() const
-		{
-			return 0;
-		}
-
-		void popBytes(char *, int)
-		{
-		}
-	};
-*/
-
-	typedef std::multimap<int, boost::shared_ptr<IFilePackage> > PackageMap;
+	typedef std::multimap<int, std::shared_ptr<IFilePackage> > PackageMap;
 
 	FilePackageManager instance;
 	FilePackageManager *instancePtr = 0;
@@ -104,7 +81,7 @@ struct FilePackageManagerData
 		}
 
 		InputStream inputStream;
-		boost::shared_ptr<EmptyBuffer> inputBuffer(new EmptyBuffer());
+		std::shared_ptr<EmptyBuffer> inputBuffer(new EmptyBuffer());
 
 		inputStream.setBuffer(inputBuffer);
 		return inputStream;		
@@ -140,15 +117,15 @@ FilePackageManager::~FilePackageManager()
     delete data;
 }
 
-void FilePackageManager::addPackage(boost::shared_ptr<IFilePackage> filePackage, int priority)
+void FilePackageManager::addPackage(std::shared_ptr<IFilePackage> filePackage, int priority)
 {
-	std::pair<int, boost::shared_ptr<IFilePackage> > value(priority, filePackage);
+	std::pair<int, std::shared_ptr<IFilePackage> > value(priority, filePackage);
 	data->packages.insert(value);
 }
 
-boost::shared_ptr<IFileList> FilePackageManager::findFiles(const std::string &dir, const std::string &extension, bool caseSensitive)
+std::shared_ptr<IFileList> FilePackageManager::findFiles(const std::string &dir, const std::string &extension, bool caseSensitive)
 {
-	boost::shared_ptr<IFileList> result(new FileList());
+	std::shared_ptr<IFileList> result(new FileList());
 	result->setCaseSensitivity(caseSensitive);
 
 	for(PackageMap::iterator it = data->packages.begin(); it != data->packages.end(); ++it)

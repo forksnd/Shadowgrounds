@@ -1,6 +1,5 @@
 #include "precompiled.h"
 
-#include <boost/shared_ptr.hpp>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -30,7 +29,7 @@ namespace frozenbyte {
 #endif
 
 	typedef std::vector<Effect> EffectList;
-	typedef std::vector<boost::shared_ptr<DecalSpawner> > SpawnerList;
+	typedef std::vector<std::shared_ptr<DecalSpawner> > SpawnerList;
 
 	struct Effect
 	{
@@ -113,7 +112,7 @@ namespace frozenbyte {
 		IStorm3D_Material *material = storm.CreateNewMaterial(effect.name.c_str());
 		material->SetBaseTexture(texture);
 
-		boost::shared_ptr<DecalSpawner> spawner(new DecalSpawner(manager, *material));
+		std::shared_ptr<DecalSpawner> spawner(new DecalSpawner(manager, *material));
 		spawner->setType(effect.type);
 		spawner->setSpawnProperties(effect.waitTime, effect.fadeTime, effect.fadeType);
 		spawner->setSizeFactor(sizeFactor);

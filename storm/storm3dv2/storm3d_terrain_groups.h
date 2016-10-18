@@ -3,9 +3,7 @@
 #ifndef INCLUDED_STORM3D_TERRAIN_GROUP_H
 #define INCLUDED_STORM3D_TERRAIN_GROUP_H
 
-#include "DatatypeDef.h"
 #include "IStorm3D_Terrain.h"
-#include <boost/shared_ptr.hpp>
 
 class Storm3D;
 class Storm3D_Scene;
@@ -22,7 +20,7 @@ public:
 	Storm3D_TerrainGroup(Storm3D &storm, Storm3D_TerrainModels &models);
 	~Storm3D_TerrainGroup();
 
-	int addModel(boost::shared_ptr<Storm3D_Model> model, boost::shared_ptr<Storm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation);
+	int addModel(std::shared_ptr<Storm3D_Model> model, std::shared_ptr<Storm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation);
 	void removeModels();
 	int addInstance(int modeld, const VC3 &position, const QUAT &rotation, const COL &color);
 	void removeInstance(int modelId, int instanceId);
@@ -43,7 +41,7 @@ public:
 	void enableLightmapCollision(bool enable);
 
 	void setSceneSize(const VC3 &size);
-	boost::shared_ptr<IStorm3D_TerrainModelIterator> getModelIterator(const VC3 &position, float radius);
+	std::shared_ptr<IStorm3D_TerrainModelIterator> getModelIterator(const VC3 &position, float radius);
 	bool findObject(const VC3 &position, float radius, int &modelId, int &instanceId);
 };
 

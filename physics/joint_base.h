@@ -2,7 +2,7 @@
 #define INCLUDED_FROZENBYTE_JOINT_BASE_H
 
 #include <DatatypeDef.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class NxJoint;
 class NxScene;
@@ -18,10 +18,10 @@ protected:
 	NxJoint *joint;
 	NxScene &scene;
 
-	boost::shared_ptr<ActorBase> &actor1;
-	boost::shared_ptr<ActorBase> &actor2;
+	std::shared_ptr<ActorBase> &actor1;
+	std::shared_ptr<ActorBase> &actor2;
 
-	JointBase(NxScene &scene, boost::shared_ptr<ActorBase> &a, boost::shared_ptr<ActorBase> &b);
+	JointBase(NxScene &scene, std::shared_ptr<ActorBase> &a, std::shared_ptr<ActorBase> &b);
 	virtual ~JointBase();
 
 	void init();

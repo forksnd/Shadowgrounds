@@ -1,12 +1,6 @@
 
 #include "precompiled.h"
 
-#include <vector>
-#include <map>
-#include <string>
-#include <sstream>
-#include <boost/shared_ptr.hpp>
-
 #include <istorm3D_terrain_renderer.h>
 #include <IStorm3D_Terrain.h>
 
@@ -86,10 +80,10 @@ namespace ui {
 typedef std::vector<MapEntity> EntityList;
 typedef std::map<std::string, ObjectivePoint> ObjectivePoints;
 typedef std::vector<Objective> ObjectiveList;
-typedef std::vector<boost::shared_ptr<OguiTextLabel> > LabelList;
-typedef std::vector<boost::shared_ptr<OguiButton> > ButtonList;
+typedef std::vector<std::shared_ptr<OguiTextLabel> > LabelList;
+typedef std::vector<std::shared_ptr<OguiButton> > ButtonList;
 
-typedef std::vector<boost::shared_ptr<OguiCheckBox> > CheckboxList;
+typedef std::vector<std::shared_ptr<OguiCheckBox> > CheckboxList;
 
 struct MapWindow::Data : private IOguiButtonListener, private IOguiEffectListener
 {
@@ -103,39 +97,39 @@ struct MapWindow::Data : private IOguiButtonListener, private IOguiEffectListene
 	float playerRotation;
 	int currentObjective;
 	
-	boost::shared_ptr<Map> map;
+	std::shared_ptr<Map> map;
 
 	bool visible;
-	boost::scoped_ptr<GUIEffectWindow> effectWindow;
-	boost::scoped_ptr<OguiWindow> window;
-	boost::scoped_ptr<OguiButton> closeButton;
-	boost::scoped_ptr<OguiButton> mapBackground;
-	boost::scoped_ptr<OguiButton> mapOverlay;
-	boost::scoped_ptr<OguiButton> mapButton;
-	boost::scoped_ptr<IOguiImage> mapImage;
+	std::unique_ptr<GUIEffectWindow> effectWindow;
+	std::unique_ptr<OguiWindow> window;
+	std::unique_ptr<OguiButton> closeButton;
+	std::unique_ptr<OguiButton> mapBackground;
+	std::unique_ptr<OguiButton> mapOverlay;
+	std::unique_ptr<OguiButton> mapButton;
+	std::unique_ptr<IOguiImage> mapImage;
 	// scoped_ptr<OguiTextLabel> missionLabel;
 	// scoped_ptr<OguiTextLabel> primaryLabel;
 	// scoped_ptr<OguiTextLabel> secondaryLabel;
-	boost::scoped_ptr<OguiTextLabel> exitLabel;
-	boost::scoped_ptr<OguiButton> playerButton;
-	boost::scoped_ptr<OguiButton> checkpointButton;
-	boost::scoped_ptr<OguiButton> primaryBackground;
+	std::unique_ptr<OguiTextLabel> exitLabel;
+	std::unique_ptr<OguiButton> playerButton;
+	std::unique_ptr<OguiButton> checkpointButton;
+	std::unique_ptr<OguiButton> primaryBackground;
 	// scoped_ptr<OguiButton> secondaryBackground;
-	boost::scoped_ptr<OguiButton> highlight;
+	std::unique_ptr<OguiButton> highlight;
 	// scoped_ptr<OguiFormattedText> description;	// by Pete
-	boost::scoped_ptr<IOguiFont> boldFont;				// by Pete
-	boost::scoped_ptr<IOguiFont> bigObjectiveFont;		// by Pete
+	std::unique_ptr<IOguiFont> boldFont;				// by Pete
+	std::unique_ptr<IOguiFont> bigObjectiveFont;		// by Pete
 
 #ifdef PROJECT_SURVIVOR
-	scoped_ptr<IOguiFont> normalFont;
-	scoped_ptr<IOguiFont> exitFont;
-	scoped_ptr<IOguiFont> exitFontHigh;
+	std::unique_ptr<IOguiFont> normalFont;
+	std::unique_ptr<IOguiFont> exitFont;
+	std::unique_ptr<IOguiFont> exitFontHigh;
 
-	scoped_ptr<IOguiFont> missionTitleFont;
-	scoped_ptr<OguiTextLabel> missionTitleLabel;
+	std::unique_ptr<IOguiFont> missionTitleFont;
+	std::unique_ptr<OguiTextLabel> missionTitleLabel;
 
-	scoped_ptr<IOguiFont> scrollTipFont;
-	scoped_ptr<OguiTextLabel> scrollTipLabel;
+	std::unique_ptr<IOguiFont> scrollTipFont;
+	std::unique_ptr<OguiTextLabel> scrollTipLabel;
 #endif
 
 	// scoped_ptr<OguiButton> haxButton;
@@ -175,7 +169,7 @@ struct MapWindow::Data : private IOguiButtonListener, private IOguiEffectListene
 	std::vector<DWORD> mapBuffer;
 	std::vector<DWORD> mapBufferOutput;
 
-	Data(game::Game &game_, Ogui &ogui_, boost::shared_ptr<Map> &map_)
+	Data(game::Game &game_, Ogui &ogui_, std::shared_ptr<Map> &map_)
 	:	game(game_),
 		ogui(ogui_),
 		playerRotation(0),
@@ -1231,7 +1225,7 @@ struct MapWindow::Data : private IOguiButtonListener, private IOguiEffectListene
 						highlight.reset(ogui.CreateSimpleTextButton(window.get(), x, y, xs, ys, fname, fname, fname, 0));
 					}
 					
-					boost::shared_ptr<OguiCheckBox> checkbox( new OguiCheckBox( window.get(), &ogui, getLocaleGuiInt( "gui_map_checkbox_position_x", 0 ), yPos, getLocaleGuiInt( "gui_map_checkbox_size_x", 0 ), getLocaleGuiInt( "gui_map_checkbox_size_y", 0 ), 
+					std::shared_ptr<OguiCheckBox> checkbox( new OguiCheckBox( window.get(), &ogui, getLocaleGuiInt( "gui_map_checkbox_position_x", 0 ), yPos, getLocaleGuiInt( "gui_map_checkbox_size_x", 0 ), getLocaleGuiInt( "gui_map_checkbox_size_y", 0 ), 
 						getLocaleGuiString("gui_map_checkbox_image"), "", "", 
 						getLocaleGuiString("gui_map_checkbox_done_image"), "", "", 0, it->completed, false )  );
 
@@ -1549,7 +1543,7 @@ struct MapWindow::Data : private IOguiButtonListener, private IOguiEffectListene
 	}
 };
 
-MapWindow::MapWindow(game::Game &game, Ogui &ogui, boost::shared_ptr<Map> &map)
+MapWindow::MapWindow(game::Game &game, Ogui &ogui, std::shared_ptr<Map> &map)
 {
 	data = new Data(game, ogui, map);
 	data->init();

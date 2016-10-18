@@ -15,8 +15,6 @@
 
 #include "../../util/Debug_MemoryManager.h"
 
-#include <boost/shared_ptr.hpp>
-
 #ifdef WIN32
 #include <direct.h>
 #endif
@@ -33,12 +31,12 @@ struct Storm3D_VideoStreamer::Data
     Storm3D &storm;
     IStorm3D_StreamBuilder *streamBuilder;
 
-    boost::shared_ptr<Storm3D_Texture>  ramTexture;
-    boost::shared_ptr<Storm3D_Texture>  texture1;
-    boost::shared_ptr<Storm3D_Texture>  texture2;
+    std::shared_ptr<Storm3D_Texture>  ramTexture;
+    std::shared_ptr<Storm3D_Texture>  texture1;
+    std::shared_ptr<Storm3D_Texture>  texture2;
 
-    boost::shared_ptr<Storm3D_Texture>  activeTexture;
-    boost::shared_ptr<Storm3D_Material> material;
+    std::shared_ptr<Storm3D_Texture>  activeTexture;
+    std::shared_ptr<Storm3D_Material> material;
 
     uint32_t*    buffer;
 
@@ -86,11 +84,11 @@ struct Storm3D_VideoStreamer::Data
         delete[] buffer;
     }
 
-    boost::shared_ptr<TReader> test;
+    std::shared_ptr<TReader> test;
 
     void initialize(const std::string &fileName)
     {
-        test = boost::shared_ptr<TReader>( new TReader() );
+        test = std::shared_ptr<TReader>( new TReader() );
         if ( test->read_info(fileName.c_str(), streamBuilder) )
             return;
 
@@ -123,30 +121,31 @@ struct Storm3D_VideoStreamer::Data
 
             IStorm3D_Texture::TEXTYPE textype = IStorm3D_Texture::TEXTYPE_DYNAMIC_LOCKABLE;
 
-            texture1.reset( static_cast<Storm3D_Texture *>( storm.CreateNewTexture(width,
-                                                                                   height,
-                                                                                   textype) ),
-                            std::mem_fun(&Storm3D_Texture::Release) );
-            texture2.reset( static_cast<Storm3D_Texture *>( storm.CreateNewTexture(width,
-                                                                                   height,
-                                                                                   textype) ),
-                            std::mem_fun(&Storm3D_Texture::Release) );
+            texture1.reset(static_cast<Storm3D_Texture *>(storm.CreateNewTexture(width,
+                height,
+                textype)),
+                [](Storm3D_Texture* texture) { texture->Release(); });
+            texture2.reset(static_cast<Storm3D_Texture *>(storm.CreateNewTexture(width,
+                height,
+                textype)),
+                [](Storm3D_Texture* texture) { texture->Release(); });
 
             activeTexture = texture1;
             if (!texture1 || !texture2)
                 return false;
-        } else {
-            ramTexture.reset( new Storm3D_Texture(&storm, width, height,
-                                                  IStorm3D_Texture::TEXTYPE_RAM),
-                              std::mem_fun(&Storm3D_Texture::Release) );
-            texture1.reset( static_cast<Storm3D_Texture *>( storm.CreateNewTexture(width,
-                                                                                   height,
-                                                                                   IStorm3D_Texture::TEXTYPE_DYNAMIC) ),
-                            std::mem_fun(&Storm3D_Texture::Release) );
-            texture2.reset( static_cast<Storm3D_Texture *>( storm.CreateNewTexture(width,
-                                                                                   height,
-                                                                                   IStorm3D_Texture::TEXTYPE_DYNAMIC) ),
-                            std::mem_fun(&Storm3D_Texture::Release) );
+        }
+        else {
+            ramTexture.reset(new Storm3D_Texture(&storm, width, height,
+                IStorm3D_Texture::TEXTYPE_RAM),
+                [](Storm3D_Texture* texture) { texture->Release(); });
+            texture1.reset(static_cast<Storm3D_Texture *>(storm.CreateNewTexture(width,
+                height,
+                IStorm3D_Texture::TEXTYPE_DYNAMIC)),
+                [](Storm3D_Texture* texture) { texture->Release(); });
+            texture2.reset(static_cast<Storm3D_Texture *>(storm.CreateNewTexture(width,
+                height,
+                IStorm3D_Texture::TEXTYPE_DYNAMIC)),
+                [](Storm3D_Texture* texture) { texture->Release(); });
 
             activeTexture = texture1;
             if (!texture1 || !texture2 || !ramTexture)

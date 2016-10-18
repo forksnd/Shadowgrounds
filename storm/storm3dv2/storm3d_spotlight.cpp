@@ -241,18 +241,18 @@ namespace {
 			}
 		}
 
-		boost::shared_ptr<ShadowMap> getShadowMap()
+		std::shared_ptr<ShadowMap> getShadowMap()
 		{
 			for(unsigned int i = 0; i < SHADOW_BUFFER_LIMIT; ++i)
 			{
 				if(!used[i])// && buffers[i]->hasInitialized())
 				{
 					used[i] = true;
-					return boost::shared_ptr<ShadowMap>(buffers[i], BufferDeleter(*this));
+					return std::shared_ptr<ShadowMap>(buffers[i], BufferDeleter(*this));
 				}
 			}
 
-			return boost::shared_ptr<ShadowMap>();
+			return std::shared_ptr<ShadowMap>();
 		}
 
 		void freeShadowMap(const ShadowMap *map)
@@ -276,9 +276,9 @@ struct Storm3D_SpotlightData
 	Storm3D &storm;
 	GfxDevice &device;
 
-	boost::shared_ptr<ShadowMap> shadowMap;
-	boost::shared_ptr<Storm3D_Texture> projectionTexture;
-	boost::shared_ptr<Storm3D_Texture> coneTexture;
+	std::shared_ptr<ShadowMap> shadowMap;
+	std::shared_ptr<Storm3D_Texture> projectionTexture;
+	std::shared_ptr<Storm3D_Texture> coneTexture;
 
     //TODO: create proper rt sharing solution at higher level
 	Storm3D_SpotlightShared properties;
@@ -754,14 +754,14 @@ bool Storm3D_Spotlight::setScissorRect(Storm3D_Camera &camera, const VC2I &scree
 	return data->setScissorRect(camera, screenSize, scene);
 }
 
-void Storm3D_Spotlight::setProjectionTexture(boost::shared_ptr<IStorm3D_Texture> texture)
+void Storm3D_Spotlight::setProjectionTexture(std::shared_ptr<IStorm3D_Texture> texture)
 {
-	data->projectionTexture = boost::static_pointer_cast<Storm3D_Texture> (texture);
+	data->projectionTexture = std::static_pointer_cast<Storm3D_Texture> (texture);
 }
 
-void Storm3D_Spotlight::setConeTexture(boost::shared_ptr<IStorm3D_Texture> texture)
+void Storm3D_Spotlight::setConeTexture(std::shared_ptr<IStorm3D_Texture> texture)
 {
-	data->coneTexture = boost::static_pointer_cast<Storm3D_Texture> (texture);
+	data->coneTexture = std::static_pointer_cast<Storm3D_Texture> (texture);
 }
 
 bool Storm3D_Spotlight::hasConeTexture() const

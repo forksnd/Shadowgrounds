@@ -2,10 +2,6 @@
 
 #include <string>
 #include <vector>
-#ifdef _WIN32
-#include <malloc.h>
-#endif
-#include <boost/lexical_cast.hpp>
 
 #include "UnitScripting.h"
 
@@ -5767,7 +5763,7 @@ namespace game
 				if(unit->getVisualObject() && unit->getVisualObject()->getStormModel())
 				{
 					IStorm3D_Model *model = unit->getVisualObject()->getStormModel();
-					boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
+					std::unique_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
 					for(; !object_iterator->IsEnd(); object_iterator->Next())
 					{
 						IStorm3D_Model_Object *o = object_iterator->GetCurrent();
@@ -5862,7 +5858,7 @@ namespace game
 				if(unit->getVisualObject() && unit->getVisualObject()->getStormModel())
 				{
 					IStorm3D_Model *model = unit->getVisualObject()->getStormModel();
-					boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
+					std::unique_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
 					for(; !object_iterator->IsEnd(); object_iterator->Next())
 					{
 						IStorm3D_Model_Object *o = object_iterator->GetCurrent();
@@ -6520,7 +6516,7 @@ namespace game
 
 				if( splitString.size() >= 2 )
 				{
-					int ui_number = boost::lexical_cast< int >( splitString[ 0 ] );
+					int ui_number = std::stoi( splitString[ 0 ] );
 
 					const char* partTypeIdString = splitString[ 1 ].c_str();
 					if (PARTTYPE_ID_STRING_VALID(partTypeIdString))

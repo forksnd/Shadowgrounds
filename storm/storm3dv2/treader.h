@@ -3,14 +3,11 @@
 
 #include <SDL.h>
 
-#include <boost/utility.hpp>
-
 class IStorm3D_Stream;
 class IStorm3D_StreamBuilder;
 
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <list>
+#include <memory>
 
 struct AVFormatContext;
 struct AVCodecContext;
@@ -19,11 +16,14 @@ struct AVFrame;
 struct SwsContext;
 struct SwrContext;
 
-struct avctx : public boost::noncopyable {
+struct avctx {
+    avctx(const avctx&) = delete;
+    avctx& operator=(const avctx&) = delete;
+
     struct Frame
     {
-        boost::shared_array<uint8_t> data;
-        int64_t                      time;
+        std::unique_ptr<uint8_t[]> data;
+        int64_t                    time;
     };
 
     bool               fileopen, videoopen, audioopen;
@@ -43,7 +43,7 @@ struct avctx : public boost::noncopyable {
     short             *audiobuffer;
     unsigned int       audiobuffersize;
     unsigned long long audiotime;
-    boost::shared_ptr<IStorm3D_Stream> audiostream;
+    std::shared_ptr<IStorm3D_Stream> audiostream;
     avctx() : fileopen(false), videoopen(false), audioopen(false),
         formatctx(0), videocodecctx(0), audiocodecctx(0),
         videoindex(-1), audioindex(-1),
@@ -55,7 +55,10 @@ struct avctx : public boost::noncopyable {
         audiobuffer(0), audiobuffersize(0), audiotime(0) { }
 };
 
-class VideoBackgroundLoader : public boost::noncopyable {
+class VideoBackgroundLoader {
+    VideoBackgroundLoader(const VideoBackgroundLoader&) = delete;
+    VideoBackgroundLoader& operator=(const VideoBackgroundLoader&) = delete;
+
     avctx *mContext;
     enum ENUM_LOADER_STATE {
         STARTING = 1,
@@ -93,8 +96,10 @@ private:
     void startLoadingThread();
 };
 
-class TReader : public boost::noncopyable {
+class TReader {
 private:
+    TReader(const TReader&) = delete;
+    TReader& operator=(const TReader&) = delete;
     VideoBackgroundLoader * mLoader;
 public:
     unsigned int fps_numerator, fps_denominator, frame_width, frame_height;

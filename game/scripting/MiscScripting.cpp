@@ -398,7 +398,7 @@ namespace game
 						if (unit->getCharacter() != NULL
 							&& unit->getCharacter()->getLipsyncId() != NULL)
 						{
-							boost::shared_ptr<sfx::AmplitudeArray> amplitudes = game->gameUI->getAvatarManager()->getAmplitudeBuffer(convertLocaleSpeechString(usestr));
+							std::shared_ptr<sfx::AmplitudeArray> amplitudes = game->gameUI->getAvatarManager()->getAmplitudeBuffer(convertLocaleSpeechString(usestr));
 							game->gameUI->getAvatarManager()->playSpeech(unit->getCharacter()->getLipsyncId(), amplitudes, lipsync_start_time);
 
 							if (!game->gameUI->getAvatarManager()->isActive())
@@ -1478,14 +1478,14 @@ namespace game
 				IStorm3D *storm = game->gameUI->getStorm3D();
 				if(storm)
 				{
-					boost::scoped_ptr<Iterator<IStorm3D_Model *> > model_iterator(storm->ITModel->Begin());
+					std::unique_ptr<Iterator<IStorm3D_Model *> > model_iterator(storm->ITModel->Begin());
 					for(; !model_iterator->IsEnd(); model_iterator->Next())
 					{
 						IStorm3D_Model *model = model_iterator->GetCurrent();
 						if(!model)
 							continue;
 
-						boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
+						std::unique_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
 						for(; !object_iterator->IsEnd(); object_iterator->Next())
 						{
 							IStorm3D_Model_Object *object = object_iterator->GetCurrent();
@@ -1519,14 +1519,14 @@ namespace game
 				IStorm3D *storm = game->gameUI->getStorm3D();
 				if(storm)
 				{
-					boost::scoped_ptr<Iterator<IStorm3D_Model *> > model_iterator(storm->ITModel->Begin());
+					std::unique_ptr<Iterator<IStorm3D_Model *> > model_iterator(storm->ITModel->Begin());
 					for(; !model_iterator->IsEnd(); model_iterator->Next())
 					{
 						IStorm3D_Model *model = model_iterator->GetCurrent();
 						if(!model)
 							continue;
 
-						boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
+						std::unique_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
 						for(; !object_iterator->IsEnd(); object_iterator->Next())
 						{
 							IStorm3D_Model_Object *object = object_iterator->GetCurrent();

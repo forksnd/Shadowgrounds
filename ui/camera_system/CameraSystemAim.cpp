@@ -1,7 +1,6 @@
 #include "precompiled.h"
 #include "CameraSystemAim.h"
 
-#include <boost/lexical_cast.hpp>
 #include "../../system/Logger.h"
 
 #include "../../game/SimpleOptions.h"

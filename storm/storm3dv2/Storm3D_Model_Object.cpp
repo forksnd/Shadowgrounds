@@ -13,7 +13,6 @@
 #include "storm3d_light.h"
 #include "storm3d_helper.h"
 #include "VertexFormats.h"
-#include <boost/lexical_cast.hpp>
 
 #include "Storm3D_Bone.h"
 #include "../../util/Debug_MemoryManager.h"

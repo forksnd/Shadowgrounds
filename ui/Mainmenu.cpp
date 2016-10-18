@@ -1,6 +1,5 @@
 #include "precompiled.h"
 
-#include <boost/lexical_cast.hpp>
 #include <assert.h>
 
 #include "Mainmenu.h"
@@ -39,7 +38,7 @@ bool DoWeHaveAnySaveGames( Game* game )
 	}
 
 	int i = 0;
-	std::string temp = boost::lexical_cast< std::string >( char( 0 ) );
+	std::string temp = std::to_string( char( 0 ) );
 	for( i = 1; i <= mission_max; i++ )
 	{
 		std::stringstream foo;
@@ -356,7 +355,7 @@ void MainMenu::menuContinue()
 	}	
 #else
 	int i = 0;
-	std::string temp = boost::lexical_cast< std::string >( char( 0 ) );
+	std::string temp = std::to_string( char( 0 ) );
 	for( i = 1; i <= mission_max; i++ )
 	{
 		std::stringstream foo;
@@ -660,13 +659,13 @@ OguiButton* MainMenu::addButton( const std::string& text, int command, IOguiFont
 	if (!text.empty()) {
 		OguiButton* b;
 		
-		int x = getLocaleGuiInt( ( preHeader + "x_" + boost::lexical_cast< std::string >( count ) ).c_str(), buttonX );
-		int y = getLocaleGuiInt( ( preHeader + "y_" + boost::lexical_cast< std::string >( count ) ).c_str(), buttonY );
-		int w = getLocaleGuiInt( ( preHeader + "w_" + boost::lexical_cast< std::string >( count ) ).c_str(), buttonW );
-		int h = getLocaleGuiInt( ( preHeader + "h_" + boost::lexical_cast< std::string >( count ) ).c_str(), buttonH );
+		int x = getLocaleGuiInt( ( preHeader + "x_" + std::to_string( count ) ).c_str(), buttonX );
+		int y = getLocaleGuiInt( ( preHeader + "y_" + std::to_string( count ) ).c_str(), buttonY );
+		int w = getLocaleGuiInt( ( preHeader + "w_" + std::to_string( count ) ).c_str(), buttonW );
+		int h = getLocaleGuiInt( ( preHeader + "h_" + std::to_string( count ) ).c_str(), buttonH );
 
 		OguiWindow *parent_win = win;
-		if(getLocaleGuiInt( ( preHeader + "window_" + boost::lexical_cast< std::string >( count ) ).c_str(), 1 ) == 2)
+		if(getLocaleGuiInt( ( preHeader + "window_" + std::to_string( count ) ).c_str(), 1 ) == 2)
 		{
 			parent_win = win2;
 		}

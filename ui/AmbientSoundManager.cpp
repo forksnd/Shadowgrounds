@@ -113,7 +113,7 @@ struct AmbientSoundManagerData {
 };
 
 AmbientSoundManager::AmbientSoundManager(game::GameUI* gameUI_, SoundLooper* looper_) {
-	//boost::scoped_ptr<AmbientSoundManagerData> p(new AmbientSoundManagerData(gameUI_, looper_));
+	//std::unique_ptr<AmbientSoundManagerData> p(new AmbientSoundManagerData(gameUI_, looper_));
 	//m.swap(p);
 	m = new AmbientSoundManagerData(gameUI_, looper_);
 }

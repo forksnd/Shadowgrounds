@@ -3,9 +3,7 @@
 #ifndef INCLUDED_FILESYSTEM_STANDARD_PACKAGE
 #define INCLUDED_FILESYSTEM_STANDARD_PACKAGE
 
-#ifndef INCLUDED_FILESYSTEM_IFILE_PACKAGE_H
 #include "ifile_package.h"
-#endif
 
 namespace frozenbyte {
 namespace filesystem {

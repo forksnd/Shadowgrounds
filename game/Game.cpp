@@ -3,10 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <boost/lexical_cast.hpp>
-#ifdef _WIN32
-#include <malloc.h>
-#endif
+#include <algorithm>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4786)
@@ -2916,13 +2913,13 @@ gameUI->getTerrain()->calculateLighting();
 			util::Script::getGlobalIntVariableValue("exp_array_index", &last_index);
 			int level = 0;
 			util::Script::getGlobalArrayVariableValue("survivor_characterLevels", last_index, &level);
-			expstats += boost::lexical_cast<std::string>(level+1);
+			expstats += std::to_string(level+1);
 #endif
 
 			const char *time = time2str(timeValue);
 
-			std::string kills = boost::lexical_cast<std::string>(totalKills);
-			std::string secrets = boost::lexical_cast<std::string>(gameScripting->getGlobalIntVariableValue("secretpart_amount"));
+			std::string kills = std::to_string(totalKills);
+			std::string secrets = std::to_string(gameScripting->getGlobalIntVariableValue("secretpart_amount"));
 
 			std::string stats = "savegameStats \"time " + std::string(time) + " kills " + kills + " secrets " + secrets + expstats + "\"\n";
 

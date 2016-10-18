@@ -1,7 +1,7 @@
 #ifndef INCLUDED_FROZENBYTE_COOKER_H
 #define INCLUDED_FROZENBYTE_COOKER_H
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <DatatypeDef.h>
 
 class NxPhysicsSDK;
@@ -18,7 +18,7 @@ class PhysicsLib;
 class Cooker
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	std::unique_ptr<Data> data;
 
 public:
 	Cooker();

@@ -1,6 +1,5 @@
 #include "precompiled.h"
 
-#include <boost/lexical_cast.hpp>
 #include <fstream>
 
 // Copyright 2002-2004 Frozenbyte Ltd.
@@ -13,7 +12,6 @@
 #include "../system/Logger.h"
 #include "../filesystem/file_package_manager.h"
 #include "../filesystem/input_stream.h"
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <map>
 #include <string>
@@ -49,7 +47,7 @@ namespace sfx {
 		};
 
 		std::string filename;
-		boost::shared_ptr<SoundStream> stream;
+		std::shared_ptr<SoundStream> stream;
 
 		Mode mode;
 		int time;
@@ -62,7 +60,7 @@ namespace sfx {
 		float oldMaxVolume;
 		float maxVolume;
 
-		Stream(boost::shared_ptr<SoundStream> stream_, float volume, float panning)
+		Stream(std::shared_ptr<SoundStream> stream_, float volume, float panning)
 		:	stream(stream_),
 			mode(Normal),
 			time(0),
@@ -82,7 +80,7 @@ namespace sfx {
 			stream->play();
 		}
 
-		Stream(boost::shared_ptr<SoundStream> stream_, int fadeTime_, float maxVolume_, const std::string &file)
+		Stream(std::shared_ptr<SoundStream> stream_, int fadeTime_, float maxVolume_, const std::string &file)
 		:	filename(file),
 			stream(stream_),
 			mode(FadeIn),
@@ -278,7 +276,7 @@ namespace sfx {
 			string foo = "Fading out old stream ";
 			foo += filename;
 			foo += ", ";
-			foo += lexical_cast<string> (ms);
+			foo += std::to_string(ms);
 			Logger::getInstance()->warning(foo.c_str());
 			*/
 
@@ -286,7 +284,7 @@ namespace sfx {
 		}
 	};
 
-	typedef std::vector<boost::shared_ptr<Stream> > AmbientStreamList;
+	typedef std::vector<std::shared_ptr<Stream> > AmbientStreamList;
 
 	// .......
 
@@ -548,7 +546,7 @@ struct AmbientAreaManager::Data
 				}
 				else
 				{
-					boost::shared_ptr<Stream> ptr(new Stream(mixer->getStream(area.ambient.file.c_str(), SoundMixer::SOUNDSTREAMTYPE_AMBIENT), fadeTime, maxVolume, file));
+					std::shared_ptr<Stream> ptr(new Stream(mixer->getStream(area.ambient.file.c_str(), SoundMixer::SOUNDSTREAMTYPE_AMBIENT), fadeTime, maxVolume, file));
 
 					if(ptr)
 					{
@@ -660,7 +658,7 @@ struct AmbientAreaManager::Data
 
 				if(!file.empty())
 				{
-					boost::shared_ptr<Stream> ptr(new Stream (mixer->getStream(file.c_str(), SoundMixer::SOUNDSTREAMTYPE_AMBIENT), volume, panning));
+					std::shared_ptr<Stream> ptr(new Stream (mixer->getStream(file.c_str(), SoundMixer::SOUNDSTREAMTYPE_AMBIENT), volume, panning));
 					if(ptr)
 						randoms.push_back(ptr);
 					else

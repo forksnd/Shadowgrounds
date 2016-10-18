@@ -3,6 +3,7 @@
 #endif
 
 #include <vector>
+#include <memory>
 
 #include "Storm3D_ProceduralManager.h"
 #include "storm3d.h"
@@ -11,8 +12,6 @@
 #include "Storm3D_ShaderManager.h"
 #include <IStorm3D_Logger.h>
 #include <d3d9.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 
 	struct NullDeleter
 	{
@@ -83,13 +82,13 @@
 	struct ProceduralEffect
 	{
 		Storm3D_ProceduralManager::Effect effect;
-		boost::shared_ptr<Storm3D_Texture> texture1;
-		boost::shared_ptr<Storm3D_Texture> texture2;
-		boost::shared_ptr<Storm3D_Texture> offset1;
-		boost::shared_ptr<Storm3D_Texture> offset2;
-		boost::shared_ptr<Storm3D_Texture> distortion1;
-		boost::shared_ptr<Storm3D_Texture> distortion2;
-		boost::shared_ptr<Storm3D_Texture> fallback;
+		std::shared_ptr<Storm3D_Texture> texture1;
+		std::shared_ptr<Storm3D_Texture> texture2;
+		std::shared_ptr<Storm3D_Texture> offset1;
+		std::shared_ptr<Storm3D_Texture> offset2;
+		std::shared_ptr<Storm3D_Texture> distortion1;
+		std::shared_ptr<Storm3D_Texture> distortion2;
+		std::shared_ptr<Storm3D_Texture> fallback;
 
 		TexCoord coord1;
 		TexCoord coord2;
@@ -103,7 +102,7 @@
 				Storm3D_Texture *t1 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.source1.texture.texture.c_str()));
 				if(t1)
 				{
-					texture1.reset(t1, std::mem_fun(&IStorm3D_Texture::Release));
+					texture1.reset(t1, [](Storm3D_Texture* tex) {tex->Release();});
 					texture1->setAutoRelease(false);
 				}
 			}
@@ -112,7 +111,7 @@
 				Storm3D_Texture *t2 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.source2.texture.texture.c_str()));
 				if(t2)
 				{
-					texture2.reset(t2, std::mem_fun(&IStorm3D_Texture::Release));
+					texture2.reset(t2, [](Storm3D_Texture* tex) {tex->Release();});
 					texture2->setAutoRelease(false);
 				}
 			}
@@ -122,7 +121,7 @@
 				Storm3D_Texture *t3 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.source1.offset.texture.c_str()));
 				if(t3)
 				{
-					offset1.reset(t3, std::mem_fun(&IStorm3D_Texture::Release));
+					offset1.reset(t3, [](Storm3D_Texture* tex) {tex->Release();});
 					offset1->setAutoRelease(false);
 				}
 			}
@@ -132,7 +131,7 @@
 				Storm3D_Texture *t4 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.source2.offset.texture.c_str()));
 				if(t4)
 				{
-					offset2.reset(t4, std::mem_fun(&IStorm3D_Texture::Release));
+					offset2.reset(t4, [](Storm3D_Texture* tex) {tex->Release();});
 					offset2->setAutoRelease(false);
 				}
 			}
@@ -142,7 +141,7 @@
 				Storm3D_Texture *t5 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.distortion1.offset.texture.c_str()));
 				if(t5)
 				{
-					distortion1.reset(t5, std::mem_fun(&IStorm3D_Texture::Release));
+					distortion1.reset(t5, [](Storm3D_Texture* tex) {tex->Release();});
 					distortion1->setAutoRelease(false);
 				}
 			}
@@ -151,7 +150,7 @@
 				Storm3D_Texture *t6 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.distortion2.offset.texture.c_str()));
 				if(t6)
 				{
-					distortion2.reset(t6, std::mem_fun(&IStorm3D_Texture::Release));
+					distortion2.reset(t6, [](Storm3D_Texture* tex) {tex->Release();});
 					distortion2->setAutoRelease(false);
 				}
 			}
@@ -161,7 +160,7 @@
 				Storm3D_Texture *f = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.fallback.c_str()));
 				if(f)
 				{
-					fallback.reset(f, std::mem_fun(&IStorm3D_Texture::Release));
+					fallback.reset(f, [](Storm3D_Texture* tex) {tex->Release();});
 					fallback->setAutoRelease(false);
 				}
 			} else {
@@ -192,17 +191,17 @@ struct Storm3D_ProceduralManager::Data
 	std::string active;
 
 	IStorm3D_Logger *logger;
-	boost::scoped_ptr<frozenbyte::storm::VertexShader> vshader;
-	boost::scoped_ptr<frozenbyte::storm::PixelShader> pshader;
-	boost::scoped_ptr<frozenbyte::storm::PixelShader> poffsetShader;
-	boost::scoped_ptr<frozenbyte::storm::VertexBuffer> vbuffer;
-	boost::scoped_ptr<frozenbyte::storm::IndexBuffer> ibuffer;
+	std::unique_ptr<frozenbyte::storm::VertexShader> vshader;
+	std::unique_ptr<frozenbyte::storm::PixelShader> pshader;
+	std::unique_ptr<frozenbyte::storm::PixelShader> poffsetShader;
+	std::unique_ptr<frozenbyte::storm::VertexBuffer> vbuffer;
+	std::unique_ptr<frozenbyte::storm::IndexBuffer> ibuffer;
 
 	bool distortionMode;
 	bool hasDistortion;
 
 	bool useFallback;
-	boost::shared_ptr<Storm3D_Texture> fallback;
+	std::shared_ptr<Storm3D_Texture> fallback;
 
 	Data(Storm3D &storm_)
 	:	storm(storm_),

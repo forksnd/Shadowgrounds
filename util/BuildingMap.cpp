@@ -1,6 +1,5 @@
 #include "precompiled.h"
 
-#include <boost/lexical_cast.hpp>
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -1246,11 +1245,11 @@ BuildingMap::BuildingMap(const char *fileNameRaw, IStorm3D_Model *model, int rot
 		if(rotationX || rotationY || rotationZ)
 		{
 			binFileName += "_R_";
-			binFileName += boost::lexical_cast<std::string> (rotationX);
+			binFileName += std::to_string(rotationX);
 			binFileName += "_";
-			binFileName += boost::lexical_cast<std::string> (rotationY);
+			binFileName += std::to_string(rotationY);
 			binFileName += "_";
-			binFileName += boost::lexical_cast<std::string> (rotationZ);
+			binFileName += std::to_string(rotationZ);
 		}
 
 		/*

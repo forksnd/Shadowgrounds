@@ -6,6 +6,7 @@
 // The game.
 //
 
+#include <memory>
 #include <c2_vectors.h>
 
 #include "../container/LinkedList.h"
@@ -15,7 +16,6 @@
 #include "unified_handle_type.h"
 #include "UnitFormation.h"
 #include "../ui/DecorationManager.h"
-#include <boost/shared_ptr.hpp>
 
 #ifdef PROJECT_CLAW_PROTO
 #ifndef USE_CLAW_CONTROLLER
@@ -342,7 +342,7 @@ namespace game
 		LightBlinker *outdoorLightBlinker;
 
 		ParticleSpawnerManager *particleSpawnerManager;
-		boost::shared_ptr<ui::Map> map;
+		std::shared_ptr<ui::Map> map;
 
 		void clearVisualObjectModelStorage();
 

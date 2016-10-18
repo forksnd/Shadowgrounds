@@ -1,7 +1,7 @@
 #ifndef SOUNDMIXER_H
 #define SOUNDMIXER_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 class IStorm3D_StreamBuilder;
@@ -126,7 +126,7 @@ public:
 	void stopStreamedSounds();
 
 	SoundSample *loadSample(const char *filename, bool temporaryCache);
-	boost::shared_ptr<SoundStream> getStream(const char *filename, SoundStreamType type);
+	std::shared_ptr<SoundStream> getStream(const char *filename, SoundStreamType type);
 	IStorm3D_StreamBuilder *getStreamBuilder();
 
 	int playSoundEffect(SoundSample *sample, bool loop, float range, int priority);

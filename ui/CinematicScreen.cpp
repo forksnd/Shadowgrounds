@@ -3,9 +3,9 @@
 #include <limits.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <map>
 #include <list>
-#include <boost/lexical_cast.hpp>
 
 #include "CinematicScreen.h"
 #include "../ogui/Ogui.h"
@@ -294,8 +294,8 @@ public:
 
 			for( int i = 0; i < num_of; i++ )
 			{
-				// const std::string& pre_text = ( prefix + "_textarea_" + boost::lexical_cast< std::string >( i ) );
-				const std::string& pre_effect = prefix + "_image_" + boost::lexical_cast< std::string >( i );
+				// const std::string& pre_text = ( prefix + "_textarea_" + std::to_string( i ) );
+				const std::string& pre_effect = prefix + "_image_" + std::to_string( i );
 				int time = getLocaleGuiInt( ( pre_effect + "_time" ).c_str(), 0 );
 				int length = getLocaleGuiInt( ( pre_effect + "_length" ).c_str(), 0 );
 				std::string file = getLocaleGuiString( ( pre_effect + "_img" ).c_str() );
@@ -312,8 +312,8 @@ public:
 
 			for( int i = 0; i < num_of; i++ )
 			{
-				// const std::string& pre_text = ( prefix + "_textarea_" + boost::lexical_cast< std::string >( i ) );
-				const std::string& pre_effect = prefix + "_effect_" + boost::lexical_cast< std::string >( i );
+				// const std::string& pre_text = ( prefix + "_textarea_" + std::to_string( i ) );
+				const std::string& pre_effect = prefix + "_effect_" + std::to_string( i );
 				int time = getLocaleGuiInt( ( pre_effect + "_time" ).c_str(), 0 );
 				int effect = getLocaleGuiInt( ( pre_effect + "_id" ).c_str(), 0 );
 				int length = getLocaleGuiInt( ( pre_effect + "_duration" ).c_str(), 0 );
@@ -338,7 +338,7 @@ public:
 
 			for( int i = 0; i < num_of; i++ )
 			{
-				const std::string& pre_text = ( prefix + "_textarea_" + boost::lexical_cast< std::string >( i ) );
+				const std::string& pre_text = ( prefix + "_textarea_" + std::to_string( i ) );
 				textAreas[ i ] = new OguiFormattedText( window, ogui, 
 														getLocaleGuiInt( ( pre_text + "_x" ).c_str(), 0 ), getLocaleGuiInt( ( pre_text + "_y" ).c_str(), 0 ),
 														getLocaleGuiInt( ( pre_text + "_w" ).c_str(), 0 ), getLocaleGuiInt( ( pre_text + "_h" ).c_str(), 0 ) );
@@ -397,10 +397,10 @@ public:
 				for( int j = 0; j < num_of_texts; j++ )
 				{
 					// get time
-					int time = getLocaleGuiInt( ( pre_text + "_text_" + boost::lexical_cast< std::string >( j )  + "_insert_time" ).c_str(), 0 );
+					int time = getLocaleGuiInt( ( pre_text + "_text_" + std::to_string( j )  + "_insert_time" ).c_str(), 0 );
 
 					// get text
-					std::string text = getLocaleGuiString( ( pre_text + "_text_" + boost::lexical_cast< std::string >( j ) ).c_str() ); 
+					std::string text = getLocaleGuiString( ( pre_text + "_text_" + std::to_string( j ) ).c_str() ); 
 
 					// translate $(locales)
 #ifdef PROJECT_SURVIVOR
@@ -410,7 +410,7 @@ public:
 #endif
 
 					// credits hack
-					if( ( pre_text + "_text_" + boost::lexical_cast< std::string >( j ) ) == "cinematic_screen_credits_textarea_0_text_0" )
+					if( ( pre_text + "_text_" + std::to_string( j ) ) == "cinematic_screen_credits_textarea_0_text_0" )
 					{
 						text = G_UiCredits;
 					}
@@ -430,8 +430,8 @@ public:
 							killsValue += game::GameStats::instances[c]->getTotalKills();
 						}
 
-						std::string kills = boost::lexical_cast<std::string>(killsValue);
-						std::string secrets = boost::lexical_cast<std::string>(game->gameScripting->getGlobalIntVariableValue("secretpart_amount"));
+						std::string kills = std::to_string(killsValue);
+						std::string secrets = std::to_string(game->gameScripting->getGlobalIntVariableValue("secretpart_amount"));
 						stats = util::StringReplace("($kills)", kills, stats);
 						stats = util::StringReplace("($secrets)", secrets, stats);
 						stats = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + stats;
@@ -440,8 +440,8 @@ public:
 #endif
 
 					// sound file hack
-					std::string sound_file_locale = pre_text + "_text_" + boost::lexical_cast< std::string >( j ) + "_audiofile";
-					std::string speech_file_locale = pre_text + "_text_" + boost::lexical_cast< std::string >( j ) + "_speechfile";
+					std::string sound_file_locale = pre_text + "_text_" + std::to_string( j ) + "_audiofile";
+					std::string speech_file_locale = pre_text + "_text_" + std::to_string( j ) + "_speechfile";
 					const char *sound_file = NULL;
 					bool audiofile = ::DHLocaleManager::getInstance()->getString( ::DHLocaleManager::BANK_GUI, sound_file_locale.c_str(), &sound_file );
 					bool audiofile_stream = ::DHLocaleManager::getInstance()->getString( ::DHLocaleManager::BANK_GUI, (sound_file_locale + "stream").c_str(), &sound_file );
@@ -484,7 +484,7 @@ public:
 					{
 						textQueue[t].textArea = i;
 
-						std::string error_location = "locale " + locale + " line " + boost::lexical_cast<std::string>(t - entry_offset +1);
+						std::string error_location = "locale " + locale + " line " + std::to_string(t - entry_offset +1);
 
 						std::vector<std::string> params;
 						bool inside_quote = false;
@@ -539,7 +539,7 @@ public:
 							std::vector<std::string> define = util::StringSplit(":", params[p]);
 							if(define.size() != 2)
 							{
-								Logger::getInstance()->error(("CinematicScreen - Error parsing parameter " + boost::lexical_cast<std::string>(p+1) + " in " + error_location).c_str());
+								Logger::getInstance()->error(("CinematicScreen - Error parsing parameter " + std::to_string(p+1) + " in " + error_location).c_str());
 								continue;
 							}
 
@@ -569,7 +569,7 @@ public:
 							}
 							else
 							{
-								Logger::getInstance()->error(("CinematicScreen - Unknown parameter " + boost::lexical_cast<std::string>(p+1) + " in " + error_location).c_str());
+								Logger::getInstance()->error(("CinematicScreen - Unknown parameter " + std::to_string(p+1) + " in " + error_location).c_str());
 							}
 						}
 
@@ -595,7 +595,7 @@ public:
 			textFaders.resize(num_of);
 			for(unsigned int i = 0; i < textFaders.size(); i++)
 			{
-				const std::string& pre_fader = ( prefix + "_textfader_" + boost::lexical_cast< std::string >( i ) );
+				const std::string& pre_fader = ( prefix + "_textfader_" + std::to_string( i ) );
 				textFaders[i].time_start = getTime() + getLocaleGuiInt( (pre_fader + "_time_start").c_str() , 0 );
 				textFaders[i].time_end = getTime() + getLocaleGuiInt( (pre_fader + "_time_end").c_str() , 0 );
 				textFaders[i].fade_duration = getLocaleGuiInt( (pre_fader + "_fade_duration").c_str() , 0 );
@@ -641,7 +641,7 @@ public:
 			soundEffects.resize(offset + num_of);
 			for(unsigned int i = offset; i < soundEffects.size(); i++)
 			{
-				const std::string& pre_fader = ( prefix + "_soundeffect_" + boost::lexical_cast< std::string >( i - offset ) );
+				const std::string& pre_fader = ( prefix + "_soundeffect_" + std::to_string( i - offset ) );
 				soundEffects[i].time = getLocaleGuiInt( (pre_fader + "_time").c_str() , 0 );
 				soundEffects[i].volume = getLocaleGuiInt( (pre_fader + "_volume").c_str() , 100 );
 				soundEffects[i].file = game::convertLocaleSpeechString( getLocaleGuiString( (pre_fader + "_file").c_str()) );
@@ -1008,7 +1008,7 @@ public:
 		{
 			int time = backgroundVideoStream->getTime();
 			
-			// Logger::getInstance()->error( boost::lexical_cast< std::string >( time ).c_str() );
+			// Logger::getInstance()->error( std::to_string( time ).c_str() );
 			// assert( time > 0 );
 			return time;
 		}*/

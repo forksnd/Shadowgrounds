@@ -8,6 +8,7 @@
 #include "../filesystem/file_package_manager.h"
 #include "../system/Logger.h"
 #include <assert.h>
+#include <algorithm>
 
 using namespace frozenbyte;
 using namespace frozenbyte::editor;

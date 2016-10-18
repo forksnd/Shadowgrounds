@@ -7,8 +7,6 @@
 #pragma warning( disable : 4800 )
 #endif
 
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
 #include <Storm3D_UI.h>
@@ -63,7 +61,7 @@ void parseFloatKeyControlFrom(const ParserGroup& g, KeyControl* kc) {
 	kc->setNumKeys(n);
 	for(int i = 0; i < n; i++) {
 		FloatKey key;
-		std::string str = "key" + boost::lexical_cast<std::string>(i);
+		std::string str = "key" + std::to_string(i);
 		key.time = convertFromString<float>(g.getValue((str + ".time"), "0"), 0);
 		key.value = convertFromString<float>(g.getValue((str + ".value"), "0"), 0);
 		kc->setKey(i, &key);
@@ -75,7 +73,7 @@ void parseFloatKeyControlTo(ParserGroup& g, KeyControl* kc) {
 	for(int i = 0; i < kc->getNumKeys(); i++) {
 		FloatKey key;
 		kc->getKey(i, &key);
-		std::string str = "key" + boost::lexical_cast<std::string>(i);
+		std::string str = "key" + std::to_string(i);
 		g.setValue((str + ".time"), convertToString<float>(key.time));
 		g.setValue((str + ".value"), convertToString<float>(key.value));		
 	}
@@ -86,7 +84,7 @@ void parseVectorKeyControlFrom(const ParserGroup& g, KeyControl* kc) {
 	kc->setNumKeys(n);
 	for(int i = 0; i < n; i++) {
 		VectorKey key;
-		std::string str = "key" + boost::lexical_cast<std::string>(i);
+		std::string str = "key" + std::to_string(i);
 		key.time = convertFromString<float>(g.getValue((str + ".time"), "0"), 0);
 		key.value = convertVectorFromString(g.getValue((str + ".value"), "0"));
 		kc->setKey(i, &key);
@@ -99,7 +97,7 @@ void parseVectorKeyControlTo(ParserGroup& g, KeyControl* kc) {
 	for(int i = 0; i < kc->getNumKeys(); i++) {
 		VectorKey key;
 		kc->getKey(i, &key);
-		std::string str = "key" + boost::lexical_cast<std::string>(i);
+		std::string str = "key" + std::to_string(i);
 		g.setValue((str + ".time"), convertToString<float>(key.time));
 		g.setValue((str + ".value"), convertVectorToString(key.value));
 	}	

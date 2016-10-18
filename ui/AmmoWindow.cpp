@@ -16,8 +16,6 @@
 #include "../util/Debug_MemoryManager.h"
 #include "../ogui/OguiAligner.h"
 
-#include <boost/lexical_cast.hpp>
-
 using namespace game;
 
 namespace ui
@@ -65,7 +63,7 @@ REGISTER_COMBATSUBWINDOW( AmmoWindow );
 
 		if( coop ) 
 		{
-			prefix = "gui_ammo_coop" + boost::lexical_cast< std::string >( clientNum ) + "_";
+			prefix = "gui_ammo_coop" + std::to_string( clientNum ) + "_";
 		}
 
 		int xPosition = getLocaleGuiInt( ( prefix + "position_x" ).c_str(), 0);

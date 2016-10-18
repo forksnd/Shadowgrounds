@@ -3,7 +3,6 @@
 
 #include <sstream>
 #include <assert.h>
-#include <boost/lexical_cast.hpp>
 
 #include "LoadGameMenu.h"
 
@@ -229,7 +228,7 @@ LoadGameMenu::LoadGameMenu( MenuCollection* menu, MenuCollection::Fonts* fonts, 
 	}
 	// -jpk
 
-	Logger::getInstance()->debug( ((std::string)("LoadGameMenu - Mission amount ") + boost::lexical_cast< std::string >( mission_max )).c_str() );
+	Logger::getInstance()->debug( ((std::string)("LoadGameMenu - Mission amount ") + std::to_string( mission_max )).c_str() );
 	
 	game = g;
 
@@ -340,22 +339,22 @@ LoadGameMenu::LoadGameMenu( MenuCollection* menu, MenuCollection::Fonts* fonts, 
 
 			if( add )
 			{
-				std::string temp = std::string( "gui_loadgamemenu_mission_" ) + boost::lexical_cast< std::string >( i ) + "_image_norm";
+				std::string temp = std::string( "gui_loadgamemenu_mission_" ) + std::to_string( i ) + "_image_norm";
 				const std::string image_norm = getLocaleGuiString( temp.c_str() );
 
-				temp = std::string( "gui_loadgamemenu_mission_" ) + boost::lexical_cast< std::string >( i ) + "_image_high";
+				temp = std::string( "gui_loadgamemenu_mission_" ) + std::to_string( i ) + "_image_high";
 				const std::string image_high = getLocaleGuiString( temp.c_str() );
 
-				temp = std::string( "gui_loadgamemenu_mission_" ) + boost::lexical_cast<std::string >( i ) + "_image_down";
+				temp = std::string( "gui_loadgamemenu_mission_" ) + std::to_string( i ) + "_image_down";
 				const std::string image_down = getLocaleGuiString( temp.c_str() );
 
-				temp = std::string( "gui_loadgamemenu_mission_" ) + boost::lexical_cast< std::string >( i ) + "_image_disa";
+				temp = std::string( "gui_loadgamemenu_mission_" ) + std::to_string( i ) + "_image_disa";
 				const std::string image_disabled = getLocaleGuiString( temp.c_str() );
 
-				temp = std::string( "gui_loadgamemenu_mission_" ) + boost::lexical_cast< std::string >( i ) + "_image_selected_norm";
+				temp = std::string( "gui_loadgamemenu_mission_" ) + std::to_string( i ) + "_image_selected_norm";
 				const std::string image_selected_norm = getLocaleGuiString( temp.c_str() );
 
-				temp = std::string( "gui_loadgamemenu_mission_" ) + boost::lexical_cast< std::string >( i ) + "_image_selected_high";
+				temp = std::string( "gui_loadgamemenu_mission_" ) + std::to_string( i ) + "_image_selected_high";
 				const std::string image_selected_high = getLocaleGuiString( temp.c_str() );
 
 				this->addImageSelectionButton( image_norm, image_high, image_down, image_disabled, !add, i, NULL );

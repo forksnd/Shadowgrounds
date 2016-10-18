@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
-#include <boost/lexical_cast.hpp>
 
 #ifdef FB_RU_HAX
 #include "../filesystem/input_file_stream.h"
@@ -386,7 +385,7 @@ void LocaleManager::init(const char *configurationFile)
 
 		try
 		{
-			int index = boost::lexical_cast<int> (key);
+			int index = std::stoi(key);
 			if(index < 0 || index >= MAX_LOCALES)
 			{
 				Logger::getInstance()->error("Invalid locale index");

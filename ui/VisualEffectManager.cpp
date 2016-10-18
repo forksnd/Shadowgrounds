@@ -225,7 +225,7 @@ namespace ui
 		// read from multiple files, scan directory/subdirectories, then read in all those files...
 
 		// read in files...
-		boost::shared_ptr<filesystem::IFileList> files = filesystem::FilePackageManager::getInstance().findFiles("data/effect/visualeffect", "*.vef");
+		std::shared_ptr<filesystem::IFileList> files = filesystem::FilePackageManager::getInstance().findFiles("data/effect/visualeffect", "*.vef");
 		std::vector<std::string> allFiles;
 		filesystem::getAllFiles(*files, "data/effect/visualeffect", allFiles, true);
 
@@ -597,7 +597,7 @@ namespace ui
 #ifdef PHYSICS_PHYSX
 				if(game::SimpleOptions::getBool(DH_OPT_B_PHYSICS_PARTICLES) && game->getGamePhysics() && game->getGamePhysics()->getPhysicsLib())
 				{
-					boost::shared_ptr<physics::PhysicsLib> ptr(game->getGamePhysics()->getPhysicsLib(), NullDeleter());
+					std::shared_ptr<physics::PhysicsLib> ptr(game->getGamePhysics()->getPhysicsLib(), NullDeleter());
 					particleEffectManager->setPhysics(ptr);
 				}
 
@@ -612,9 +612,9 @@ namespace ui
 
 				if(v->particleEffect)
 				{
-					boost::shared_ptr<frozenbyte::particle::IParticleCollision> ptr = boost::static_pointer_cast<frozenbyte::particle::IParticleCollision> (particleCollision);
-					//boost::shared_ptr<frozenbyte::particle::IParticleCollision> ptr = boost::static_pointer_cast<frozenbyte::particle::IParticleCollision> (fluidParticleCollision);
-					boost::shared_ptr<frozenbyte::particle::IParticleArea> area = boost::static_pointer_cast<frozenbyte::particle::IParticleArea> (particleArea);
+					std::shared_ptr<frozenbyte::particle::IParticleCollision> ptr = std::static_pointer_cast<frozenbyte::particle::IParticleCollision> (particleCollision);
+					//std::shared_ptr<frozenbyte::particle::IParticleCollision> ptr = std::static_pointer_cast<frozenbyte::particle::IParticleCollision> (fluidParticleCollision);
+					std::shared_ptr<frozenbyte::particle::IParticleArea> area = std::static_pointer_cast<frozenbyte::particle::IParticleArea> (particleArea);
 					v->particleEffect->setCollision(ptr);
 					v->particleEffect->setArea(area);
 					if (visualEffectTypes[visualEffectId].doesAttachToSpawnModel())

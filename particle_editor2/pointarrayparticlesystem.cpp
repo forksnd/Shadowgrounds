@@ -6,8 +6,6 @@
 #pragma warning( disable : 4800 )
 #endif
 
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <string>
 #include <map>
@@ -47,22 +45,22 @@ PointArrayParticleSystem::PointArrayParticleSystem()
 	m_index = 0;	
 }
 	
-boost::shared_ptr<IParticleSystem> PointArrayParticleSystem::createNew() 
+std::shared_ptr<IParticleSystem> PointArrayParticleSystem::createNew() 
 {
 	PointArrayParticleSystem* ps = new PointArrayParticleSystem();
-	boost::shared_ptr<IParticleSystem> ptr(ps);
-	boost::shared_ptr<PointArrayParticleSystemEditables> e(new PointArrayParticleSystemEditables);
+	std::shared_ptr<IParticleSystem> ptr(ps);
+	std::shared_ptr<PointArrayParticleSystemEditables> e(new PointArrayParticleSystemEditables);
 	ps->m_eds.swap(e);
 	return ptr;
 }
 
-boost::shared_ptr<IParticleSystem> PointArrayParticleSystem::clone() 
+std::shared_ptr<IParticleSystem> PointArrayParticleSystem::clone() 
 {
 	PointArrayParticleSystem* ps = new PointArrayParticleSystem();
 	copyTo(*ps);
 	ps->m_eds = m_eds;
 	ps->m_parray = m_parray;
-	boost::shared_ptr<IParticleSystem> ptr(ps);
+	std::shared_ptr<IParticleSystem> ptr(ps);
 
 #ifdef PHYSICS_PHYSX
 #ifndef NX_DISABLE_FLUIDS
@@ -198,7 +196,7 @@ void PointArrayParticleSystem::init(IStorm3D* s3d, IStorm3D_Scene* scene)
 		Iterator<IStorm3D_Model_Object*>* obj = model->ITObject->Begin();
 		assert(obj != NULL);
 
-		boost::shared_ptr<PointArray> pm(new PointArray());
+		std::shared_ptr<PointArray> pm(new PointArray());
 		for(; !obj->IsEnd(); obj->Next())
 		{
 			IStorm3D_Mesh* mesh = obj->GetCurrent()->GetMesh();

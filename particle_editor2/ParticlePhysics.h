@@ -1,9 +1,7 @@
 #ifndef FROZENBYTE_PARTICLE_PHYSICS_H
 #define FROZENBYTE_PARTICLE_PHYSICS_H
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <DatatypeDef.h>
 #include <vector>
 
@@ -30,7 +28,7 @@ class PhysicsFluid;
 class ParticlePhysics
 {
 	struct Data;
-	boost::shared_ptr<Data> data;
+	std::shared_ptr<Data> data;
 	friend class PhysicsActor;
 #ifndef NX_DISABLE_FLUIDS
 	friend class PhysicsFluid;
@@ -44,13 +42,13 @@ public:
 	void setMaxParticleSpawnAmount(int amount);
 	void physicsExplosion(const VC3 &position, float forceFactor, float radius);
 
-	boost::shared_ptr<PhysicsMesh> createConvexMesh(const char *filename, IStorm3D_Model_Object *object);
-	boost::shared_ptr<PhysicsActor> createActor(boost::shared_ptr<PhysicsMesh> &mesh, const VC3 &position, const QUAT &rotation, const VC3 &velocity, const VC3 &angularVelocity, float mass, int collisionGroup, int soundGroup);
+	std::shared_ptr<PhysicsMesh> createConvexMesh(const char *filename, IStorm3D_Model_Object *object);
+	std::shared_ptr<PhysicsActor> createActor(std::shared_ptr<PhysicsMesh> &mesh, const VC3 &position, const QUAT &rotation, const VC3 &velocity, const VC3 &angularVelocity, float mass, int collisionGroup, int soundGroup);
 #ifndef NX_DISABLE_FLUIDS
-	boost::shared_ptr<PhysicsFluid> createFluid(int type, int maxParticles, float fluidStaticRestitution, float fluidStaticAdhesion, float fluidDynamicRestitution, float fluidDynamicAdhesion, float fluidDamping, float fluidStiffness, float fluidViscosity, float fluidKernelRadiusMultiplier, float fluidRestParticlesPerMeter, float fluidRestDensity, float fluidMotionLimit, int fluidPacketSizeMultiplier, int collGroup);
+	std::shared_ptr<PhysicsFluid> createFluid(int type, int maxParticles, float fluidStaticRestitution, float fluidStaticAdhesion, float fluidDynamicRestitution, float fluidDynamicAdhesion, float fluidDamping, float fluidStiffness, float fluidViscosity, float fluidKernelRadiusMultiplier, float fluidRestParticlesPerMeter, float fluidRestDensity, float fluidMotionLimit, int fluidPacketSizeMultiplier, int collGroup);
 #endif
 
-	void setPhysics(boost::shared_ptr<physics::PhysicsLib> &physics);
+	void setPhysics(std::shared_ptr<physics::PhysicsLib> &physics);
 #ifndef NX_DISABLE_FLUIDS
 	void resetFluidRendering();
 #endif
@@ -59,7 +57,7 @@ public:
 
 class PhysicsMesh
 {
-	//boost::shared_ptr<physics::ConvexMesh> mesh;
+	//std::shared_ptr<physics::ConvexMesh> mesh;
 	VC3 localPosition;
 	VC3 size;
 	float volume;
@@ -88,8 +86,8 @@ class PhysicsActor
 
 	bool forceUpdate;
 
-	boost::shared_ptr<physics::ActorBase> actor;
-	boost::weak_ptr<ParticlePhysics::Data> lib;
+	std::shared_ptr<physics::ActorBase> actor;
+	std::weak_ptr<ParticlePhysics::Data> lib;
 	friend class ParticlePhysics;
 
 public:
@@ -106,9 +104,9 @@ public:
 #ifndef NX_DISABLE_FLUIDS
 class PhysicsFluid
 {
-	boost::shared_ptr<physics::Fluid> fluid;
+	std::shared_ptr<physics::Fluid> fluid;
 
-	boost::weak_ptr<ParticlePhysics::Data> lib;
+	std::weak_ptr<ParticlePhysics::Data> lib;
 	friend class ParticlePhysics;
 
 	VC3 acceleration;

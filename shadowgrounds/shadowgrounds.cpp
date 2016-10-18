@@ -518,12 +518,12 @@ try {
 #endif
 
 		using namespace frozenbyte::filesystem;
-		boost::shared_ptr<IFilePackage> standardPackage(new StandardPackage());
+		std::shared_ptr<IFilePackage> standardPackage(new StandardPackage());
 		
-		boost::shared_ptr<IFilePackage> zipPackage1(new ZipPackage("data1.fbz"));
-		boost::shared_ptr<IFilePackage> zipPackage2(new ZipPackage("data2.fbz"));
-		boost::shared_ptr<IFilePackage> zipPackage3(new ZipPackage("data3.fbz"));
-		boost::shared_ptr<IFilePackage> zipPackage4(new ZipPackage("data4.fbz"));
+		std::shared_ptr<IFilePackage> zipPackage1(new ZipPackage("data1.fbz"));
+		std::shared_ptr<IFilePackage> zipPackage2(new ZipPackage("data2.fbz"));
+		std::shared_ptr<IFilePackage> zipPackage3(new ZipPackage("data3.fbz"));
+		std::shared_ptr<IFilePackage> zipPackage4(new ZipPackage("data4.fbz"));
 
 		FilePackageManager &manager = FilePackageManager::getInstance();
 		manager.addPackage(standardPackage, 999);

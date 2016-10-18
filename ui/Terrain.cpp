@@ -6,9 +6,8 @@
 #include <deque>
 #include <map>
 #include <string>
-#include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
+#include <algorithm>
+#include <memory>
 
 #include "Terrain.h"
 #include "../game/materials.h"
@@ -428,7 +427,7 @@ static void uninit_terrain_object_variables()
 
 		std::string bones;
 		std::string idleAnimation;
-		std::vector<boost::shared_ptr<IStorm3D_BoneAnimation> > explosionAnimations;
+		std::vector<std::shared_ptr<IStorm3D_BoneAnimation> > explosionAnimations;
 		int nextAnimation;
 
 		int physicsType;
@@ -522,7 +521,7 @@ static void uninit_terrain_object_variables()
 		int hp;
 		std::string originalName;
 		bool inBuilding;
-		boost::shared_ptr<game::AbstractPhysicsObject> physicsObject;
+		std::shared_ptr<game::AbstractPhysicsObject> physicsObject;
 
 		int originalModel;
 		int originalInstance;
@@ -643,8 +642,8 @@ static void uninit_terrain_object_variables()
 
 	struct Object
 	{
-		boost::shared_ptr<IStorm3D_Model> model;
-		boost::shared_ptr<IStorm3D_Model> breakModel;
+		std::shared_ptr<IStorm3D_Model> model;
+		std::shared_ptr<IStorm3D_Model> breakModel;
 
 		ObjectData data;
 		InstanceList instances;
@@ -659,7 +658,7 @@ static void uninit_terrain_object_variables()
 
 			// Slightly unoptimal. Krhmn.
 
-			boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
+			std::unique_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
 			for(; !object_iterator->IsEnd(); object_iterator->Next())
 			{
 				IStorm3D_Model_Object *object = object_iterator->GetCurrent();
@@ -790,8 +789,8 @@ static void uninit_terrain_object_variables()
 		int textureB;
 
 		// Only 1 used if no legacy texturing
-		boost::shared_ptr<IStorm3D_Texture> texture1;
-		boost::shared_ptr<IStorm3D_Texture> texture2;
+		std::shared_ptr<IStorm3D_Texture> texture1;
+		std::shared_ptr<IStorm3D_Texture> texture2;
 
 		std::vector<DWORD> weights;
 
@@ -812,7 +811,7 @@ static void uninit_terrain_object_variables()
 	struct TerrainLightMap
 	{
 		std::vector<TColor<unsigned char> > values;
-		boost::shared_ptr<IStorm3D_Texture> texture;
+		std::shared_ptr<IStorm3D_Texture> texture;
 
 		TerrainLightMap()
 		{
@@ -861,9 +860,9 @@ struct TerrainData
 	std::vector<TerrainObstacle> obstacleList;
 	TerrainAnimation animation;
 
-	std::vector<boost::shared_ptr<IStorm3D_Texture> > textures;
+	std::vector<std::shared_ptr<IStorm3D_Texture> > textures;
 	std::map<int, std::vector<BlendPass> > blendings;	
-	boost::scoped_ptr<IStorm3D_Model> backgroundStormModel;
+	std::unique_ptr<IStorm3D_Model> backgroundStormModel;
 	std::map<int, TerrainLightMap> lightMaps;
 	
 	ObjectList objects;
@@ -878,9 +877,9 @@ struct TerrainData
 
 	const util::AreaMap *areaMap;
 
-	boost::scoped_array<WORD> heightMap;
-	boost::scoped_array<WORD> obstacleMap;
-	boost::scoped_array<WORD> forceMap;
+	std::unique_ptr<WORD[]> heightMap;
+	std::unique_ptr<WORD[]> obstacleMap;
+	std::unique_ptr<WORD[]> forceMap;
 	
 	VC2I mapSize;
 	VC3 realSize;
@@ -910,7 +909,7 @@ struct TerrainData
 
 	util::FogApplier fogApplier;
 #ifdef PHYSICS_PHYSX
-	boost::scoped_ptr<game::AbstractPhysicsObject> terrainPhysics;
+	std::unique_ptr<game::AbstractPhysicsObject> terrainPhysics;
 #endif
 
 	TerrainData()
@@ -1478,7 +1477,7 @@ static util::ObjectDurabilityParser durp;
 		if(version <= 2)
 			return;
 
-		boost::scoped_array<WORD> newArr (new WORD[mapSize.x * mapSize.y]);
+		std::unique_ptr<WORD[]> newArr (new WORD[mapSize.x * mapSize.y]);
 		heightMap.swap(newArr);
 
 		// NOTICE: this obstaclemap thing is totally fucked up!
@@ -1487,10 +1486,10 @@ static util::ObjectDurabilityParser durp;
 		#define INCORRECT_TERRAIN_OBST_MAP_AREA_MULT 16
 		//#define CORRECT_TERRAIN_OBST_MAP_AREA_MULT (GAMEMAP_HEIGHTMAP_MULTIPLIER*GAMEMAP_HEIGHTMAP_MULTIPLIER * GAMEMAP_PATHFIND_ACCURACY*GAMEMAP_PATHFIND_ACCURACY)
 
-		boost::scoped_array<WORD> newObstacleMap(new WORD[INCORRECT_TERRAIN_OBST_MAP_AREA_MULT * mapSize.x * mapSize.y]);
+		std::unique_ptr<WORD[]> newObstacleMap(new WORD[INCORRECT_TERRAIN_OBST_MAP_AREA_MULT * mapSize.x * mapSize.y]);
 		obstacleMap.swap(newObstacleMap);
 
-		boost::scoped_array<WORD> newForceMap(new WORD[GAMEMAP_HEIGHTMAP_MULTIPLIER*GAMEMAP_HEIGHTMAP_MULTIPLIER * mapSize.x * mapSize.y]);
+		std::unique_ptr<WORD[]> newForceMap(new WORD[GAMEMAP_HEIGHTMAP_MULTIPLIER*GAMEMAP_HEIGHTMAP_MULTIPLIER * mapSize.x * mapSize.y]);
 		forceMap.swap(newForceMap);
 
 		stream.read(heightMap.get(), mapSize.x * mapSize.y);
@@ -1564,7 +1563,7 @@ static util::ObjectDurabilityParser durp;
 
 			if(texture)
 			{
-				boost::shared_ptr<IStorm3D_Texture> t(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				std::shared_ptr<IStorm3D_Texture> t(texture, [](IStorm3D_Texture* texture){texture->Release();});
 				textures.push_back(t);
 			}
 			else
@@ -1577,7 +1576,7 @@ static util::ObjectDurabilityParser durp;
 #else
 				texture = storm->CreateNewTexture("data/texture/missing.dds");
 #endif
-				boost::shared_ptr<IStorm3D_Texture> t(texture, std::mem_fun(&IStorm3D_Texture::Release));
+				std::shared_ptr<IStorm3D_Texture> t(texture, [](IStorm3D_Texture* texture){texture->Release();});
 				textures.push_back(t);
 			}
 		}
@@ -1829,7 +1828,7 @@ static util::ObjectDurabilityParser durp;
 			int instanceAmount = 0;
 			stream >> instanceAmount;
 
-			boost::shared_ptr<IStorm3D_Model> model(storm->CreateNewModel());
+			std::shared_ptr<IStorm3D_Model> model(storm->CreateNewModel());
 
 			/*
 			static std::vector<std::pair<std::string, IStorm3D_Model *> > modelCache;
@@ -1856,7 +1855,7 @@ static util::ObjectDurabilityParser durp;
 			}
 
 
-			boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(model->ITObject->Begin());
+			std::unique_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(model->ITObject->Begin());
 			for(; !objectIterator->IsEnd(); objectIterator->Next())
 			{
 				IStorm3D_Model_Object *object = objectIterator->GetCurrent();
@@ -2115,7 +2114,7 @@ static util::ObjectDurabilityParser durp;
 				{
 					BlendPass &pass = passes[i];
 
-						pass.texture1 = boost::shared_ptr<IStorm3D_Texture> (storm->CreateNewTexture(BLOCK_SIZE, BLOCK_SIZE, IStorm3D_Texture::TEXTYPE_BASIC));
+						pass.texture1 = std::shared_ptr<IStorm3D_Texture> (storm->CreateNewTexture(BLOCK_SIZE, BLOCK_SIZE, IStorm3D_Texture::TEXTYPE_BASIC));
 						pass.texture1->Copy32BitSysMembufferToTexture(&pass.weights[0]);
 
 						terrain->setBlendMap(blockIndex, *pass.texture1, pass.textureA, pass.textureB);
@@ -2139,7 +2138,7 @@ static util::ObjectDurabilityParser durp;
 				textureSize = 1;
 
 			std::vector<DWORD> buffer(textureSize * textureSize);
-			boost::shared_ptr<IStorm3D_Texture> black(storm->CreateNewTexture(1, 1, IStorm3D_Texture::TEXTYPE_BASIC), std::mem_fun(&IStorm3D_Texture::Release));
+			std::shared_ptr<IStorm3D_Texture> black(storm->CreateNewTexture(1, 1, IStorm3D_Texture::TEXTYPE_BASIC), [](IStorm3D_Texture* texture){texture->Release();});
 			black->Copy32BitSysMembufferToTexture(&buffer[0]);
 
 			for(int blockIndex = 0; blockIndex < blockAmount; ++blockIndex)
@@ -2148,7 +2147,7 @@ static util::ObjectDurabilityParser durp;
 				if(it != lightMaps.end() && !it->second.values.empty())
 				{
 					TerrainLightMap &map = it->second;
-					map.texture = boost::shared_ptr<IStorm3D_Texture> (storm->CreateNewTexture(textureSize, textureSize, IStorm3D_Texture::TEXTYPE_BASIC), std::mem_fun(&IStorm3D_Texture::Release));
+					map.texture = std::shared_ptr<IStorm3D_Texture> (storm->CreateNewTexture(textureSize, textureSize, IStorm3D_Texture::TEXTYPE_BASIC), [](IStorm3D_Texture* texture){texture->Release();});
 
 					if(scaleDown)
 					{
@@ -2193,7 +2192,7 @@ static util::ObjectDurabilityParser durp;
 
 		if(!backgroundModel.empty())
 		{
-			boost::scoped_ptr<IStorm3D_Model> newModel(storm->CreateNewModel());
+			std::unique_ptr<IStorm3D_Model> newModel(storm->CreateNewModel());
 			newModel->LoadS3D(backgroundModel.c_str());
 
 			backgroundStormModel.swap(newModel);
@@ -2549,7 +2548,7 @@ static util::ObjectDurabilityParser durp;
 				//position.y = terrain->getHeight(instance.position) + instance.heightOffset;
 				position.y = instance.height;
 
-				boost::shared_ptr<IStorm3D_TerrainModelIterator> it = terrain->getModelIterator(position, radius + 2.f);
+				std::shared_ptr<IStorm3D_TerrainModelIterator> it = terrain->getModelIterator(position, radius + 2.f);
 				for(; !it->end(); )
 				{
 					const VC3 &objectPosition = it->getPosition();
@@ -2697,10 +2696,10 @@ static util::ObjectDurabilityParser durp;
 			cylinderFile = "data/model/cylinder_cook/cylinder_";
 #endif
 			int heightInt = int(height * 100.f);
-			cylinderFile += boost::lexical_cast<std::string> (heightInt);
+			cylinderFile += std::to_string(heightInt);
 			cylinderFile += "_";
 			int radiusInt = int(radius * 100.f);
-			cylinderFile += boost::lexical_cast<std::string> (radiusInt);
+			cylinderFile += std::to_string(radiusInt);
 			cylinderFile += ".cook";
 
 			filesystem::FB_FILE *fp = filesystem::fb_fopen(cylinderFile.c_str(), "rb");
@@ -3164,7 +3163,7 @@ void Terrain::createPhysics(game::GamePhysics *gamePhysics, unsigned char *clipM
 
 		//if (game::SimpleOptions::getBool(DH_OPT_B_PHYSICS_USE_HARDWARE))
 		{
-			boost::shared_ptr<frozenbyte::physics::StaticMesh> mesh = gamePhysics->getPhysicsLib()->createStaticMesh(terrainFilename.c_str());
+			std::shared_ptr<frozenbyte::physics::StaticMesh> mesh = gamePhysics->getPhysicsLib()->createStaticMesh(terrainFilename.c_str());
 			
 			VC3 physics_mesh_offset;
 			if( game::Unit::getVisualizationOffsetInUse() )
@@ -3341,7 +3340,7 @@ void Terrain::updatePhysics(game::GamePhysics *gamePhysics, std::vector<TerrainO
 	/*
 	VC3 foopos = VC3(0,0,0); 
 	float fooradius = 1000.0f;
-	boost::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(foopos, fooradius * data->terrainScale);
+	std::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(foopos, fooradius * data->terrainScale);
 	for(; !it->end(); it->next())
 	{
 		int modelId = it->getModelId();
@@ -3380,7 +3379,7 @@ void Terrain::BlastTerrainObjects(const VC3 &position3, float radius, std::vecto
 {
 	VC2 position(position3.x, position3.z);
 
-	boost::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position3, radius * data->terrainScale);
+	std::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position3, radius * data->terrainScale);
 	for(; !it->end(); )
 	{
 		const VC3 &objectPosition = it->getPosition();
@@ -3491,7 +3490,7 @@ UnifiedHandle Terrain::findClosestContainer(const VC3 &position, float maxRadius
 	/*int closestModel = -1;
 	int closestInstance = -1;
 	data->terrain->findObject(position, maxRadius * data->terrainScale, closestModel, closestInstance);*/
-	boost::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position, maxRadius);
+	std::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position, maxRadius);
 	for(; !it->end(); it->next())
 	{
 		int modelId = it->getModelId();
@@ -3543,7 +3542,7 @@ UnifiedHandle Terrain::findTerrainObjectByIdString(const char *idString)
 		return UNIFIED_HANDLE_NONE;
 	}
 
-	int indexcrap = boost::lexical_cast<int> (idStringStr);
+	int indexcrap = std::stoi(idStringStr);
 
 	int index = 0;
 	switch(indexcrap)
@@ -3627,7 +3626,7 @@ void Terrain::physicsImpulse(const VC3 &position, const VC3 &velocity, float rad
 {
 	if(!closestOnly)
 	{
-		boost::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position, radius);
+		std::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position, radius);
 		for(; !it->end(); it->next())
 		{
 			int modelId = it->getModelId();
@@ -3670,8 +3669,8 @@ void Terrain::BreakTerrainObjects(const VC3 &position3, const VC3 &velocity, flo
 
 	if(!closestOnly)
 	{
-		//boost::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position3, radius * data->terrainScale);
-		boost::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position3, radius);
+		//std::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position3, radius * data->terrainScale);
+		std::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position3, radius);
 		for(; !it->end(); )
 		{
 			const VC3 &objectPosition = it->getPosition();
@@ -3884,7 +3883,7 @@ game::tracking::ITrackableUnifiedHandleObjectIterator *Terrain::getTrackableUnif
 {
 	game::tracking::SimpleTrackableUnifiedHandleObjectIterator *iter = new game::tracking::SimpleTrackableUnifiedHandleObjectIterator();
 
-	boost::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position, radius);
+	std::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position, radius);
 	for(; !it->end(); it->next())
 	{
 		int modelId = it->getModelId();
@@ -4135,7 +4134,7 @@ void Terrain::setToOutdoorColorMultiplier(const COL &colorFactor, const VC3 &ori
 {
 	data->terrain->getRenderer().setColorValue(IStorm3D_TerrainRenderer::TerrainObjectOutsideFactor, colorFactor);
 	/*
-	boost::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(origo, radius);
+	std::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(origo, radius);
 	for(; !it->end(); it->next())
 	{
 		int modelId = it->getModelId();
@@ -4269,7 +4268,7 @@ void Terrain::calculateLighting()
 
 void Terrain::updateLighting(const VC3 &position, float radius)
 {
-	boost::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position, radius);
+	std::shared_ptr<IStorm3D_TerrainModelIterator> it = data->terrain->getModelIterator(position, radius);
 	for(; !it->end(); it->next())
 	{
 		int modelId = it->getModelId();

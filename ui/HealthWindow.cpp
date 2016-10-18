@@ -18,8 +18,6 @@
 
 #include "CombatSubWindowFactory.h"
 
-#include <boost/lexical_cast.hpp>
-
 using namespace game;
 
 namespace ui
@@ -94,7 +92,7 @@ REGISTER_COMBATSUBWINDOW( HealthWindow );
 
 		if( coop )
 		{
-			prefix = "gui_health_coop" + boost::lexical_cast< std::string >( clientNum ) + "_";
+			prefix = "gui_health_coop" + std::to_string( clientNum ) + "_";
 		}
 
 		int xPosition = getLocaleGuiInt( ( prefix + "position_x" ).c_str(), 0);

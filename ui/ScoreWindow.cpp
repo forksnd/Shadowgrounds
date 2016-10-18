@@ -19,7 +19,6 @@
 #include "GameController.h"
 
 #include <map>
-#include <boost/lexical_cast.hpp>
 #include <fstream>
 
 using namespace game;

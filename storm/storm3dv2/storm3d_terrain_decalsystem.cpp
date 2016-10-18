@@ -4,9 +4,8 @@
 #pragma warning(disable:4103)
 #endif
 
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <vector>
+#include <memory>
 #include <deque>
 
 #include "storm3d_terrain_decalsystem.h"
@@ -222,7 +221,7 @@ namespace {
 	struct Material
 	{
 		COL diffuseColor;
-		boost::shared_ptr<Storm3D_Texture> baseTexture;
+		std::shared_ptr<Storm3D_Texture> baseTexture;
 
 		DecalList decals;
 		int materialIndex;
@@ -398,14 +397,14 @@ struct Storm3D_TerrainDecalSystem::Data
     UINT baseDecalVertex;
     LPDIRECT3DVERTEXDECLARATION9 VtxFmt_DECAL;
 
-	boost::scoped_ptr<Tree> tree;
+	std::unique_ptr<Tree> tree;
 	DecalPtrList decals;
 	DecalList shadowDecals;
 
 	COL outFactor;
 	COL inFactor;
 
-	boost::shared_ptr<Material> shadowMaterial;
+	std::shared_ptr<Material> shadowMaterial;
 
 	float fogEnd;
 	float fogRange;
@@ -417,7 +416,7 @@ struct Storm3D_TerrainDecalSystem::Data
 		pointVertexShader(storm.GetD3DDevice()),
 		dirVertexShader(storm.GetD3DDevice()),
 		flatVertexShader(storm.GetD3DDevice()),
-		tree(0),
+		tree(),
 		outFactor(1.f, 1.f, 1.f),
 		inFactor(1.f, 1.f, 1.f),
 		fogEnd(-1000000000000.f),

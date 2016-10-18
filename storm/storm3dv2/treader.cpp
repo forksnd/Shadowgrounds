@@ -285,11 +285,11 @@ void VideoBackgroundLoader::getVideoInfo(unsigned int *fps_num, unsigned int *fp
 
 bool VideoBackgroundLoader::readFrame(char *buffer, const unsigned int w, const unsigned int h, int64_t& time)
 {
-    boost::shared_array<unsigned char> frame;
+    std::unique_ptr<uint8_t[]> frame;
     {
         SDL_LockMutex(backgroundMutex);
         if ( mContext->frames.size() ) {
-            frame = mContext->frames.front().data;
+            frame = std::move(mContext->frames.front().data);
             time  = mContext->frames.front().time;
             mContext->frames.pop_front();
 
@@ -358,7 +358,7 @@ void VideoBackgroundLoader::startLoadingThread()
                 avcodec_decode_video2(mContext->videocodecctx, mContext->readframe, &framedone, &packet);
                 if (framedone) {
                     size_t bsize = (mContext->videowidth * mContext->videoheight * 3 + 4);
-                    boost::shared_array<unsigned char> buffer(new unsigned char[bsize]);
+                    std::unique_ptr<uint8_t[]> buffer(new unsigned char[bsize]);
                     if (buffer) {
                         toRGB_convert_ctx = sws_getCachedContext(toRGB_convert_ctx,
                                                  mContext->videowidth, mContext->videoheight,
@@ -378,8 +378,7 @@ void VideoBackgroundLoader::startLoadingThread()
 
                         {
                             SDL_LockMutex(backgroundMutex);
-                            avctx::Frame f = {buffer, packet.dts};
-                            mContext->frames.push_back(f);
+                            mContext->frames.push_back({ std::move(buffer), packet.dts });
 
                             if (quitRequested)
                             {

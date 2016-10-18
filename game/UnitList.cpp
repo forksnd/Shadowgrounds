@@ -11,7 +11,6 @@
 #include "../system/Logger.h"
 
 #include <c2_qtree.h>
-#include <boost/scoped_ptr.hpp>
 #include <vector>
 
 #include "tracking/SimpleTrackableUnifiedHandleObjectIterator.h"
@@ -58,7 +57,7 @@ namespace game
 				// nop?
 			}
 
-			boost::scoped_ptr<UnitQTree> tree;
+			std::unique_ptr<UnitQTree> tree;
 
 		friend class UnitList;
 	};

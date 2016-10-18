@@ -286,7 +286,7 @@ namespace filesystem {
 #if READ_CHUNKS
 	class ZipInputBuffer: public IInputStreamBuffer
 	{
-		boost::shared_ptr<ZipData> zipData;
+		std::shared_ptr<ZipData> zipData;
 		unsigned char buffer[BUFFER_SIZE];
 		int currentPosition;
 		int readBytes;
@@ -357,7 +357,7 @@ namespace filesystem {
 		}
 
 	public:
-		ZipInputBuffer(boost::shared_ptr<ZipData> &zipData_, const ZipFileData &fileData_)
+		ZipInputBuffer(std::shared_ptr<ZipData> &zipData_, const ZipFileData &fileData_)
 		:	zipData(zipData_),
 			fileData(fileData_)
 		{
@@ -428,7 +428,7 @@ namespace filesystem {
 
 	class ZipInputBuffer: public IInputStreamBuffer
 	{
-		boost::shared_ptr<ZipData> zipData;
+		std::shared_ptr<ZipData> zipData;
 		std::vector<unsigned char> buffer;
 		int position;
 
@@ -459,7 +459,7 @@ namespace filesystem {
 		}
 
 	public:
-		ZipInputBuffer(boost::shared_ptr<ZipData> &zipData_, const ZipFileData &fileData_)
+		ZipInputBuffer(std::shared_ptr<ZipData> &zipData_, const ZipFileData &fileData_)
 		:	zipData(zipData_),
 			fileData(fileData_)
 		{
@@ -515,7 +515,7 @@ namespace filesystem {
 struct ZipPackageData
 {
 	std::string archiveName;
-	boost::shared_ptr<ZipData> zipData;
+	std::shared_ptr<ZipData> zipData;
 
 	ZipPackageData()
 	{
@@ -552,12 +552,12 @@ InputStream ZipPackage::getFile(const std::string &fileName)
 	ZipFileList::iterator it;
 	if(data->zipData->findFile(fileName, it))
 	{
-		boost::shared_ptr<ZipInputBuffer> inputBuffer(new ZipInputBuffer(data->zipData, it->second));
+		std::shared_ptr<ZipInputBuffer> inputBuffer(new ZipInputBuffer(data->zipData, it->second));
 		inputStream.setBuffer(inputBuffer);
 	}
 	else
 	{
-		boost::shared_ptr<EmptyBuffer> inputBuffer(new EmptyBuffer());
+		std::shared_ptr<EmptyBuffer> inputBuffer(new EmptyBuffer());
 		inputStream.setBuffer(inputBuffer);
 	}
 

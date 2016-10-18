@@ -14,13 +14,13 @@
 #include "../util/assert.h"
 #include <IStorm3D.h>
 #include <IStorm3D_Bone.h>
-#include <boost/shared_ptr.hpp>
 #include <string>
+#include <algorithm>
 #include <map>
 
 namespace sfx {
 
-typedef std::map<std::string, boost::shared_ptr<IStorm3D_BoneAnimation> > AnimationMap;
+typedef std::map<std::string, std::shared_ptr<IStorm3D_BoneAnimation> > AnimationMap;
 
 
 	struct Releaser
@@ -135,7 +135,7 @@ typedef std::map<std::string, boost::shared_ptr<IStorm3D_BoneAnimation> > Animat
 	struct Amplitude
 	{
 		unsigned char limit;
-		boost::shared_ptr<IStorm3D_BoneAnimation> animation;
+		std::shared_ptr<IStorm3D_BoneAnimation> animation;
 
 		Amplitude()
 		:	limit(0)
@@ -154,13 +154,13 @@ typedef std::map<std::string, boost::shared_ptr<IStorm3D_BoneAnimation> > Animat
 	struct PlayData
 	{
 		IStorm3D_Model *model;
-		boost::shared_ptr<AmplitudeArray> array;
+		std::shared_ptr<AmplitudeArray> array;
 		IStorm3D_BoneAnimation *previous;
 		int currentSample;
 
 		int startTime;
 
-		explicit PlayData(const boost::shared_ptr<AmplitudeArray> &array_)
+		explicit PlayData(const std::shared_ptr<AmplitudeArray> &array_)
 		:	model(0),
 			array(array_),
 			previous(0),
@@ -212,7 +212,7 @@ typedef std::map<std::string, boost::shared_ptr<IStorm3D_BoneAnimation> > Animat
 	};
 
 	typedef std::map<IStorm3D_Model *, ModelInfo> ModelInfos;
-	typedef std::vector<boost::shared_ptr<PlayData> > PlayDatas;
+	typedef std::vector<std::shared_ptr<PlayData> > PlayDatas;
 	typedef std::vector<Amplitude> Amplitudes;
 
 
@@ -308,9 +308,9 @@ struct LipsyncManager::Data
 		modelInfo[model].setExpression(fader, model, it->second.get(), fadeTime);
 	}
 
-	void play(IStorm3D_Model *model, const boost::shared_ptr<AmplitudeArray> &array, int currentTime)
+	void play(IStorm3D_Model *model, const std::shared_ptr<AmplitudeArray> &array, int currentTime)
 	{
-		boost::shared_ptr<PlayData> playInfo(new PlayData(array));
+		std::shared_ptr<PlayData> playInfo(new PlayData(array));
 		playInfo->model = model;
 		playInfo->startTime = currentTime;
 
@@ -338,7 +338,7 @@ struct LipsyncManager::Data
 		PlayDatas::iterator it = playDatas.begin();
 		for(; it != playDatas.end(); )
 		{
-			boost::shared_ptr<PlayData> &playInfo = *it;
+			std::shared_ptr<PlayData> &playInfo = *it;
 			PlayData *ptr = playInfo.get();
 
 			ptr->setCurrentTime(currentTime, sampleRate);
@@ -372,9 +372,9 @@ const LipsyncProperties &LipsyncManager::getProperties() const
 	return data->properties;
 }
 
-boost::shared_ptr<AmplitudeArray> LipsyncManager::getAmplitudeBuffer(const std::string &file) const
+std::shared_ptr<AmplitudeArray> LipsyncManager::getAmplitudeBuffer(const std::string &file) const
 {
-	boost::shared_ptr<AmplitudeArray> array(new AmplitudeArray());
+	std::shared_ptr<AmplitudeArray> array(new AmplitudeArray());
 
 	WaveReader reader(file);
 	reader.readAmplitudeArray(data->sampleRate, *array);
@@ -393,7 +393,7 @@ void LipsyncManager::setExpression(IStorm3D_Model *model, const std::string &val
 	data->setExpression(model, value, fadeTime);
 }
 
-void LipsyncManager::play(IStorm3D_Model *model, const boost::shared_ptr<AmplitudeArray> &array, int currentTime)
+void LipsyncManager::play(IStorm3D_Model *model, const std::shared_ptr<AmplitudeArray> &array, int currentTime)
 {
 	data->play(model, array, currentTime);
 }

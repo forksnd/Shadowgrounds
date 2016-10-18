@@ -164,7 +164,7 @@ namespace game
 			*/
 
 #ifdef LEGACY_FILES
-			boost::shared_ptr<filesystem::IFileList> fileList = filesystem::FilePackageManager::getInstance().findFiles("Data/Units", "*.dhu");
+			std::shared_ptr<filesystem::IFileList> fileList = filesystem::FilePackageManager::getInstance().findFiles("Data/Units", "*.dhu");
 			std::vector<std::string> allFiles;
 			filesystem::getAllFiles(*fileList, "Data/Units", allFiles, true);
 
@@ -175,7 +175,7 @@ namespace game
 			}
 #else
 			// TODO: fix for subdirs too.
-			boost::shared_ptr<filesystem::IFileList> fileList = filesystem::FilePackageManager::getInstance().findFiles("data/unit", "*.dhu");
+			std::shared_ptr<filesystem::IFileList> fileList = filesystem::FilePackageManager::getInstance().findFiles("data/unit", "*.dhu");
 			std::vector<std::string> allFiles;
 			filesystem::getAllFiles(*fileList, "data/unit", allFiles, true);
 

@@ -16,7 +16,7 @@ struct Storm3D_VideoPlayerData
 {
 	Storm3D &storm;
 	Storm3D_Scene &scene;
-	boost::shared_ptr<Storm3D_VideoStreamer> streamer;
+	std::shared_ptr<Storm3D_VideoStreamer> streamer;
 
 	Storm3D_VideoPlayerData(Storm3D &storm_, Storm3D_Scene &scene_, const char *filename, class IStorm3D_StreamBuilder *streamBuilder)
 	:	storm(storm_),

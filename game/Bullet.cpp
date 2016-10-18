@@ -19,7 +19,6 @@
 #include "../sound/sounddefs.h"
 #include "Forcewear.h"
 #include <string>
-#include <boost/lexical_cast.hpp>
 
 
 #define BULLET_SLOTS 0
@@ -765,7 +764,7 @@ namespace game
 
 				try
 				{
-					chainSoundRange[atChain] = boost::lexical_cast<float> (std::string(value));
+					chainSoundRange[atChain] = std::stof(std::string(value));
 				}
 				catch(...)
 				{

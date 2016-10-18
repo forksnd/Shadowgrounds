@@ -248,19 +248,19 @@
 			//	filterTexture.Release();
 		}
 
-		boost::shared_ptr<RenderTarget> getTarget()
+		std::shared_ptr<RenderTarget> getTarget()
 		{
 			for(unsigned int i = 0; i < BUFFER_LIMIT; ++i)
 			{
 				if(!used[i] && targets[i]->hasInitialized())
 				{
 					used[i] = true;
-					return boost::shared_ptr<RenderTarget>(targets[i], BufferDeleter(*this));
+					return std::shared_ptr<RenderTarget>(targets[i], BufferDeleter(*this));
 				}
 			}
 
 			assert(!"Whoops");	
-			return boost::shared_ptr<RenderTarget>();
+			return std::shared_ptr<RenderTarget>();
 		}
 
 		void freeTarget(const RenderTarget *target)
@@ -299,7 +299,7 @@ struct Storm3D_FakeSpotlight::Data
 	GfxDevice &device;
 
     //TODO: create proper rt sharing solution at higher level
-	boost::shared_ptr<RenderTarget> renderTarget;
+	std::shared_ptr<RenderTarget> renderTarget;
 	Storm3D_SpotlightShared properties;
 
 	Storm3D_Camera camera;

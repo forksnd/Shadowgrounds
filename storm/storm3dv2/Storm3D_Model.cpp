@@ -9,7 +9,6 @@
 //------------------------------------------------------------------
 #include <queue>
 #include <vector>
-#include <boost/lexical_cast.hpp>
 
 #include "S3D_ModelFile.h"
 #include "storm3d.h"
@@ -1660,9 +1659,9 @@ bool Storm3D_Model::LoadS3D(const char *filename)
 		}
 
 		std::string foo;
-		foo += std::string("Objects: ") + boost::lexical_cast<std::string> (objects.size());
+		foo += std::string("Objects: ") + std::to_string(objects.size());
 		foo += "\r\n";
-		foo += std::string("Light objects: ") + boost::lexical_cast<std::string> (light_objects.size());
+		foo += std::string("Light objects: ") + std::to_string(light_objects.size());
 		foo += "\r\n";
 		//MessageBox(0, foo.c_str(), "Info", MB_OK);
 	}

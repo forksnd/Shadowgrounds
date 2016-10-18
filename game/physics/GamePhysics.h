@@ -5,7 +5,6 @@
 #include "IGamePhysicsObject.h"
 #include "IGamePhysicsScriptRunner.h"
 #include "IPhysicsContactListener.h"
-#include <boost/shared_ptr.hpp>
 
 #ifdef PROJECT_CLAW_PROTO
 class NxActor;

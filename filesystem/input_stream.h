@@ -3,14 +3,8 @@
 #ifndef INCLUDED_FILESYSTEM_INPUT_STREAM_H
 #define INCLUDED_FILESYSTEM_INPUT_STREAM_H
 
-#ifndef INCLUDED_BOOST_SHARED_PTR_HPP
-#define INCLUDED_BOOST_SHARED_PTR_HPP
-#include <boost/shared_ptr.hpp>
-#endif
-#ifndef INCLUDED_STRING
-#define INCLUDED_STRING
+#include <memory>
 #include <string>
-#endif
 
 namespace frozenbyte {
 namespace filesystem {
@@ -29,13 +23,13 @@ public:
 
 class InputStream
 {
-	boost::shared_ptr<IInputStreamBuffer> streamBuffer;
+	std::shared_ptr<IInputStreamBuffer> streamBuffer;
 
 public:
 	InputStream();
 	~InputStream();
 
-	void setBuffer(boost::shared_ptr<IInputStreamBuffer> streamBuffer);
+	void setBuffer(std::shared_ptr<IInputStreamBuffer> streamBuffer);
 	bool isEof() const;
 	int getSize() const;
 

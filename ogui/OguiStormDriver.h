@@ -11,7 +11,6 @@
 #include "IOguiDriver.h"
 #include "IOguiImage.h"
 #include "IOguiFont.h"
-#include <boost/shared_ptr.hpp>
 
 //
 // Does not actually implement a driver, but just gives ogui user a dummy

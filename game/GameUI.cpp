@@ -151,8 +151,6 @@
 #include "direct_controls.h"
 
 
-#include <boost/lexical_cast.hpp>
-
 #include "userdata.h"
 
 
@@ -2473,32 +2471,32 @@ namespace game
 			{
 				VC3 pos = getListenerPosition();
 				std::string msg = "Camera listener position: ";
-				msg += boost::lexical_cast<std::string> (pos.x);
+				msg += std::to_string(pos.x);
 				msg += ", ";
-				msg += boost::lexical_cast<std::string> (pos.y);
+				msg += std::to_string(pos.y);
 				msg += ", ";
-				msg += boost::lexical_cast<std::string> (pos.z);
+				msg += std::to_string(pos.z);
 				Logger::getInstance()->error(msg.c_str());
 			}
 
 			{
 				VC3 pos = gameCamera->getPosition();
 				std::string msg = "Camera position: ";
-				msg += boost::lexical_cast<std::string> (pos.x);
+				msg += std::to_string(pos.x);
 				msg += ", ";
-				msg += boost::lexical_cast<std::string> (pos.y);
+				msg += std::to_string(pos.y);
 				msg += ", ";
-				msg += boost::lexical_cast<std::string> (pos.z);
+				msg += std::to_string(pos.z);
 				Logger::getInstance()->error(msg.c_str());
 			}
 
 			{
 				std::string msg = "Camera direction: ";
-				msg += boost::lexical_cast<std::string> (dir.x);
+				msg += std::to_string(dir.x);
 				msg += ", ";
-				msg += boost::lexical_cast<std::string> (dir.y);
+				msg += std::to_string(dir.y);
 				msg += ", ";
-				msg += boost::lexical_cast<std::string> (dir.z);
+				msg += std::to_string(dir.z);
 				Logger::getInstance()->error(msg.c_str());
 			}
 			*/

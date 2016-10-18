@@ -40,7 +40,7 @@ public:
 	void setLightMap(int blockIndex, IStorm3D_Texture &map);
 
 	// Terrain objects
-	int addModel(boost::shared_ptr<IStorm3D_Model> model, boost::shared_ptr<IStorm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation);
+	int addModel(std::shared_ptr<IStorm3D_Model> model, std::shared_ptr<IStorm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation);
 	void removeModels();
 	int addInstance(int modeld, const VC3 &position, const QUAT &rotation, const COL &color);
 	void setInstancePosition(int modelId, int instanceId, const VC3 &position);
@@ -76,7 +76,7 @@ public:
 	void recreateDynamicResources();
 
 	// Querys
-	boost::shared_ptr<IStorm3D_TerrainModelIterator> getModelIterator(const VC3 &position, float radius);
+	std::shared_ptr<IStorm3D_TerrainModelIterator> getModelIterator(const VC3 &position, float radius);
 	bool findObject(const VC3 &position, float radius, int &modelId, int &instanceId);
 	VC3 getNormal(const VC2I &position) const;
 	VC3 getFaceNormal(const VC2 &position) const;

@@ -20,8 +20,6 @@
 #include "../ogui/OguiCheckBox.h"
 #include "../game/userdata.h"
 
-#include <boost/lexical_cast.hpp>
-
 #ifdef PROJECT_SURVIVOR
 	#include "CoopMenu.h"
 	#include "../game/BonusManager.h"

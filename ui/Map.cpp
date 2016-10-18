@@ -322,8 +322,8 @@ namespace {
 		std::string layerFile1;
 		std::string layerFile2;
 
-		boost::scoped_ptr<FileReader> fileReader1;
-		boost::scoped_ptr<FileReader> fileReader2;
+		std::unique_ptr<FileReader> fileReader1;
+		std::unique_ptr<FileReader> fileReader2;
 
 		ColorList layer1;
 		ColorList layer2;
@@ -602,7 +602,7 @@ namespace {
 	};
 
 
-typedef std::map<std::string, boost::shared_ptr<Layer> > Layers;
+typedef std::map<std::string, std::shared_ptr<Layer> > Layers;
 
 struct Map::Data
 {
@@ -626,7 +626,7 @@ struct Map::Data
 	{
 		if(layers.find(id) == layers.end())
 		{
-			boost::shared_ptr<Layer> l(new Layer());
+			std::shared_ptr<Layer> l(new Layer());
 			layers[id] = l;
 		}
 	}

@@ -3,7 +3,7 @@
 #ifndef INCLUDED_LIPSYNC_MANAGER_H
 #define INCLUDED_LIPSYNC_MANAGER_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 class IStorm3D;
@@ -33,14 +33,14 @@ public:
 	};
 
 	const std::string &getCharacter(CharPosition position) const;
-	boost::shared_ptr<sfx::AmplitudeArray> getAmplitudeBuffer(const std::string &file) const;
+	std::shared_ptr<sfx::AmplitudeArray> getAmplitudeBuffer(const std::string &file) const;
 	bool isActive() const;
 
 
 	void setCharacter(CharPosition position, const std::string &id);
 	void setIdle(const std::string &character, const std::string &idleAnimation, int fadeTime = -1);
 	void setExpression(const std::string &character, const std::string &idleAnimation, int fadeTime = -1);
-	void playSpeech(const std::string &character, const boost::shared_ptr<sfx::AmplitudeArray> &amplitudes, int time);
+	void playSpeech(const std::string &character, const std::shared_ptr<sfx::AmplitudeArray> &amplitudes, int time);
 
 	// some rendering settings
 	void setCamera(CharPosition pos, const VC3 &cameraPos, const VC3 &cameraTarget, float aspectRatio = 0.0f);

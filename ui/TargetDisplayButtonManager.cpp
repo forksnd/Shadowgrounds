@@ -7,7 +7,6 @@
 #include "../ogui/OguiSlider.h"
 
 #include <sstream>
-#include <boost/lexical_cast.hpp>
 
 #include "../system/Logger.h"
 #include "../game/DHLocaleManager.h"
@@ -171,7 +170,7 @@ void TargetDisplayButtonManager::setText( button& b, const std::string& txt )
 		b.hasText = true;
 		b.theText = text;
 		b.textWidth = b.font?b.font->getStringWidth( text.c_str() ):0;
-		// b.theText = boost::lexical_cast< std::string >( b.textWidth );
+		// b.theText = std::to_string( b.textWidth );
 	}
 
 	/*

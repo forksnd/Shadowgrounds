@@ -1,8 +1,7 @@
 #ifndef INCLUDED_FROZENBYTE_PHYSICS_LIB_H
 #define INCLUDED_FROZENBYTE_PHYSICS_LIB_H
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <DatatypeDef.h>
 #include <string>
 #include <vector>
@@ -126,7 +125,7 @@ public:
 class PhysicsLib
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	std::unique_ptr<Data> data;
 
 public:
 	PhysicsLib(bool useHardware, bool useHardwareOnly, bool useMultithreading, PhysicsParams *params = NULL);
@@ -136,24 +135,24 @@ public:
 	NxScene *getScene();
 
 	// Geometry data (cooked file)
-	boost::shared_ptr<ConvexMesh> createConvexMesh(const char *filename);
-	boost::shared_ptr<StaticMesh> createStaticMesh(const char *filename);
+	std::shared_ptr<ConvexMesh> createConvexMesh(const char *filename);
+	std::shared_ptr<StaticMesh> createStaticMesh(const char *filename);
 
 	// Actors
-	boost::shared_ptr<SphereActor> createSphereActor(float radius, const VC3 &position);
-	boost::shared_ptr<BoxActor> createBoxActor(const VC3 &sizes, const VC3 &position, const VC3 &localPosition = VC3());
-	boost::shared_ptr<CapsuleActor> createCapsuleActor(float height, float radius, const VC3 &position, float offset = 0.0f, int axisNumber = 1);
-	boost::shared_ptr<ConvexActor> createConvexActor(const boost::shared_ptr<ConvexMesh> &mesh, const VC3 &position);
-	boost::shared_ptr<StaticMeshActor> createStaticMeshActor(const boost::shared_ptr<StaticMesh> &mesh, const VC3 &position, const QUAT &rotation);
-	boost::shared_ptr<HeightmapActor> createHeightmapActor(const unsigned short *buffer, int samplesX, int samplesY, const VC3 &size);
-	boost::shared_ptr<RackActor> createRackActor(const VC3 &position);
+	std::shared_ptr<SphereActor> createSphereActor(float radius, const VC3 &position);
+	std::shared_ptr<BoxActor> createBoxActor(const VC3 &sizes, const VC3 &position, const VC3 &localPosition = VC3());
+	std::shared_ptr<CapsuleActor> createCapsuleActor(float height, float radius, const VC3 &position, float offset = 0.0f, int axisNumber = 1);
+	std::shared_ptr<ConvexActor> createConvexActor(const std::shared_ptr<ConvexMesh> &mesh, const VC3 &position);
+	std::shared_ptr<StaticMeshActor> createStaticMeshActor(const std::shared_ptr<StaticMesh> &mesh, const VC3 &position, const QUAT &rotation);
+	std::shared_ptr<HeightmapActor> createHeightmapActor(const unsigned short *buffer, int samplesX, int samplesY, const VC3 &size);
+	std::shared_ptr<RackActor> createRackActor(const VC3 &position);
 #ifdef PROJECT_CLAW_PROTO
-	boost::shared_ptr<CarActor> createCarActor(const VC3 &position);
+	std::shared_ptr<CarActor> createCarActor(const VC3 &position);
 	static NxMaterial * unitMaterial;
 #endif
 
 	// Joints
-	boost::shared_ptr<SphericalJoint> createSphericalJoint(boost::shared_ptr<ActorBase> &a, boost::shared_ptr<ActorBase> &b, const VC3 &globalAnchor);
+	std::shared_ptr<SphericalJoint> createSphericalJoint(std::shared_ptr<ActorBase> &a, std::shared_ptr<ActorBase> &b, const VC3 &globalAnchor);
 
 	// Fluid
 	enum FluidType
@@ -163,7 +162,7 @@ public:
 	};
 
 #ifndef NX_DISABLE_FLUIDS
-	boost::shared_ptr<Fluid> createFluid(FluidType fluidType, int maxParticles, float fluidStaticRestitution, float fluidStaticAdhesion, float fluidDynamicRestitution, float fluidDynamicAdhesion, float fluidDamping, float fluidStiffness, float fluidViscosity, float fluidKernelRadiusMultiplier, float fluidRestParticlesPerMeter, float fluidRestDensity, float fluidMotionLimit, int fluidPacketSizeMultiplier, int collGroup);
+	std::shared_ptr<Fluid> createFluid(FluidType fluidType, int maxParticles, float fluidStaticRestitution, float fluidStaticAdhesion, float fluidDynamicRestitution, float fluidDynamicAdhesion, float fluidDamping, float fluidStiffness, float fluidViscosity, float fluidKernelRadiusMultiplier, float fluidRestParticlesPerMeter, float fluidRestDensity, float fluidMotionLimit, int fluidPacketSizeMultiplier, int collGroup);
 #endif
 
 	// Misc

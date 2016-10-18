@@ -6,8 +6,6 @@
 #pragma warning( disable : 4800 )
 #endif
 
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <string>
 #include <map>

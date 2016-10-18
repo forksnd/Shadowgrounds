@@ -3,7 +3,7 @@
 #ifndef INCLUDED_ISTORM3D_TERRAIN_RENDERER_H
 #define INCLUDED_ISTORM3D_TERRAIN_RENDERER_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <DatatypeDef.h>
 
 class IStorm3D_Spotlight;
@@ -18,10 +18,10 @@ public:
 	// Normalized coordinates (0 .. 1)
 	virtual void renderLightTexture(const VC2 &start, const VC2 &end, IStorm3D_Texture &texture, const COL &color) = 0;
 
-	virtual boost::shared_ptr<IStorm3D_Spotlight> createSpot() = 0;
-	virtual void deleteSpot(boost::shared_ptr<IStorm3D_Spotlight> &spot) = 0;
-	virtual boost::shared_ptr<IStorm3D_FakeSpotlight> createFakeSpot() = 0;
-	virtual void deleteFakeSpot(boost::shared_ptr<IStorm3D_FakeSpotlight> &spot) = 0;
+	virtual std::shared_ptr<IStorm3D_Spotlight> createSpot() = 0;
+	virtual void deleteSpot(std::shared_ptr<IStorm3D_Spotlight> &spot) = 0;
+	virtual std::shared_ptr<IStorm3D_FakeSpotlight> createFakeSpot() = 0;
+	virtual void deleteFakeSpot(std::shared_ptr<IStorm3D_FakeSpotlight> &spot) = 0;
 
 	virtual void setMovieAspectRatio(bool enable, bool fade = false) = 0;
 

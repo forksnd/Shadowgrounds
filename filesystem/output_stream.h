@@ -3,14 +3,8 @@
 #ifndef INCLUDED_FILESYSTEM_OUTPUT_STREAM_H
 #define INCLUDED_FILESYSTEM_OUTPUT_STREAM_H
 
-#ifndef INCLUDED_BOOST_SHARED_PTR_HPP
-#define INCLUDED_BOOST_SHARED_PTR_HPP
-#include <boost/shared_ptr.hpp>
-#endif
-#ifndef INCLUDED_STRING
-#define INCLUDED_STRING
+#include <memory>
 #include <string>
-#endif
 
 namespace frozenbyte {
 namespace filesystem {
@@ -25,14 +19,14 @@ public:
 
 class OutputStream
 {
-	boost::shared_ptr<IOutputStreamBuffer> streamBuffer;
+	std::shared_ptr<IOutputStreamBuffer> streamBuffer;
 	bool textStrings;
 
 public:
 	OutputStream();
 	~OutputStream();
 
-	void setBuffer(boost::shared_ptr<IOutputStreamBuffer> streamBuffer);
+	void setBuffer(std::shared_ptr<IOutputStreamBuffer> streamBuffer);
 	void useTextStrings(); // Insert pure strings. Put std::endl manually!
 
 private:

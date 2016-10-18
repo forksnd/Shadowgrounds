@@ -11,8 +11,6 @@
 #include <IStorm3D.h>
 #include "../filesystem/input_stream_wrapper.h"
 
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include <map>
 #include <list>
@@ -38,10 +36,10 @@ namespace frozenbyte {
 
 	struct TemporaryTexture
 	{
-		boost::shared_ptr<IStorm3D_Texture> texture;
+		std::shared_ptr<IStorm3D_Texture> texture;
 		int timeLeft;
 
-		explicit TemporaryTexture(boost::shared_ptr<IStorm3D_Texture> &texture_)
+		explicit TemporaryTexture(std::shared_ptr<IStorm3D_Texture> &texture_)
 		:	texture(texture_),
 			timeLeft(TEMPORARY_TIME)
 		{
@@ -91,8 +89,8 @@ struct TextureCache::Data
 {
 	IStorm3D &storm;
 
-	std::map<std::string, boost::shared_ptr<IStorm3D_Texture> > textures;
-	std::map<std::string, boost::shared_ptr<IStorm3D_Texture> > temporaryTextures;
+	std::map<std::string, std::shared_ptr<IStorm3D_Texture> > textures;
+	std::map<std::string, std::shared_ptr<IStorm3D_Texture> > temporaryTextures;
 
 	// texture data loaded to memory
 	std::map<std::string, TextureData > textureDatas;
@@ -116,7 +114,7 @@ struct TextureCache::Data
 			total += it->second.data_size;
 			delete[] it->second.data;
 		}
-		Logger::getInstance()->debug(("TextureCache preloaded a total of " + boost::lexical_cast<std::string>(total) + " bytes").c_str());
+		Logger::getInstance()->debug(("TextureCache preloaded a total of " + std::to_string(total) + " bytes").c_str());
 	}
 
 	void loadTexture(std::string fileName, bool temporaryCache)
@@ -142,7 +140,7 @@ struct TextureCache::Data
 			return;
 		}
 
-		boost::shared_ptr<IStorm3D_Texture> texture(t, TextureDeleter());
+		std::shared_ptr<IStorm3D_Texture> texture(t, TextureDeleter());
 
 		if(temporaryCache)
 		{
@@ -163,7 +161,7 @@ struct TextureCache::Data
 	{
 		makeLower(fileName);
 
-		std::map<std::string, boost::shared_ptr<IStorm3D_Texture> >::iterator it = textures.find(fileName);
+		std::map<std::string, std::shared_ptr<IStorm3D_Texture> >::iterator it = textures.find(fileName);
 		if(it != textures.end())
 			return it->second.get();
 

@@ -2,8 +2,6 @@
 
 // Copyright 2002-2004 Frozenbyte Ltd.
 
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <string>
 #include <map>
@@ -313,7 +311,7 @@ void ModelParticleSystem::update()
 
 		for(int i = 0; i < forceAmount; ++i)
 		{
-			boost::shared_ptr<IParticleForce> &iforce = m_forces[i];
+			std::shared_ptr<IParticleForce> &iforce = m_forces[i];
 			int forceType = iforce->getTypeId();
 
 			if(forceType == DragParticleForce::getType())
@@ -499,16 +497,16 @@ ModelParticleSystem::ModelParticleSystem()
 {
 }
 
-boost::shared_ptr<IParticleSystem> ModelParticleSystem::createNew()
+std::shared_ptr<IParticleSystem> ModelParticleSystem::createNew()
 {
 	ModelParticleSystem *ms = new ModelParticleSystem();
-	boost::shared_ptr<ModelParticleSystemEditables> e(new ModelParticleSystemEditables);
+	std::shared_ptr<ModelParticleSystemEditables> e(new ModelParticleSystemEditables);
 	ms->m_eds.swap(e);
 
-	return boost::shared_ptr<IParticleSystem> (ms);
+	return std::shared_ptr<IParticleSystem> (ms);
 }
 
-boost::shared_ptr<IParticleSystem> ModelParticleSystem::clone()
+std::shared_ptr<IParticleSystem> ModelParticleSystem::clone()
 {
 	ModelParticleSystem *ms = new ModelParticleSystem();
 	copyTo(*ms);
@@ -525,7 +523,7 @@ boost::shared_ptr<IParticleSystem> ModelParticleSystem::clone()
 	}
 
 	//ms->physics = physics;
-	return boost::shared_ptr<IParticleSystem>(ms);
+	return std::shared_ptr<IParticleSystem>(ms);
 }
 
 void ModelParticleSystem::setLighting(const COL &ambient, const signed short int *lightIndices)
@@ -542,12 +540,12 @@ void ModelParticleSystem::setLighting(const COL &ambient, const signed short int
 	}
 }
 
-void ModelParticleSystem::setCollision(boost::shared_ptr<IParticleCollision> &collision_)
+void ModelParticleSystem::setCollision(std::shared_ptr<IParticleCollision> &collision_)
 {
 	collision = collision_;
 }
 
-void ModelParticleSystem::setPhysics(boost::shared_ptr<ParticlePhysics> &physics_)
+void ModelParticleSystem::setPhysics(std::shared_ptr<ParticlePhysics> &physics_)
 {
 	physics = physics_;
 }
@@ -604,7 +602,7 @@ void ModelParticleSystem::init(IStorm3D *s3d, IStorm3D_Scene *scene)
 			IStorm3D_Mesh *mesh = obj->GetCurrent()->GetMesh();
 			if(mesh) 
 			{
-				boost::shared_ptr<PointArray> pm(new PointArray());
+				std::shared_ptr<PointArray> pm(new PointArray());
 				pm->verts.resize(mesh->GetVertexCount());
 				pm->normals.resize(mesh->GetVertexCount());
 
@@ -684,7 +682,7 @@ void ModelParticleSystem::init(IStorm3D *s3d, IStorm3D_Scene *scene)
 					*/
 
 					/*
-					boost::shared_ptr<physics::ConvexMesh> shape = physics->createConvexMesh(fname.c_str());
+					std::shared_ptr<physics::ConvexMesh> shape = physics->createConvexMesh(fname.c_str());
 					if(!shape->isValid())
 					{
 						physics::Cooker cooker;
@@ -695,7 +693,7 @@ void ModelParticleSystem::init(IStorm3D *s3d, IStorm3D_Scene *scene)
 					*/
 
 #ifdef PHYSICS_PHYSX
-					boost::shared_ptr<PhysicsMesh> shape = physics->createConvexMesh(0, o);
+					std::shared_ptr<PhysicsMesh> shape = physics->createConvexMesh(0, o);
 					original.shapes.push_back(shape);
 #endif
 				}

@@ -2,7 +2,7 @@
 #define INCLUDED_FROZENBYTE_CONVEX_ACTOR_H
 
 #include "actor_base.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class NxPhysicsSDK;
 class NxScene;
@@ -30,10 +30,10 @@ public:
 
 class ConvexActor: public ActorBase
 {
-	boost::shared_ptr<ConvexMesh> mesh;
+	std::shared_ptr<ConvexMesh> mesh;
 
 public:
-	ConvexActor(NxScene &scene, const boost::shared_ptr<ConvexMesh> &mesh, const VC3 &position);
+	ConvexActor(NxScene &scene, const std::shared_ptr<ConvexMesh> &mesh, const VC3 &position);
 	~ConvexActor();
 
 	// Extended stuff

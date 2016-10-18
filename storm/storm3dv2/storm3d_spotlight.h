@@ -45,8 +45,8 @@ public:
 	void enableSmoothing(bool enable);
 	bool setScissorRect(Storm3D_Camera &camera, const VC2I &screenSize, Storm3D_Scene &scene);
 
-	void setProjectionTexture(boost::shared_ptr<IStorm3D_Texture> texture);
-	void setConeTexture(boost::shared_ptr<IStorm3D_Texture> texture);
+	void setProjectionTexture(std::shared_ptr<IStorm3D_Texture> texture);
+	void setConeTexture(std::shared_ptr<IStorm3D_Texture> texture);
 	bool hasConeTexture() const;
 	void setColorMultiplier(const COL &color);
 	void setConeMultiplier(float scalar);

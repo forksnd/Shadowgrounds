@@ -16,7 +16,6 @@
 #include <string>
 
 #include <fstream>
-#include <boost/lexical_cast.hpp>
 
 using namespace game;
 
@@ -439,7 +438,7 @@ private:
 		if( s.empty() )
 			return default_value;
 		
-		return boost::lexical_cast< int >( s );
+		return std::stoi( s );
 	}
 
 	//=========================================================================

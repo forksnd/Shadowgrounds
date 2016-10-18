@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace util {
 
@@ -13,7 +13,7 @@ class LocaleManager
 {
 	struct Locale
 	{
-		std::vector<boost::shared_ptr<LocaleResource> > resources;
+		std::vector<std::shared_ptr<LocaleResource> > resources;
 
 		std::string englishName;
 		std::string nativeName;

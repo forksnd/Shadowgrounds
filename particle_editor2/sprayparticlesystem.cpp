@@ -6,8 +6,6 @@
 #pragma warning( disable : 4800 )
 #endif
 
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <string>
 #include <map>
@@ -43,19 +41,19 @@ SprayParticleSystem::SprayParticleSystem()
 {
 }
 
-boost::shared_ptr<IParticleSystem> SprayParticleSystem::createNew() {
+std::shared_ptr<IParticleSystem> SprayParticleSystem::createNew() {
 	SprayParticleSystem* ps = new SprayParticleSystem();
-	boost::shared_ptr<IParticleSystem> ptr(ps); 
-	boost::shared_ptr<SprayParticleSystemEditables> eds(new SprayParticleSystemEditables);
+	std::shared_ptr<IParticleSystem> ptr(ps); 
+	std::shared_ptr<SprayParticleSystemEditables> eds(new SprayParticleSystemEditables);
 	ps->m_eds.swap(eds);
 	return ptr;
 }
 
-boost::shared_ptr<IParticleSystem> SprayParticleSystem::clone() {
+std::shared_ptr<IParticleSystem> SprayParticleSystem::clone() {
 	SprayParticleSystem* ps = new SprayParticleSystem();
 	copyTo(*ps);
 	ps->m_eds = m_eds;
-	boost::shared_ptr<IParticleSystem> res(ps);
+	std::shared_ptr<IParticleSystem> res(ps);
 
 #ifdef PHYSICS_PHYSX
 #ifndef NX_DISABLE_FLUIDS
@@ -169,7 +167,7 @@ void SprayParticleSystem::setParticleVelocity(Vector& v, const Vector& direction
 	v = dir * speed;
 }
 
-void SprayParticleSystem::setCollision(boost::shared_ptr<IParticleCollision> &collision_)
+void SprayParticleSystem::setCollision(std::shared_ptr<IParticleCollision> &collision_)
 {
 	collision = collision_;
 }

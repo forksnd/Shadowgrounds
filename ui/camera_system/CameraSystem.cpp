@@ -4,7 +4,6 @@
 #include "CameraSystemAreas.h"
 #include "CameraSystemAim.h"
 
-#include <boost/lexical_cast.hpp>
 #include "../../system/Logger.h"
 
 #include "../../game/SimpleOptions.h"
@@ -114,7 +113,7 @@ void CameraSystem::update( VC3 positionOfInterest, int elapsedTime )
 	if (modeChangeTimer<modeChangeTime) {
 		modeChangeTimer += elapsedTime;
 //		std::string foofoo = "TIMER: ";
-//		foofoo = foofoo + boost::lexical_cast< std::string >(modeChangeTimer) + ", ";
+//		foofoo = foofoo + std::to_string(modeChangeTimer) + ", ";
 //		Logger::getInstance()->error( foofoo.c_str() );
 		if ((modeChangeTime == 0) || (modeChangeTimer>modeChangeTime)) {
 			modeWeight[oldMode] = 0;
@@ -124,9 +123,9 @@ void CameraSystem::update( VC3 positionOfInterest, int elapsedTime )
 			modeWeight[oldMode] = 0.5f+0.5f*cos(s*PI);
 			modeWeight[mode] = 1-(0.5f+0.5f*cos(s*PI));
 //			std::string foofoo2 = "";
-//			foofoo2 = foofoo2 + boost::lexical_cast< std::string >(s) + ", ";
-//			foofoo2 = foofoo2 + boost::lexical_cast< std::string >(modeWeight[mode]) + ", ";
-//			foofoo2 = foofoo2 + boost::lexical_cast< std::string >(modeWeight[oldMode]) + ", ";
+//			foofoo2 = foofoo2 + std::to_string(s) + ", ";
+//			foofoo2 = foofoo2 + std::to_string(modeWeight[mode]) + ", ";
+//			foofoo2 = foofoo2 + std::to_string(modeWeight[oldMode]) + ", ";
 //			Logger::getInstance()->error( foofoo2.c_str() );
 		}
 	}

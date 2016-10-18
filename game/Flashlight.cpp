@@ -19,9 +19,6 @@
 #include "../util/SpotLightCalculator.h"
 #include "../util/LightAmountManager.h"
 
-#include <boost/shared_ptr.hpp>
-
-
 #define FLASHLIGHT_HEIGHT 0.0f
 
 // THESE ARE IN GAME OPTIONS NOW
@@ -58,7 +55,7 @@ namespace game
 			int lastRecharge;
 			float tempBrightnessFactor;
 			float lastBrightnessFactor;
-			boost::shared_ptr<util::SpotLightCalculator> lightCalculator;
+			std::shared_ptr<util::SpotLightCalculator> lightCalculator;
 			float swayFactor;
 			float shakeFactor;
 			int swayCurrentTime;
@@ -574,7 +571,7 @@ dir.z = -dir.z;
 			impl->spotlight = sp;
 			this->setRotation(impl->angle);
 
-			impl->lightCalculator = boost::shared_ptr<util::SpotLightCalculator> (new util::SpotLightCalculator(40.0f, 20.0f, impl->origin->getDataObject()));
+			impl->lightCalculator = std::shared_ptr<util::SpotLightCalculator> (new util::SpotLightCalculator(40.0f, 20.0f, impl->origin->getDataObject()));
 			util::LightAmountManager::getInstance()->add(impl->lightCalculator);
 
 			VC3 pos = impl->position;

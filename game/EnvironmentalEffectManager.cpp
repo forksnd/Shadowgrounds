@@ -6,8 +6,6 @@
 #include <list>
 #include <fstream>
 #include <map>
-#include <vector>
-#include <boost/lexical_cast.hpp>
 
 #include "EnvironmentalEffectManager.h"
 #include "EnvironmentalEffect.h"
@@ -68,7 +66,7 @@ struct EnvironmentalEffectManagerImpl
 {
 	Game *game;
 	ui::VisualEffectManager *visualEffectManager;
-	boost::scoped_ptr<LinkedList> effects;
+	std::unique_ptr<LinkedList> effects;
 
 	bool sunlightEnabled;
 	VC3 sunlightDirection;
@@ -118,7 +116,7 @@ struct EnvironmentalEffectManagerImpl
 		const editor::ParserGroup &global = parser.getGlobals();
 		try
 		{
-			fadeTime = boost::lexical_cast<int> (global.getValue("fade_time"));
+			fadeTime = std::stoi(global.getValue("fade_time"));
 		}
 		catch(...)
 		{
@@ -134,25 +132,26 @@ struct EnvironmentalEffectManagerImpl
 		}
 	}
 
-	void parseGroupList(GroupList &list, const editor::ParserGroup &group)
-	{
-		try
-		{
-			list.lightningEnabled = boost::lexical_cast<bool> (group.getValue("lightning_enabled"));
-			list.lightningVariation = boost::lexical_cast<int> (group.getValue("lightning_variation"));
-			list.lightningMin = boost::lexical_cast<int> (group.getValue("lightning_min"));
-		}
-		catch(...)
-		{
-			list.lightningEnabled = false;
-		}
+    void parseGroupList(GroupList &list, const editor::ParserGroup &group)
+    {
+        const std::string& lightning_enabled_str_val = group.getValue("lightning_enabled");
+        if (!lightning_enabled_str_val.empty())
+        {
+            list.lightningEnabled = std::stoi(lightning_enabled_str_val) != 0;
+            list.lightningVariation = std::stoi(group.getValue("lightning_variation"));
+            list.lightningMin = std::stoi(group.getValue("lightning_min"));
+        }
+        else
+        {
+            list.lightningEnabled = false;
+        }
 
-		parseGroup(list.group[0], group.getSubGroup("VeryLow"));
-		parseGroup(list.group[1], group.getSubGroup("Low"));
-		parseGroup(list.group[2], group.getSubGroup("Medium"));
-		parseGroup(list.group[3], group.getSubGroup("High"));
-		parseGroup(list.group[4], group.getSubGroup("VeryHigh"));
-	}
+        parseGroup(list.group[0], group.getSubGroup("VeryLow"));
+        parseGroup(list.group[1], group.getSubGroup("Low"));
+        parseGroup(list.group[2], group.getSubGroup("Medium"));
+        parseGroup(list.group[3], group.getSubGroup("High"));
+        parseGroup(list.group[4], group.getSubGroup("VeryHigh"));
+    }
 
 	void parseGroup(Group &g, const editor::ParserGroup &group)
 	{

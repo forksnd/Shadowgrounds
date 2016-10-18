@@ -2,8 +2,6 @@
 #include "precompiled.h"
 
 #include <Storm3D_UI.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
 #include <vector>
 #include <string>
 #include <map>
@@ -25,7 +23,7 @@ ParticleSystemManager::ParticleSystemManager(IStorm3D* s3d, IStorm3D_Scene* scen
 	memset(&m_stats, 0, sizeof(m_stats));
 }
 
-void ParticleSystemManager::addParticleSystem(boost::shared_ptr<IParticleSystem> ps) 
+void ParticleSystemManager::addParticleSystem(std::shared_ptr<IParticleSystem> ps) 
 {
 	ps->prepareForLaunch(m_s3d, m_scene);
 	m_systems.push_back(ps);
@@ -51,7 +49,7 @@ void ParticleSystemManager::tick()
 	m_stats.numParticles = 0;
 	m_stats.numSystems = 0;
 	
-	std::list< boost::shared_ptr<IParticleSystem> >::iterator it = m_systems.begin();
+	std::list< std::shared_ptr<IParticleSystem> >::iterator it = m_systems.begin();
 	while(it != m_systems.end()) 
 	{
 		(*it)->tick(m_scene);
@@ -76,7 +74,7 @@ void ParticleSystemManager::tick()
 
 void ParticleSystemManager::render() 
 {
-	std::list< boost::shared_ptr<IParticleSystem> >::iterator it = m_systems.begin();
+	std::list< std::shared_ptr<IParticleSystem> >::iterator it = m_systems.begin();
 	while(it != m_systems.end()) 
 	{
 		(*it)->render(m_scene);

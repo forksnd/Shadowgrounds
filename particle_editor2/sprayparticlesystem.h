@@ -15,16 +15,16 @@ public:
 };
 
 class SprayParticleSystem : public GenParticleSystem {
-	boost::shared_ptr<SprayParticleSystemEditables> m_eds;	
+	std::shared_ptr<SprayParticleSystemEditables> m_eds;	
 
-	boost::shared_ptr<IParticleCollision> collision;
+	std::shared_ptr<IParticleCollision> collision;
 
 	SprayParticleSystem();
 public:
 	
-	static boost::shared_ptr<IParticleSystem> createNew();
+	static std::shared_ptr<IParticleSystem> createNew();
 	
-	boost::shared_ptr<IParticleSystem> clone();
+	std::shared_ptr<IParticleSystem> clone();
 
 	void setParticlePosition(Vector& pos);
 	void setParticleVelocity(Vector& vel, const Vector& dir, float speed, const GenParticleSystemEditables& eds);
@@ -40,7 +40,7 @@ public:
 	SprayParticleSystemEditables& getEditables();
 	const SprayParticleSystemEditables& getEditables() const;
 
-	void setCollision(boost::shared_ptr<IParticleCollision> &collision);
+	void setCollision(std::shared_ptr<IParticleCollision> &collision);
 	void setEmitterRotation(const QUAT &rotation) {}
 };
 	

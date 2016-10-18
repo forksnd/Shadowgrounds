@@ -1,6 +1,5 @@
 #include "precompiled.h"
 
-#include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <string.h>
 #include <stdio.h>

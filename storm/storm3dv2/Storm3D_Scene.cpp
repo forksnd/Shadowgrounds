@@ -26,7 +26,6 @@
 #include <IStorm3D_Logger.h>
 #include "Iterator.h"
 #include "VertexFormats.h"
-#include <boost/lexical_cast.hpp>
 #include <d3dx9shape.h>
 #include <d3dx9mesh.h>
 

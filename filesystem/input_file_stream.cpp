@@ -13,6 +13,7 @@
 
 #include "input_file_stream.h"
 #include <fstream>
+#include <assert.h>
 
 #include "../system/Logger.h"
 #include "../util/Debug_MemoryManager.h"
@@ -102,7 +103,7 @@ void InputFileStreamBuffer::popBytes(char *buffer, int bytes)
 InputStream createInputFileStream(const std::string &fileName)
 {
 	InputStream inputStream;
-	boost::shared_ptr<InputFileStreamBuffer> inputBuffer(new InputFileStreamBuffer(fileName));
+	std::shared_ptr<InputFileStreamBuffer> inputBuffer(new InputFileStreamBuffer(fileName));
 
 	// TODO: would need a seperate error check, eof is not the same as file does not exist!
 	// (for now, just assuming that there will be no 0 byte length files, and if there are, those are errors)

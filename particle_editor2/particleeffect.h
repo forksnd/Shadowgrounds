@@ -36,8 +36,8 @@ public:
 
 	virtual void setEmitFactor(float factor) = 0;
 	virtual void setLighting(const COL &ambient, const signed short int *lightIndices)=0;
-	virtual void setCollision(boost::shared_ptr<IParticleCollision> &collision) = 0;
-	virtual void setArea(boost::shared_ptr<IParticleArea> &area) = 0;
+	virtual void setCollision(std::shared_ptr<IParticleCollision> &collision) = 0;
+	virtual void setArea(std::shared_ptr<IParticleArea> &area) = 0;
 	virtual void setEmitterRotation(const QUAT &rotation) = 0;
 
 	virtual void tick()=0;
@@ -63,9 +63,9 @@ public:
 	
 private:	
 	Stats m_stats;
-	std::list< boost::shared_ptr<IParticleSystem> > m_systems;
+	std::list< std::shared_ptr<IParticleSystem> > m_systems;
 		
-	std::vector< boost::shared_ptr<IParticleEffect> > m_protos;
+	std::vector< std::shared_ptr<IParticleEffect> > m_protos;
 	IStorm3D* m_s3d;
 	IStorm3D_Scene* m_scene;
 	static ParticleEffectManager* m_singleton;
@@ -74,7 +74,7 @@ private:
 	bool physicsEnabled;
 	bool particlePhysicsEnabled;
 	bool fluidPhysicsEnabled;
-	boost::shared_ptr<ParticlePhysics> physics;
+	std::shared_ptr<ParticlePhysics> physics;
 
 	util::SoundMaterialParser materialParser;
 
@@ -84,8 +84,8 @@ public:
 	~ParticleEffectManager();
 	int loadParticleEffect(const editor::EditorParser& parser);
 	int getEffectPrototypeAmount();
-	boost::shared_ptr<IParticleEffect> getEffectPrototype(int id);
-	boost::shared_ptr<IParticleEffect> addEffectToScene(int id);
+	std::shared_ptr<IParticleEffect> getEffectPrototype(int id);
+	std::shared_ptr<IParticleEffect> addEffectToScene(int id);
 	ParticleSystemManager& getParticleSystemManager();
 
 	void release();
@@ -97,7 +97,7 @@ public:
 	void updatePhysics();
 	void enablePhysics(bool enable);
 	void enableParticlePhysics(bool enable);
-	void setPhysics(boost::shared_ptr<physics::PhysicsLib> &physics);
+	void setPhysics(std::shared_ptr<physics::PhysicsLib> &physics);
 	void setModelParticleParameters(int maxAmount, int maxSpawnAmount);
 	void addPhysicsExplosion(const VC3 &position, float forceFactor, float radius = 5.0f);
 	void releasePhysicsResources();

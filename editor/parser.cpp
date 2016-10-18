@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 #include <cassert>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "../system/Logger.h"
 
 #define VALUEMAP_MASK_REFERENCED 1
@@ -165,7 +165,7 @@ struct ParserGroupData
 	{
 	}
 
-	typedef std::map<std::string, boost::shared_ptr<ParserGroup> > GroupMap;
+	typedef std::map<std::string, std::shared_ptr<ParserGroup> > GroupMap;
 
 	ValueMap values;
 	GroupMap groups;
@@ -208,7 +208,7 @@ struct ParserGroupData
 		std::string superName;
 
 		splitString(string, groupName, superName, ':');
-		boost::shared_ptr<ParserGroup> group(parserGroupFactory());
+		std::shared_ptr<ParserGroup> group(parserGroupFactory());
 
 		group->setFlags(flags);
 
@@ -282,7 +282,7 @@ struct ParserGroupData
 
 		for(GroupMap::iterator it = rhs.groups.begin(); it != rhs.groups.end(); ++it)
 		{
-			boost::shared_ptr<ParserGroup> g(parserGroupFactory());
+			std::shared_ptr<ParserGroup> g(parserGroupFactory());
 			*g.get() = *(*it).second.get();
 
 			groups[(*it).first] = g;
@@ -399,7 +399,7 @@ ParserGroup &ParserGroup::getSubGroup(const std::string &name)
 	ParserGroupData::GroupMap::iterator it = data->groups.find(name);
 	if(it == data->groups.end())
 	{
-		boost::shared_ptr<ParserGroup> g(new ParserGroup());
+		std::shared_ptr<ParserGroup> g(new ParserGroup());
 		data->groups[name] = g;
 	}
 
@@ -494,7 +494,7 @@ void ParserGroup::addSubGroup(const std::string &name, ParserGroup &group)
 {
 	assert(!name.empty());
 
-	boost::shared_ptr<ParserGroup> g(new ParserGroup());
+	std::shared_ptr<ParserGroup> g(new ParserGroup());
 	g->data->copy(*group.data);
 
 	g->data->flags = data->flags;

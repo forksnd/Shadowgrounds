@@ -4,14 +4,14 @@
 #define INCLUDED_MOD_SELECTOR_H
 
 #include <string>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace util {
 
 class ModSelector
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	std::unique_ptr<Data> data;
 
 public:
 	ModSelector();

@@ -36,7 +36,7 @@ namespace {
         VC2 start;
         VC2 end;
 
-        boost::shared_ptr<Storm3D_Texture> texture;
+        std::shared_ptr<Storm3D_Texture> texture;
         COL color;
 
         Storm3D_LightTexture(const VC2 &start_, const VC2 &end_, IStorm3D_Texture &texture_, const COL &color_)
@@ -44,15 +44,15 @@ namespace {
             end(end_),
             color(color_)
         {
-            texture = boost::shared_ptr<Storm3D_Texture>(static_cast<Storm3D_Texture *> (&texture_), std::mem_fun(&Storm3D_Texture::Release));
+            texture = std::shared_ptr<Storm3D_Texture>(static_cast<Storm3D_Texture *> (&texture_), [](Storm3D_Texture* tex) {tex->Release();});
             texture->AddRef();
         }
 
         ~Storm3D_LightTexture(){}
     };
 
-    typedef std::vector<boost::shared_ptr<Storm3D_Spotlight> > SpotList;
-    typedef std::vector<boost::shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
+    typedef std::vector<std::shared_ptr<Storm3D_Spotlight> > SpotList;
+    typedef std::vector<std::shared_ptr<Storm3D_FakeSpotlight> > FakeSpotList;
     typedef std::vector<Storm3D_LightTexture> FakeLightList;
 
     static const int MAX_SIZES = 2;
@@ -221,7 +221,7 @@ struct Storm3D_TerrainRendererData
 	bool forceDraw;
 
 	Storm3D_ParticleSystem *particleSystem;
-	boost::shared_ptr<Storm3D_Texture> offsetFade;
+	std::shared_ptr<Storm3D_Texture> offsetFade;
 
 	int activeSize;
 
@@ -1308,18 +1308,18 @@ Storm3D_TerrainRenderer::~Storm3D_TerrainRenderer()
     delete data;
 }
 
-boost::shared_ptr<IStorm3D_Spotlight> Storm3D_TerrainRenderer::createSpot()
+std::shared_ptr<IStorm3D_Spotlight> Storm3D_TerrainRenderer::createSpot()
 {
 	GfxDevice &device = data->storm.GetD3DDevice();
 
-	boost::shared_ptr<Storm3D_Spotlight> spot(new Storm3D_Spotlight(data->storm, device));
+	std::shared_ptr<Storm3D_Spotlight> spot(new Storm3D_Spotlight(data->storm, device));
 	spot->enableSmoothing(data->smoothShadows);
 	data->spots.push_back(spot);
 
-	return boost::static_pointer_cast<IStorm3D_Spotlight> (spot);
+	return std::static_pointer_cast<IStorm3D_Spotlight> (spot);
 }
 
-void Storm3D_TerrainRenderer::deleteSpot(boost::shared_ptr<IStorm3D_Spotlight> &spot)
+void Storm3D_TerrainRenderer::deleteSpot(std::shared_ptr<IStorm3D_Spotlight> &spot)
 {
 	for(unsigned int i = 0; i < data->spots.size(); ++i)
 	{
@@ -1331,17 +1331,17 @@ void Storm3D_TerrainRenderer::deleteSpot(boost::shared_ptr<IStorm3D_Spotlight> &
 	}
 }
 
-boost::shared_ptr<IStorm3D_FakeSpotlight> Storm3D_TerrainRenderer::createFakeSpot()
+std::shared_ptr<IStorm3D_FakeSpotlight> Storm3D_TerrainRenderer::createFakeSpot()
 {
 	GfxDevice &device = data->storm.GetD3DDevice();
 
-	boost::shared_ptr<Storm3D_FakeSpotlight> spot(new Storm3D_FakeSpotlight(data->storm, device));
+	std::shared_ptr<Storm3D_FakeSpotlight> spot(new Storm3D_FakeSpotlight(data->storm, device));
 	data->fakeSpots.push_back(spot);
 
-	return boost::static_pointer_cast<IStorm3D_FakeSpotlight> (spot);;
+	return std::static_pointer_cast<IStorm3D_FakeSpotlight> (spot);;
 }
 
-void Storm3D_TerrainRenderer::deleteFakeSpot(boost::shared_ptr<IStorm3D_FakeSpotlight> &spot)
+void Storm3D_TerrainRenderer::deleteFakeSpot(std::shared_ptr<IStorm3D_FakeSpotlight> &spot)
 {
 	for(unsigned int i = 0; i < data->fakeSpots.size(); ++i)
 	{

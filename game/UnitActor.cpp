@@ -53,6 +53,7 @@
 #include "IAIDirectControl.h"
 
 #include <sstream>
+#include <algorithm>
 
 // how often is line of fire to target checked (value must be 2^n)
 #define LINE_OF_FIRE_CHECK_INTERVAL 32

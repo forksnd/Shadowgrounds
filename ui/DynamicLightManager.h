@@ -1,7 +1,7 @@
 #ifndef INCLUDED_DYNAMIC_LIGHT_MANAGER_H
 #define INCLUDED_DYNAMIC_LIGHT_MANAGER_H
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <string>
 #include "../game/unified_handle_type.h"
 
@@ -13,7 +13,7 @@ class LightManager;
 class DynamicLightManager
 {
 	struct Data;
-	boost::scoped_ptr<Data> data;
+	std::unique_ptr<Data> data;
 
 public:
 	explicit DynamicLightManager(LightManager *lightManager);

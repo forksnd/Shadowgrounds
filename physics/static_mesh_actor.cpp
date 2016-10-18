@@ -42,7 +42,7 @@ StaticMesh::~StaticMesh()
 // StaticMeshActor
 // ---------------
 
-StaticMeshActor::StaticMeshActor(NxScene &scene, const boost::shared_ptr<StaticMesh> &mesh_, const VC3 &position, const QUAT &rotation)
+StaticMeshActor::StaticMeshActor(NxScene &scene, const std::shared_ptr<StaticMesh> &mesh_, const VC3 &position, const QUAT &rotation)
 :	mesh(mesh_)
 {
 	if(!mesh)

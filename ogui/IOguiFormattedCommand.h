@@ -3,7 +3,6 @@
 
 #include <string>
 #include <map>
-#include <boost/lexical_cast.hpp>
 
 #include "OguiFormattedText.h"
 

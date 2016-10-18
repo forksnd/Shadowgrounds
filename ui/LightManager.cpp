@@ -5,7 +5,6 @@
 #pragma warning(disable:4786)
 #endif
 
-#include <boost/lexical_cast.hpp>
 #include "LightManager.h"
 #include <istorm3D_terrain_renderer.h>
 #include <istorm3d_spotlight.h>
@@ -14,7 +13,6 @@
 #include <IStorm3D.h>
 #include <IStorm3D_Model.h>
 #include <c2_frustum.h>
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <map>
 #include "../util/SelfIlluminationChanger.h"
@@ -31,6 +29,7 @@
 
 
 #include <string>
+#include <algorithm>
 
 //std::vector<VC2> fakeMin;
 //std::vector<VC2> fakeSize;
@@ -367,9 +366,9 @@ namespace ui {
 		float currentColorMul;
 		float colorMul;
 
-		boost::shared_ptr<IStorm3D_Texture> texture;
-		boost::shared_ptr<IStorm3D_Texture> coneTexture;
-		boost::shared_ptr<IStorm3D_Model> lightModel;
+		std::shared_ptr<IStorm3D_Texture> texture;
+		std::shared_ptr<IStorm3D_Texture> coneTexture;
+		std::shared_ptr<IStorm3D_Model> lightModel;
 
 		SpotImp()
 		:	yAngle(0),
@@ -813,8 +812,8 @@ struct LightManager::Data
 
 	PointList buildingLights;
 
-	boost::shared_ptr<IStorm3D_Spotlight> lightingSpot[LIGHTING_SPOT_AMOUNT];
-	boost::shared_ptr<IStorm3D_FakeSpotlight> fakeSpot[LIGHTING_FAKE_SPOT_MAX_AMOUNT];
+	std::shared_ptr<IStorm3D_Spotlight> lightingSpot[LIGHTING_SPOT_AMOUNT];
+	std::shared_ptr<IStorm3D_FakeSpotlight> fakeSpot[LIGHTING_FAKE_SPOT_MAX_AMOUNT];
 
 	int activeFakes[LIGHTING_FAKE_SPOT_MAX_AMOUNT];
 	int shadowLevel;
@@ -1350,7 +1349,7 @@ for(i = 0; i < LIGHTING_FAKE_SPOT_AMOUNT; ++i)
 			// Get model's bounding box ignoring "EditorOnly" -meshes.
 			bbox.mmax = VC3(-100000.0f,-100000.0f,-100000.0f );
 			bbox.mmin = VC3( 100000.0f, 100000.0f, 100000.0f );
-			boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
+			std::unique_ptr<Iterator<IStorm3D_Model_Object *> > object_iterator(model->ITObject->Begin());
 			VC3 v[8];
 			for(; !object_iterator->IsEnd(); object_iterator->Next())
 			{
@@ -1868,7 +1867,7 @@ void LightManager::setBuildingLights(IStorm3D_Model &model)
 {
 	model.ResetObjectLights();
 
-	boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(model.ITObject->Begin());
+	std::unique_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(model.ITObject->Begin());
 	for(; !objectIterator->IsEnd(); objectIterator->Next())
 	{
 		IStorm3D_Model_Object *object = objectIterator->GetCurrent();

@@ -3,11 +3,7 @@
 #define VISUALEFFECTMANAGER_H
 
 #include <DatatypeDef.h>
-
-#ifndef INCLUDED_BOOST_SHARED_PTR_HPP
-#define INCLUDED_BOOST_SHARED_PTR_HPP
-#include <boost/shared_ptr.hpp>
-#endif
+#include <memory>
 
 class LinkedList;
 class IStorm3D;
@@ -130,9 +126,9 @@ namespace ui
 
 			LinkedList *managedEffects;
 
-			boost::shared_ptr<ParticleCollision> particleCollision;
-			boost::shared_ptr<FluidParticleCollision> fluidParticleCollision;
-			boost::shared_ptr<ParticleArea> particleArea;
+			std::shared_ptr<ParticleCollision> particleCollision;
+			std::shared_ptr<FluidParticleCollision> fluidParticleCollision;
+			std::shared_ptr<ParticleArea> particleArea;
 			frozenbyte::particle::ParticleEffectManager* particleEffectManager;
 
 			static void loadVisualEffectTypes();

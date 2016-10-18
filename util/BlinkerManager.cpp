@@ -4,12 +4,14 @@
 #include "BlinkerManager.h"
 #include "BuildingBlinker.h"
 #include <vector>
+#include <memory>
+#include <assert.h>
 
 namespace util {
 
 struct BlinkerManager::Data
 {
-	std::vector<boost::shared_ptr<BuildingBlinker> > blinkers;
+	std::vector<std::shared_ptr<BuildingBlinker> > blinkers;
 
 	void update(int timeDelta)
 	{
@@ -29,7 +31,7 @@ BlinkerManager::~BlinkerManager()
     delete data;
 }
 
-void BlinkerManager::addBlinker(boost::shared_ptr<BuildingBlinker> blinker)
+void BlinkerManager::addBlinker(std::shared_ptr<BuildingBlinker> blinker)
 {
 	if(!blinker)
 	{

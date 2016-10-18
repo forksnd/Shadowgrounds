@@ -3,8 +3,7 @@
 #ifndef MODEL_PARTICLE_SYSTEM_H
 #define MODEL_PARTICLE_SYSTEM_H
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace frozenbyte {
 namespace physics {
@@ -69,18 +68,18 @@ class ModelParticleSystem : public GenParticleSystem {
 
 	struct Original
 	{
-		boost::shared_ptr<IStorm3D_Model> model;
+		std::shared_ptr<IStorm3D_Model> model;
 		std::vector<Mesh> meshes;
-		std::vector<boost::shared_ptr<PhysicsMesh> > shapes;
+		std::vector<std::shared_ptr<PhysicsMesh> > shapes;
 
 		Original()
 		{
 		}
 	};
 
-	boost::shared_ptr<ParticlePhysics> physics;
-	boost::shared_ptr<ModelParticleSystemEditables> m_eds;
-	boost::shared_ptr<PointArray> m_parray;	
+	std::shared_ptr<ParticlePhysics> physics;
+	std::shared_ptr<ModelParticleSystemEditables> m_eds;
+	std::shared_ptr<PointArray> m_parray;	
 
 	Original original;
 
@@ -102,8 +101,8 @@ class ModelParticleSystem : public GenParticleSystem {
 		QUAT axis[2];
 		float rotateSpeed[2];
 
-		boost::shared_ptr<PhysicsMesh> shape;
-		boost::shared_ptr<PhysicsActor> actor;
+		std::shared_ptr<PhysicsMesh> shape;
+		std::shared_ptr<PhysicsActor> actor;
 
 		Particle()
 		:	object(0),
@@ -119,14 +118,14 @@ class ModelParticleSystem : public GenParticleSystem {
 	};
 
 	std::vector<Particle> particles;
-	boost::scoped_ptr<IStorm3D_Model> model;
+	std::unique_ptr<IStorm3D_Model> model;
 
 	VC3 position;
 	VC3 velocity;
 	float time;
 	float residue;
 
-	boost::shared_ptr<IParticleCollision> collision;
+	std::shared_ptr<IParticleCollision> collision;
 	MAT emitterTm;
 
 	void apply(Particle &p);
@@ -137,14 +136,14 @@ class ModelParticleSystem : public GenParticleSystem {
 
 	ModelParticleSystem(); // use createNew();
 public:
-	static boost::shared_ptr<IParticleSystem> createNew();
-	boost::shared_ptr<IParticleSystem> clone();
+	static std::shared_ptr<IParticleSystem> createNew();
+	std::shared_ptr<IParticleSystem> clone();
 
 	void setParticlePosition(Vector& pos) {}
 	void setParticleVelocity(Vector& vel, const Vector& direction, float speed, const GenParticleSystemEditables& eds) {}
 	void setLighting(const COL &ambient, const signed short int *lightIndices);
-	void setCollision(boost::shared_ptr<IParticleCollision> &collision);
-	void setPhysics(boost::shared_ptr<ParticlePhysics> &physics);
+	void setCollision(std::shared_ptr<IParticleCollision> &collision);
+	void setPhysics(std::shared_ptr<ParticlePhysics> &physics);
 	void releasePhysicsResources();
 	void setEmitterRotation(const QUAT &rotation);
 	void *getId() const;

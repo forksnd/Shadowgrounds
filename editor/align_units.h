@@ -3,14 +3,9 @@
 #ifndef INCLUDED_EDITOR_ALIGN_UNITS_H
 #define INCLUDED_EDITOR_ALIGN_UNITS_H
 
-#ifndef INCLUDED_BOOST_SCOPED_PTR_HPP
-#define INCLUDED_BOOST_SCOPED_PTR_HPP
-#include <boost/scoped_ptr.hpp>
-#endif
-#ifndef INCLUDED_DATATYPEDEF_H
-#define INCLUDED_DATATYPEDEF_H
+
+#include <memory>
 #include <DatatypeDef.h>
-#endif
 
 class IStorm3D_Camera;
 
@@ -21,7 +16,7 @@ struct AlignUnitsData;
 
 class AlignUnits
 {
-	boost::scoped_ptr<AlignUnitsData> data;
+	std::unique_ptr<AlignUnitsData> data;
 
 public:
 	AlignUnits();

@@ -13,6 +13,7 @@
 #include "../game/GameMap.h"
 
 #include <vector>
+#include <memory>
 
 namespace util {
 
@@ -20,12 +21,12 @@ LightAmountManager *LightAmountManager::instance = NULL;
 
 struct LightAmountManager::Data
 {
-	mutable std::vector<boost::weak_ptr<SpotLightCalculator> > spots;
+	mutable std::vector<std::weak_ptr<SpotLightCalculator> > spots;
 	const game::GameMap *gameMap;
 	const IStorm3D_Terrain *terrain;
 
 
-	void add(boost::weak_ptr<SpotLightCalculator> light)
+	void add(std::weak_ptr<SpotLightCalculator> light)
 	{
 		for(unsigned int i = 0; i < spots.size(); ++i)
 			assert(spots[i].lock() != light.lock());
@@ -45,10 +46,10 @@ struct LightAmountManager::Data
 	{
 		float result = 0;
 
-		std::vector<boost::weak_ptr<SpotLightCalculator> >::iterator it = spots.begin();
+		std::vector<std::weak_ptr<SpotLightCalculator> >::iterator it = spots.begin();
 		while(it != spots.end())
 		{
-			boost::shared_ptr<SpotLightCalculator> spot = it->lock();
+			std::shared_ptr<SpotLightCalculator> spot = it->lock();
 			if(!spot)
 			{
 				it = spots.erase(it);
@@ -117,7 +118,7 @@ LightAmountManager::~LightAmountManager()
     delete data;
 }
 
-void LightAmountManager::add(boost::weak_ptr<SpotLightCalculator> light)
+void LightAmountManager::add(std::weak_ptr<SpotLightCalculator> light)
 {
 	data->add(light);
 }

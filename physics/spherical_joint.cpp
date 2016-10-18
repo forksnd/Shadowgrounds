@@ -5,7 +5,7 @@
 namespace frozenbyte {
 namespace physics {
 
-SphericalJoint::SphericalJoint(NxScene &scene, const NxSphericalJointDesc &desc, boost::shared_ptr<ActorBase> &a, boost::shared_ptr<ActorBase> &b)
+SphericalJoint::SphericalJoint(NxScene &scene, const NxSphericalJointDesc &desc, std::shared_ptr<ActorBase> &a, std::shared_ptr<ActorBase> &b)
 :	JointBase(scene, a, b)
 {
 	joint = scene.createJoint(desc);

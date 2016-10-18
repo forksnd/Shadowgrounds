@@ -20,8 +20,6 @@
 
 #include "../ui/animdefs.h"
 
-#include <boost/lexical_cast.hpp>
-
 // this should result into about 8 seconds (slightly less).
 // (note: this value is not seconds though!!!) 
 #define UNITTYPE_DEFAULT_TARGET_LOSE_TIME 8
@@ -996,7 +994,7 @@ int getMaterialFromString( const std::string& string )
 					int sound_pos = 0;
 					if( splitTemp.size() > 3 )
 					{
-						sound_pos = boost::lexical_cast< int >( splitTemp[ 3 ] );
+						sound_pos = std::stoi( splitTemp[ 3 ] );
 					}
 
 					if( sound_pos < 0 ) sound_pos = 0;
@@ -1013,7 +1011,7 @@ int getMaterialFromString( const std::string& string )
 					int sound_pos = 0;
 					if( splitTemp.size() > 3 )
 					{
-						sound_pos = boost::lexical_cast< int >( splitTemp[ 3 ] );
+						sound_pos = std::stoi( splitTemp[ 3 ] );
 					}
 
 					if( sound_pos < 0 ) sound_pos = 0;
@@ -1030,7 +1028,7 @@ int getMaterialFromString( const std::string& string )
 					int sound_pos = 0;
 					if( splitTemp.size() > 3 )
 					{
-						sound_pos = boost::lexical_cast< int >( splitTemp[ 3 ] );
+						sound_pos = std::stoi( splitTemp[ 3 ] );
 					}
 
 					if( sound_pos < 0 ) sound_pos = 0;

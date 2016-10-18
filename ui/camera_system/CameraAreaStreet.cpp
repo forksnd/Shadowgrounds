@@ -1,7 +1,6 @@
 #include "precompiled.h"
 #include "CameraAreaStreet.h"
 
-#include <boost/lexical_cast.hpp>
 #include "../../system/Logger.h"
 
 #define ROTATE_DISTANCE 7.0f
@@ -174,7 +173,7 @@ void CameraAreaStreet::update( VC3 positionOfInterest, float currentAngle, int e
 			} else {
 				VC3 v = getTransformedCoord(positionOfInterest)-getTransformedCoord(entryPoint);
 				if (flipped) v.z = -v.z;
-				std::string foofoo = boost::lexical_cast< std::string >(v.z);
+				std::string foofoo = std::to_string(v.z);
 				Logger::getInstance()->error( foofoo.c_str() );
 				if (v.z>0) {
 					float s = v.z/ANGLE_SELECTION_DISTANCE;
@@ -205,7 +204,7 @@ void CameraAreaStreet::update( VC3 positionOfInterest, float currentAngle, int e
 //	selectedAngle = RAD2DEG(angle);
 	selectedAngle = angle;
 		std::string foofoo = "ANGLE: ";
-		foofoo = foofoo + boost::lexical_cast< std::string >(selectedAngle) + ", ";
+		foofoo = foofoo + std::to_string(selectedAngle) + ", ";
 	//	Logger::getInstance()->error( foofoo.c_str() );
 
 //	angleOffset = 0;

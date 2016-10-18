@@ -27,7 +27,7 @@ namespace game
 	PHYSICS_ACTOR RackPhysicsObject::createImplementationObject()
 	{
 #ifdef PHYSICS_PHYSX
-		boost::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createRackActor(position);
+		std::shared_ptr<frozenbyte::physics::ActorBase> actor = gamePhysics->getPhysicsLib()->createRackActor(position);
 		if(actor)
 		{
 			actor->setMass(mass);

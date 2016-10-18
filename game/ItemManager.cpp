@@ -31,6 +31,7 @@
 #include "../util/Debug_MemoryManager.h"
 
 #include <sstream>
+#include <algorithm>
 
 // <physics_include>
 #include "physics/GamePhysics.h"

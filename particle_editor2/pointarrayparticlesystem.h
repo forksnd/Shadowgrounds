@@ -25,15 +25,15 @@ class PointArrayParticleSystem : public GenParticleSystem {
 		std::vector<Vector> verts;
 		std::vector<Vector> normals;
 	};
-	boost::shared_ptr<PointArrayParticleSystemEditables> m_eds;		
-	boost::shared_ptr<PointArray> m_parray;	
+	std::shared_ptr<PointArrayParticleSystemEditables> m_eds;		
+	std::shared_ptr<PointArray> m_parray;	
 	int m_index;
 	//MAT rotation;
 	PointArrayParticleSystem(); // use createNew();
 public:
-	static boost::shared_ptr<IParticleSystem> createNew();
+	static std::shared_ptr<IParticleSystem> createNew();
 	
-	boost::shared_ptr<IParticleSystem> clone();
+	std::shared_ptr<IParticleSystem> clone();
 
 	//void setRotation(const MAT &tm);
 	void setParticlePosition(Vector& pos);
@@ -50,7 +50,7 @@ public:
 	PointArrayParticleSystemEditables& getEditables();
 	const PointArrayParticleSystemEditables& getEditables() const;
 
-	void setCollision(boost::shared_ptr<IParticleCollision> &collision) {}
+	void setCollision(std::shared_ptr<IParticleCollision> &collision) {}
 	void setEmitterRotation(const QUAT &rotation) {}
 };
 

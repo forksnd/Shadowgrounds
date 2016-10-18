@@ -20,8 +20,6 @@
 #include "../../filesystem/input_stream_wrapper.h"
 #include "../../util/Debug_MemoryManager.h"
 
-#include <boost/lexical_cast.hpp>
-
 using namespace frozenbyte;
 
 namespace {
@@ -277,11 +275,11 @@ namespace {
 		{
 			filesystem::FilePackageManager &manager = filesystem::FilePackageManager::getInstance();
 #ifdef LEGACY_FILES
-			boost::shared_ptr<filesystem::IFileList> fileList = manager.findFiles("Data/Textures", fileType);
+			std::shared_ptr<filesystem::IFileList> fileList = manager.findFiles("Data/Textures", fileType);
 #else
-			boost::shared_ptr<filesystem::IFileList> fileList = manager.findFiles("data/texture", fileType);
+			std::shared_ptr<filesystem::IFileList> fileList = manager.findFiles("data/texture", fileType);
 #endif
-			//boost::shared_ptr<filesystem::IFileList> fileList = manager.findFiles("Data/Models", fileType);
+			//std::shared_ptr<filesystem::IFileList> fileList = manager.findFiles("Data/Models", fileType);
 
 			std::vector<std::string> files;
 #ifdef LEGACY_FILES

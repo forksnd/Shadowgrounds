@@ -54,7 +54,7 @@ void OutputFileStreamBuffer::putByte(unsigned char c)
 OutputStream createOutputFileStream(const std::string &fileName)
 {
 	OutputStream outputStream;
-	boost::shared_ptr<OutputFileStreamBuffer> outputBuffer(new OutputFileStreamBuffer(fileName));
+	std::shared_ptr<OutputFileStreamBuffer> outputBuffer(new OutputFileStreamBuffer(fileName));
 
 	outputStream.setBuffer(outputBuffer);
 	return outputStream;

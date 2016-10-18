@@ -19,7 +19,6 @@
 #include "Storm3D_ShaderManager.h"
 
 #include "storm3d.h"
-#include <boost/scoped_array.hpp>
 
 #include "../../util/Debug_MemoryManager.h"
 
@@ -132,10 +131,10 @@ void Storm3D_Terrain::setLightMap(int blockIndex, IStorm3D_Texture &map_)
 	data->heightMap.setLightMap(blockIndex, static_cast<Storm3D_Texture &> (map_));
 }
 
-int Storm3D_Terrain::addModel(boost::shared_ptr<IStorm3D_Model> model, boost::shared_ptr<IStorm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation)
+int Storm3D_Terrain::addModel(std::shared_ptr<IStorm3D_Model> model, std::shared_ptr<IStorm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation)
 {
-	boost::shared_ptr<Storm3D_Model> m = boost::static_pointer_cast<Storm3D_Model, IStorm3D_Model> (model);
-	boost::shared_ptr<Storm3D_Model> mf = boost::static_pointer_cast<Storm3D_Model, IStorm3D_Model> (fadeModel);
+	std::shared_ptr<Storm3D_Model> m = std::static_pointer_cast<Storm3D_Model, IStorm3D_Model> (model);
+	std::shared_ptr<Storm3D_Model> mf = std::static_pointer_cast<Storm3D_Model, IStorm3D_Model> (fadeModel);
 	return data->modelGroups.addModel(m, mf, bones, idleAnimation);
 }
 
@@ -270,7 +269,7 @@ void Storm3D_Terrain::recreateDynamicResources()
 	data->renderer.recreateDynamicResources();
 }
 
-boost::shared_ptr<IStorm3D_TerrainModelIterator> Storm3D_Terrain::getModelIterator(const VC3 &position, float radius)
+std::shared_ptr<IStorm3D_TerrainModelIterator> Storm3D_Terrain::getModelIterator(const VC3 &position, float radius)
 {
 	return data->modelGroups.getModelIterator(position, radius);
 }

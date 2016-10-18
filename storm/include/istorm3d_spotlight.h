@@ -4,7 +4,7 @@
 #define INCLUDED_ISTORM3D_SPOTLIGHT_H
 
 #include <DatatypeDef.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class IStorm3D_Texture;
 class IStorm3D_Model;
@@ -43,8 +43,8 @@ public:
 
 	virtual void setType(Type type) = 0;
 	virtual void setNoShadowModel(const IStorm3D_Model *model) = 0;
-	virtual void setProjectionTexture(boost::shared_ptr<IStorm3D_Texture> texture) = 0;
-	virtual void setConeTexture(boost::shared_ptr<IStorm3D_Texture> texture) = 0;
+	virtual void setProjectionTexture(std::shared_ptr<IStorm3D_Texture> texture) = 0;
+	virtual void setConeTexture(std::shared_ptr<IStorm3D_Texture> texture) = 0;
 	virtual void setColorMultiplier(const COL &color) = 0;
 	virtual void setConeMultiplier(float scalar) = 0;
 	virtual void setSmoothness(float smoothness) = 0;

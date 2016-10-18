@@ -4,7 +4,7 @@
 
 #include <stdarg.h>
 
-#include <boost/scoped_array.hpp>
+#include <memory>
 
 #include "igios.h"
 
@@ -40,7 +40,7 @@ std::string strPrintf(const char *fmt, ...)
 	// NOT the stack
 	// bad things might happen
 	const unsigned int BUFFERSIZE = 4096;
-	boost::scoped_array<char> buf(new char[BUFFERSIZE]);
+	std::unique_ptr<char[]> buf(new char[BUFFERSIZE]);
 	vsnprintf(buf.get(), BUFFERSIZE, fmt, args);
 
 	std::string retString(buf.get());

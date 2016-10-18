@@ -3,9 +3,7 @@
 #ifndef INCLUDED_FILESYSTEM_INPUT_FILE_STREAM_H
 #define INCLUDED_FILESYSTEM_INPUT_FILE_STREAM_H
 
-#ifndef INCLUDED_FILESYSTEM_INPUT_STREAM_H
 #include "input_stream.h"
-#endif
 
 namespace frozenbyte {
 namespace filesystem {

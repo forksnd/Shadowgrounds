@@ -73,15 +73,15 @@ namespace {
 #if !defined PROJECT_SURVIVOR && !defined PROJECT_SHADOWGROUNDS
 	struct JointCreationInfo
 	{
-		boost::shared_ptr<AbstractPhysicsObject> objectA;
-		boost::shared_ptr<AbstractPhysicsObject> objectB;
+		std::shared_ptr<AbstractPhysicsObject> objectA;
+		std::shared_ptr<AbstractPhysicsObject> objectB;
 		std::string id;
 
 		frozenbyte::physics::PhysicsJoint joint;
 	};
 
 	typedef std::vector<JointCreationInfo> JointCreationList;
-	typedef std::vector<boost::shared_ptr<frozenbyte::physics::JointBase> > JointList;
+	typedef std::vector<std::shared_ptr<frozenbyte::physics::JointBase> > JointList;
 #endif
 
 #endif
@@ -622,15 +622,15 @@ namespace {
 			{
 				JointCreationInfo &info = *it;
 
-				boost::shared_ptr<frozenbyte::physics::ActorBase> a;
+				std::shared_ptr<frozenbyte::physics::ActorBase> a;
 				if(info.objectA)
 					a = getImplementingBaseObject(info.objectA.get());
-				boost::shared_ptr<frozenbyte::physics::ActorBase> b;
+				std::shared_ptr<frozenbyte::physics::ActorBase> b;
 				if(info.objectB)
 					b = getImplementingBaseObject(info.objectB.get());
 
 				// I guess this could be a map with id as a key or something
-				jointList.push_back(boost::static_pointer_cast<frozenbyte::physics::JointBase> (physicsLib->createGeneralJoint(a, b, info.joint)));
+				jointList.push_back(std::static_pointer_cast<frozenbyte::physics::JointBase> (physicsLib->createGeneralJoint(a, b, info.joint)));
 			}
 
 			jointCreationList.clear();
@@ -1007,7 +1007,7 @@ namespace {
 
 #ifdef PHYSICS_PHYSX
 #if !defined PROJECT_SURVIVOR && !defined PROJECT_SHADOWGROUNDS
-	void GamePhysics::addJoint(boost::shared_ptr<AbstractPhysicsObject> &objectA, boost::shared_ptr<AbstractPhysicsObject> &objectB, const frozenbyte::physics::PhysicsJoint &joint, const std::string &id)
+	void GamePhysics::addJoint(std::shared_ptr<AbstractPhysicsObject> &objectA, std::shared_ptr<AbstractPhysicsObject> &objectB, const frozenbyte::physics::PhysicsJoint &joint, const std::string &id)
 	{
 		JointCreationInfo info;
 		info.objectA = objectA;
@@ -1029,7 +1029,7 @@ namespace {
 #ifdef PROJECT_CLAW_PROTO
 	NxActor *GamePhysics::getImplementingObject(IGamePhysicsObject *interfaceObject)
 	{
-		boost::shared_ptr<frozenbyte::physics::ActorBase> base = impl->getImplementingBaseObject(interfaceObject);
+		std::shared_ptr<frozenbyte::physics::ActorBase> base = impl->getImplementingBaseObject(interfaceObject);
 		if(base)
 			return base->getActor();
 
@@ -1071,7 +1071,7 @@ namespace {
 		*/
 	}
 
-	boost::shared_ptr<frozenbyte::physics::ActorBase> GamePhysics::getImplementingBaseObject(IGamePhysicsObject *interfaceObject)
+	std::shared_ptr<frozenbyte::physics::ActorBase> GamePhysics::getImplementingBaseObject(IGamePhysicsObject *interfaceObject)
 	{
 		return impl->getImplementingBaseObject(interfaceObject);
 	}

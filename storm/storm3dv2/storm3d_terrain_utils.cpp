@@ -870,15 +870,15 @@ IndexBuffer::operator bool() const
 	return buffer != 0;
 }
 
-boost::shared_ptr<Storm3D_Texture> createSharedTexture(Storm3D_Texture *texture)
+std::shared_ptr<Storm3D_Texture> createSharedTexture(Storm3D_Texture *texture)
 {
-	if(texture)
-	{
-		texture->AddRef();
-		return boost::shared_ptr<Storm3D_Texture> (texture, std::mem_fun(&Storm3D_Texture::Release));
-	}
+    if (texture)
+    {
+        texture->AddRef();
+        return std::shared_ptr<Storm3D_Texture>(texture, [] (Storm3D_Texture* tex) {tex->Release();});
+    }
 
-	return boost::shared_ptr<Storm3D_Texture> (texture);
+    return std::shared_ptr<Storm3D_Texture>(texture);
 }
 
 

@@ -23,7 +23,6 @@
 
 #include "../util/Debug_MemoryManager.h"
 
-#include <boost/lexical_cast.hpp>
 #include <sstream>
 #include <fstream>
 #include <assert.h>
@@ -686,7 +685,7 @@ OptionsMenu::OptionsMenu( MenuCollection* menu, MenuCollection::Fonts* fonts, Og
 
 	determineCurrentController();
 
-	// Logger::getInstance()->warning( std::string( "joy2-up = " + boost::lexical_cast< std::string >( gameController->getKeycodeNumberForName( "joy2-up" ) ) ).c_str() );
+	// Logger::getInstance()->warning( std::string( "joy2-up = " + std::to_string( gameController->getKeycodeNumberForName( "joy2-up" ) ) ).c_str() );
 	// joy-up : 270
 	// joy2-up: 290
 
@@ -2160,14 +2159,14 @@ void OptionsMenu::updateControllerTypeText(void)
 	{
 		std::string mouse_desc = getLocaleGuiString("gui_optionsmenu_controllertype_mouse");
 		int id = type - GameController::CONTROLLER_TYPE_KEYBOARD_AND_MOUSE1 + 1;
-		controllerTypeButton->SetText((mouse_desc + " " + boost::lexical_cast<std::string>(id)).c_str());
+		controllerTypeButton->SetText((mouse_desc + " " + std::to_string(id)).c_str());
 	}
 	// joystick controllers
 	else if(type >= GameController::CONTROLLER_TYPE_JOYSTICK1 && type <= GameController::CONTROLLER_TYPE_JOYSTICK4)
 	{
 		std::string joystick_desc = getLocaleGuiString("gui_optionsmenu_controllertype_joystick");
 		int id = type - GameController::CONTROLLER_TYPE_JOYSTICK1 + 1;
-		controllerTypeButton->SetText((joystick_desc + " " + boost::lexical_cast<std::string>(id)).c_str());
+		controllerTypeButton->SetText((joystick_desc + " " + std::to_string(id)).c_str());
 	}
 	else
 	{
@@ -2245,15 +2244,15 @@ void OptionsMenu::openControllerTypeList()
 
 	// keyboard controller
 	std::string keyboard_desc = getLocaleGuiString("gui_optionsmenu_controllertype_keyboard");
-	std::string value = boost::lexical_cast<std::string>(GameController::CONTROLLER_TYPE_KEYBOARD_ONLY);
+	std::string value = std::to_string(GameController::CONTROLLER_TYPE_KEYBOARD_ONLY);
 	controllerTypeList->addItem(value.c_str(), keyboard_desc.c_str());
 
 	// mouse controllers
 	for(int i = 0; i < num_mouses; i++)
 	{
 		std::string mouse_desc = getLocaleGuiString("gui_optionsmenu_controllertype_mouse");
-		std::string item = mouse_desc + " " + boost::lexical_cast<std::string>(i + 1);
-		std::string value = boost::lexical_cast<std::string>(GameController::CONTROLLER_TYPE_KEYBOARD_AND_MOUSE1 + i);
+		std::string item = mouse_desc + " " + std::to_string(i + 1);
+		std::string value = std::to_string(GameController::CONTROLLER_TYPE_KEYBOARD_AND_MOUSE1 + i);
 		controllerTypeList->addItem(value.c_str(), item.c_str());
 	}
 
@@ -2261,8 +2260,8 @@ void OptionsMenu::openControllerTypeList()
 	for(int i = 0; i < JoyNum; i++)
 	{
 		std::string joystick_desc = getLocaleGuiString("gui_optionsmenu_controllertype_joystick");
-		std::string item = joystick_desc + " " + boost::lexical_cast<std::string>(i + 1);
-		std::string value = boost::lexical_cast<std::string>(GameController::CONTROLLER_TYPE_JOYSTICK1 + i);
+		std::string item = joystick_desc + " " + std::to_string(i + 1);
+		std::string value = std::to_string(GameController::CONTROLLER_TYPE_JOYSTICK1 + i);
 		controllerTypeList->addItem(value.c_str(), item.c_str());
 	}
 }

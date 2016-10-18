@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <keyb3.h>
 

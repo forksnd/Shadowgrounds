@@ -3,7 +3,7 @@
 #ifndef IPARTICLE_COLLISION_H
 #define IPARTICLE_COLLISION_H
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace frozenbyte {
 namespace particle {

@@ -29,12 +29,10 @@
 
 #include "../../util/Debug_MemoryManager.h"
 
-#include <boost/scoped_ptr.hpp>
-
 	struct SharedModel;
 	struct Instance;
 	typedef std::vector<SharedModel> ModelList;
-	typedef std::vector<boost::shared_ptr<Instance> > InstanceList;
+	typedef std::vector<std::shared_ptr<Instance> > InstanceList;
 
 	struct AnimationDeleter
 	{
@@ -47,18 +45,18 @@
 
 	struct SharedModel
 	{
-		boost::shared_ptr<IStorm3D_Model> model;
-		boost::shared_ptr<IStorm3D_Model> fadeModel;
+		std::shared_ptr<IStorm3D_Model> model;
+		std::shared_ptr<IStorm3D_Model> fadeModel;
 		InstanceList instances;
 
 		std::string bones;
 		std::string idleAnimation;
-		boost::shared_ptr<IStorm3D_BoneAnimation> animation;
+		std::shared_ptr<IStorm3D_BoneAnimation> animation;
 
 		float radius;
 		float radius2d;
 
-		SharedModel(boost::shared_ptr<IStorm3D_Model> model_, boost::shared_ptr<IStorm3D_Model> fadeModel_, const std::string &bones_, const std::string &idleAnimation_)
+		SharedModel(std::shared_ptr<IStorm3D_Model> model_, std::shared_ptr<IStorm3D_Model> fadeModel_, const std::string &bones_, const std::string &idleAnimation_)
 		:	model(model_),
 			fadeModel(fadeModel_),
 			bones(bones_),
@@ -112,8 +110,8 @@
 
 	struct Instance
 	{
-		boost::shared_ptr<IStorm3D_Model> model;
-		boost::shared_ptr<IStorm3D_Model> fadeModel;
+		std::shared_ptr<IStorm3D_Model> model;
+		std::shared_ptr<IStorm3D_Model> fadeModel;
 
 		int modelId;
 		int instanceId;
@@ -139,7 +137,7 @@
 		bool lightmapped;
 		bool inBuilding;
 
-		Instance(boost::shared_ptr<IStorm3D_Model> model_, boost::shared_ptr<IStorm3D_Model> fadeModel_, const COL &ambient_)
+		Instance(std::shared_ptr<IStorm3D_Model> model_, std::shared_ptr<IStorm3D_Model> fadeModel_, const COL &ambient_)
 		:	model(model_),
 			fadeModel(fadeModel_),
 			modelId(-1),
@@ -224,7 +222,7 @@ struct Storm3D_TerrainGroupData
 	VC2 sceneSize;
 
 	ModelList models;
-	boost::scoped_ptr<Tree> tree;
+	std::unique_ptr<Tree> tree;
 
 	InstanceMap instanceMap;
 
@@ -319,7 +317,7 @@ Storm3D_TerrainGroup::~Storm3D_TerrainGroup()
     delete data;
 }
 
-int Storm3D_TerrainGroup::addModel(boost::shared_ptr<Storm3D_Model> model, boost::shared_ptr<Storm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation)
+int Storm3D_TerrainGroup::addModel(std::shared_ptr<Storm3D_Model> model, std::shared_ptr<Storm3D_Model> fadeModel, const std::string &bones, const std::string &idleAnimation)
 {
 	assert(model);
 
@@ -339,10 +337,10 @@ int Storm3D_TerrainGroup::addInstance(int modelId, const VC3 &position, const QU
 	assert(modelId >= 0 && modelId < int(data->models.size()));
 	SharedModel &original = data->models[modelId];
 
-	boost::shared_ptr<IStorm3D_Model> m(original.model->GetClone(true, false, true));
+	std::shared_ptr<IStorm3D_Model> m(original.model->GetClone(true, false, true));
 	//m->SetNoCollision(original.model->GetNoCollision());
 
-	boost::shared_ptr<IStorm3D_Model> mf;
+	std::shared_ptr<IStorm3D_Model> mf;
 	if(original.fadeModel)
 		mf.reset(original.fadeModel->GetClone(true, false, true));
 
@@ -394,7 +392,7 @@ int Storm3D_TerrainGroup::addInstance(int modelId, const VC3 &position, const QU
 	data->terrainModels.addModel(*m);
 
 	int index = original.instances.size();
-	boost::shared_ptr<Instance> instance(new Instance(m, mf, color));
+	std::shared_ptr<Instance> instance(new Instance(m, mf, color));
 	original.instances.push_back(instance);
 
 	// ToDo:
@@ -573,7 +571,7 @@ void Storm3D_TerrainGroup::setInstanceFade(int modelId, int instanceId, float fa
 /*
 	if(instance.model)
 	{
-		boost::scoped_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(instance.model->ITObject->Begin());
+		std::unique_ptr<Iterator<IStorm3D_Model_Object *> > objectIterator(instance.model->ITObject->Begin());
 		for(; !objectIterator->IsEnd(); objectIterator->Next())
 		{
 			IStorm3D_Model_Object *object = objectIterator->GetCurrent();
@@ -795,9 +793,9 @@ void Storm3D_TerrainGroup::setSceneSize(const VC3 &size)
 	data->tree.reset(new Tree(minSize, maxSize));
 }
 
-boost::shared_ptr<IStorm3D_TerrainModelIterator> Storm3D_TerrainGroup::getModelIterator(const VC3 &position, float radius)
+std::shared_ptr<IStorm3D_TerrainModelIterator> Storm3D_TerrainGroup::getModelIterator(const VC3 &position, float radius)
 {
-	return boost::shared_ptr<IStorm3D_TerrainModelIterator> (new TerrainIterator(data->tree.get(), position, radius, data->terrainModels));
+	return std::shared_ptr<IStorm3D_TerrainModelIterator> (new TerrainIterator(data->tree.get(), position, radius, data->terrainModels));
 }
 
 bool Storm3D_TerrainGroup::findObject(const VC3 &position, float radius, int &modelId, int &instanceId)

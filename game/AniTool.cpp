@@ -10,7 +10,6 @@
 #include "../convert/str2int.h"
 #include <DatatypeDef.h>
 #include <string>
-#include <boost/lexical_cast.hpp>
 
 namespace game
 {
@@ -265,7 +264,7 @@ namespace game
 						int aniHeightPosEnd = tf->findNext("\n") + 1;
 						if (aniHeightPosEnd > 0)
 						{
-							std::string newheight = std::string("aniHeight ") + boost::lexical_cast<std::string> (positions[0].y);
+							std::string newheight = std::string("aniHeight ") + std::to_string(positions[0].y);
 							newheight += std::string("\r\n");
 							bufstr.replace(aniHeightPos, aniHeightPosEnd - aniHeightPos, newheight.c_str());
 
@@ -300,7 +299,7 @@ namespace game
 							std::string newmove = "";
 							if (fabs(positions[i].x - positions[i - 1].x) > 0.0001f)
 							{
-								newmove = std::string("aniMoveX ") + boost::lexical_cast<std::string> (positions[i].x - positions[i - 1].x);
+								newmove = std::string("aniMoveX ") + std::to_string(positions[i].x - positions[i - 1].x);
 								newmove += std::string("\r\n");
 							}
 							if (moveXpos >= 0 && moveXpos < nexttickpos
@@ -328,7 +327,7 @@ namespace game
 							std::string newmove = "";
 							if (fabs(positions[i].y - positions[i - 1].y) > 0.0001f)
 							{
-								newmove = std::string("aniMoveY ") + boost::lexical_cast<std::string> (positions[i].y - positions[i - 1].y);
+								newmove = std::string("aniMoveY ") + std::to_string(positions[i].y - positions[i - 1].y);
 								newmove += std::string("\r\n");
 							}
 							if (moveYpos >= 0 && moveYpos < nexttickpos
@@ -356,7 +355,7 @@ namespace game
 							std::string newmove = "";
 							if (fabs(positions[i].z - positions[i - 1].z) > 0.0001f)
 							{
-								newmove = std::string("aniMoveZ ") + boost::lexical_cast<std::string> (positions[i].z - positions[i - 1].z);
+								newmove = std::string("aniMoveZ ") + std::to_string(positions[i].z - positions[i - 1].z);
 								newmove += std::string("\r\n");
 							}
 							if (moveZpos >= 0 && moveZpos < nexttickpos
@@ -384,7 +383,7 @@ namespace game
 							std::string newrot = "";
 							if (fabs(rotations[i].x - rotations[i - 1].x) > 0.0001f)
 							{
-								newrot = std::string("aniRotX ") + boost::lexical_cast<std::string> (rotations[i].x - rotations[i - 1].x);
+								newrot = std::string("aniRotX ") + std::to_string(rotations[i].x - rotations[i - 1].x);
 								newrot += std::string("\r\n");
 							}
 							if (rotXpos >= 0 && rotXpos < nexttickpos
@@ -412,7 +411,7 @@ namespace game
 							std::string newrot = "";
 							if (fabs(rotations[i].y - rotations[i - 1].y) > 0.0001f)
 							{
-								newrot = std::string("aniRotY ") + boost::lexical_cast<std::string> (rotations[i].y - rotations[i - 1].y);
+								newrot = std::string("aniRotY ") + std::to_string(rotations[i].y - rotations[i - 1].y);
 								newrot += std::string("\r\n");
 							}
 							if (rotYpos >= 0 && rotYpos < nexttickpos
@@ -440,7 +439,7 @@ namespace game
 							std::string newrot = "";
 							if (fabs(rotations[i].z - rotations[i - 1].z) > 0.0001f)
 							{
-								newrot = std::string("aniRotZ ") + boost::lexical_cast<std::string> (rotations[i].z - rotations[i - 1].z);
+								newrot = std::string("aniRotZ ") + std::to_string(rotations[i].z - rotations[i - 1].z);
 								newrot += std::string("\r\n");
 							}
 							if (rotZpos >= 0 && rotZpos < nexttickpos
@@ -468,7 +467,7 @@ namespace game
 							std::string newrot = "";
 							if (fabs(aims[i] - aims[i - 1]) > 0.01f)
 							{
-								newrot = std::string("aniAim ") + boost::lexical_cast<std::string> (aims[i]);
+								newrot = std::string("aniAim ") + std::to_string(aims[i]);
 								newrot += std::string("\r\n");
 							}
 							if (aimpos >= 0 && aimpos < nexttickpos
