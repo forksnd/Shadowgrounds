@@ -110,13 +110,13 @@
 		{
 		}
 
-        void createBuffer(VertexStorage& storage)
+        void createBuffer(gfx::VertexStorage& storage)
         {
             storage.free(heights_id);
             heights_id = storage.alloc(VERTEX_COUNT * VERTEX_COUNT, STREAM_0_SIZE);
         }
 
-		void fillBuffer(VertexStorage& storage, const VC2I &start, const VC2I &end, std::unique_ptr<unsigned short[]> &buffer, int blockX, int blockY, const VC2I &resolution, const VC3 &scale, const VC3 &size)
+		void fillBuffer(gfx::VertexStorage& storage, const VC2I &start, const VC2I &end, std::unique_ptr<unsigned short[]> &buffer, int blockX, int blockY, const VC2I &resolution, const VC3 &scale, const VC3 &size)
 		{
 			float *pointer = (float*) storage.lock(heights_id, STREAM_0_SIZE);
 			if(!pointer)
@@ -319,7 +319,7 @@ struct Storm3D_TerrainHeightmapData
 
     ~Storm3D_TerrainHeightmapData()
     {
-        VertexStorage& vtxStorage = storm.getVertexStorage();
+        gfx::VertexStorage& vtxStorage = storm.renderer.getVertexStorage();
 
         vtxStorage.free(vertices_id);
 
@@ -331,7 +331,7 @@ struct Storm3D_TerrainHeightmapData
 
 	void createVertexBuffer(float textureDetail)
 	{
-        VertexStorage& vtxStorage = storm.getVertexStorage();
+        gfx::VertexStorage& vtxStorage = storm.renderer.getVertexStorage();
 
         vtxStorage.free(vertices_id);
 
@@ -373,8 +373,8 @@ struct Storm3D_TerrainHeightmapData
 		for(int j = 0; j < blockAmount.y; ++j)
 		for(int i = 0; i < blockAmount.x; ++i)
 		{
-			tempBlocks[j * blockAmount.x + i].createBuffer(storm.getVertexStorage());
-			tempBlocks[j * blockAmount.x + i].fillBuffer(storm.getVertexStorage(), start, end, heightMap, i, j, resolution, scale, size);
+			tempBlocks[j * blockAmount.x + i].createBuffer(storm.renderer.getVertexStorage());
+			tempBlocks[j * blockAmount.x + i].fillBuffer(storm.renderer.getVertexStorage(), start, end, heightMap, i, j, resolution, scale, size);
 		}
 
 		blocks.swap(tempBlocks);
@@ -392,8 +392,8 @@ struct Storm3D_TerrainHeightmapData
 		{
 			TerrainBlock &block = blocks[j * blockAmount.x + i];
 
-			block.createBuffer(storm.getVertexStorage());
-			block.fillBuffer(storm.getVertexStorage(), VC2I(), VC2I(VERTEX_COUNT, VERTEX_COUNT), heightMap, i, j, resolution, scale, size);
+			block.createBuffer(storm.renderer.getVertexStorage());
+			block.fillBuffer(storm.renderer.getVertexStorage(), VC2I(), VC2I(VERTEX_COUNT, VERTEX_COUNT), heightMap, i, j, resolution, scale, size);
 		}
 	}
 
@@ -1079,7 +1079,7 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene)
 
 	data->pixelShader.apply();
 
-    VertexStorage& vtxStorage = data->storm.getVertexStorage();
+    gfx::VertexStorage& vtxStorage = data->storm.renderer.getVertexStorage();
 
     device.SetStreamSource(1, vtxStorage.vertices, vtxStorage.offset(data->vertices_id, STREAM_1_SIZE), STREAM_1_SIZE);
 	std::vector<RenderBlock> &visibleBlocks = data->visibleBlocks;
@@ -1245,7 +1245,7 @@ void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera 
 		device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 	}
 
-    VertexStorage& vtxStorage = data->storm.getVertexStorage();
+    gfx::VertexStorage& vtxStorage = data->storm.renderer.getVertexStorage();
 
     device.SetStreamSource(1, vtxStorage.vertices, vtxStorage.offset(data->vertices_id, STREAM_1_SIZE), STREAM_1_SIZE);
 	device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);

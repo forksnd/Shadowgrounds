@@ -6,7 +6,7 @@
 //------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------
-#include "GfxDevice.h"
+#include "GfxRenderer.h"
 #include "storm3d_common_imp.h"
 #include "IStorm3D.h"
 #include "storm3d_resourcemanager.h"
@@ -35,6 +35,8 @@ public:
         {
         }
     };
+
+    gfx::Renderer renderer;
 
 private:
     Storm3D_Texture *CreateNewTextureInstance(int width, int height, IStorm3D_Texture::TEXTYPE textype);
@@ -71,7 +73,6 @@ private:
     bool GetDSModeStencilSupport(D3DFORMAT &form);
     D3DFORMAT GetDSBufferModeForDisplayMode(int adapter, D3DDISPLAYMODE &mode);
 
-    gfx::Device device;					// 3d-device
     D3DPRESENT_PARAMETERS present_params;		// Present parameters
 
     // gamma ramps
@@ -154,19 +155,7 @@ private:
     bool hasNeededBuffers();
     bool force_reset;
 
-    uint16_t quadIdxAlloc;
-
 public:
-
-    IndexStorage16  indices;
-    VertexStorage   vertices;
-
-    IndexStorage16& getIndexStorage16() { return indices; }
-    VertexStorage&  getVertexStorage() { return vertices; }
-
-    void setQuadIndices();
-    UINT baseQuadIndex();
-
     void createManagedResources();
     void destroyManagedResources();
 
@@ -202,7 +191,7 @@ public:
     void createTargets();
 
     // Get D3D Device inline (v3)
-    gfx::Device& GetD3DDevice() { return device; }
+    gfx::Device& GetD3DDevice() { return renderer.device; }
 
     IStorm3D_Logger *getLogger() { return logger; }
 

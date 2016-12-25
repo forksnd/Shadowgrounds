@@ -188,9 +188,9 @@ void Storm3D_Scene_PicList_Font::Render()
 
                     // Render it
                     Storm3D2->GetD3DDevice().SetStdProgram(gfx::Device::SSF_2D_POS | gfx::Device::SSF_COLOR | gfx::Device::SSF_TEXTURE);
-                    Storm3D2->GetD3DDevice().SetFVF(FVF_P2DUV);
+                    Storm3D2->renderer.SetFVF(FVF_P2DUV);
 
-                    Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vx, sizeof(Vertex_P2DUV));
+                    Storm3D2->renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vx, sizeof(Vertex_P2DUV));
                     scene->AddPolyCounter(2);
 				}
 			}

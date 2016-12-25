@@ -2,81 +2,6 @@
 #include "storm3d_terrain_utils.h"
 #include <assert.h>
 
-D3DVERTEXELEMENT9 VertexDesc_P3NUV2[] = {
-    {0,  0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-    {0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0},
-    {0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
-    {0, 32, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1},
-    D3DDECL_END()
-};
-
-D3DVERTEXELEMENT9 VertexDesc_P3NUV2BW[] = {
-    {0,  0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-    {0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0},
-    {0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
-    {0, 32, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1},
-    {0, 40, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 2},
-    D3DDECL_END()
-};
-
-D3DVERTEXELEMENT9 VertexDesc_P3D[] = {
-    {0,  0, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-    {0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0},
-    D3DDECL_END()
-};
-
-D3DVERTEXELEMENT9 VertexDesc_P3DUV2[] = {
-    {0,  0, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-    {0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0},
-    {0, 16, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
-    {0, 24, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1},
-    D3DDECL_END()
-};
-
-D3DVERTEXELEMENT9 VertexDesc_P3UV[] = {
-    {0,  0, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-    {0, 12, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
-    D3DDECL_END()
-};
-
-D3DVERTEXELEMENT9 VertexDesc_P4DUV[] = {
-    {0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0}, //TODO: use D3DDECLUSAGE_POSITION when port to shaders
-    {0, 16, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,     0},
-    {0, 20, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0},
-    D3DDECL_END()
-};
-
-D3DVERTEXELEMENT9 VertexDesc_P4UV[] = {
-    {0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0}, //TODO: use D3DDECLUSAGE_POSITION when port to shaders
-    {0, 16, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0},
-    D3DDECL_END()
-};
-
-D3DVERTEXELEMENT9 VertexDesc_P2DUV[] = {
-    {0,  0, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-    {0,  8, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0},
-    {0, 12, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
-    D3DDECL_END()
-};
-
-D3DVERTEXELEMENT9 VertexDesc_P2UV[] = {
-    {0, 0, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-    {0, 8, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
-    D3DDECL_END()
-};
-
-LPD3DVERTEXELEMENT9 vtxFmtDescs[FVF_COUNT] = {
-    VertexDesc_P3NUV2,
-    VertexDesc_P3NUV2BW,
-    VertexDesc_P3D,
-    VertexDesc_P3DUV2,
-    VertexDesc_P3UV,
-    VertexDesc_P4DUV,
-    VertexDesc_P4UV,
-    VertexDesc_P2DUV,
-    VertexDesc_P2UV
-};
-
 enum ShaderProfile
 {
     VERTEX_SHADER_3_0,
@@ -137,9 +62,6 @@ void bitset32_clear(uint32_t& set)
 {
     set = 0;
 }
-
-#define DYNAMIC_VB_FRAME_SIZE    (10 * (1<<20))
-#define DYNAMIC_IB16_FRAME_SIZE  ( 1 * (1<<20))
 
 namespace gfx
 {
@@ -355,16 +277,6 @@ namespace gfx
         D3D->Release();
     }
 
-    bool initDevice(Device& device, UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params)
-    {
-        return device.init(D3D, Adapter, hWnd, params);
-    }
-
-    void finiDevice(Device& device)
-    {
-        device.fini();
-    }
-
     bool Device::cached = true;
 
     void Device::resetCache()
@@ -380,17 +292,12 @@ namespace gfx
         pconsts_range_max = 0;
     }
 
-    bool Device::init(LPDIRECT3D9 d3d, UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params)
+    bool Device::init(UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params)
     {
-        if (FAILED(d3d->CreateDevice(Adapter, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &device)))
+        if (FAILED(D3D->CreateDevice(Adapter, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &device)))
             return false;
 
-        for (auto& q : frame_sync) q = 0;
-
         createFrameResources(params);
-
-        for (size_t i = 0; i < FVF_COUNT; ++i)
-            device->CreateVertexDeclaration(vtxFmtDescs[i], &vtxFmtSet[i]);
 
         const char* defines[] = {
             "VS_2D_POS",
@@ -412,8 +319,6 @@ namespace gfx
             if (stdPS[i]) stdPS[i]->Release();
         }
 
-        for (auto vf : vtxFmtSet) vf->Release();
-
         destroyFrameResources();
         device->Release();
     }
@@ -429,103 +334,6 @@ namespace gfx
         }
 
         return false;
-    }
-
-    void Device::beginFrame()
-    {
-        assert(frame_id >= 0);
-        assert(frame_id < NUM_FRAMES_DELAY);
-
-        while (frame_sync[frame_id]->GetData(NULL, 0, D3DGETDATA_FLUSH) == S_FALSE);
-
-        frame_vb_used = 0;
-        frame_ib16_used = 0;
-
-        D3DXMatrixIdentity(&world_mat);
-        D3DXMatrixIdentity(&view_mat);
-        D3DXMatrixIdentity(&proj_mat);
-
-        resetCache();
-    }
-
-    void Device::endFrame()
-    {
-        assert(frame_id >= 0);
-        assert(frame_id < NUM_FRAMES_DELAY);
-
-        frame_sync[frame_id]->Issue(D3DISSUE_END);
-
-        frame_id = (frame_id + 1) % NUM_FRAMES_DELAY;
-
-        device->Present(NULL, NULL, NULL, NULL);
-    }
-
-    void Device::SetDynIdx16Buffer()
-    {
-        SetIndices(frame_ib16[frame_id]);
-    }
-
-    bool Device::lockDynIdx16(UINT count, uint16_t** ptr, UINT* baseIndex)
-    {
-        UINT sz = count * sizeof(uint16_t);
-
-        assert(frame_ib16_used % sizeof(uint16_t) == 0);
-
-        if (frame_ib16_used + sz > DYNAMIC_IB16_FRAME_SIZE)
-        {
-            assert(0);
-            return false;
-        }
-
-        HRESULT hr = frame_ib16[frame_id]->Lock(frame_ib16_used, sz, (void**)ptr, D3DLOCK_NOOVERWRITE);
-        assert(SUCCEEDED(hr));
-
-        *baseIndex = frame_ib16_used / sizeof(uint16_t);
-
-        frame_ib16_used += sz;
-
-        return true;
-    }
-
-    void Device::unlockDynIdx16()
-    {
-        frame_ib16[frame_id]->Unlock();
-    }
-
-    void Device::SetDynVtxBuffer(UINT Stride)
-    {
-        SetStreamSource(0, frame_vb[frame_id], 0, Stride);
-    }
-
-    bool Device::lockDynVtx(UINT count, UINT stride, void** ptr, UINT* baseVertex)
-    {
-        UINT sz = count*stride;
-        UINT rem;
-
-        rem = frame_vb_used % stride;
-        rem = rem == 0 ? 0 : stride - rem;
-
-        if (frame_vb_used + rem + sz > DYNAMIC_VB_FRAME_SIZE)
-        {
-            assert(0);
-            return false;
-        }
-
-        frame_vb_used += rem;
-
-        HRESULT hr = frame_vb[frame_id]->Lock(frame_vb_used, sz, ptr, D3DLOCK_NOOVERWRITE);
-        assert(SUCCEEDED(hr));
-
-        *baseVertex = frame_vb_used / stride;
-
-        frame_vb_used += sz;
-
-        return true;
-    }
-
-    void Device::unlockDynVtx()
-    {
-        frame_vb[frame_id]->Unlock();
     }
 
     void Device::SetStdProgram(size_t id)
@@ -594,92 +402,13 @@ namespace gfx
         pxSize = VC2(2.0f / fViewportDim.x, 2.0f / fViewportDim.y);
     }
 
-    void Device::SetFVF(FVF vtxFmt)
-    {
-        SetVertexDeclaration(vtxFmtSet[vtxFmt]);
-    }
-
-    void Device::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT PrimitiveCount, CONST void* vertexData, UINT Stride)
-    {
-        void* vertices = NULL;
-        UINT  baseVertex = 0;
-        UINT  VertexCount = 0;
-
-        switch (PrimitiveType)
-        {
-        case D3DPT_TRIANGLESTRIP:
-            VertexCount = PrimitiveCount + 2;
-            break;
-        case D3DPT_TRIANGLELIST:
-            VertexCount = 3 * PrimitiveCount;
-            break;
-        default:
-            assert(0);
-        }
-
-        lockDynVtx(VertexCount, Stride, &vertices, &baseVertex);
-        memcpy(vertices, vertexData, Stride*VertexCount);
-        unlockDynVtx();
-
-        SetDynVtxBuffer(Stride);
-        DrawPrimitive(PrimitiveType, baseVertex, PrimitiveCount);
-    }
-
     void Device::createFrameResources(D3DPRESENT_PARAMETERS& params)
     {
-        for (auto& q : frame_sync)
-        {
-            assert(q == 0);
-            HRESULT hr = device->CreateQuery(D3DQUERYTYPE_EVENT, &q);
-            assert(SUCCEEDED(hr));
-        }
-
-        for (auto& vb : frame_vb)
-        {
-            HRESULT hr = device->CreateVertexBuffer(
-                DYNAMIC_VB_FRAME_SIZE,
-                D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY,
-                0, D3DPOOL_DEFAULT,
-                &vb, NULL
-            );
-            assert(SUCCEEDED(hr));
-        }
-
-
-        for (auto& ib : frame_ib16)
-        {
-            HRESULT hr = device->CreateIndexBuffer(
-                DYNAMIC_IB16_FRAME_SIZE,
-                D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY,
-                D3DFMT_INDEX16, D3DPOOL_DEFAULT,
-                &ib, NULL
-            );
-            assert(SUCCEEDED(hr));
-        }
-
-        frame_id = 0;
         setViewportSize(params.BackBufferWidth, params.BackBufferHeight);
     }
 
     void Device::destroyFrameResources()
     {
-        for (auto& q : frame_sync)
-        {
-            if (q) q->Release();
-            q = 0;
-        }
-
-        for (auto& vb : frame_vb)
-        {
-            if (vb) vb->Release();
-            vb = 0;
-        }
-
-        for (auto& ib : frame_ib16)
-        {
-            if (ib) ib->Release();
-            ib = 0;
-        }
     }
 
     HRESULT Device::TestCooperativeLevel()
@@ -810,6 +539,12 @@ namespace gfx
 
     HRESULT Device::BeginScene()
     {
+        D3DXMatrixIdentity(&world_mat);
+        D3DXMatrixIdentity(&view_mat);
+        D3DXMatrixIdentity(&proj_mat);
+
+        resetCache();
+
         return device->BeginScene();
     }
 
@@ -839,16 +574,6 @@ namespace gfx
         return device->SetMaterial(pMaterial);
     }
 
-    HRESULT Device::GetMaterial(D3DMATERIAL9* pMaterial)
-    {
-        return device->GetMaterial(pMaterial);
-    }
-
-    HRESULT Device::SetLight(DWORD Index, CONST D3DLIGHT9* pLight)
-    {
-        return device->SetLight(Index, pLight);
-    }
-
     HRESULT Device::LightEnable(DWORD Index, BOOL Enable)
     {
         return device->LightEnable(Index, Enable);
@@ -874,16 +599,6 @@ namespace gfx
     HRESULT Device::CreateStateBlock(D3DSTATEBLOCKTYPE Type, IDirect3DStateBlock9** ppSB)
     {
         return device->CreateStateBlock(Type, ppSB);
-    }
-
-    HRESULT Device::BeginStateBlock()
-    {
-        return device->BeginStateBlock();
-    }
-
-    HRESULT Device::EndStateBlock(IDirect3DStateBlock9** ppSB)
-    {
-        return device->EndStateBlock(ppSB);
     }
 
     HRESULT Device::SetTexture(DWORD Stage, IDirect3DBaseTexture9* pTexture)
@@ -1061,5 +776,10 @@ namespace gfx
     HRESULT Device::CreateQuery(D3DQUERYTYPE Type, IDirect3DQuery9** ppQuery)
     {
         return device->CreateQuery(Type, ppQuery);
+    }
+
+    HRESULT Device::Present(CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion)
+    {
+        return device->Present(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
     }
 }

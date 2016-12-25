@@ -1115,9 +1115,9 @@ void Storm3D_Spotlight::debugRender()
 
 	data->device.SetPixelShader(0);
 	data->device.SetVertexShader(0);
-	data->device.SetFVF(FVF_P4UV);
+    data->storm.renderer.SetFVF(FVF_P4UV);
 
-	data->device.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) *  6);
+	data->storm.renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) *  6);
 }
 
 void Storm3D_Spotlight::releaseDynamicResources()

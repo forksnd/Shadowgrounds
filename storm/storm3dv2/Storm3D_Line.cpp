@@ -72,7 +72,7 @@ void Storm3D_Line::SetColor(int color)
 	rebuild_vertices = true;
 }
 
-void Storm3D_Line::Render(gfx::Device& device)
+void Storm3D_Line::Render(gfx::Renderer& renderer)
 {
 	if(points.size() < 2)
 		return;
@@ -83,8 +83,8 @@ void Storm3D_Line::Render(gfx::Device& device)
 	rebuild_vertices = false;
 	rebuild_indices = false;
 
-    device.SetStdProgram(gfx::Device::SSF_COLOR);
-    device.SetFVF(FVF_P3D);
+    renderer.device.SetStdProgram(gfx::Device::SSF_COLOR);
+    renderer.SetFVF(FVF_P3D);
 
     // Render
     if (!pixel_line)
@@ -92,7 +92,7 @@ void Storm3D_Line::Render(gfx::Device& device)
         uint16_t* ip = 0;
         UINT      baseIdx = 0;
 
-        device.lockDynIdx16(faces*3, &ip, &baseIdx);
+        renderer.lockDynIdx16(faces*3, &ip, &baseIdx);
         for (int i = 0; i < static_cast<int> (points.size() - 1); ++i)
         {
             // First face
@@ -105,12 +105,12 @@ void Storm3D_Line::Render(gfx::Device& device)
             *ip++ = i * 4 + 3;
             *ip++ = i * 4 + 2;
         }
-        device.unlockDynIdx16();
+        renderer.unlockDynIdx16();
 
         UINT        baseVtx = 0;
         Vertex_P3D* v = 0;
 
-        device.lockDynVtx<Vertex_P3D>(vertices, &v, &baseVtx);
+        renderer.lockDynVtx<Vertex_P3D>(vertices, &v, &baseVtx);
         // last corner points (next part will be connected to these)
         // -jpk
         Vertex_P3D *lastv1 = NULL;
@@ -150,11 +150,11 @@ void Storm3D_Line::Render(gfx::Device& device)
             lastv2 = v;
             ++v;
         }
-        device.unlockDynVtx();
+        renderer.unlockDynVtx();
 
-        device.SetDynVtxBuffer<Vertex_P3D>();
-        device.SetDynIdx16Buffer();
-        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVtx, 0, vertices, baseIdx, faces);
+        renderer.SetDynVtxBuffer<Vertex_P3D>();
+        renderer.SetDynIdx16Buffer();
+        renderer.device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVtx, 0, vertices, baseIdx, faces);
         ++storm3d_dip_calls;
     }
     else
@@ -162,16 +162,16 @@ void Storm3D_Line::Render(gfx::Device& device)
         UINT        baseVtx = 0;
         Vertex_P3D* v = 0;
 
-        device.lockDynVtx<Vertex_P3D>(points.size(), &v, &baseVtx);
+        renderer.lockDynVtx<Vertex_P3D>(points.size(), &v, &baseVtx);
         for (unsigned int i = 0; i < points.size(); i++)
         {
             v[i].p = points[i];
             v[i].d = color;
         }
-        device.unlockDynVtx();
+        renderer.unlockDynVtx();
 
-        device.SetDynVtxBuffer<Vertex_P3D>();
-        device.DrawPrimitive(D3DPT_LINELIST, baseVtx, points.size() / 2);
+        renderer.SetDynVtxBuffer<Vertex_P3D>();
+        renderer.device.DrawPrimitive(D3DPT_LINELIST, baseVtx, points.size() / 2);
         ++storm3d_dip_calls;
     }
 }

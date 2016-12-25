@@ -579,13 +579,13 @@ struct Storm3D_TerrainDecalSystem::Data
 		gfx::Device &device = storm.GetD3DDevice();
 
         Vertex_DECAL *buffer = 0;
-        device.lockDynVtx<Vertex_DECAL>(decals.size() * 4, &buffer, &baseDecalVertex);
+        storm.renderer.lockDynVtx<Vertex_DECAL>(decals.size() * 4, &buffer, &baseDecalVertex);
         for (unsigned int i = 0; i < decals.size(); ++i)
         {
             decals[i]->insert(buffer);
             buffer += 4;
         }
-        device.unlockDynVtx();
+        storm.renderer.unlockDynVtx();
 
 		// Render
 		if(!decals.empty())
@@ -602,8 +602,8 @@ struct Storm3D_TerrainDecalSystem::Data
 			pixelShader.apply();
 			vertexShader.apply();
 
-            device.SetDynVtxBuffer<Vertex_DECAL>();
-            storm.setQuadIndices();
+            storm.renderer.SetDynVtxBuffer<Vertex_DECAL>();
+            storm.renderer.setQuadIndices();
 
 			D3DXVECTOR4 outfactor(outFactor.r, outFactor.g, outFactor.b, 1.f);
 			device.SetVertexShaderConstantF(8, outfactor, 1);
@@ -631,7 +631,7 @@ struct Storm3D_TerrainDecalSystem::Data
 
 				int renderAmount = endIndex - startIndex + 1;
 
-                device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseDecalVertex+startIndex * 4, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
+                device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseDecalVertex+startIndex * 4, 0, renderAmount * 4, storm.renderer.baseQuadIndex(), renderAmount * 2);
 
 				startIndex = ++endIndex;
 
@@ -659,7 +659,7 @@ struct Storm3D_TerrainDecalSystem::Data
 
         UINT baseVertex = 0;
         Vertex_DECAL *buffer = 0;;
-        device.lockDynVtx<Vertex_DECAL>(shadowDecals.size() * 4, &buffer, &baseVertex);
+        storm.renderer.lockDynVtx<Vertex_DECAL>(shadowDecals.size() * 4, &buffer, &baseVertex);
 
         float inverseRange = 1.f / fogRange;
         for (unsigned int i = 0; i < shadowDecals.size() && renderAmount < MAX_DECAL_AMOUNT; ++i)
@@ -702,7 +702,7 @@ struct Storm3D_TerrainDecalSystem::Data
             }
         }
 
-        device.unlockDynVtx();
+        storm.renderer.unlockDynVtx();
 
         if (renderAmount == 0)
             return;
@@ -736,9 +736,9 @@ struct Storm3D_TerrainDecalSystem::Data
 
         shadowMaterial->applyShadow(device);
 
-        device.SetDynVtxBuffer<Vertex_DECAL>();
-        storm.setQuadIndices();
-        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVertex, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
+        storm.renderer.SetDynVtxBuffer<Vertex_DECAL>();
+        storm.renderer.setQuadIndices();
+        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVertex, 0, renderAmount * 4, storm.renderer.baseQuadIndex(), renderAmount * 2);
 
         scene.AddPolyCounter(renderAmount * 2);
 
@@ -770,8 +770,8 @@ struct Storm3D_TerrainDecalSystem::Data
 
 			Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
 
-            device.SetDynVtxBuffer<Vertex_DECAL>();
-            storm.setQuadIndices();
+            storm.renderer.SetDynVtxBuffer<Vertex_DECAL>();
+            storm.renderer.setQuadIndices();
 
 			int materialIndex = 0;
 			int startIndex = 0;
@@ -802,7 +802,7 @@ struct Storm3D_TerrainDecalSystem::Data
 
 				int renderAmount = endIndex - startIndex + 1;
 
-                device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseDecalVertex+startIndex * 4, 0, renderAmount * 4, storm.baseQuadIndex(), renderAmount * 2);
+                device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseDecalVertex+startIndex * 4, 0, renderAmount * 4, storm.renderer.baseQuadIndex(), renderAmount * 2);
 
                 startIndex = ++endIndex;
 

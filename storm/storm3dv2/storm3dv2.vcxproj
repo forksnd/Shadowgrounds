@@ -173,6 +173,8 @@
     </ClCompile>
     <ClCompile Include="etlsf.c" />
     <ClCompile Include="GfxDevice.cpp" />
+    <ClCompile Include="GfxMemory.cpp" />
+    <ClCompile Include="GfxRenderer.cpp" />
     <ClCompile Include="IStorm3D.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -504,6 +506,8 @@
     <ClInclude Include="etlsf.h" />
     <ClInclude Include="GfxDevice.h" />
     <ClInclude Include="DatatypeDef.h" />
+    <ClInclude Include="GfxMemory.h" />
+    <ClInclude Include="GfxRenderer.h" />
     <ClInclude Include="Iterator.h" />
     <ClInclude Include="RenderWindow.h" />
     <ClInclude Include="S3D_ModelFile.h" />

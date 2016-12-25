@@ -8,7 +8,7 @@
 class Storm3D;
 namespace gfx
 {
-    struct Device;
+    struct Renderer;
 }
 
 class Storm3D_Line: public IStorm3D_Line
@@ -38,7 +38,7 @@ public:
 	void SetColor(int color);
 
 	// Storm-stuff (expose this and remove that cast?)
-	void Render(gfx::Device& device);
+	void Render(gfx::Renderer& device);
 
 	void releaseDynamicResources();
 	void recreateDynamicResources();

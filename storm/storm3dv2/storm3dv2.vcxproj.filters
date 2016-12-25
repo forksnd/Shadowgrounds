@@ -49,6 +49,9 @@
       <UniqueIdentifier>{620a893a-e4b7-42fa-8bf6-888c5e5876e9}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{9a3a6a93-3c1b-46b5-9291-72342e97a1aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Clipper.cpp">
@@ -222,11 +225,17 @@
     <ClCompile Include="treader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GfxDevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="etlsf.c">
-      <Filter>Source Files</Filter>
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="GfxDevice.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="GfxRenderer.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="GfxMemory.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -468,10 +477,16 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GfxDevice.h">
-      <Filter>Header Files</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="etlsf.h">
-      <Filter>Header Files</Filter>
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GfxRenderer.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GfxMemory.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -148,8 +148,8 @@ Storm3D_Mesh::~Storm3D_Mesh()
 
 	// Release buffers
     
-    VertexStorage&  vtxStorage = Storm3D2->getVertexStorage();
-    IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
+    gfx::VertexStorage&  vtxStorage = Storm3D2->renderer.getVertexStorage();
+    gfx::IndexStorage16& idxStorage = Storm3D2->renderer.getIndexStorage16();
 
     vtxStorage.free(vertices_id);
 
@@ -300,7 +300,8 @@ void Storm3D_Mesh::PrepareForRender(Storm3D_Scene *scene,Storm3D_Model_Object *o
 //------------------------------------------------------------------
 void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_Object *object)
 {
-	// Apply material (if it is not already active)
+    gfx::Device& device = Storm3D2->GetD3DDevice();
+    // Apply material (if it is not already active)
 	if (material!=Storm3D2->active_material)
 	{
 		// Create world matrix
@@ -314,14 +315,14 @@ void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_O
 			// Default: "white plastic"...
 
 			// Set stages (color only)
-			Storm3D2->device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
-			Storm3D2->device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-			Storm3D2->device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
-			Storm3D2->device.SetTexture(0,NULL);
-			Storm3D2->device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG1);
-			Storm3D2->device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_DIFFUSE);
-			Storm3D2->device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_DISABLE);
-			Storm3D2->device.SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
+			device.SetRenderState(D3DRS_ALPHATESTENABLE,FALSE);
+			device.SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+			device.SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
+			device.SetTexture(0,NULL);
+			device.SetTextureStageState(0,D3DTSS_COLOROP,D3DTOP_SELECTARG1);
+			device.SetTextureStageState(0,D3DTSS_COLORARG1,D3DTA_DIFFUSE);
+			device.SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_DISABLE);
+			device.SetTextureStageState(1,D3DTSS_COLOROP,D3DTOP_DISABLE);
 
 
 			// Setup material
@@ -347,7 +348,7 @@ void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_O
 			mat.Power=25; 
 
 			// Use this material
-			Storm3D2->device.SetMaterial(&mat);
+			device.SetMaterial(&mat);
 /* PSD
 			// Apply shader
 			Storm3D2->device.SetVertexShader(vbuf_fvf);
@@ -360,8 +361,8 @@ void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_O
 	// If object is scaled use normalizenormals, otherwise don't
 	if ((fabsf(object->scale.x-1.0f)>=0.001)||
 		(fabsf(object->scale.y-1.0f)>=0.001)||
-		(fabsf(object->scale.z-1.0f)>=0.001)) Storm3D2->device.SetRenderState(D3DRS_NORMALIZENORMALS,TRUE);
-		else Storm3D2->device.SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
+		(fabsf(object->scale.z-1.0f)>=0.001)) device.SetRenderState(D3DRS_NORMALIZENORMALS,TRUE);
+		else device.SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
 }
 
 
@@ -371,26 +372,27 @@ void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_O
 //------------------------------------------------------------------
 void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
 {
+    gfx::Device& device = Storm3D2->GetD3DDevice();
     int lod = object->parent_model->lodLevel;
     if (!hasLods)
         lod = 0;
 
-    VertexStorage& vtxStorage = Storm3D2->getVertexStorage();
-    IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
+    gfx::VertexStorage& vtxStorage = Storm3D2->renderer.getVertexStorage();
+    gfx::IndexStorage16& idxStorage = Storm3D2->renderer.getIndexStorage16();
 
-    Storm3D2->device.SetFVF(vbuf_fvf);
-    Storm3D2->device.SetStreamSource(0, vtxStorage.vertices, 0, vbuf_vsize);
-    Storm3D2->device.SetIndices(idxStorage.indices);
+    Storm3D2->renderer.SetFVF(vbuf_fvf);
+    device.SetStreamSource(0, vtxStorage.vertices, 0, vbuf_vsize);
+    device.SetIndices(idxStorage.indices);
 
     if (bone_weights)
     {
         for (unsigned int i = 0; i < bone_chunks[lod].size(); ++i)
         {
             Storm3D_ShaderManager *manager = Storm3D_ShaderManager::GetSingleton();
-            manager->SetShader(Storm3D2->device, bone_chunks[lod][i].bone_indices);
+            manager->SetShader(device, bone_chunks[lod][i].bone_indices);
 
 
-            Storm3D2->device.DrawIndexedPrimitive(
+            device.DrawIndexedPrimitive(
                 D3DPT_TRIANGLELIST,
                 bone_chunks[lod][i].base_vertex, 0, bone_chunks[lod][i].vertex_count,
                 bone_chunks[lod][i].base_index, bone_chunks[lod][i].index_count
@@ -401,7 +403,7 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
     }
     else
     {
-        Storm3D2->device.DrawIndexedPrimitive(
+        device.DrawIndexedPrimitive(
             D3DPT_TRIANGLELIST,
             base_vertex, 0, render_vertex_amount,
             base_index[lod], render_face_amount[lod]
@@ -495,7 +497,8 @@ void Storm3D_Mesh::RenderWithoutMaterial(Storm3D_Scene *scene,bool mirrored,Stor
 //------------------------------------------------------------------
 void Storm3D_Mesh::RenderToBackground(Storm3D_Scene *scene,Storm3D_Model_Object *object)
 {
-	// Prepare for rendering (v3)
+    gfx::Device& device = Storm3D2->GetD3DDevice();
+    // Prepare for rendering (v3)
 	PrepareForRender(scene,object);
 
 	// Test
@@ -506,23 +509,23 @@ void Storm3D_Mesh::RenderToBackground(Storm3D_Scene *scene,Storm3D_Model_Object 
 	PrepareMaterialForRender(scene,object);
 
 	// Disable some states
-	Storm3D2->device.SetRenderState(D3DRS_SPECULARENABLE,FALSE);
-	Storm3D2->device.SetRenderState(D3DRS_ZENABLE,FALSE);
-	Storm3D2->device.SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
+	device.SetRenderState(D3DRS_SPECULARENABLE,FALSE);
+	device.SetRenderState(D3DRS_ZENABLE,FALSE);
+	device.SetRenderState(D3DRS_NORMALIZENORMALS,FALSE);
 
 	// Render vertex buffers
 	RenderBuffers(object);
 	scene->AddPolyCounter(face_amount[0]);
 
 	// Return states
-	Storm3D2->device.SetRenderState(D3DRS_ZENABLE,TRUE);
+	device.SetRenderState(D3DRS_ZENABLE,TRUE);
 }
 
 void Storm3D_Mesh::clearBoneChunks()
 {
     int lodLevels = hasLods ? LOD_AMOUNT : 1;
-    IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
-    VertexStorage&  vtxStorage = Storm3D2->getVertexStorage();
+    gfx::IndexStorage16& idxStorage = Storm3D2->renderer.getIndexStorage16();
+    gfx::VertexStorage&  vtxStorage = Storm3D2->renderer.getVertexStorage();
 
     for(int lod = 0; lod < lodLevels; ++lod)
     {
@@ -562,8 +565,8 @@ void Storm3D_Mesh::ReBuild()
         vbuf_fvf = FVF_P3NUV2;
     }
 
-    IndexStorage16& idxStorage = Storm3D2->getIndexStorage16();
-    VertexStorage&  vtxStorage = Storm3D2->getVertexStorage();
+    gfx::IndexStorage16& idxStorage = Storm3D2->renderer.getIndexStorage16();
+    gfx::VertexStorage&  vtxStorage = Storm3D2->renderer.getVertexStorage();
 
     int lodLevels = hasLods ? LOD_AMOUNT : 1;
 

@@ -44,12 +44,6 @@
 
 using namespace frozenbyte;
 
-static const size_t INDEX_STORAGE_SIZE = 20 * (1<<20);
-static const size_t VERTEX_STORAGE_SIZE = 80 * (1<<20);
-static const size_t MAX_QUAD_COUNT = 0x4000;
-
-static_assert(MAX_QUAD_COUNT*4<=0x10000, "Vertex count should be less then 65536(0x10000)");
-
 // HACK: for statistics
 extern int storm3d_model_boneanimation_allocs;
 extern int storm3d_model_loads;
@@ -170,14 +164,14 @@ void Storm3D::createTargets()
 	{
 		toNearestPow(colorTargetSize.x);
 		toNearestPow(colorTargetSize.y);
-		device.CreateTexture(colorTargetSize.x, colorTargetSize.y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &colorTarget, 0);
+		renderer.device.CreateTexture(colorTargetSize.x, colorTargetSize.y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &colorTarget, 0);
 	}
 
 	if(colorSecondaryTargetSize.x > 0 && colorSecondaryTargetSize.y > 0)
 	{
 		toNearestPow(colorSecondaryTargetSize.x);
 		toNearestPow(colorSecondaryTargetSize.y);
-		device.CreateTexture(colorSecondaryTargetSize.x, colorSecondaryTargetSize.y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &colorSecondaryTarget, 0);
+        renderer.device.CreateTexture(colorSecondaryTargetSize.x, colorSecondaryTargetSize.y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &colorSecondaryTarget, 0);
 	}
 
 	depthTargetSize.x = max(depthTargetSize.x, colorTargetSize.x);
@@ -186,7 +180,7 @@ void Storm3D::createTargets()
 	depthTargetSize.y = max(depthTargetSize.y, colorSecondaryTargetSize.y);
 
 	if(depthTargetSize.x > 0 && depthTargetSize.y > 0)
-		device.CreateDepthStencilSurface(depthTargetSize.x, depthTargetSize.y, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, D3DMULTISAMPLE_NONE, FALSE, &depthTarget, 0);
+        renderer.device.CreateDepthStencilSurface(depthTargetSize.x, depthTargetSize.y, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, D3DMULTISAMPLE_NONE, FALSE, &depthTarget, 0);
 
 	if(allocate_procedural_target && proceduralTargetSize.x && proceduralTargetSize.y)
 	{
@@ -202,14 +196,14 @@ void Storm3D::createTargets()
 		}
 
 		//device.CreateTexture(xs, ys, 1, D3DUSAGE_RENDERTARGET | D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A1R5G5B5, D3DPOOL_DEFAULT, &proceduralTarget, 0);
-		device.CreateTexture(xs, ys, 1, D3DUSAGE_RENDERTARGET | D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &proceduralTarget, 0);
+        renderer.device.CreateTexture(xs, ys, 1, D3DUSAGE_RENDERTARGET | D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &proceduralTarget, 0);
 
 		if(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_PS20)
 		{
 			if(proceduralOffsetTarget)
 				proceduralOffsetTarget.Release();
 			
-			device.CreateTexture(xs / 2, ys / 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &proceduralOffsetTarget, 0);
+            renderer.device.CreateTexture(xs / 2, ys / 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &proceduralOffsetTarget, 0);
 			//device.CreateTexture(xs / 2, ys / 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &proceduralOffsetTarget, 0);
 		}
 
@@ -224,8 +218,8 @@ void Storm3D::createTargets()
 		if(systemTarget)
 			systemTarget.Release();
 
-		device.CreateTexture(1, 1, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &valueTarget, 0);
-		device.CreateTexture(1, 1, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &systemTarget, 0);
+		renderer.device.CreateTexture(1, 1, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &valueTarget, 0);
+		renderer.device.CreateTexture(1, 1, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &systemTarget, 0);
 	}
 }
 
@@ -245,49 +239,15 @@ bool Storm3D::TestAdapterFeatures(int adanum)
 	return true;
 }
 
-void Storm3D::setQuadIndices()
-{
-    device.SetIndices(indices.indices);
-}
-
-UINT Storm3D::baseQuadIndex()
-{
-    return indices.baseIndex(quadIdxAlloc);
-}
-
 void Storm3D::createManagedResources()
 {
     // Create shader manager
-    new Storm3D_ShaderManager(device);
-    Storm3D_ShaderManager::GetSingleton()->CreateShaders(device);
-
-    indices.init(device, INDEX_STORAGE_SIZE);
-    vertices.init(device, VERTEX_STORAGE_SIZE);
-
-    //Create quad indices
-    quadIdxAlloc = indices.alloc(MAX_QUAD_COUNT * 6);
-    assert(quadIdxAlloc);
-
-    uint16_t* buffer = indices.lock(quadIdxAlloc);
-    for (uint16_t i = 0; i < MAX_QUAD_COUNT; ++i)
-    {
-        uint16_t base  = i * 4;
-
-        *buffer++ = base + 0;
-        *buffer++ = base + 2;
-        *buffer++ = base + 1;
-        *buffer++ = base + 1;
-        *buffer++ = base + 2;
-        *buffer++ = base + 3;
-    }
-    indices.unlock();
+    new Storm3D_ShaderManager(renderer.device);
+    Storm3D_ShaderManager::GetSingleton()->CreateShaders(renderer.device);
 }
 
 void Storm3D::destroyManagedResources()
 {
-    indices.fini();
-    vertices.fini();
-
 	// Delete shader manager
 	delete Storm3D_ShaderManager::GetSingleton();
 }
@@ -396,7 +356,7 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
     }
 
     // Create the device
-	if (!gfx::initDevice(device, active_adapter, window_handle, present_params))
+	if (!renderer.init(active_adapter, window_handle, present_params))
 	{
 		//MessageBox(NULL,"Error creating fullscreen device","Storm3D Error",0);
 		error_string = "Failed to create device";
@@ -407,7 +367,7 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 
 	// Get original gamma ramp
 	// --jpk
-	device.GetGammaRamp(0, &originalGammaRamp);
+    renderer.device.GetGammaRamp(0, &originalGammaRamp);
 	for (int i = 0; i < 256; i++)
 	{
 	  currentGammaRamp.red[i] = originalGammaRamp.red[i];
@@ -424,8 +384,8 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
 	createTargets();
 	createRenderTargets();
 	Storm3D_TerrainRenderer::createRenderBuffers(*this, lighting_quality);
-	Storm3D_Spotlight::createShadowBuffers(*this, device, shadow_quality);
-	Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
+	Storm3D_Spotlight::createShadowBuffers(*this, renderer.device, shadow_quality);
+	Storm3D_FakeSpotlight::createBuffers(*this, renderer.device, fake_shadow_quality);
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
     createManagedResources();
@@ -506,7 +466,7 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
     }
 
     // Create the device
-	if (!gfx::initDevice(device, active_adapter, window_handle, present_params))
+	if (!renderer.init(active_adapter, window_handle, present_params))
 	{
 		//MessageBox(NULL,"Error creating windowed device","Storm3D Error",0);
 		error_string = "Failed to create device";
@@ -517,7 +477,7 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 
 	// Get original gamma ramp
 	// --jpk
-	device.GetGammaRamp(0, &originalGammaRamp);
+	renderer.device.GetGammaRamp(0, &originalGammaRamp);
 	for (int i = 0; i < 256; i++)
 	{
 	  currentGammaRamp.red[i] = originalGammaRamp.red[i];
@@ -534,8 +494,8 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 	createTargets();
 	createRenderTargets();
 	Storm3D_TerrainRenderer::createRenderBuffers(*this, lighting_quality);
-	Storm3D_Spotlight::createShadowBuffers(*this, device, shadow_quality);
-	Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
+	Storm3D_Spotlight::createShadowBuffers(*this, renderer.device, shadow_quality);
+	Storm3D_FakeSpotlight::createBuffers(*this, renderer.device, fake_shadow_quality);
 	Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 
     createManagedResources();
@@ -603,7 +563,7 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
     }
 
     // Create the device
-    if (!gfx::initDevice(device, active_adapter, window_handle, present_params))
+    if (!renderer.init(active_adapter, window_handle, present_params))
 	{
 		//MessageBox(NULL,"Error creating windowed device","Storm3D Error",0);
 		error_string = "Failed creating device";
@@ -614,7 +574,7 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 
 	// Get original gamma ramp
 	// --jpk
-	device.GetGammaRamp(0, &originalGammaRamp);
+    renderer.device.GetGammaRamp(0, &originalGammaRamp);
 	for (int i = 0; i < 256; i++)
 	{
 	  currentGammaRamp.red[i] = originalGammaRamp.red[i];
@@ -639,8 +599,8 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 	//if(!disableBuffers)
 	{
 		Storm3D_TerrainRenderer::createRenderBuffers(*this, lighting_quality);
-		Storm3D_Spotlight::createShadowBuffers(*this, device, shadow_quality);
-		Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
+		Storm3D_Spotlight::createShadowBuffers(*this, renderer.device, shadow_quality);
+		Storm3D_FakeSpotlight::createBuffers(*this, renderer.device, fake_shadow_quality);
 		Storm3D_TerrainRenderer::createSecondaryRenderBuffers(*this, enable_glow);
 	}
 
@@ -703,8 +663,7 @@ Storm3D::Storm3D(SDL_Window* wnd, bool _no_info, filesystem::FilePackageManager 
 	needValueTargets(false),
 	antialiasing_level(0),
 	allocate_procedural_target(true),
-	force_reset(false),
-    quadIdxAlloc(0)
+	force_reset(false)
 { 
 	if(fileManager)
 		filesystem::FilePackageManager::setInstancePtr(fileManager);
@@ -802,7 +761,7 @@ Storm3D::~Storm3D()
     destroyManagedResources();
 
     // Release Direct3D stuff
-    gfx::finiDevice(device);
+    renderer.fini();
     gfx::fini();
 
 	// Delete adapterlist
@@ -950,7 +909,7 @@ void Storm3D::enableLocalReflection(bool enable, float height)
 // --jpk
 void Storm3D::RestoreGammaRamp()
 {
-	device.SetGammaRamp(0, D3DSGR_CALIBRATE, &originalGammaRamp);	
+    renderer.device.SetGammaRamp(0, D3DSGR_CALIBRATE, &originalGammaRamp);
 }
 
 
@@ -1025,7 +984,7 @@ void Storm3D::SetGammaRamp(float gamma, float brightness, float contrast,
 	else
 		flags = D3DSGR_NO_CALIBRATION;
 
-	device.SetGammaRamp(0, flags, &currentGammaRamp);
+    renderer.device.SetGammaRamp(0, flags, &currentGammaRamp);
 }
 
 
@@ -2056,11 +2015,11 @@ Storm3D_SurfaceInfo Storm3D::GetScreenSize()
 void Storm3D::TakeScreenshot(const char *file_name)
 {
 	D3DDISPLAYMODE mode ;
-	device.GetDisplayMode(0, &mode);
+    renderer.device.GetDisplayMode(0, &mode);
 	
 	CComPtr<IDirect3DSurface9> front_buffer;
-	device.CreateOffscreenPlainSurface(mode.Width, mode.Height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &front_buffer, 0);
-	HRESULT hr = device.GetFrontBufferData(0, front_buffer);
+    renderer.device.CreateOffscreenPlainSurface(mode.Width, mode.Height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &front_buffer, 0);
+	HRESULT hr = renderer.device.GetFrontBufferData(0, front_buffer);
 	if(FAILED(hr))
 		return;
 
@@ -2104,7 +2063,7 @@ public:
 IStorm3D_ScreenBuffer *Storm3D::TakeScreenshot(const VC2 &area)
 {
 	CComPtr<IDirect3DSurface9> back_buffer;
-	HRESULT hr = device.GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &back_buffer);
+	HRESULT hr = renderer.device.GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &back_buffer);
 	if(FAILED(hr))
 		return 0;
 
@@ -2160,7 +2119,7 @@ IStorm3D_ScreenBuffer *Storm3D::TakeScreenshot(const VC2 &area)
 DWORD Storm3D::getScreenColorValue(const VC2 &area)
 {
 	CComPtr<IDirect3DSurface9> back_buffer;
-	HRESULT hr = device.GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &back_buffer);
+	HRESULT hr = renderer.device.GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &back_buffer);
 	if(FAILED(hr))
 		return 0;
 
@@ -2194,7 +2153,7 @@ DWORD Storm3D::getScreenColorValue(const VC2 &area)
 	RECT rect2 = { 0 };
 	rect2.right = sizeX;
 	rect2.bottom = sizeY;
-	device.StretchRect(back_buffer, &rect1, source_buffer, &rect2, D3DTEXF_POINT);
+    renderer.device.StretchRect(back_buffer, &rect1, source_buffer, &rect2, D3DTEXF_POINT);
 
 	while(sizeX > 1 || sizeY > 1)
 	{
@@ -2213,7 +2172,7 @@ DWORD Storm3D::getScreenColorValue(const VC2 &area)
 		destRect.right = sizeX;
 		destRect.bottom = sizeY;
 
-		device.StretchRect(source_buffer, &sourceRect, dest_buffer, &destRect, D3DTEXF_POINT);
+        renderer.device.StretchRect(source_buffer, &sourceRect, dest_buffer, &destRect, D3DTEXF_POINT);
 		CComPtr<IDirect3DSurface9> temp_buffer = source_buffer;
 		source_buffer = dest_buffer;
 		dest_buffer = temp_buffer;
@@ -2222,8 +2181,8 @@ DWORD Storm3D::getScreenColorValue(const VC2 &area)
 	RECT rc1 = { 0 };
 	rc1.right = 1;
 	rc1.bottom = 1;
-	device.StretchRect(source_buffer, &rc1, value_buffer, &rc1, D3DTEXF_LINEAR);
-	device.GetRenderTargetData(value_buffer, system_buffer);
+    renderer.device.StretchRect(source_buffer, &rc1, value_buffer, &rc1, D3DTEXF_LINEAR);
+    renderer.device.GetRenderTargetData(value_buffer, system_buffer);
 
 	D3DLOCKED_RECT rc;
 	hr = system_buffer->LockRect(&rc, 0, D3DLOCK_READONLY);
@@ -2264,8 +2223,8 @@ bool Storm3D::SetRenderTarget(Storm3D_Texture *newtarget,int map)
 	{
 		if (bbuf_orig)
 		{
-			device.SetRenderTarget(0, bbuf_orig);
-			device.SetDepthStencilSurface(zbuf_orig);
+            renderer.device.SetRenderTarget(0, bbuf_orig);
+            renderer.device.SetDepthStencilSurface(zbuf_orig);
 			SAFE_RELEASE(bbuf_orig);	// Sets bbuf_orig to NULL
 			SAFE_RELEASE(zbuf_orig);	// Sets zbuf_orig to NULL
 			//if (FAILED(hr)) MessageBox(NULL,"Error in SetRenderTarget","Storm3D Error",0);
@@ -2274,7 +2233,7 @@ bool Storm3D::SetRenderTarget(Storm3D_Texture *newtarget,int map)
 		// Set viewport
 		viewport_size=screen_size;
 		D3DVIEWPORT9 viewData={0,0,screen_size.width,screen_size.height,0.0f,1.0f};
-		device.SetViewport(&viewData);
+        renderer.device.SetViewport(&viewData);
 
 		// Everything went ok
 		return true;
@@ -2286,8 +2245,8 @@ bool Storm3D::SetRenderTarget(Storm3D_Texture *newtarget,int map)
 	// Save original (active) backbuffer
 	if (!bbuf_orig)
 	{
-		device.GetRenderTarget(0, &bbuf_orig);
-		device.GetDepthStencilSurface(&zbuf_orig);
+        renderer.device.GetRenderTarget(0, &bbuf_orig);
+        renderer.device.GetDepthStencilSurface(&zbuf_orig);
 	}
 
 	// Set the target
@@ -2300,8 +2259,8 @@ bool Storm3D::SetRenderTarget(Storm3D_Texture *newtarget,int map)
 			newtarget->dx_handle->GetSurfaceLevel(0,&surf);
 			if (surf)
 			{
-				HRESULT hr=device.SetRenderTarget(0, surf);
-				device.SetDepthStencilSurface(zbuf_orig);
+				HRESULT hr= renderer.device.SetRenderTarget(0, surf);
+                renderer.device.SetDepthStencilSurface(zbuf_orig);
 				surf->Release();
 
 				//if (FAILED(hr)) MessageBox(NULL,"Error in SetRenderTarget","Storm3D Error",0);
@@ -2310,7 +2269,7 @@ bool Storm3D::SetRenderTarget(Storm3D_Texture *newtarget,int map)
 				viewport_size.width=newtarget->width;
 				viewport_size.height=newtarget->height;
 				D3DVIEWPORT9 viewData={0,0,newtarget->width,newtarget->height,0.0f,1.0f};
-				hr=device.SetViewport(&viewData);
+				hr= renderer.device.SetViewport(&viewData);
 			}
 		}
 	}
@@ -2325,8 +2284,8 @@ bool Storm3D::SetRenderTarget(Storm3D_Texture *newtarget,int map)
         newtarget->dx_handle_cube->GetCubeMapSurface((D3DCUBEMAP_FACES)map,0,&surf);
         if (surf)
 		{
-			HRESULT hr=device.SetRenderTarget(0, surf);
-			device.SetDepthStencilSurface(zbuf_orig);
+			HRESULT hr= renderer.device.SetRenderTarget(0, surf);
+            renderer.device.SetDepthStencilSurface(zbuf_orig);
 			surf->Release();
 
 			//if (FAILED(hr)) MessageBox(NULL,"Error in SetRenderTarget","Storm3D Error",0);
@@ -2335,7 +2294,7 @@ bool Storm3D::SetRenderTarget(Storm3D_Texture *newtarget,int map)
 			viewport_size.width=newtarget->width;
 			viewport_size.height=newtarget->height;
 			D3DVIEWPORT9 viewData={0,0,newtarget->width,newtarget->height,0.0f,1.0f};
-			hr=device.SetViewport(&viewData);
+			hr= renderer.device.SetViewport(&viewData);
 			if (FAILED(hr)) MessageBox(NULL,"Error in SetViewport","Storm3D Error",0);
 		}
 	}
@@ -2353,8 +2312,8 @@ bool Storm3D::RenderSceneToArray( IStorm3D_Scene * stormScene, unsigned char * d
 	{
 		//stormScene->RenderSceneToDynamicTexture( target );
 		SetRenderTarget ( target, 0 );
-		device.Clear( 0, NULL, D3DCLEAR_TARGET, 0xFFFFFFFF, 1.0f, 0 );
-		device.Clear( 0, NULL, D3DCLEAR_ZBUFFER, 0xFFFFFFFF, 1.0f, 0 );
+        renderer.device.Clear( 0, NULL, D3DCLEAR_TARGET, 0xFFFFFFFF, 1.0f, 0 );
+        renderer.device.Clear( 0, NULL, D3DCLEAR_ZBUFFER, 0xFFFFFFFF, 1.0f, 0 );
 		stormScene->RenderScene();
 		SetRenderTarget ( NULL, 0 );
 
@@ -2377,7 +2336,7 @@ bool Storm3D::RestoreDeviceIfLost()
 {
     // Test the cooperative level to see if device is lost
     HRESULT hr = D3D_OK;
-    if(force_reset || FAILED(hr=device.TestCooperativeLevel()))
+    if(force_reset || FAILED(hr= renderer.device.TestCooperativeLevel()))
     {
 		// If the device was lost, wait until we get it back
 // FIXED: hr accessed without being initialized. --jpk
@@ -2406,7 +2365,7 @@ bool Storm3D::RestoreDeviceIfLost()
 			ReleaseDynamicResources();
 
 			// Reset the device
-			if(!device.reset(present_params)) return false;
+			if(!renderer.reset(present_params)) return false;
 
 			// Recreate dynamic resources
 			RecreateDynamicResources();
@@ -2415,7 +2374,7 @@ bool Storm3D::RestoreDeviceIfLost()
 				logger->debug("Storm3D::RestoreDeviceIfLost - create shaders");
 
 			// Recreate shaders
-			Storm3D_ShaderManager::GetSingleton()->CreateShaders(device);
+			Storm3D_ShaderManager::GetSingleton()->CreateShaders(renderer.device);
 
 			//MessageBox(0, "", "", MB_OK);
 		}
@@ -2423,7 +2382,7 @@ bool Storm3D::RestoreDeviceIfLost()
 		force_reset = false;
 
 		// Test if it works now...
-		if(FAILED(hr=device.TestCooperativeLevel())) 
+		if(FAILED(hr= renderer.device.TestCooperativeLevel()))
 		{
 			if(logger)
 				logger->debug("Storm3D::RestoreDeviceIfLost - reset path failed");
@@ -2505,8 +2464,8 @@ void Storm3D::RecreateDynamicResources()
 
 	createTargets();
 	Storm3D_TerrainRenderer::createRenderBuffers(*this, lighting_quality);
-	Storm3D_Spotlight::createShadowBuffers(*this, device, shadow_quality);
-	Storm3D_FakeSpotlight::createBuffers(*this, device, fake_shadow_quality);
+	Storm3D_Spotlight::createShadowBuffers(*this, renderer.device, shadow_quality);
+	Storm3D_FakeSpotlight::createBuffers(*this, renderer.device, fake_shadow_quality);
 
 	for(std::set<IStorm3D_Line*>::iterator il=lines.begin();il!=lines.end();++il)
 	{
@@ -2539,10 +2498,10 @@ void Storm3D::RecreateDynamicResources()
 
 void Storm3D::BeginFrame()
 {
-    device.beginFrame();
+    renderer.beginFrame();
 }
 
 void Storm3D::EndFrame()
 {
-    device.endFrame();
+    renderer.endFrame();
 }

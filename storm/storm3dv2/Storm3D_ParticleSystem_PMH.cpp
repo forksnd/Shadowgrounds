@@ -428,7 +428,7 @@ void Storm3D_ParticleSystem::QuadArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 
 	// Render the buffer
     Storm3D2->GetD3DDevice().SetStdProgram(gfx::Device::SSF_COLOR|gfx::Device::SSF_TEXTURE);
-	Storm3D2->GetD3DDevice().SetFVF(FVF_P3DUV2);
+	Storm3D2->renderer.SetFVF(FVF_P3DUV2);
 	
 	Storm3D2->GetD3DDevice().SetStreamSource(0,m_vb,0,stride);
 	Storm3D2->GetD3DDevice().SetIndices(m_ib);
@@ -852,7 +852,7 @@ void Storm3D_ParticleSystem::LineArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 
     // Render the buffer
     Storm3D2->GetD3DDevice().SetStdProgram(gfx::Device::SSF_COLOR | gfx::Device::SSF_TEXTURE);
-    Storm3D2->GetD3DDevice().SetFVF(FVF_P3DUV2);
+    Storm3D2->renderer.SetFVF(FVF_P3DUV2);
 
 	Storm3D2->GetD3DDevice().SetStreamSource(0,m_vb,0,stride);
 	Storm3D2->GetD3DDevice().SetIndices(m_ib);

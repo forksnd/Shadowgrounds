@@ -45,12 +45,12 @@ struct LodIndexBuffer
     {
     }
 
-    void cleanup(IndexStorage16& storage)
+    void cleanup(gfx::IndexStorage16& storage)
     {
         storage.free(allocId);
     }
 
-    void generate(IndexStorage16& storage, Type type, int resolution, int lodFactor_, bool leftLod, bool rightLod, bool upLod, bool downLod, unsigned char *clipBuffer)
+    void generate(gfx::IndexStorage16& storage, Type type, int resolution, int lodFactor_, bool leftLod, bool rightLod, bool upLod, bool downLod, unsigned char *clipBuffer)
     {
         faceAmount = 0;
         lodFactor = lodFactor_;
@@ -74,7 +74,7 @@ struct LodIndexBuffer
         baseIndex = storage.baseIndex(allocId);
     }
 
-    void generateCenters(IndexStorage16& storage, int resolution, int lodFactor_, int mask, unsigned char *clipBuffer)
+    void generateCenters(gfx::IndexStorage16& storage, int resolution, int lodFactor_, int mask, unsigned char *clipBuffer)
     {
         faceAmount = 0;
         lodFactor = lodFactor_;
@@ -359,7 +359,7 @@ struct LOD
 	// Center in 16 pieces (2x2 chunks, same ordering)
 	LodIndexBuffer centerBuffers[16];
 
-	void generate(IndexStorage16& storage, int resolution, int lod, unsigned char *clipBuffer)
+	void generate(gfx::IndexStorage16& storage, int resolution, int lod, unsigned char *clipBuffer)
 	{
 		for(int l = 0; l < 2; ++l)
 		for(int r = 0; r < 2; ++r)
@@ -381,7 +381,7 @@ struct LOD
 			centerBuffers[i].generateCenters(storage, resolution, lod,  i, clipBuffer);
 	}
 
-    void cleanup(IndexStorage16& storage)
+    void cleanup(gfx::IndexStorage16& storage)
     {
         for (auto& buf: fullBuffers)   buf.cleanup(storage);
         for (auto& buf: linkBuffers)   buf.cleanup(storage);
@@ -406,7 +406,7 @@ struct Storm3D_TerrainLodData
 
     ~Storm3D_TerrainLodData()
     {
-        IndexStorage16& storage = storm.getIndexStorage16();
+        gfx::IndexStorage16& storage = storm.renderer.getIndexStorage16();
         for (auto& lod: lodBuffers) lod.cleanup(storage);
     }
 
@@ -444,7 +444,7 @@ Storm3D_TerrainLod::~Storm3D_TerrainLod()
 
 void Storm3D_TerrainLod::generate(int resolution, unsigned char *clipBuffer)
 {
-    IndexStorage16& storage = data->storm.getIndexStorage16();
+    gfx::IndexStorage16& storage = data->storm.renderer.getIndexStorage16();
 	data->maxVertex = (resolution * resolution);
 	for(int i = 0; i < LOD_AMOUNT; ++i)
 	{
@@ -479,7 +479,7 @@ void Storm3D_TerrainLod::render(Storm3D_Scene &scene, int subMask, float range, 
 	if(lodY2)
 		index += 8;
 
-    IndexStorage16& indices = data->storm.getIndexStorage16();
+    gfx::IndexStorage16& indices = data->storm.renderer.getIndexStorage16();
     device.SetIndices(indices.indices);
 
 	// Render as whole

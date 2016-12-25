@@ -69,9 +69,6 @@ namespace gfx
     bool init();
     void fini();
 
-    bool initDevice(Device& device, UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
-    void finiDevice(Device& device);
-
     int BeginScope(D3DCOLOR col, LPCWSTR wszName);
     int EndScope(void);
 
@@ -86,15 +83,10 @@ namespace gfx
             SSF_TEXTURE = (1 << 2),
         };
 
-        bool init(LPDIRECT3D9 d3d, UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
+        bool init(UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
         void fini();
 
         bool reset(D3DPRESENT_PARAMETERS& params);
-
-
-        void beginFrame();
-        void endFrame();
-
 
         void SetWorldMatrix(const D3DXMATRIX& world);
         void SetViewMatrix(const D3DXMATRIX& view);
@@ -103,34 +95,7 @@ namespace gfx
         void SetStdProgram(size_t id);
 
 
-        void SetDynIdx16Buffer();
-        bool lockDynIdx16(UINT count, uint16_t** ptr, UINT* baseIndex);
-        void unlockDynIdx16();
-
-
-        void SetDynVtxBuffer(UINT Stride);
-        bool lockDynVtx(UINT count, UINT stride, void** ptr, UINT* baseVertex);
-        void unlockDynVtx();
-
-        template<typename T>
-        void SetDynVtxBuffer()
-        {
-            SetDynVtxBuffer(sizeof(T));
-        }
-
-        template<typename T>
-        bool lockDynVtx(UINT count, T** ptr, UINT* baseVertex)
-        {
-            return lockDynVtx(count, sizeof(T), (void**)ptr, baseVertex);
-        }
-
-
         VC2 pixelSize() { return pxSize; }
-
-
-        //Fixed function imitation
-        void SetFVF(FVF vtxFmt);
-        void DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT PrimitiveCount, CONST void* vertexData, UINT Stride);
 
 
         HRESULT TestCooperativeLevel();
@@ -163,14 +128,10 @@ namespace gfx
         HRESULT SetTransform(D3DTRANSFORMSTATETYPE State, CONST D3DMATRIX* pMatrix);
         HRESULT SetViewport(CONST D3DVIEWPORT9* pViewport);
         HRESULT SetMaterial(CONST D3DMATERIAL9* pMaterial);
-        HRESULT GetMaterial(D3DMATERIAL9* pMaterial);
-        HRESULT SetLight(DWORD Index, CONST D3DLIGHT9*);
         HRESULT LightEnable(DWORD Index, BOOL Enable);
         HRESULT SetClipPlane(DWORD Index, CONST float* pPlane);
         HRESULT SetRenderState(D3DRENDERSTATETYPE State, DWORD Value);
         HRESULT CreateStateBlock(D3DSTATEBLOCKTYPE Type, IDirect3DStateBlock9** ppSB);
-        HRESULT BeginStateBlock();
-        HRESULT EndStateBlock(IDirect3DStateBlock9** ppSB);
         HRESULT SetTexture(DWORD Stage, IDirect3DBaseTexture9* pTexture);
         HRESULT SetTextureStageState(DWORD Stage, D3DTEXTURESTAGESTATETYPE Type, DWORD Value);
         HRESULT SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value);
@@ -194,6 +155,8 @@ namespace gfx
         HRESULT SetPixelShaderConstantB(UINT StartRegister, CONST BOOL* pConstantData, UINT  BoolCount);
         HRESULT CreateQuery(D3DQUERYTYPE Type, IDirect3DQuery9** ppQuery);
 
+        HRESULT Present(CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
+
     private:
         // cache
         enum
@@ -202,8 +165,6 @@ namespace gfx
         };
 
         static bool cached;
-
-        LPDIRECT3DVERTEXDECLARATION9 vtxFmtSet[FVF_COUNT];
 
         uint32_t  rs_valid[8];
         DWORD     rs[256];
@@ -241,16 +202,6 @@ namespace gfx
         LPDIRECT3DINDEXBUFFER9  ib;
 
         void resetCache();
-
-        // frame sync
-        LPDIRECT3DQUERY9 frame_sync[NUM_FRAMES_DELAY];
-        size_t           frame_id = 0;
-
-        LPDIRECT3DVERTEXBUFFER9 frame_vb[NUM_FRAMES_DELAY];
-        UINT                    frame_vb_used;
-
-        LPDIRECT3DINDEXBUFFER9 frame_ib16[NUM_FRAMES_DELAY];
-        UINT                   frame_ib16_used;
 
         D3DXMATRIX world_mat;
         D3DXMATRIX view_mat;
