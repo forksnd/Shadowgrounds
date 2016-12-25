@@ -6,7 +6,10 @@
 #include <atlbase.h>
 
 class Storm3D;
-struct GfxDevice;
+namespace gfx
+{
+    struct Device;
+}
 
 class Storm3D_Line: public IStorm3D_Line
 {
@@ -35,7 +38,7 @@ public:
 	void SetColor(int color);
 
 	// Storm-stuff (expose this and remove that cast?)
-	void Render(GfxDevice& device);
+	void Render(gfx::Device& device);
 
 	void releaseDynamicResources();
 	void recreateDynamicResources();

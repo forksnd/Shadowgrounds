@@ -305,7 +305,7 @@ namespace {
 			decal.calculateValues();
 		}
 
-		void apply(GfxDevice &device)
+		void apply(gfx::Device &device)
 		{
 			if(baseTexture)
 				baseTexture->Apply(1);
@@ -314,7 +314,7 @@ namespace {
 			device.SetVertexShaderConstantF(7, diffuse, 1);
 		}
 
-		void applyProjection(GfxDevice &device, const COL &spotColor)
+		void applyProjection(gfx::Device &device, const COL &spotColor)
 		{
 			if(baseTexture)
 				baseTexture->Apply(2);
@@ -325,7 +325,7 @@ namespace {
 			device.SetVertexShaderConstantF(17, diffuse, 1);
 		}
 
-		void applyShadow(GfxDevice &device)
+		void applyShadow(gfx::Device &device)
 		{
 			if(baseTexture)
 				baseTexture->Apply(0);
@@ -576,7 +576,7 @@ struct Storm3D_TerrainDecalSystem::Data
 		if(decals.empty())
             return;
 
-		GfxDevice &device = storm.GetD3DDevice();
+		gfx::Device &device = storm.GetD3DDevice();
 
         Vertex_DECAL *buffer = 0;
         device.lockDynVtx<Vertex_DECAL>(decals.size() * 4, &buffer, &baseDecalVertex);
@@ -649,7 +649,7 @@ struct Storm3D_TerrainDecalSystem::Data
         if (shadowDecals.empty() || !shadowMaterial)
             return;
 
-        GfxDevice &device = storm.GetD3DDevice();
+        gfx::Device &device = storm.GetD3DDevice();
 
         int renderAmount = 0;
 
@@ -750,7 +750,7 @@ struct Storm3D_TerrainDecalSystem::Data
 
 	void renderProjection(Storm3D_Scene &scene, Storm3D_Spotlight *spot)
 	{
-		GfxDevice &device = storm.GetD3DDevice();
+		gfx::Device &device = storm.GetD3DDevice();
 
 		device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 

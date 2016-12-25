@@ -216,7 +216,7 @@
 struct Storm3D_TerrainGroupData
 {
 	Storm3D &storm;
-	GfxDevice &device;
+	gfx::Device &device;
 	Storm3D_TerrainModels &terrainModels;
 
 	VC2 sceneSize;

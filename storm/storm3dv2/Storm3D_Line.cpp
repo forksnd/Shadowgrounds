@@ -72,7 +72,7 @@ void Storm3D_Line::SetColor(int color)
 	rebuild_vertices = true;
 }
 
-void Storm3D_Line::Render(GfxDevice& device)
+void Storm3D_Line::Render(gfx::Device& device)
 {
 	if(points.size() < 2)
 		return;
@@ -83,7 +83,7 @@ void Storm3D_Line::Render(GfxDevice& device)
 	rebuild_vertices = false;
 	rebuild_indices = false;
 
-    device.SetStdProgram(GfxDevice::SSF_COLOR);
+    device.SetStdProgram(gfx::Device::SSF_COLOR);
     device.SetFVF(FVF_P3D);
 
     // Render

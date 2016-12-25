@@ -7,8 +7,6 @@
 //------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------
-#include <GfxDevice.h>
-
 #include "Storm3D_ShaderManager.h"
 #include "storm3d_model.h"
 #include "storm3d_model_object.h"
@@ -37,7 +35,7 @@ D3DXMATRIX clip_matrix;
 const int Storm3D_ShaderManager::BONE_INDEX_START = 42;
 const int Storm3D_ShaderManager::BONE_INDICES = 48;
 
-Storm3D_ShaderManager::Storm3D_ShaderManager(GfxDevice& device)
+Storm3D_ShaderManager::Storm3D_ShaderManager(gfx::Device& device)
 :	ambient_color(.7f,.7f,.7f,0),
 	ambient_force_color(0,0,0,0),
     fog_color(0.0f, 0.0f, 0.0f, 1.0f),
@@ -220,7 +218,7 @@ Storm3D_ShaderManager::~Storm3D_ShaderManager()
     }
 }
 
-void Storm3D_ShaderManager::CreateShaders(GfxDevice& device)
+void Storm3D_ShaderManager::CreateShaders(gfx::Device& device)
 {
 	// Set identity matrix on card
 	D3DXMATRIX identity;
@@ -505,7 +503,7 @@ bool Storm3D_ShaderManager::BoneShader()
 }
 
 void Storm3D_ShaderManager::SetShaders(
-    GfxDevice& device,
+    gfx::Device& device,
     uint32_t vertexShader,
     uint32_t pixelShader,
     Storm3D_Model_Object *object
@@ -660,7 +658,7 @@ void Storm3D_ShaderManager::SetPixelShader(uint32_t pixelShader)
     use_custom_shader = true;
 }
 
-void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *object)
+void Storm3D_ShaderManager::SetShader(gfx::Device &device, Storm3D_Model_Object *object)
 {
     assert(device.device);
 
@@ -743,7 +741,7 @@ void Storm3D_ShaderManager::SetShader(GfxDevice &device, Storm3D_Model_Object *o
     use_custom_shader = false;
 }
 
-void Storm3D_ShaderManager::SetShader(GfxDevice &device, const std::vector<int> &bone_indices)
+void Storm3D_ShaderManager::SetShader(gfx::Device &device, const std::vector<int> &bone_indices)
 {
     bool setIndices = BoneShader() && !bone_indices.empty() && model;
 
@@ -821,7 +819,7 @@ void Storm3D_ShaderManager::ClearCache()
 	model_ambient_color.w = 0.f;
 }
 
-void Storm3D_ShaderManager::SetShaderDefaultValues(GfxDevice &device)
+void Storm3D_ShaderManager::SetShaderDefaultValues(gfx::Device &device)
 {
 	// Set values
 	D3DXVECTOR4 foo(1,1,1,1);
@@ -829,7 +827,7 @@ void Storm3D_ShaderManager::SetShaderDefaultValues(GfxDevice &device)
 	device.SetVertexShaderConstantF(8, foo, 1);
 }
 
-void Storm3D_ShaderManager::SetShaderAmbient(GfxDevice &device, const COL &color)
+void Storm3D_ShaderManager::SetShaderAmbient(gfx::Device &device, const COL &color)
 {
 	D3DXVECTOR4 ambient(color.r, color.g, color.b, 0.f);
 	D3DXVECTOR4 diffuse(1, 1, 1, 0);
@@ -838,7 +836,7 @@ void Storm3D_ShaderManager::SetShaderAmbient(GfxDevice &device, const COL &color
 	device.SetVertexShaderConstantF(8, diffuse, 1);
 }
 
-void Storm3D_ShaderManager::SetShaderDiffuse(GfxDevice &device, const COL &color)
+void Storm3D_ShaderManager::SetShaderDiffuse(gfx::Device &device, const COL &color)
 {
 	D3DXVECTOR4 diffuse(color.r, color.g, color.b, 0.f);
 	device.SetVertexShaderConstantF(8, diffuse, 1);
@@ -852,7 +850,7 @@ void Storm3D_ShaderManager::SetLightmapFactor(float xf, float yf)
 	lightmap_factor.w = 0;
 }
 
-void Storm3D_ShaderManager::SetWorldTransform(GfxDevice &device, const D3DXMATRIX &tm, bool forceTextureTm, bool terrain)
+void Storm3D_ShaderManager::SetWorldTransform(gfx::Device &device, const D3DXMATRIX &tm, bool forceTextureTm, bool terrain)
 {
 	update_values = true;
 
@@ -966,7 +964,7 @@ void Storm3D_ShaderManager::SetWorldTransform(GfxDevice &device, const D3DXMATRI
 	}
 }
 
-void Storm3D_ShaderManager::ApplyForceAmbient(GfxDevice &device)
+void Storm3D_ShaderManager::ApplyForceAmbient(gfx::Device &device)
 {
 	D3DXVECTOR4 v = ambient_force_color + ambient_color;
 	device.SetVertexShaderConstantF(7, v, 1);

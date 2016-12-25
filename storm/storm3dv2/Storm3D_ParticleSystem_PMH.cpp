@@ -35,7 +35,7 @@ int Storm3D_ParticleSystem::PointArray::lock(Vertex_P3DUV2 *pointer, int particl
 	return 0;
 }
 
-void Storm3D_ParticleSystem::PointArray::setRender(GfxDevice &device, int &vertexOffset, int &particleAmount)
+void Storm3D_ParticleSystem::PointArray::setRender(gfx::Device &device, int &vertexOffset, int &particleAmount)
 {
 }
 
@@ -264,7 +264,7 @@ int Storm3D_ParticleSystem::QuadArray::lock(Vertex_P3DUV2 *pointer, int particle
 	return m_numParts;
 }
 
-void Storm3D_ParticleSystem::QuadArray::setRender(GfxDevice &device, int &vertexOffset, int &particleAmount)
+void Storm3D_ParticleSystem::QuadArray::setRender(gfx::Device &device, int &vertexOffset, int &particleAmount)
 {
 	if(m_numParts <= 0)
 		return;
@@ -427,7 +427,7 @@ void Storm3D_ParticleSystem::QuadArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	Storm3D2->GetD3DDevice().CommitConstants();
 
 	// Render the buffer
-    Storm3D2->GetD3DDevice().SetStdProgram(GfxDevice::SSF_COLOR|GfxDevice::SSF_TEXTURE);
+    Storm3D2->GetD3DDevice().SetStdProgram(gfx::Device::SSF_COLOR|gfx::Device::SSF_TEXTURE);
 	Storm3D2->GetD3DDevice().SetFVF(FVF_P3DUV2);
 	
 	Storm3D2->GetD3DDevice().SetStreamSource(0,m_vb,0,stride);
@@ -708,7 +708,7 @@ int Storm3D_ParticleSystem::LineArray::lock(Vertex_P3DUV2 *pointer, int particle
 	return m_numParts;
 }
 
-void Storm3D_ParticleSystem::LineArray::setRender(GfxDevice &device, int &vertexOffset, int &particleAmount)
+void Storm3D_ParticleSystem::LineArray::setRender(gfx::Device &device, int &vertexOffset, int &particleAmount)
 {
 	if(m_numParts <= 0)
 		return;
@@ -851,7 +851,7 @@ void Storm3D_ParticleSystem::LineArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 
 
     // Render the buffer
-    Storm3D2->GetD3DDevice().SetStdProgram(GfxDevice::SSF_COLOR | GfxDevice::SSF_TEXTURE);
+    Storm3D2->GetD3DDevice().SetStdProgram(gfx::Device::SSF_COLOR | gfx::Device::SSF_TEXTURE);
     Storm3D2->GetD3DDevice().SetFVF(FVF_P3DUV2);
 
 	Storm3D2->GetD3DDevice().SetStreamSource(0,m_vb,0,stride);

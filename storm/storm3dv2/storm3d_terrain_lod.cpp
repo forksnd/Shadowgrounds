@@ -460,7 +460,7 @@ void Storm3D_TerrainLod::setBlockRadius(float size)
 
 void Storm3D_TerrainLod::render(Storm3D_Scene &scene, int subMask, float range, float rangeX1, float rangeY1, float rangeX2, float rangeY2)
 {
-	GfxDevice &device = data->storm.GetD3DDevice();
+	gfx::Device &device = data->storm.GetD3DDevice();
 
 	int lod = data->getLOD(range);
 

@@ -234,7 +234,7 @@ struct Storm3D_ProceduralManager::Data
 
 	void init(CComPtr<IDirect3DTexture9> target_, CComPtr<IDirect3DTexture9> offsetTarget_)
 	{
-		GfxDevice &device = storm.GetD3DDevice();
+		gfx::Device &device = storm.GetD3DDevice();
 		target = target_;
 		offsetTarget = offsetTarget_;
 
@@ -312,7 +312,7 @@ struct Storm3D_ProceduralManager::Data
 	void render(const ProceduralEffect &e, float width, float height, bool offsetTarget)
 	{
         GFX_TRACE_SCOPE("Storm3D_ProceduralManager::render");
-		GfxDevice& device = storm.GetD3DDevice();
+		gfx::Device& device = storm.GetD3DDevice();
 		
 		if(e.texture1)
 			e.texture1->Apply(1);
@@ -399,7 +399,7 @@ struct Storm3D_ProceduralManager::Data
 		if(useFallback)
 			return;
 
-		GfxDevice &device = storm.GetD3DDevice();
+		gfx::Device &device = storm.GetD3DDevice();
 		if(active.empty() || !target)
 			return;
 
@@ -520,7 +520,7 @@ void Storm3D_ProceduralManager::apply(int stage)
 	}
 	else
 	{
-		GfxDevice &device = data->storm.GetD3DDevice();
+		gfx::Device &device = data->storm.GetD3DDevice();
 		if(data->target)
 			device.SetTexture(stage, data->target);
 	}
@@ -528,7 +528,7 @@ void Storm3D_ProceduralManager::apply(int stage)
 
 void Storm3D_ProceduralManager::applyOffset(int stage)
 {
-	GfxDevice &device = data->storm.GetD3DDevice();
+	gfx::Device &device = data->storm.GetD3DDevice();
 	if(data->offsetTarget)
 		device.SetTexture(stage, data->offsetTarget);
 }

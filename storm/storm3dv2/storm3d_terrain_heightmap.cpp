@@ -241,7 +241,7 @@
 struct Storm3D_TerrainHeightmapData
 {
 	Storm3D &storm;
-	GfxDevice &device;
+	gfx::Device &device;
 
 	std::unique_ptr<unsigned short[]> heightMap;
 	std::unique_ptr<unsigned short[]> collisionHeightMap;
@@ -1067,7 +1067,7 @@ void Storm3D_TerrainHeightmap::calculateVisibility(Storm3D_Scene &scene)
 void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainHeightmap::renderTextures");
-	GfxDevice& device = data->device;
+	gfx::Device& device = data->device;
 
 	D3DXMATRIX dm;
 	D3DXMatrixIdentity(&dm);
@@ -1164,7 +1164,7 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene)
 void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera *camera, RenderMode mode, IStorm3D_Spotlight::Type spot_type, Storm3D_Spotlight *spot)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainHeightmap::renderDepth");
-	GfxDevice& device = data->device;
+	gfx::Device& device = data->device;
 	std::vector<RenderBlock> &visibleBlocks = data->visibleBlocks;
 
 	Frustum *frustum1 = 0;

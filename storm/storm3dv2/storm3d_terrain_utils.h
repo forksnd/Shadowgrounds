@@ -30,14 +30,14 @@ class VertexShader
 	CComPtr<IDirect3DVertexShader9> handle;
 	CComPtr<IDirect3DVertexDeclaration9> declaration;
 	
-	GfxDevice& device;
+	gfx::Device& device;
 	std::vector<D3DVERTEXELEMENT9> elements;
 
 	std::string name;
-	CComPtr<IDirect3DVertexShader9> createVertexShader(GfxDevice& device, const std::string &fileName);
+	CComPtr<IDirect3DVertexShader9> createVertexShader(gfx::Device& device, const std::string &fileName);
 
 public:
-	VertexShader(GfxDevice& device);
+	VertexShader(gfx::Device& device);
 	~VertexShader();
 
 	void createTerrainShader();
@@ -64,15 +64,15 @@ public:
 class PixelShader
 {
 	CComPtr<IDirect3DPixelShader9> handle;
-	GfxDevice& device;
+	gfx::Device& device;
 
 	std::vector<D3DVERTEXELEMENT9> elements;
 
 	std::string name;
 
-	CComPtr<IDirect3DPixelShader9> createPixelShader(GfxDevice& device, const std::string &fileName);
+	CComPtr<IDirect3DPixelShader9> createPixelShader(gfx::Device& device, const std::string &fileName);
 public:
-	PixelShader(GfxDevice &device);
+	PixelShader(gfx::Device &device);
 	~PixelShader();
 
 	void createTerrainShader();
@@ -85,7 +85,6 @@ public:
 	void createNvConeShader_Texture();
 	void createNvConeShader_NoTexture();
 
-	void createShadowPixelShader();
 	void createDecalPixelShader();
 	void createColorEffectPixelShader();
 	void createColorEffectOffsetPixelShader();
@@ -112,12 +111,12 @@ public:
 	~VertexBuffer();
 
 	void release();
-	void create(GfxDevice& device, int vertexAmount, int vertexSize, bool dynamic);
+	void create(gfx::Device& device, int vertexAmount, int vertexSize, bool dynamic);
 	void *lock();
 	void *unsafeLock(int offset, int amount);
 	void unlock();
 
-	void apply(GfxDevice& device, int stream) const;
+	void apply(gfx::Device& device, int stream) const;
 	operator bool() const;
 };
 
@@ -136,11 +135,11 @@ public:
 	void setLogger(IStorm3D_Logger *logger);
 
 	void release();
-	void create(GfxDevice& device, int faceAmount, bool dynamic);
+	void create(gfx::Device& device, int faceAmount, bool dynamic);
 	unsigned short *lock();
 	void unlock();
 
-	void render(GfxDevice& device, int faceAmount, int maxIndex, int vertexOffset = 0, int startIndex = 0) const;
+	void render(gfx::Device& device, int faceAmount, int maxIndex, int vertexOffset = 0, int startIndex = 0) const;
 	operator bool() const;
 };
 
@@ -152,12 +151,12 @@ void readFile(std::string &result, const std::string &fileName);
 std::shared_ptr<Storm3D_Texture> createSharedTexture(Storm3D_Texture *texture);
 
 void setCurrentAnisotrophy(int max);
-void applyMaxAnisotrophy(GfxDevice& device, int stageAmount);
-void enableMinMagFiltering(GfxDevice& device, int startStage, int endStage, bool enable);
-void enableMipFiltering(GfxDevice& device, int startStage, int endStage, bool enable);
+void applyMaxAnisotrophy(gfx::Device& device, int stageAmount);
+void enableMinMagFiltering(gfx::Device& device, int startStage, int endStage, bool enable);
+void enableMipFiltering(gfx::Device& device, int startStage, int endStage, bool enable);
 
 void setInverseCulling(bool enable);
-void setCulling(GfxDevice& device, DWORD type);
+void setCulling(gfx::Device& device, DWORD type);
 
 } // storm
 } // frozenbyte
@@ -168,7 +167,7 @@ struct IndexStorage16
     etlsf_t                allocator;
     uint16_t               locked;
 
-    void init(GfxDevice& device, uint32_t size, uint16_t max_allocs = 0xFFFF);
+    void init(gfx::Device& device, uint32_t size, uint16_t max_allocs = 0xFFFF);
     void fini();
 
     uint16_t alloc(uint32_t numIndices);
@@ -186,7 +185,7 @@ struct VertexStorage
     etlsf_t                 allocator;
     uint16_t                locked;
 
-    void init(GfxDevice& device, uint32_t size, uint16_t max_allocs = 0xFFFF);
+    void init(gfx::Device& device, uint32_t size, uint16_t max_allocs = 0xFFFF);
     void fini();
 
     uint16_t alloc(uint32_t numVertices, uint32_t stride);

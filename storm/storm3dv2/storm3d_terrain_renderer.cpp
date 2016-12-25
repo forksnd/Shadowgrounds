@@ -303,7 +303,7 @@ struct Storm3D_TerrainRendererData
 
 		forcedDirectionalLightEnabled(false)
 	{
-		GfxDevice &device = storm.GetD3DDevice();
+		gfx::Device &device = storm.GetD3DDevice();
 		lightShader.createLightShader();
 		colorEffectShader.createColorEffectPixelShader();
 		blackWhiteShader.createBlackWhiteShader();
@@ -644,7 +644,7 @@ struct Storm3D_TerrainRendererData
 	void renderConeLights(Storm3D_Scene &scene, bool glowsEnabled)
 	{
         GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderCones");
-		GfxDevice &device = storm.GetD3DDevice();
+		gfx::Device &device = storm.GetD3DDevice();
 		device.SetTexture(2, coneFadeTexture);
 
 		//lightManager.renderCones(scene, renderSpotShadows, glowsEnabled);
@@ -688,7 +688,7 @@ struct Storm3D_TerrainRendererData
     void renderLightTargets(Storm3D_Scene &scene)
     {
         GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderProjectedRenderTargets");
-        GfxDevice &device = storm.GetD3DDevice();
+        gfx::Device &device = storm.GetD3DDevice();
         Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
 
         //renderSpotBuffers(scene, renderSpotShadows);
@@ -800,7 +800,7 @@ struct Storm3D_TerrainRendererData
 	{
 		Storm3D_ShaderManager::GetSingleton()->setLightingShaders();
 
-		GfxDevice& device = storm.GetD3DDevice();
+		gfx::Device& device = storm.GetD3DDevice();
 		D3DXMATRIX dm;
 		D3DXMatrixIdentity(&dm);
 
@@ -978,7 +978,7 @@ t->Apply(4);
             GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderFakeSpotLights");
 
             // Renders fake shadows to screen?
-            GfxDevice &device = storm.GetD3DDevice();
+            gfx::Device &device = storm.GetD3DDevice();
             Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
 
             device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
@@ -1051,7 +1051,7 @@ t->Apply(4);
 
         // this renders spotlight light & shadows
         //setTracing(true);
-        GfxDevice &device = storm.GetD3DDevice();
+        gfx::Device &device = storm.GetD3DDevice();
         Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
 
         Storm3D_ShaderManager::GetSingleton()->setProjectedShaders();
@@ -1205,7 +1205,7 @@ t->Apply(4);
 
 	static void createTextures(Storm3D &storm, int lightmapQuality)
 	{
-		GfxDevice &device = storm.GetD3DDevice();
+		gfx::Device &device = storm.GetD3DDevice();
 		Storm3D_SurfaceInfo screen = storm.GetScreenSize();
 
 		renderSize.x = screen.width;
@@ -1310,7 +1310,7 @@ Storm3D_TerrainRenderer::~Storm3D_TerrainRenderer()
 
 std::shared_ptr<IStorm3D_Spotlight> Storm3D_TerrainRenderer::createSpot()
 {
-	GfxDevice &device = data->storm.GetD3DDevice();
+	gfx::Device &device = data->storm.GetD3DDevice();
 
 	std::shared_ptr<Storm3D_Spotlight> spot(new Storm3D_Spotlight(data->storm, device));
 	spot->enableSmoothing(data->smoothShadows);
@@ -1333,7 +1333,7 @@ void Storm3D_TerrainRenderer::deleteSpot(std::shared_ptr<IStorm3D_Spotlight> &sp
 
 std::shared_ptr<IStorm3D_FakeSpotlight> Storm3D_TerrainRenderer::createFakeSpot()
 {
-	GfxDevice &device = data->storm.GetD3DDevice();
+	gfx::Device &device = data->storm.GetD3DDevice();
 
 	std::shared_ptr<Storm3D_FakeSpotlight> spot(new Storm3D_FakeSpotlight(data->storm, device));
 	data->fakeSpots.push_back(spot);
@@ -1746,7 +1746,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 	data->models.enableAdditionalAlphaTestPass(data->additionalAlphaTestPassAllowed);
 	data->models.enableSkyModelGlow(data->skyModelGlowAllowed);
 
-	GfxDevice &device = data->storm.GetD3DDevice();
+	gfx::Device &device = data->storm.GetD3DDevice();
 	Storm3D_Camera &camera = static_cast<Storm3D_Camera &> (*scene.GetCamera());
 	camera.Apply();
 
@@ -1824,7 +1824,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
                 device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
                 device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 
-                device.SetStdProgram(GfxDevice::SSF_2D_POS | GfxDevice::SSF_COLOR | GfxDevice::SSF_TEXTURE);
+                device.SetStdProgram(gfx::Device::SSF_2D_POS | gfx::Device::SSF_COLOR | gfx::Device::SSF_TEXTURE);
                 device.SetFVF(FVF_P2DUV);
 
                 VC2 pixsz = device.pixelSize();
@@ -2455,7 +2455,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderBase");
-	GfxDevice& device = data->storm.GetD3DDevice();
+	gfx::Device& device = data->storm.GetD3DDevice();
 
 	Storm3D_Camera &camera = static_cast<Storm3D_Camera &> (*scene.GetCamera());
 	camera.Apply();

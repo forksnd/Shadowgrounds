@@ -41,7 +41,7 @@ namespace {
 
 	struct ShadowMap
 	{
-		GfxDevice &device;
+		gfx::Device &device;
 
 		CComPtr<IDirect3DTexture9> color;
 		CComPtr<IDirect3DTexture9> depthTexture;
@@ -55,7 +55,7 @@ namespace {
 		}
 
 	public:
-		ShadowMap(GfxDevice &device_, CComPtr<IDirect3DTexture9> sharedColor, CComPtr<IDirect3DTexture9> sharedDepthTexture, CComPtr<IDirect3DSurface9> sharedDepth, const VC2I &pos_)
+		ShadowMap(gfx::Device &device_, CComPtr<IDirect3DTexture9> sharedColor, CComPtr<IDirect3DTexture9> sharedDepthTexture, CComPtr<IDirect3DSurface9> sharedDepth, const VC2I &pos_)
 		:	device(device_),
 			pos(pos_)
 		{
@@ -183,7 +183,7 @@ namespace {
 			freeAll();
 		}
 
-		bool createAll(Storm3D &storm, GfxDevice &device, int quality)
+		bool createAll(Storm3D &storm, gfx::Device &device, int quality)
 		{
 			freeAll();
 
@@ -274,7 +274,7 @@ namespace {
 struct Storm3D_SpotlightData
 {
 	Storm3D &storm;
-	GfxDevice &device;
+	gfx::Device &device;
 
 	std::shared_ptr<ShadowMap> shadowMap;
 	std::shared_ptr<Storm3D_Texture> projectionTexture;
@@ -321,7 +321,7 @@ struct Storm3D_SpotlightData
 	static frozenbyte::storm::PixelShader *coneNvPixelShader_NoTexture;
 	static frozenbyte::storm::VertexShader *coneStencilVertexShader;
 
-	Storm3D_SpotlightData(Storm3D &storm_, GfxDevice &device_)
+	Storm3D_SpotlightData(Storm3D &storm_, gfx::Device &device_)
 	:	storm(storm_),
 		device(device_),
 		properties(device),
@@ -596,7 +596,7 @@ frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneNvPixelShader_Texture
 frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneNvPixelShader_NoTexture = 0;
 frozenbyte::storm::VertexShader *Storm3D_SpotlightData::coneStencilVertexShader = 0;
 
-Storm3D_Spotlight::Storm3D_Spotlight(Storm3D &storm, GfxDevice &device)
+Storm3D_Spotlight::Storm3D_Spotlight(Storm3D &storm, gfx::Device &device)
 {
 	data = new Storm3D_SpotlightData(storm, device);
 }
@@ -1159,7 +1159,7 @@ void Storm3D_Spotlight::querySizes(Storm3D &storm, int shadowQuality)
 	}
 }
 
-void Storm3D_Spotlight::createShadowBuffers(Storm3D &storm, GfxDevice &device, int shadowQuality)
+void Storm3D_Spotlight::createShadowBuffers(Storm3D &storm, gfx::Device &device, int shadowQuality)
 {
 	bool status = staticBuffers.createAll(storm, device, shadowQuality);
 	while(!status && shadowQuality > 0)

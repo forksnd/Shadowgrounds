@@ -33,7 +33,7 @@
 		CComPtr<IDirect3DTexture9> color;
 		CComPtr<IDirect3DSurface9> depth;
 
-		GfxDevice &device;
+		gfx::Device &device;
 		VC2I pos;
 
 		bool hasInitialized() const
@@ -41,7 +41,7 @@
 			return color && depth;
 		}
 
-		RenderTarget(GfxDevice &device_, CComPtr<IDirect3DTexture9> sharedColor, CComPtr<IDirect3DSurface9> sharedDepth)
+		RenderTarget(gfx::Device &device_, CComPtr<IDirect3DTexture9> sharedColor, CComPtr<IDirect3DSurface9> sharedDepth)
 		:	device(device_)
 		{
 			color = sharedColor;
@@ -173,7 +173,7 @@
 		{
 		}
 
-		bool createAll(Storm3D &storm, GfxDevice &device, int quality)
+		bool createAll(Storm3D &storm, gfx::Device &device, int quality)
 		{
 			freeAll();
 			if(SHARE_BUFFERS)
@@ -296,7 +296,7 @@ struct Storm3D_FakeSpotlight::Data
 {
     //TODO: change to manager pattern, share this higher
 	Storm3D &storm; 
-	GfxDevice &device;
+	gfx::Device &device;
 
     //TODO: create proper rt sharing solution at higher level
 	std::shared_ptr<RenderTarget> renderTarget;
@@ -317,7 +317,7 @@ struct Storm3D_FakeSpotlight::Data
 	static frozenbyte::storm::IndexBuffer *indexBuffer;
 	frozenbyte::storm::VertexBuffer vertexBuffer;
 
-	Data(Storm3D &storm_, GfxDevice &device_)
+	Data(Storm3D &storm_, gfx::Device &device_)
 	:	storm(storm_),
 		device(device_),
 		properties(device),
@@ -363,7 +363,7 @@ struct Storm3D_FakeSpotlight::Data
 //TODO: make shared
 frozenbyte::storm::IndexBuffer *Storm3D_FakeSpotlight::Data::indexBuffer = 0;
 
-Storm3D_FakeSpotlight::Storm3D_FakeSpotlight(Storm3D &storm, GfxDevice &device)
+Storm3D_FakeSpotlight::Storm3D_FakeSpotlight(Storm3D &storm, gfx::Device &device)
 {
 	data = new Data(storm, device);
 }
@@ -757,7 +757,7 @@ void Storm3D_FakeSpotlight::querySizes(Storm3D &storm, int shadowQuality)
 	}
 }
 
-void Storm3D_FakeSpotlight::createBuffers(Storm3D &storm, GfxDevice &device, int shadowQuality)
+void Storm3D_FakeSpotlight::createBuffers(Storm3D &storm, gfx::Device &device, int shadowQuality)
 {
 	if(BUFFER_WIDTH <= 0 || BUFFER_HEIGHT <= 0)
 		return;

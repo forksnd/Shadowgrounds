@@ -71,8 +71,7 @@ private:
     bool GetDSModeStencilSupport(D3DFORMAT &form);
     D3DFORMAT GetDSBufferModeForDisplayMode(int adapter, D3DDISPLAYMODE &mode);
 
-    LPDIRECT3D9 D3D;									// Direct3D device
-    GfxDevice device;					// 3d-device
+    gfx::Device device;					// 3d-device
     D3DPRESENT_PARAMETERS present_params;		// Present parameters
 
     // gamma ramps
@@ -203,8 +202,7 @@ public:
     void createTargets();
 
     // Get D3D Device inline (v3)
-    GfxDevice& GetD3DDevice() { return device; }
-    LPDIRECT3D9 GetD3D() const { return D3D; }
+    gfx::Device& GetD3DDevice() { return device; }
 
     IStorm3D_Logger *getLogger() { return logger; }
 

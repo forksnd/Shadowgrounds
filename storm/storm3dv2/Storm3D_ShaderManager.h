@@ -112,7 +112,7 @@ public:
 
 public:
     void SetShaders(
-        GfxDevice& device,
+        gfx::Device& device,
         uint32_t vertexShader,
         uint32_t pixelShader,
         Storm3D_Model_Object *object
@@ -185,11 +185,11 @@ private:
 	bool light_params_changed;
 
 public:
-	Storm3D_ShaderManager(GfxDevice& device);
+	Storm3D_ShaderManager(gfx::Device& device);
 	~Storm3D_ShaderManager();
 	
 	// Create shaders
-	void CreateShaders(GfxDevice& device);
+	void CreateShaders(gfx::Device& device);
 
 	void setLightingParameters(bool reflection_, bool local_reflection_, int light_count_);
 
@@ -232,18 +232,18 @@ public:
 	bool BoneShader();
 
 	// Do the magic ;-)
-	void SetShader(GfxDevice& device, Storm3D_Model_Object *object);
-	void SetShader(GfxDevice& device, const std::vector<int> &bone_indices); // not including first identity
+	void SetShader(gfx::Device& device, Storm3D_Model_Object *object);
+	void SetShader(gfx::Device& device, const std::vector<int> &bone_indices); // not including first identity
 	void ResetShader();
 	void ClearCache();
 
-	void SetShaderDefaultValues(GfxDevice& device);
-	void SetShaderAmbient(GfxDevice& device, const COL &color);
-	void SetShaderDiffuse(GfxDevice& device, const COL &color);
+	void SetShaderDefaultValues(gfx::Device& device);
+	void SetShaderAmbient(gfx::Device& device, const COL &color);
+	void SetShaderDiffuse(gfx::Device& device, const COL &color);
 	void SetLightmapFactor(float xf, float yf);
 
-	void ApplyForceAmbient(GfxDevice& device);
-	void SetWorldTransform(GfxDevice& device, const D3DXMATRIX &tm, bool forceTextureTm = false, bool terrain = false);
+	void ApplyForceAmbient(gfx::Device& device);
+	void SetWorldTransform(gfx::Device& device, const D3DXMATRIX &tm, bool forceTextureTm = false, bool terrain = false);
 
 	// Public constants
 	static const int BONE_INDEX_START; // First is identity

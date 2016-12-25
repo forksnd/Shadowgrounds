@@ -8,13 +8,16 @@
 
 class Storm3D_Camera;
 class Storm3D_Scene;
-struct GfxDevice;
+namespace gfx
+{
+    struct Device;
+}
 
 //NOTE: do we need this class at all?
 struct Storm3D_SpotlightShared
 {
     //TODO: try to get reed of this member
-	GfxDevice &device;
+	gfx::Device &device;
 
 	VC3 position;
 	VC3 direction;
@@ -45,7 +48,7 @@ struct Storm3D_SpotlightShared
 	unsigned int resolutionX;
 	unsigned int resolutionY;
 
-	Storm3D_SpotlightShared(GfxDevice &device);
+	Storm3D_SpotlightShared(gfx::Device &device);
 	~Storm3D_SpotlightShared();
 
 	void updateMatrices(const D3DXMATRIX &cameraView, float bias);

@@ -187,7 +187,7 @@ void Storm3D_Scene_PicList_Font::Render()
                     }
 
                     // Render it
-                    Storm3D2->GetD3DDevice().SetStdProgram(GfxDevice::SSF_2D_POS | GfxDevice::SSF_COLOR | GfxDevice::SSF_TEXTURE);
+                    Storm3D2->GetD3DDevice().SetStdProgram(gfx::Device::SSF_2D_POS | gfx::Device::SSF_COLOR | gfx::Device::SSF_TEXTURE);
                     Storm3D2->GetD3DDevice().SetFVF(FVF_P2DUV);
 
                     Storm3D2->GetD3DDevice().DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vx, sizeof(Vertex_P2DUV));

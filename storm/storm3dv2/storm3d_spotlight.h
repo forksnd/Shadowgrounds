@@ -10,14 +10,17 @@ class Storm3D_Camera;
 class Storm3D_Scene;
 struct Storm3D_SpotlightData;
 struct IDirect3D9;
-struct GfxDevice;
+namespace gfx
+{
+    struct Device;
+}
 
 class Storm3D_Spotlight: public IStorm3D_Spotlight
 {
 	Storm3D_SpotlightData* data;
 
 public:
-	Storm3D_Spotlight(Storm3D &storm, GfxDevice &device);
+	Storm3D_Spotlight(Storm3D &storm, gfx::Device &device);
 	~Storm3D_Spotlight();
 
 	void testVisibility(Storm3D_Camera &camera);
@@ -69,7 +72,7 @@ public:
 	void recreateDynamicResources();
 
 	static void querySizes(Storm3D &storm, int shadowQuality);
-	static void createShadowBuffers(Storm3D &storm, GfxDevice &device, int shadowQuality);
+	static void createShadowBuffers(Storm3D &storm, gfx::Device &device, int shadowQuality);
 	static void freeShadowBuffers();
 	static void clearCache();
 

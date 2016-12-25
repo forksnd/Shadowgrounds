@@ -395,7 +395,7 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 }
 
 void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
-    GfxDevice& device = Storm3D2->device;
+    gfx::Device& device = Storm3D2->device;
 
     GFX_TRACE_SCOPE("Storm3D_Scene::renderRealScene");
     device.BeginScene();
@@ -606,7 +606,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
                     pixelShader = Storm3D_ShaderManager::LIGHTING_SIMPLE_TEXTURE;
                 }
 
-                GfxDevice& device = Storm3D2->device;
+                gfx::Device& device = Storm3D2->device;
                 int alphaType = m->GetAlphaType();
                 if (alphaType == IStorm3D_Material::ATYPE_NONE)
                 {
@@ -823,7 +823,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 
         device.unlockDynVtx();
 
-        device.SetStdProgram(GfxDevice::SSF_COLOR);
+        device.SetStdProgram(gfx::Device::SSF_COLOR);
         Storm3D2->device.SetFVF(FVF_P3D);
         device.SetDynVtxBuffer<Vertex_P3D>();
 
@@ -847,7 +847,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
     if(draw_bones)
     {
         device.SetDynVtxBuffer<Vertex_P3D>();
-        device.SetStdProgram(GfxDevice::SSF_COLOR);
+        device.SetStdProgram(gfx::Device::SSF_COLOR);
         Storm3D2->device.SetFVF(FVF_P3D);
 
         Storm3D2->device.SetRenderState(D3DRS_ZENABLE, FALSE);
@@ -1435,7 +1435,7 @@ int Storm3D_Scene::RenderScene(bool present)
 			frozenbyte::storm::setInverseCulling(true);
 			active_visibility = 1;
 
-			GfxDevice &device = Storm3D2->GetD3DDevice();
+			gfx::Device &device = Storm3D2->GetD3DDevice();
 			Storm3D_Camera camback = camera;
 			camback.Apply();
 

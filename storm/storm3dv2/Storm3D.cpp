@@ -44,8 +44,8 @@
 
 using namespace frozenbyte;
 
-static const size_t INDEX_STORAGE_SIZE = 40 * (1<<20);
-static const size_t VERTEX_STORAGE_SIZE = 100 * (1<<20);
+static const size_t INDEX_STORAGE_SIZE = 20 * (1<<20);
+static const size_t VERTEX_STORAGE_SIZE = 80 * (1<<20);
 static const size_t MAX_QUAD_COUNT = 0x4000;
 
 static_assert(MAX_QUAD_COUNT*4<=0x10000, "Vertex count should be less then 65536(0x10000)");
@@ -111,7 +111,7 @@ namespace {
 		return true;
 	}
 
-	D3DMULTISAMPLE_TYPE findMultiSampleType(IDirect3D9 &d3d, int active_adapter, D3DFORMAT format, int antialiasing_level, BOOL windowed)
+	D3DMULTISAMPLE_TYPE findMultiSampleType(int active_adapter, D3DFORMAT format, int antialiasing_level, BOOL windowed)
 	{
 		if(antialiasing_level <= 1 || antialiasing_level > 16)
 			return D3DMULTISAMPLE_NONE;
@@ -119,7 +119,7 @@ namespace {
 		for(int i = antialiasing_level; i > 1; --i)
 		{
 			D3DMULTISAMPLE_TYPE current = (D3DMULTISAMPLE_TYPE) i;
-			if(SUCCEEDED(d3d.CheckDeviceMultiSampleType(active_adapter, D3DDEVTYPE_HAL, format, windowed, current, 0)))
+			if(SUCCEEDED(gfx::D3D->CheckDeviceMultiSampleType(active_adapter, D3DDEVTYPE_HAL, format, windowed, current, 0)))
 				return current;
 		}
 
@@ -370,7 +370,7 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
     present_params.Windowed               = 0;
     present_params.BackBufferCount        = 1;
     present_params.MultiSampleType        = D3DMULTISAMPLE_NONE;
-	present_params.MultiSampleType        = findMultiSampleType(*D3D, active_adapter, DSFormat, antialiasing_level, FALSE);
+	present_params.MultiSampleType        = findMultiSampleType(active_adapter, DSFormat, antialiasing_level, FALSE);
     present_params.SwapEffect             = D3DSWAPEFFECT_DISCARD;
     present_params.EnableAutoDepthStencil = 1;
     present_params.AutoDepthStencilFormat = DSFormat;
@@ -388,7 +388,7 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
     if ((adapters[active_adapter].caps & Storm3D_Adapter::CAPS_HWSHADER) == 0 ||
         (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)     == 0 ||
         (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0 ||
-        FAILED(D3D->CheckDeviceFormat(active_adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D24S8))
+        FAILED(gfx::D3D->CheckDeviceFormat(active_adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D24S8))
        )
     {
         MessageBox(NULL, "Unsupported graphics card", "Storm3D Error", 0);
@@ -396,7 +396,7 @@ bool Storm3D::SetFullScreenMode(int width,int height,int bpp)
     }
 
     // Create the device
-	if (!device.init(D3D, active_adapter, window_handle, present_params))
+	if (!gfx::initDevice(device, active_adapter, window_handle, present_params))
 	{
 		//MessageBox(NULL,"Error creating fullscreen device","Storm3D Error",0);
 		error_string = "Failed to create device";
@@ -448,7 +448,7 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
 {
 	// Get the current desktop display mode (for backbuffer and z)
     D3DDISPLAYMODE desktopmode;
-    if(FAILED(D3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT,&desktopmode)))
+    if(FAILED(gfx::D3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT,&desktopmode)))
 	{
 		error_string = "Failed to get adapter display mode";
         return false;
@@ -480,7 +480,7 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
     present_params.Windowed               = 1;
     present_params.BackBufferCount        = 1;
     present_params.MultiSampleType        = D3DMULTISAMPLE_NONE;
-	present_params.MultiSampleType        = findMultiSampleType(*D3D, active_adapter, DSFormat, antialiasing_level, TRUE);
+	present_params.MultiSampleType        = findMultiSampleType(active_adapter, DSFormat, antialiasing_level, TRUE);
     present_params.SwapEffect             = D3DSWAPEFFECT_DISCARD;
     present_params.EnableAutoDepthStencil = 1;
     present_params.AutoDepthStencilFormat = DSFormat;
@@ -498,7 +498,7 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
     if ((adapters[active_adapter].caps & Storm3D_Adapter::CAPS_HWSHADER) == 0 ||
         (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)     == 0 ||
         (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0 ||
-        FAILED(D3D->CheckDeviceFormat(active_adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D24S8))
+        FAILED(gfx::D3D->CheckDeviceFormat(active_adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D24S8))
        )
     {
         MessageBox(NULL, "Unsupported graphics card", "Storm3D Error", 0);
@@ -506,7 +506,7 @@ bool Storm3D::SetWindowedMode(int width,int height,bool titlebar)
     }
 
     // Create the device
-	if (!device.init(D3D, active_adapter, window_handle, present_params))
+	if (!gfx::initDevice(device, active_adapter, window_handle, present_params))
 	{
 		//MessageBox(NULL,"Error creating windowed device","Storm3D Error",0);
 		error_string = "Failed to create device";
@@ -553,7 +553,7 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
 {
 	// Get the current desktop display mode (for backbuffer and z)
     D3DDISPLAYMODE desktopmode;
-    if(FAILED(D3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT,&desktopmode)))
+    if(FAILED(gfx::D3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT,&desktopmode)))
 	{
 		error_string = "Failed to get adapter display mode";
         return false;
@@ -574,7 +574,7 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
     present_params.Windowed               = 1;
     present_params.BackBufferCount        = 1;
 	present_params.MultiSampleType        = D3DMULTISAMPLE_NONE;
-	present_params.MultiSampleType = findMultiSampleType(*D3D, active_adapter, DSFormat, antialiasing_level, TRUE);
+	present_params.MultiSampleType = findMultiSampleType(active_adapter, DSFormat, antialiasing_level, TRUE);
 
     present_params.SwapEffect             = D3DSWAPEFFECT_DISCARD;
     present_params.EnableAutoDepthStencil = 1;
@@ -595,7 +595,7 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
     if ((adapters[active_adapter].caps & Storm3D_Adapter::CAPS_HWSHADER) == 0 ||
         (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS20)     == 0 ||
         (adapters[active_adapter].caps & Storm3D_Adapter::CAPS_PS14)     == 0 ||
-        FAILED(D3D->CheckDeviceFormat(active_adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D24S8))
+        FAILED(gfx::D3D->CheckDeviceFormat(active_adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE, D3DFMT_D24S8))
        )
     {
         MessageBox(NULL, "Unsupported graphics card", "Storm3D Error", 0);
@@ -603,7 +603,7 @@ bool Storm3D::SetWindowedMode(bool disableBuffers = false)
     }
 
     // Create the device
-    if (!device.init(D3D, active_adapter, window_handle, present_params))
+    if (!gfx::initDevice(device, active_adapter, window_handle, present_params))
 	{
 		//MessageBox(NULL,"Error creating windowed device","Storm3D Error",0);
 		error_string = "Failed creating device";
@@ -681,7 +681,6 @@ Storm3D::Storm3D(SDL_Window* wnd, bool _no_info, filesystem::FilePackageManager 
 	adapters(NULL),
 	active_adapter(D3DADAPTER_DEFAULT),
     window(wnd),
-	D3D(NULL),
 	textureLODLevel(0),
 	bbuf_orig(NULL),
 	zbuf_orig(NULL),
@@ -731,28 +730,11 @@ Storm3D::Storm3D(SDL_Window* wnd, bool _no_info, filesystem::FilePackageManager 
     SDL_VERSION(&info.version); /* initialize info structure with SDL version info */
     window_handle = SDL_GetWindowWMInfo(window, &info) ? info.info.win.window : (HWND)INVALID_HANDLE_VALUE;
 
-    HMODULE hD3D9DLL = LoadLibrary(TEXT("d3d9.dll"));
-    if (hD3D9DLL == NULL)
+    if (!gfx::init())
     {
         MessageBox(NULL, "DirectX9 is needed to run this program.", "Storm3D Error", 0);
         return;
     }
-
-    typedef IDirect3D9 * (WINAPI *Direct3DCreate9Func)(UINT SDKVersion);
-    Direct3DCreate9Func fnDirect3DCreate9 = reinterpret_cast<Direct3DCreate9Func>(GetProcAddress(hD3D9DLL, "Direct3DCreate9"));
-    if (!fnDirect3DCreate9)
-    {
-        MessageBox(NULL, "DirectX9 is needed to run this program.", "Storm3D Error", 0);
-        return;
-    }
-
-    // Create the D3D object
-    if ((D3D = fnDirect3DCreate9(D3D_SDK_VERSION)) == NULL)
-    {
-        MessageBox(NULL, "DirectX9 is needed to run this program.", "Storm3D Error", 0);
-        return;
-    }
-
     // Enumerate all adapters and modes
     EnumAdaptersAndModes();
 
@@ -820,8 +802,8 @@ Storm3D::~Storm3D()
     destroyManagedResources();
 
     // Release Direct3D stuff
-    device.fini();
-    if(D3D) D3D->Release();
+    gfx::finiDevice(device);
+    gfx::fini();
 
 	// Delete adapterlist
 	if (adapters) delete[] adapters;
@@ -1097,7 +1079,7 @@ void Storm3D::setGlobalTimeFactor(float timeFactor)
 void Storm3D::EnumAdaptersAndModes()
 {
 	// Get adapter count
-	adapter_amount=D3D->GetAdapterCount();
+	adapter_amount=gfx::D3D->GetAdapterCount();
 
 	// Create array to store adapter data
     adapters=new Storm3D_Adapter[adapter_amount];
@@ -1107,13 +1089,13 @@ void Storm3D::EnumAdaptersAndModes()
     {
 		// Get adapter identifier
 		D3DADAPTER_IDENTIFIER9 aid;
-        D3D->GetAdapterIdentifier(ada,0,&aid);
+        gfx::D3D->GetAdapterIdentifier(ada,0,&aid);
 
         // Enumerate all display modes on this adapter
 		int amount_modes=0;
 
 		// Get (adapter) display mode count
-        int amodes=D3D->GetAdapterModeCount(ada, D3DFMT_X8R8G8B8);
+        int amodes=gfx::D3D->GetAdapterModeCount(ada, D3DFMT_X8R8G8B8);
 
 		// Create array to store display modes (to adapter)
 		adapters[ada].display_modes=new D3DDISPLAYMODE[amodes];
@@ -1123,10 +1105,10 @@ void Storm3D::EnumAdaptersAndModes()
         {
             // Get the display mode attributes
             D3DDISPLAYMODE mode;
-            D3D->EnumAdapterModes(ada,D3DFMT_X8R8G8B8,md,&mode);
+            gfx::D3D->EnumAdapterModes(ada,D3DFMT_X8R8G8B8,md,&mode);
 
             // Check if the mode already exists (to filter out refresh rates)
-			int i = 0;
+            int i = 0;
             for(;i<amount_modes;i++)
                 if((adapters[ada].display_modes[i].Width==mode.Width)&&
                    (adapters[ada].display_modes[i].Height==mode.Height)&&
@@ -1149,7 +1131,7 @@ void Storm3D::EnumAdaptersAndModes()
 
 		// Get HAL-device caps (no REF or SW, because they are too slow!)
 		D3DCAPS9 devcaps;
-		D3D->GetDeviceCaps(ada,D3DDEVTYPE_HAL,&devcaps);
+		gfx::D3D->GetDeviceCaps(ada,D3DDEVTYPE_HAL,&devcaps);
 
 		// Store intresting caps...
 
@@ -1232,7 +1214,7 @@ void Storm3D::EnumAdaptersAndModes()
 		if (devcaps.RasterCaps&D3DPRASTERCAPS_FOGTABLE) adapters[ada].caps|=Storm3D_Adapter::CAPS_PIXELFOG;
 
 		// Test for multisample antialias
-		if (SUCCEEDED(D3D->CheckDeviceMultiSampleType(ada,D3DDEVTYPE_HAL,D3DFMT_R8G8B8,FALSE,D3DMULTISAMPLE_2_SAMPLES,0))) 
+		if (SUCCEEDED(gfx::D3D->CheckDeviceMultiSampleType(ada,D3DDEVTYPE_HAL,D3DFMT_R8G8B8,FALSE,D3DMULTISAMPLE_2_SAMPLES,0))) 
 			adapters[ada].multisample=2;
 	}
 }
@@ -1262,58 +1244,58 @@ D3DFORMAT Storm3D::GetDSBufferModeForDisplayMode(int adapter,D3DDISPLAYMODE &mod
 		case D3DFMT_D16: // 16 bits
 
 			// 16 bit Z
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D16)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D16))) return D3DFMT_D16;
 			}
 
 			// 16 bit Z (lockable)
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D16_LOCKABLE)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D16_LOCKABLE))) return D3DFMT_D16_LOCKABLE;
 			}
 
 			// 15 bit Z, 1 bit stencil
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D15S1)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D15S1))) return D3DFMT_D15S1;
 			}
 
 			// 32 bit Z
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D32)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D32))) return D3DFMT_D32;
 			}
 
 			// 24 bit Z (24 Z-bits, 8 unused)
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D24X8)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D24X8))) return D3DFMT_D24X8;            
 			}
 	
 			// 24 bit Z, 8 bit stencil
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D24S8)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D24S8))) return D3DFMT_D24S8;
 			}
 
 			// 24 bit Z, 4 bit stencil (4 bits unused!!)
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D24X4S4)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D24X4S4))) return D3DFMT_D24X4S4;
 			}
 
@@ -1322,58 +1304,58 @@ D3DFORMAT Storm3D::GetDSBufferModeForDisplayMode(int adapter,D3DDISPLAYMODE &mod
 		case D3DFMT_D32: // 32 bits
 
 			// 32 bit Z
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D32)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D32))) return D3DFMT_D32;
 			}
 
 			// 24 bit Z (24 Z-bits, 8 unused)
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D24X8)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D24X8))) return D3DFMT_D24X8;            
 			}
 	
 			// 24 bit Z, 8 bit stencil
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D24S8)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D24S8))) return D3DFMT_D24S8;
 			}
 
 			// 24 bit Z, 4 bit stencil (4 bits unused!!)
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D24X4S4)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D24X4S4))) return D3DFMT_D24X4S4;
 			}
 
 			// 16 bit Z
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D16)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D16))) return D3DFMT_D16;
 			}
 
 			// 16 bit Z (lockable)
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D16_LOCKABLE)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D16_LOCKABLE))) return D3DFMT_D16_LOCKABLE;
 			}
 
 			// 15 bit Z, 1 bit stencil
-			if(SUCCEEDED(D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
+			if(SUCCEEDED(gfx::D3D->CheckDeviceFormat(adapter,D3DDEVTYPE_HAL,
 				mode.Format,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D15S1)))
 			{
-				if(SUCCEEDED(D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
+				if(SUCCEEDED(gfx::D3D->CheckDepthStencilMatch(adapter,D3DDEVTYPE_HAL,
 					mode.Format,mode.Format,D3DFMT_D15S1))) return D3DFMT_D15S1;
 			}
 		default: break;
