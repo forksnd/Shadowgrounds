@@ -1,6 +1,7 @@
 bin
 ipch
 tmp
+*.bak
 *.suo
 *.ncb
 *.user
@@ -8,6 +9,8 @@ tmp
 *.sdf
 *.idb
 *.patch
+*.db
+*.opendb
 *.PIXExp
 *.PIXRun
 TODO.txt
