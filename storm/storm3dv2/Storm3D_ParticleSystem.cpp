@@ -95,11 +95,14 @@ void Storm3D_ParticleSystem::Render(Storm3D_Scene* scene, bool distortion)
 
 void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion) 
 {
+    gfx::Renderer& renderer = Storm3D2->renderer;
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
+
     GFX_TRACE_SCOPE("Storm3D_ParticleSystem::RenderImp");
 	//if(distortion && !offsetShader.hasShader())
 	//	offsetShader.createOffsetBlendShader();
 
-	gfx::Device &device = Storm3D2->GetD3DDevice();
 	//device.SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);
 	frozenbyte::storm::setCulling(device, D3DCULL_NONE);
 	device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
@@ -175,11 +178,11 @@ void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion)
 	}
 
 	vertexBuffer[index].apply(device, 0);
-    Storm3D2->renderer.setQuadIndices();
+    renderer.setQuadIndices();
 
-    device.SetStdProgram(gfx::Device::SSF_COLOR|gfx::Device::SSF_TEXTURE);
-    Storm3D2->renderer.SetFVF(FVF_P3DUV2);
-    device.SetProjectionMatrix(scene->camera.GetProjectionMatrix());
+    programManager.setStdProgram(device, gfx::ProgramManager::SSF_COLOR|gfx::ProgramManager::SSF_TEXTURE);
+    programManager.setProjectionMatrix(scene->camera.GetProjectionMatrix());
+    renderer.SetFVF(FVF_P3DUV2);
 
 	// Render arrays
 	{
@@ -191,8 +194,8 @@ void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion)
 				int vertexOffset = 0;
 				int particleAmount = 0;
 
-                device.SetViewMatrix(scene->camera.GetViewMatrix());
-				(*it)->setRender(device, vertexOffset, particleAmount);
+                programManager.setViewMatrix(scene->camera.GetViewMatrix());
+				(*it)->setRender(renderer, vertexOffset, particleAmount);
 
 				if(particleAmount > 0)
 				{

@@ -10,6 +10,7 @@
 // Includes
 //------------------------------------------------------------------
 #include "GfxDevice.h"
+#include "GfxProgramManager.h"
 #include <cassert>
 #include <d3dx9math.h>
 #include "Storm3D_Datatypes.h"

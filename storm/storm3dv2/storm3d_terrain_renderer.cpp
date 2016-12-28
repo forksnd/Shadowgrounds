@@ -1724,6 +1724,10 @@ void Storm3D_TerrainRenderer::updateVisibility(Storm3D_Scene &scene, int timeDel
 
 void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 {
+    gfx::Renderer& renderer = data->storm.renderer;
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
+
     GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderTargets");
 	if(!data->forceDraw && !data->renderRenderTargets)
 	{
@@ -1746,7 +1750,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 	data->models.enableAdditionalAlphaTestPass(data->additionalAlphaTestPassAllowed);
 	data->models.enableSkyModelGlow(data->skyModelGlowAllowed);
 
-	gfx::Device &device = data->storm.GetD3DDevice();
 	Storm3D_Camera &camera = static_cast<Storm3D_Camera &> (*scene.GetCamera());
 	camera.Apply();
 
@@ -1824,10 +1827,10 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
                 device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
                 device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 
-                device.SetStdProgram(gfx::Device::SSF_2D_POS | gfx::Device::SSF_COLOR | gfx::Device::SSF_TEXTURE);
-                data->storm.renderer.SetFVF(FVF_P2DUV);
+                programManager.setStdProgram(device, gfx::ProgramManager::SSF_2D_POS | gfx::ProgramManager::SSF_COLOR | gfx::ProgramManager::SSF_TEXTURE);
+                renderer.SetFVF(FVF_P2DUV);
 
-                VC2 pixsz = device.pixelSize();
+                VC2 pixsz = VC2(2.0f / data->fakeSize.x, 2.0f / data->fakeSize.y);
                 float scalex = data->fakeSize.x * pixsz.x;
                 float scaley = data->fakeSize.y * pixsz.y;
 

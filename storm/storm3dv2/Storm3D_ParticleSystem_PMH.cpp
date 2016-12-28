@@ -35,11 +35,11 @@ int Storm3D_ParticleSystem::PointArray::lock(Vertex_P3DUV2 *pointer, int particl
 	return 0;
 }
 
-void Storm3D_ParticleSystem::PointArray::setRender(gfx::Device &device, int &vertexOffset, int &particleAmount)
+void Storm3D_ParticleSystem::PointArray::setRender(gfx::Renderer& renderer, int &vertexOffset, int &particleAmount)
 {
 }
 
-void Storm3D_ParticleSystem::PointArray::render(Storm3D* Storm3D2, Storm3D_Scene* scene) 
+void Storm3D_ParticleSystem::PointArray::render(gfx::Renderer& renderer, Storm3D_Scene* scene)
 {
 	// TODO: implementation using point sprites
 }
@@ -264,9 +264,12 @@ int Storm3D_ParticleSystem::QuadArray::lock(Vertex_P3DUV2 *pointer, int particle
 	return m_numParts;
 }
 
-void Storm3D_ParticleSystem::QuadArray::setRender(gfx::Device &device, int &vertexOffset, int &particleAmount)
+void Storm3D_ParticleSystem::QuadArray::setRender(gfx::Renderer& renderer, int &vertexOffset, int &particleAmount)
 {
-	if(m_numParts <= 0)
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
+
+    if(m_numParts <= 0)
 		return;
 
 	if (m_mtl)
@@ -285,16 +288,19 @@ void Storm3D_ParticleSystem::QuadArray::setRender(gfx::Device &device, int &vert
 	dm._41=dm._42=dm._43=0;
 	dm._11=dm._22=dm._33=dm._44=1;
 
-    device.SetWorldMatrix(dm);
-    device.SetViewMatrix(dm);
-    device.CommitConstants();
+    programManager.setWorldMatrix(dm);
+    programManager.setViewMatrix(dm);
+    programManager.commitConstants(device);
 
 	vertexOffset = m_partOffset * 4;
 	particleAmount = m_numParts;
 }
 
-void Storm3D_ParticleSystem::QuadArray::render(Storm3D* Storm3D2, Storm3D_Scene* scene) {
-	// Not used anywhere
+void Storm3D_ParticleSystem::QuadArray::render(gfx::Renderer& renderer, Storm3D_Scene* scene) 
+{
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
+    // Not used anywhere
 
 	if(m_numParts <= 0)
 		return;
@@ -305,7 +311,7 @@ void Storm3D_ParticleSystem::QuadArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	}
 	else
 	{
-		Storm3D2->GetD3DDevice().SetTexture(0,NULL);
+		device.SetTexture(0,NULL);
 	}
 
 	// lock vb
@@ -419,26 +425,26 @@ void Storm3D_ParticleSystem::QuadArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	dm._41=dm._42=dm._43=0;
 	dm._11=dm._22=dm._33=dm._44=1;
 
-    Storm3D2->GetD3DDevice().SetProjectionMatrix(scene->camera.GetProjectionMatrix());
+    programManager.setProjectionMatrix(scene->camera.GetProjectionMatrix());
 	// Set view transform to identity
-    Storm3D2->GetD3DDevice().SetViewMatrix(dm);
+    programManager.setViewMatrix(dm);
 	// Set world transform to identity
-    Storm3D2->GetD3DDevice().SetWorldMatrix(dm);
-	Storm3D2->GetD3DDevice().CommitConstants();
+    programManager.setWorldMatrix(dm);
+	programManager.commitConstants(device);
 
 	// Render the buffer
-    Storm3D2->GetD3DDevice().SetStdProgram(gfx::Device::SSF_COLOR|gfx::Device::SSF_TEXTURE);
-	Storm3D2->renderer.SetFVF(FVF_P3DUV2);
+    programManager.setStdProgram(device, gfx::ProgramManager::SSF_COLOR|gfx::ProgramManager::SSF_TEXTURE);
+	renderer.SetFVF(FVF_P3DUV2);
 	
-	Storm3D2->GetD3DDevice().SetStreamSource(0,m_vb,0,stride);
-	Storm3D2->GetD3DDevice().SetIndices(m_ib);
+	device.SetStreamSource(0,m_vb,0,stride);
+	device.SetIndices(m_ib);
 	
 	// Render as indexed primitive
-	Storm3D2->GetD3DDevice().DrawIndexedPrimitive(D3DPT_TRIANGLELIST,0,0,m_numParts * 4,0,m_numParts * 2);
+	device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST,0,0,m_numParts * 4,0,m_numParts * 2);
 	scene->AddPolyCounter(m_numParts * 2);
 
 	++storm3d_dip_calls;
-	Storm3D2->GetD3DDevice().SetTransform(D3DTS_VIEW,&mv);
+	device.SetTransform(D3DTS_VIEW,&mv);
 }
 
 // LineArray
@@ -708,9 +714,12 @@ int Storm3D_ParticleSystem::LineArray::lock(Vertex_P3DUV2 *pointer, int particle
 	return m_numParts;
 }
 
-void Storm3D_ParticleSystem::LineArray::setRender(gfx::Device &device, int &vertexOffset, int &particleAmount)
+void Storm3D_ParticleSystem::LineArray::setRender(gfx::Renderer& renderer, int &vertexOffset, int &particleAmount)
 {
-	if(m_numParts <= 0)
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
+    
+    if(m_numParts <= 0)
 		return;
 
 	if (m_mtl)
@@ -729,16 +738,19 @@ void Storm3D_ParticleSystem::LineArray::setRender(gfx::Device &device, int &vert
 	dm._41=dm._42=dm._43=0;
 	dm._11=dm._22=dm._33=dm._44=1;
 
-    device.SetWorldMatrix(dm);
+    programManager.setWorldMatrix(dm);
     //device.SetViewMatrix(dm);
-    device.CommitConstants();
+    programManager.commitConstants(device);
 
 	vertexOffset = m_partOffset * 4;
 	particleAmount = m_numParts;
 }
 
-void Storm3D_ParticleSystem::LineArray::render(Storm3D* Storm3D2, Storm3D_Scene* scene) {
-	// Not used anywhere
+void Storm3D_ParticleSystem::LineArray::render(gfx::Renderer& renderer, Storm3D_Scene* scene) {
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
+
+    // Not used anywhere
 
 	if(m_numParts <= 0)
 		return;
@@ -751,7 +763,7 @@ void Storm3D_ParticleSystem::LineArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	}
 	else
 	{
-		Storm3D2->GetD3DDevice().SetTexture(0,NULL);
+		device.SetTexture(0,NULL);
 	}
 
 	// lock vb
@@ -843,22 +855,22 @@ void Storm3D_ParticleSystem::LineArray::render(Storm3D* Storm3D2, Storm3D_Scene*
 	dm._41=dm._42=dm._43=0;
 	dm._11=dm._22=dm._33=dm._44=1;
 
-    Storm3D2->GetD3DDevice().SetProjectionMatrix(scene->camera.GetProjectionMatrix());
-    Storm3D2->GetD3DDevice().SetViewMatrix(scene->camera.GetViewMatrix());
+    programManager.setProjectionMatrix(scene->camera.GetProjectionMatrix());
+    programManager.setViewMatrix(scene->camera.GetViewMatrix());
     // Set world transform to identity
-    Storm3D2->GetD3DDevice().SetWorldMatrix(dm);
-    Storm3D2->GetD3DDevice().CommitConstants();
+    programManager.setWorldMatrix(dm);
+    programManager.commitConstants(device);
 
 
     // Render the buffer
-    Storm3D2->GetD3DDevice().SetStdProgram(gfx::Device::SSF_COLOR | gfx::Device::SSF_TEXTURE);
-    Storm3D2->renderer.SetFVF(FVF_P3DUV2);
+    programManager.setStdProgram(device, gfx::ProgramManager::SSF_COLOR | gfx::ProgramManager::SSF_TEXTURE);
+    renderer.SetFVF(FVF_P3DUV2);
 
-	Storm3D2->GetD3DDevice().SetStreamSource(0,m_vb,0,stride);
-	Storm3D2->GetD3DDevice().SetIndices(m_ib);
+	device.SetStreamSource(0,m_vb,0,stride);
+	device.SetIndices(m_ib);
 	
 	// Render as indexed primitive
-	Storm3D2->GetD3DDevice().DrawIndexedPrimitive(D3DPT_TRIANGLELIST,0,0,m_numParts * 4,0,m_numParts * 2);
+	device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST,0,0,m_numParts * 4,0,m_numParts * 2);
 	scene->AddPolyCounter(m_numParts * 2);
 	++storm3d_dip_calls;
 }

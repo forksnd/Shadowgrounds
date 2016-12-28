@@ -93,10 +93,10 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(gfx::Device& device)
         {0, 0}
     };
 
-    createShader(&meshVS[MESH_BONE_SIMPLE], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesSimple);
-    createShader(&meshPS[LIGHTING_SIMPLE_TEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesSimple);
+    createShader(&meshVS[MESH_BONE_SIMPLE], device, vs_shader_source.length(), vs_shader_source.c_str(), definesSimple);
+    createShader(&meshPS[LIGHTING_SIMPLE_TEXTURE], device, ps_shader_source.length(), ps_shader_source.c_str(), definesSimple);
     definesSimple[5].Definition = "0";
-    createShader(&meshPS[LIGHTING_SIMPLE_NOTEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesSimple);
+    createShader(&meshPS[LIGHTING_SIMPLE_NOTEXTURE], device, ps_shader_source.length(), ps_shader_source.c_str(), definesSimple);
 
     D3D_SHADER_MACRO definesStandard[] = {
         {"ENABLE_SKELETAL_ANIMATION", "1"},
@@ -108,38 +108,38 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(gfx::Device& device)
         {0, 0}
     };
 
-    createShader(&meshVS[MESH_BONE_NOREFLECTION], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
+    createShader(&meshVS[MESH_BONE_NOREFLECTION], device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
     definesStandard[5].Definition = "2";
-    createShader(&meshVS[MESH_BONE_REFLECTION], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
+    createShader(&meshVS[MESH_BONE_REFLECTION], device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
     definesStandard[0].Definition = "0";
     definesStandard[5].Definition = "1";
-    createShader(&meshVS[MESH_NOREFLECTION], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
+    createShader(&meshVS[MESH_NOREFLECTION], device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
     definesStandard[5].Definition = "2";
-    createShader(&meshVS[MESH_REFLECTION], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
+    createShader(&meshVS[MESH_REFLECTION], device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
     definesStandard[5].Definition = "3";
-    createShader(&meshVS[MESH_LOCAL_REFLECTION], &device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
+    createShader(&meshVS[MESH_LOCAL_REFLECTION], device, vs_shader_source.length(), vs_shader_source.c_str(), definesStandard);
 
     definesStandard[5].Definition = "0";
-    createShader(&meshPS[LIGHTING_LMAP_NOTEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    createShader(&meshPS[LIGHTING_LMAP_NOTEXTURE], device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
     definesStandard[5].Definition = "1";
-    createShader(&meshPS[LIGHTING_LMAP_TEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    createShader(&meshPS[LIGHTING_LMAP_TEXTURE], device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
     definesStandard[5].Definition = "2";
-    createShader(&meshPS[LIGHTING_LMAP_REFLECTION], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    createShader(&meshPS[LIGHTING_LMAP_REFLECTION], device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
     definesStandard[5].Definition = "3";
-    createShader(&meshPS[LIGHTING_LMAP_LOCAL_REFLECTION], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    createShader(&meshPS[LIGHTING_LMAP_LOCAL_REFLECTION], device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
 
     definesStandard[5].Definition = "0";
-    createShader(&meshPS[LIGHTING_NOLMAP_NOTEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    createShader(&meshPS[LIGHTING_NOLMAP_NOTEXTURE], device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
     definesStandard[5].Definition = "1";
-    createShader(&meshPS[LIGHTING_NOLMAP_TEXTURE], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    createShader(&meshPS[LIGHTING_NOLMAP_TEXTURE], device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
     definesStandard[5].Definition = "2";
-    createShader(&meshPS[LIGHTING_NOLMAP_REFLECTION], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    createShader(&meshPS[LIGHTING_NOLMAP_REFLECTION], device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
     definesStandard[5].Definition = "3";
-    createShader(&meshPS[LIGHTING_NOLMAP_LOCAL_REFLECTION], &device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
+    createShader(&meshPS[LIGHTING_NOLMAP_LOCAL_REFLECTION], device, ps_shader_source.length(), ps_shader_source.c_str(), definesStandard);
 
     std::string vs_skybox_source;
     frozenbyte::storm::readFile(vs_skybox_source, "Data\\shaders\\skybox.vs");
-    createShader(&meshVS[VERTEX_SKYBOX], &device, vs_skybox_source.length(), vs_skybox_source.c_str(), NULL);
+    createShader(&meshVS[VERTEX_SKYBOX], device, vs_skybox_source.length(), vs_skybox_source.c_str(), NULL);
 
     std::string ps_std_source;
     frozenbyte::storm::readFile(ps_std_source, "Data\\shaders\\std.ps");
@@ -149,25 +149,25 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(gfx::Device& device)
         {"ENABLE_TEXTURE", "1"},
         {0, 0}
     };
-    createShader(&meshPS[WHITE_ONLY], &device, ps_std_source.length(), ps_std_source.c_str(), NULL);
-    createShader(&meshPS[TEXTURE_ONLY], &device, ps_std_source.length(), ps_std_source.c_str(), definesSTD+1);
-    createShader(&meshPS[TEXTURExCOLOR], &device, ps_std_source.length(), ps_std_source.c_str(), definesSTD);
+    createShader(&meshPS[WHITE_ONLY], device, ps_std_source.length(), ps_std_source.c_str(), NULL);
+    createShader(&meshPS[TEXTURE_ONLY], device, ps_std_source.length(), ps_std_source.c_str(), definesSTD+1);
+    createShader(&meshPS[TEXTURExCOLOR], device, ps_std_source.length(), ps_std_source.c_str(), definesSTD);
 
     std::string ps_debug_source;
     frozenbyte::storm::readFile(ps_debug_source, "Data\\shaders\\debug.ps");
-    createShader(&meshPS[DEBUG_PIXEL_SHADER], &device, ps_debug_source.length(), ps_debug_source.c_str(), NULL);
+    createShader(&meshPS[DEBUG_PIXEL_SHADER], device, ps_debug_source.length(), ps_debug_source.c_str(), NULL);
 
     std::string ps_fake_depth_source;
     frozenbyte::storm::readFile(ps_fake_depth_source, "Data\\shaders\\fake_depth.ps");
-    createShader(&meshPS[FAKE_DEPTH], &device, ps_fake_depth_source.length(), ps_fake_depth_source.c_str(), NULL);
+    createShader(&meshPS[FAKE_DEPTH], device, ps_fake_depth_source.length(), ps_fake_depth_source.c_str(), NULL);
 
     std::string vs_fake_spot_shadow_source;
     frozenbyte::storm::readFile(vs_fake_spot_shadow_source, "Data\\shaders\\fake_spot_shadow.vs");
-    createShader(&meshVS[VERTEX_FAKE_SPOT_SHADOW], &device, vs_fake_spot_shadow_source.length(), vs_fake_spot_shadow_source.c_str(), NULL);
+    createShader(&meshVS[VERTEX_FAKE_SPOT_SHADOW], device, vs_fake_spot_shadow_source.length(), vs_fake_spot_shadow_source.c_str(), NULL);
 
     std::string ps_fake_spot_shadow_source;
     frozenbyte::storm::readFile(ps_fake_spot_shadow_source, "Data\\shaders\\fake_spot_shadow.ps");
-    createShader(&meshPS[PIXEL_FAKE_SPOT_SHADOW], &device, ps_fake_spot_shadow_source.length(), ps_fake_spot_shadow_source.c_str(), NULL);
+    createShader(&meshPS[PIXEL_FAKE_SPOT_SHADOW], device, ps_fake_spot_shadow_source.length(), ps_fake_spot_shadow_source.c_str(), NULL);
 
     std::string vs_projected_source;
     frozenbyte::storm::readFile(vs_projected_source, "Data\\shaders\\mesh_projected.vs");
@@ -178,20 +178,20 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(gfx::Device& device)
         {0, 0}
     };
 
-    createShader(&meshVS[MESH_BONE_PROJECTED_FLAT], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+    createShader(&meshVS[MESH_BONE_PROJECTED_FLAT], device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
     definesProjected[1].Definition = "1";
-    createShader(&meshVS[MESH_BONE_PROJECTED_POINT], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+    createShader(&meshVS[MESH_BONE_PROJECTED_POINT], device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
     definesProjected[1].Definition = "2";
-    createShader(&meshVS[MESH_BONE_PROJECTED_DIRECTIONAL], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+    createShader(&meshVS[MESH_BONE_PROJECTED_DIRECTIONAL], device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
 
     definesProjected[0].Definition = "0";
 
     definesProjected[1].Definition = "0";
-    createShader(&meshVS[MESH_PROJECTED_FLAT], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+    createShader(&meshVS[MESH_PROJECTED_FLAT], device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
     definesProjected[1].Definition = "1";
-    createShader(&meshVS[MESH_PROJECTED_POINT], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+    createShader(&meshVS[MESH_PROJECTED_POINT], device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
     definesProjected[1].Definition = "2";
-    createShader(&meshVS[MESH_PROJECTED_DIRECTIONAL], &device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
+    createShader(&meshVS[MESH_PROJECTED_DIRECTIONAL], device, vs_projected_source.length(), vs_projected_source.c_str(), definesProjected);
 
     D3D_SHADER_MACRO definesShadow[] = {
         {"ENABLE_SHADOW", "0"},
@@ -200,9 +200,9 @@ Storm3D_ShaderManager::Storm3D_ShaderManager(gfx::Device& device)
 
     std::string ps_shadow_source;
     frozenbyte::storm::readFile(ps_shadow_source, "Data\\shaders\\shadow.ps");
-    createShader(&meshPS[PIXEL_NO_SHADOW], &device, ps_shadow_source.length(), ps_shadow_source.c_str(), definesShadow);
+    createShader(&meshPS[PIXEL_NO_SHADOW], device, ps_shadow_source.length(), ps_shadow_source.c_str(), definesShadow);
     definesShadow[0].Definition = "1";
-    createShader(&meshPS[PIXEL_SHADOW], &device, ps_shadow_source.length(), ps_shadow_source.c_str(), definesShadow);
+    createShader(&meshPS[PIXEL_SHADOW], device, ps_shadow_source.length(), ps_shadow_source.c_str(), definesShadow);
 }
 
 Storm3D_ShaderManager::~Storm3D_ShaderManager()

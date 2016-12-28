@@ -99,11 +99,15 @@ namespace gfx
         createPersistantResources();
         createDynamicResources();
 
+        programManager.init(device);
+
         return true;
     }
 
     void Renderer::fini()
     {
+        programManager.fini();
+
         destroyDynamicResources();
         destroyPersistantResources();
 

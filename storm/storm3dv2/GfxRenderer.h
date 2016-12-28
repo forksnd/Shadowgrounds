@@ -2,12 +2,14 @@
 
 #include "GfxDevice.h"
 #include "GfxMemory.h"
+#include "GfxProgramManager.h"
 
 namespace gfx
 {
     struct Renderer
     {
         Device device;
+        ProgramManager programManager;
 
         bool init(UINT adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
         void fini();

@@ -74,7 +74,11 @@ Storm3D_Scene_PicList_Font::~Storm3D_Scene_PicList_Font()
 //------------------------------------------------------------------
 void Storm3D_Scene_PicList_Font::Render()
 {
-	// Calculate complete letter amount and letters per texture
+    gfx::Renderer& renderer = Storm3D2->renderer;
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
+    
+    // Calculate complete letter amount and letters per texture
 	int letters_per_texture=font->tex_letter_rows*font->tex_letter_columns;
 	int letter_amt=font->texture_amount*letters_per_texture;
 
@@ -89,7 +93,7 @@ void Storm3D_Scene_PicList_Font::Render()
 	//DWORD col=font->GetColor().GetAsD3DCompatibleARGB();
 	//DWORD col=color.GetAsD3DCompatibleARGB();
 	DWORD col = D3DCOLOR_ARGB((int)((alpha)*255.0f),(int)(color.r*255.0f),(int)(color.g*255.0f),(int)(color.b*255.0f));
-	Storm3D2->GetD3DDevice().SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
+	device.SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
 
 	if(font->font && font->sprite)
 	{
@@ -178,7 +182,8 @@ void Storm3D_Scene_PicList_Font::Render()
 					vx[3].p.x=vx[2].p.x;
 					vx[3].uv.x=vx[2].uv.x;
 
-                    VC2 pixsz = Storm3D2->GetD3DDevice().pixelSize();
+                    Storm3D_SurfaceInfo& si = Storm3D2->GetScreenSize();
+                    VC2 pixsz = VC2(2.0f / si.width, 2.0f / si.height);
 
                     for (int i = 0; i < 4; ++i)
                     {
@@ -187,10 +192,10 @@ void Storm3D_Scene_PicList_Font::Render()
                     }
 
                     // Render it
-                    Storm3D2->GetD3DDevice().SetStdProgram(gfx::Device::SSF_2D_POS | gfx::Device::SSF_COLOR | gfx::Device::SSF_TEXTURE);
-                    Storm3D2->renderer.SetFVF(FVF_P2DUV);
+                    programManager.setStdProgram(device, gfx::ProgramManager::SSF_2D_POS | gfx::ProgramManager::SSF_COLOR | gfx::ProgramManager::SSF_TEXTURE);
+                    renderer.SetFVF(FVF_P2DUV);
 
-                    Storm3D2->renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vx, sizeof(Vertex_P2DUV));
+                    renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vx, sizeof(Vertex_P2DUV));
                     scene->AddPolyCounter(2);
 				}
 			}

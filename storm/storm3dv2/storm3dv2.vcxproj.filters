@@ -237,6 +237,9 @@
     <ClCompile Include="GfxMemory.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="GfxProgramManager.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Clipper.h">
@@ -486,6 +489,9 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="GfxMemory.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GfxProgramManager.h">
       <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>

@@ -83,7 +83,7 @@ void Storm3D_Line::Render(gfx::Renderer& renderer)
 	rebuild_vertices = false;
 	rebuild_indices = false;
 
-    renderer.device.SetStdProgram(gfx::Device::SSF_COLOR);
+    renderer.programManager.setStdProgram(renderer.device, gfx::ProgramManager::SSF_COLOR);
     renderer.SetFVF(FVF_P3D);
 
     // Render

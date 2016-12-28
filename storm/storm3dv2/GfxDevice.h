@@ -16,54 +16,6 @@
 
 namespace gfx
 {
-    struct Device;
-
-    bool createShader(
-        IDirect3DVertexShader9** shader,
-        Device* device,
-        size_t source_len,
-        const char* source,
-        D3D_SHADER_MACRO* defines
-    );
-
-    bool createShader(
-        IDirect3DPixelShader9** shader,
-        Device* device,
-        size_t source_len,
-        const char* source,
-        D3D_SHADER_MACRO* defines
-    );
-
-    bool compileShaderSet(
-        Device* device,
-        size_t path_len, const char* path,
-        size_t define_count, const char** defines,
-        size_t shader_count, IDirect3DVertexShader9** shader_set
-    );
-
-    bool compileShaderSet(
-        Device* device,
-        size_t path_len, const char* path,
-        size_t define_count, const char** defines,
-        size_t shader_count, IDirect3DPixelShader9** shader_set
-    );
-
-    template <typename IShaderType, size_t path_len, size_t define_count, size_t shader_count>
-    bool compileShaderSet(
-        Device* device,
-        const char (&path)[path_len],
-        const char* (&defines)[define_count],
-        IShaderType (&shader_set)[shader_count]
-    )
-    {
-        return compileShaderSet(
-            device,
-            path_len, path,
-            define_count, defines,
-            shader_count, shader_set
-        );
-    }
-
     extern LPDIRECT3D9 D3D;
 
     bool init();
@@ -76,27 +28,10 @@ namespace gfx
     {
         LPDIRECT3DDEVICE9 device = nullptr;
 
-        enum
-        {
-            SSF_2D_POS = (1 << 0),
-            SSF_COLOR = (1 << 1),
-            SSF_TEXTURE = (1 << 2),
-        };
-
         bool init(UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
         void fini();
 
         bool reset(D3DPRESENT_PARAMETERS& params);
-
-        void SetWorldMatrix(const D3DXMATRIX& world);
-        void SetViewMatrix(const D3DXMATRIX& view);
-        void SetProjectionMatrix(const D3DXMATRIX& proj);
-        void CommitConstants();
-        void SetStdProgram(size_t id);
-
-
-        VC2 pixelSize() { return pxSize; }
-
 
         HRESULT TestCooperativeLevel();
         HRESULT EvictManagedResources();
@@ -158,12 +93,10 @@ namespace gfx
         HRESULT Present(CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
 
     private:
-        // cache
-        enum
-        {
-            STD_SHADER_COUNT = 8
-        };
+        void resetCache();
+        void applyShaderConsts();
 
+    private:
         static bool cached;
 
         uint32_t  rs_valid[8];
@@ -201,24 +134,6 @@ namespace gfx
 
         LPDIRECT3DINDEXBUFFER9  ib;
 
-        void resetCache();
-
-        D3DXMATRIX world_mat;
-        D3DXMATRIX view_mat;
-        D3DXMATRIX proj_mat;
-
-        LPDIRECT3DVERTEXSHADER9 stdVS[STD_SHADER_COUNT];
-        LPDIRECT3DPIXELSHADER9  stdPS[STD_SHADER_COUNT];
-
-        void createFrameResources(D3DPRESENT_PARAMETERS& params);
-        void destroyFrameResources();
-
-        VC2   fViewportDim;
-        VC2I  iViewportDim;
-        VC2   pxSize;
-
-        void setViewportSize(int w, int h);
-
         D3DXVECTOR4 vertex_consts[MAX_CONSTS];
         D3DXVECTOR4 pixel_consts[MAX_CONSTS];
 
@@ -227,8 +142,6 @@ namespace gfx
 
         UINT pconsts_range_min;
         UINT pconsts_range_max;
-
-        void SetShaderConsts();
     };
 }
 

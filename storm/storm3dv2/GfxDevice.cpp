@@ -2,13 +2,6 @@
 #include "storm3d_terrain_utils.h"
 #include <assert.h>
 
-enum ShaderProfile
-{
-    VERTEX_SHADER_3_0,
-    PIXEL_SHADER_3_0,
-    SHADER_PROFILE_COUNT
-};
-
 template<size_t N>
 bool bitset32_is_bit_set(uint32_t(&set)[N], size_t i)
 {
@@ -65,164 +58,6 @@ void bitset32_clear(uint32_t& set)
 
 namespace gfx
 {
-
-    ID3DBlob* compileShader(ShaderProfile profile, size_t source_len, const char* source, D3D_SHADER_MACRO* defines)
-    {
-        assert(profile < SHADER_PROFILE_COUNT);
-
-        const char* profile_id_string[SHADER_PROFILE_COUNT] = {
-            "vs_3_0",
-            "ps_3_0"
-        };
-
-        ID3DBlob*  code = 0;
-        ID3DBlob*  msgs = 0;
-
-        HRESULT hr = D3DCompile(
-            source, source_len,
-            NULL, defines, NULL,
-            "main", profile_id_string[profile],
-    #ifdef _DEBUG
-            D3DCOMPILE_PACK_MATRIX_ROW_MAJOR|D3DCOMPILE_OPTIMIZATION_LEVEL3|D3DCOMPILE_DEBUG,
-    #else
-            D3DCOMPILE_PACK_MATRIX_ROW_MAJOR|D3DCOMPILE_OPTIMIZATION_LEVEL3,
-    #endif
-            0, &code, &msgs
-        );
-
-        if (FAILED(hr))
-        {
-            char* report = (char *)msgs->GetBufferPointer();
-            OutputDebugString(report);
-            MessageBox(NULL, "D3DCompile failed!", "Error!!!", MB_OK);
-        }
-
-        if (msgs) msgs->Release();
-
-        return code;
-    }
-
-    bool createShader(
-        IDirect3DVertexShader9** shader,
-        Device* device,
-        size_t source_len,
-        const char* source,
-        D3D_SHADER_MACRO* defines
-    )
-    {
-        ID3DBlob* vscode = compileShader(
-            VERTEX_SHADER_3_0, source_len, source, defines
-        );
-
-        if (!vscode) return false;
-
-        HRESULT hr = device->CreateVertexShader((const DWORD*)vscode->GetBufferPointer(), shader);
-
-        return SUCCEEDED(hr);
-    }
-
-    bool createShader(
-        IDirect3DPixelShader9** shader,
-        Device* device,
-        size_t source_len,
-        const char* source,
-        D3D_SHADER_MACRO* defines
-    )
-    {
-        ID3DBlob* pscode = compileShader(
-            PIXEL_SHADER_3_0, source_len, source, defines
-        );
-
-        if (!pscode ) return false;
-
-        HRESULT hr = device->CreatePixelShader((const DWORD*)pscode ->GetBufferPointer(), shader);
-
-        return SUCCEEDED(hr);
-    }
-
-
-    template <typename IShaderType>
-    bool compileShaderSet(
-        Device* device,
-        size_t path_len, const char* path,
-        size_t define_count, const char** defines,
-        size_t shader_count, IShaderType** shader_set
-    )
-    {
-        assert(define_count<32);
-
-        const size_t generated_shader_count = 1<<define_count;
-        assert(shader_count >= generated_shader_count);
-
-        bool success = true;
-
-        std::string shader_source;
-        frozenbyte::storm::readFile(shader_source, path);
-
-        //TODO: replace with safer variant
-        D3D_SHADER_MACRO* macros = (D3D_SHADER_MACRO*)alloca(sizeof(D3D_SHADER_MACRO)*(define_count+1));
-        for (size_t i=0; i<generated_shader_count; ++i)
-        {
-            size_t active_define_count = 0;
-
-            for (size_t j=0; j<define_count; ++j)
-            {
-                const size_t bit = 1<<j;
-                if (i&bit)
-                {
-                    macros[active_define_count].Name = defines[j];
-                    macros[active_define_count].Definition = "";
-                    ++active_define_count;
-                }
-            }
-
-            macros[active_define_count].Definition = 0;
-            macros[active_define_count].Name = 0;
-
-            shader_set[i] = 0;
-
-            success &= createShader(
-                &shader_set[i],
-                device,
-                shader_source.length(),
-                shader_source.c_str(),
-                macros
-            );
-        }
-
-        return success;
-    }
-
-    bool compileShaderSet(
-        Device* device,
-        size_t path_len, const char* path,
-        size_t define_count, const char** defines,
-        size_t shader_count, IDirect3DVertexShader9** shader_set
-    )
-    {
-        return compileShaderSet<IDirect3DVertexShader9>(
-            device,
-            path_len, path,
-            define_count, defines,
-            shader_count, shader_set
-        );
-    }
-
-    bool compileShaderSet(
-        Device* device,
-        size_t path_len, const char* path,
-        size_t define_count, const char** defines,
-        size_t shader_count, IDirect3DPixelShader9** shader_set
-    )
-    {
-        return compileShaderSet<IDirect3DPixelShader9>(
-            device,
-            path_len, path,
-            define_count, defines,
-            shader_count, shader_set
-        );
-    }
-
     LPDIRECT3D9 D3D = nullptr;
 
     typedef int (WINAPI *fnD3DPERF_BeginEvent)(D3DCOLOR col, LPCWSTR wszName);
@@ -297,80 +132,20 @@ namespace gfx
         if (FAILED(D3D->CreateDevice(Adapter, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &device)))
             return false;
 
-        createFrameResources(params);
-
-        const char* defines[] = {
-            "VS_2D_POS",
-            "ENABLE_COLOR",
-            "ENABLE_TEXTURE"
-        };
-
-        compileShaderSet(this, "Data\\shaders\\std.vs", defines, stdVS);
-        compileShaderSet(this, "Data\\shaders\\std.ps", defines, stdPS);
-
         return true;
     }
 
     void Device::fini()
     {
-        for (size_t i = 0; i < STD_SHADER_COUNT; ++i)
-        {
-            if (stdVS[i]) stdVS[i]->Release();
-            if (stdPS[i]) stdPS[i]->Release();
-        }
-
-        destroyFrameResources();
         device->Release();
     }
 
     bool Device::reset(D3DPRESENT_PARAMETERS& params)
     {
-        destroyFrameResources();
-
-        if (SUCCEEDED(device->Reset(&params)))
-        {
-            createFrameResources(params);
-            return true;
-        }
-
-        return false;
+        return SUCCEEDED(device->Reset(&params));
     }
 
-    void Device::SetStdProgram(size_t id)
-    {
-        assert(id < STD_SHADER_COUNT);
-
-        SetVertexShader(stdVS[id]);
-        SetPixelShader(stdPS[id]);
-    }
-
-    void Device::SetWorldMatrix(const D3DXMATRIX& world)
-    {
-        world_mat = world;
-    }
-
-    void Device::SetViewMatrix(const D3DXMATRIX& view)
-    {
-        view_mat = view;
-    }
-
-    void Device::SetProjectionMatrix(const D3DXMATRIX& proj)
-    {
-        proj_mat = proj;
-    }
-
-    void Device::CommitConstants()
-    {
-        D3DXMATRIX MVP;
-
-        D3DXMatrixMultiply(&MVP, &view_mat, &proj_mat);
-        D3DXMatrixMultiply(&MVP, &world_mat, &MVP);
-        D3DXMatrixTranspose(&MVP, &MVP);
-
-        SetVertexShaderConstantF(0, MVP, 4);
-    }
-
-    void Device::SetShaderConsts()
+    void Device::applyShaderConsts()
     {
         if (vconsts_range_min < vconsts_range_max)
         {
@@ -393,22 +168,6 @@ namespace gfx
             pconsts_range_min = MAX_CONSTS;
             pconsts_range_max = 0;
         }
-    }
-
-    void Device::setViewportSize(int w, int h)
-    {
-        iViewportDim = VC2I(w, h);
-        fViewportDim = VC2((float)w, (float)h);
-        pxSize = VC2(2.0f / fViewportDim.x, 2.0f / fViewportDim.y);
-    }
-
-    void Device::createFrameResources(D3DPRESENT_PARAMETERS& params)
-    {
-        setViewportSize(params.BackBufferWidth, params.BackBufferHeight);
-    }
-
-    void Device::destroyFrameResources()
-    {
     }
 
     HRESULT Device::TestCooperativeLevel()
@@ -513,9 +272,6 @@ namespace gfx
 
     HRESULT Device::SetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9* pRenderTarget)
     {
-        D3DSURFACE_DESC desc;
-        pRenderTarget->GetDesc(&desc);
-        setViewportSize(desc.Width, desc.Height);
         return device->SetRenderTarget(RenderTargetIndex, pRenderTarget);
     }
 
@@ -526,9 +282,6 @@ namespace gfx
 
     HRESULT Device::SetDepthStencilSurface(IDirect3DSurface9* pNewZStencil)
     {
-        D3DSURFACE_DESC desc;
-        pNewZStencil->GetDesc(&desc);
-        setViewportSize(desc.Width, desc.Height);
         return device->SetDepthStencilSurface(pNewZStencil);
     }
 
@@ -539,10 +292,6 @@ namespace gfx
 
     HRESULT Device::BeginScene()
     {
-        D3DXMatrixIdentity(&world_mat);
-        D3DXMatrixIdentity(&view_mat);
-        D3DXMatrixIdentity(&proj_mat);
-
         resetCache();
 
         return device->BeginScene();
@@ -565,7 +314,6 @@ namespace gfx
 
     HRESULT Device::SetViewport(CONST D3DVIEWPORT9* pViewport)
     {
-        setViewportSize(pViewport->Width, pViewport->Height);
         return device->SetViewport(pViewport);
     }
 
@@ -630,13 +378,13 @@ namespace gfx
 
     HRESULT Device::DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT StartVertex, UINT PrimitiveCount)
     {
-        SetShaderConsts();
+        applyShaderConsts();
         return device->DrawPrimitive(PrimitiveType, StartVertex, PrimitiveCount);
     }
 
     HRESULT Device::DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT startIndex, UINT primCount)
     {
-        SetShaderConsts();
+        applyShaderConsts();
         return device->DrawIndexedPrimitive(PrimitiveType, BaseVertexIndex, MinVertexIndex, NumVertices, startIndex, primCount);
     }
 

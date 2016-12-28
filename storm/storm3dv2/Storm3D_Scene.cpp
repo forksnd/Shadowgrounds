@@ -395,8 +395,11 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 		device.SetDepthStencilSurface(originalDepthBuffer);
 }
 
-void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
-    gfx::Device& device = Storm3D2->GetD3DDevice();
+void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored)
+{
+    gfx::Renderer& renderer = Storm3D2->renderer;
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
 
     GFX_TRACE_SCOPE("Storm3D_Scene::renderRealScene");
     device.BeginScene();
@@ -698,11 +701,11 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 
     D3DXMATRIX dm;
     D3DXMatrixIdentity(&dm);
-    device.SetWorldMatrix(dm);
+    programManager.setWorldMatrix(dm);
     // Apply the original camera back!
-    device.SetViewMatrix(camera.GetViewMatrix());
-    device.SetProjectionMatrix(camera.GetProjectionMatrix());
-    device.CommitConstants();
+    programManager.setViewMatrix(camera.GetViewMatrix());
+    programManager.setProjectionMatrix(camera.GetProjectionMatrix());
+    programManager.commitConstants(device);
 
     // Render particles
     device.SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
@@ -750,7 +753,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 		if(!depth_lines.empty())
 		{
 			for(unsigned int i = 0; i < depth_lines.size(); ++i)
-				depth_lines[i]->Render(Storm3D2->renderer);
+				depth_lines[i]->Render(renderer);
 		}
 
 		if(!no_depth_lines.empty())
@@ -758,7 +761,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 			device.SetRenderState(D3DRS_ZENABLE,FALSE);
 
 			for(unsigned int i = 0; i < no_depth_lines.size(); ++i)
-				no_depth_lines[i]->Render(Storm3D2->renderer);
+				no_depth_lines[i]->Render(renderer);
 			
 			device.SetRenderState(D3DRS_ZENABLE,TRUE);
 		}
@@ -778,7 +781,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
         UINT        baseVtx = 0;
         Vertex_P3D* buffer = 0;
 
-        Storm3D2->renderer.lockDynVtx<Vertex_P3D>(vertexAmount, &buffer, &baseVtx);
+        renderer.lockDynVtx<Vertex_P3D>(vertexAmount, &buffer, &baseVtx);
 
         for (unsigned int i = 0; i < debugTriangles.size(); ++i)
         {
@@ -821,11 +824,11 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
             ++buffer;
         }
 
-        Storm3D2->renderer.unlockDynVtx();
+        renderer.unlockDynVtx();
 
-        device.SetStdProgram(gfx::Device::SSF_COLOR);
-        Storm3D2->renderer.SetFVF(FVF_P3D);
-        Storm3D2->renderer.SetDynVtxBuffer<Vertex_P3D>();
+        programManager.setStdProgram(device, gfx::ProgramManager::SSF_COLOR);
+        renderer.SetFVF(FVF_P3D);
+        renderer.SetDynVtxBuffer<Vertex_P3D>();
 
         device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
         device.SetRenderState(D3DRS_LIGHTING, FALSE);
@@ -846,9 +849,9 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
     //-- psd
     if(draw_bones)
     {
-        Storm3D2->renderer.SetDynVtxBuffer<Vertex_P3D>();
-        device.SetStdProgram(gfx::Device::SSF_COLOR);
-        Storm3D2->renderer.SetFVF(FVF_P3D);
+        renderer.SetDynVtxBuffer<Vertex_P3D>();
+        programManager.setStdProgram(device, gfx::ProgramManager::SSF_COLOR);
+        renderer.SetFVF(FVF_P3D);
 
         device.SetRenderState(D3DRS_ZENABLE, FALSE);
 
@@ -867,7 +870,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
                 UINT        base = 0;
                 Vertex_P3D* v = 0;
 
-                Storm3D2->renderer.lockDynVtx<Vertex_P3D>(2 * bone_count, &v, &base);
+                renderer.lockDynVtx<Vertex_P3D>(2 * bone_count, &v, &base);
                 for (unsigned int i = 0; i < bone_count; ++i)
                 {
                     Storm3D_Bone *b = mod->bones[i];
@@ -893,7 +896,7 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored) {
 
                     v += 2;
                 }
-                Storm3D2->renderer.unlockDynVtx();
+                renderer.unlockDynVtx();
 
                 // Render
                 device.DrawPrimitive(D3DPT_LINELIST, base, bone_count);
