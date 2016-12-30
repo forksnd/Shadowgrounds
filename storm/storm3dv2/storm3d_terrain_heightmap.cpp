@@ -414,7 +414,7 @@ struct Storm3D_TerrainHeightmapData
 
 		indexBuffer.reset(new Storm3D_TerrainLod(storm));
 		indexBuffer->generate(VERTEX_COUNT);
-		indexBuffer->setBlockRadius(max(positionDelta.x, positionDelta.y));
+		indexBuffer->setBlockRadius(std::max(positionDelta.x, positionDelta.y));
 
 		createVertexBuffer(textureDetail);
 		createHeightBuffers();

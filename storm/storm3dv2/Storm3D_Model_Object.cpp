@@ -298,12 +298,12 @@ const AABB &Storm3D_Model_Object::GetBoundingBox()
 		for(int i = 0; i < 8; i++)
 		{
 			mx.TransformVector( v[i] );
-			bbox.mmin.x = min(bbox.mmin.x, v[i].x);
-			bbox.mmin.y = min(bbox.mmin.y, v[i].y);
-			bbox.mmin.z = min(bbox.mmin.z, v[i].z);
-			bbox.mmax.x = max(bbox.mmax.x, v[i].x);
-			bbox.mmax.y = max(bbox.mmax.y, v[i].y);
-			bbox.mmax.z = max(bbox.mmax.z, v[i].z);
+			bbox.mmin.x = std::min(bbox.mmin.x, v[i].x);
+			bbox.mmin.y = std::min(bbox.mmin.y, v[i].y);
+			bbox.mmin.z = std::min(bbox.mmin.z, v[i].z);
+			bbox.mmax.x = std::max(bbox.mmax.x, v[i].x);
+			bbox.mmax.y = std::max(bbox.mmax.y, v[i].y);
+			bbox.mmax.z = std::max(bbox.mmax.z, v[i].z);
 		}
 
 		bounding_box = bbox;

@@ -300,10 +300,10 @@ void Storm3D_Mesh_CollisionTable::ReBuild(Storm3D_Mesh *mesh)
 
 		//tree->insert(&face, face.sphere.position, face.sphere.radius);
 
-		float mmin = min(face.vertex0.y, face.vertex1.y);
-		mmin = min(mmin, face.vertex2.y);
-		float mmax = max(face.vertex0.y, face.vertex1.y);
-		mmax = max(mmax, face.vertex2.y);
+		float mmin = std::min(face.vertex0.y, face.vertex1.y);
+		mmin = std::min(mmin, face.vertex2.y);
+		float mmax = std::max(face.vertex0.y, face.vertex1.y);
+		mmax = std::max(mmax, face.vertex2.y);
 
 		tree->insert(face, face.sphere.position, face.sphere.radius, mmin, mmax);
 	}

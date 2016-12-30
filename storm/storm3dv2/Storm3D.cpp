@@ -173,10 +173,10 @@ void Storm3D::createTargets()
         renderer.device.CreateTexture(colorSecondaryTargetSize.x, colorSecondaryTargetSize.y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &colorSecondaryTarget, 0);
 	}
 
-	depthTargetSize.x = max(depthTargetSize.x, colorTargetSize.x);
-	depthTargetSize.x = max(depthTargetSize.x, colorSecondaryTargetSize.x);
-	depthTargetSize.y = max(depthTargetSize.y, colorTargetSize.y);
-	depthTargetSize.y = max(depthTargetSize.y, colorSecondaryTargetSize.y);
+	depthTargetSize.x = std::max(depthTargetSize.x, colorTargetSize.x);
+	depthTargetSize.x = std::max(depthTargetSize.x, colorSecondaryTargetSize.x);
+	depthTargetSize.y = std::max(depthTargetSize.y, colorTargetSize.y);
+	depthTargetSize.y = std::max(depthTargetSize.y, colorSecondaryTargetSize.y);
 
 	if(depthTargetSize.x > 0 && depthTargetSize.y > 0)
         renderer.device.CreateDepthStencilSurface(depthTargetSize.x, depthTargetSize.y, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, D3DMULTISAMPLE_NONE, FALSE, &depthTarget, 0);

@@ -8,6 +8,11 @@ namespace gfx
 {
     struct Renderer
     {
+        enum
+        {
+            NUM_FRAMES_DELAY = 2,
+        };
+
         Device device;
         ProgramManager programManager;
 
@@ -45,8 +50,8 @@ namespace gfx
 
         void setFVF(FVF vtxFmt);
 
-        void drawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, uint32_t PrimitiveCount, const void* vertexData, uint32_t Stride);
-        void drawQuads(uint32_t baseVertexIndex, uint32_t QuadCount);
+        void drawPrimitiveUP(D3DPRIMITIVETYPE primitiveType, uint32_t primitiveCount, const void* vertexData, uint32_t stride);
+        void drawQuads(uint32_t baseVertexIndex, uint32_t quadCount);
 
     private:
         void createPersistantResources();

@@ -3,14 +3,18 @@
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <D3Dcompiler.h>
-#include <stdint.h>
-#include "strsafe.h"
 
 #include <VertexFormats.h>
 
-#define NUM_FRAMES_DELAY 2
+//--------------------------------------------
+//TODO: move to common header
+#include <stdint.h>
+#include <algorithm>
+#include "strsafe.h"
 
-#define MAX_CONSTS 224
+#undef min
+#undef max
+//--------------------------------------------
 
 #define USE_PIX_MARKERS
 
@@ -26,6 +30,11 @@ namespace gfx
 
     struct Device
     {
+        enum
+        {
+            MAX_CONSTS = 224,
+        };
+
         struct Stats
         {
             uint32_t numTriangles;

@@ -321,36 +321,40 @@ namespace gfx
         device.SetVertexDeclaration(vertexFormats[vtxFmt]);
     }
 
-    void Renderer::drawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, uint32_t PrimitiveCount, const void* vertexData, uint32_t Stride)
+    void Renderer::drawPrimitiveUP(D3DPRIMITIVETYPE primitiveType, uint32_t primitiveCount, const void* vertexData, uint32_t stride)
     {
         void* vertices = NULL;
         uint32_t  baseVertex = 0;
-        uint32_t  VertexCount = 0;
+        uint32_t  vertexCount = 0;
 
-        switch (PrimitiveType)
+        switch (primitiveType)
         {
         case D3DPT_TRIANGLESTRIP:
-            VertexCount = PrimitiveCount + 2;
+            vertexCount = primitiveCount + 2;
             break;
         case D3DPT_TRIANGLELIST:
-            VertexCount = 3 * PrimitiveCount;
+            vertexCount = 3 * primitiveCount;
             break;
         default:
             assert(0);
         }
 
-        lockDynVtx(VertexCount, Stride, &vertices, &baseVertex);
-        memcpy(vertices, vertexData, Stride*VertexCount);
+        lockDynVtx(vertexCount, stride, &vertices, &baseVertex);
+        memcpy(vertices, vertexData, stride*vertexCount);
         unlockDynVtx();
 
-        setDynVtxBuffer(Stride);
-        device.DrawPrimitive(PrimitiveType, baseVertex, PrimitiveCount);
+        setDynVtxBuffer(stride);
+        device.DrawPrimitive(primitiveType, baseVertex, primitiveCount);
     }
 
-    void Renderer::drawQuads(uint32_t baseVertexIndex, uint32_t QuadCount)
+    void Renderer::drawQuads(uint32_t baseVertexIndex, uint32_t quadCount)
     {
+        if (quadCount == 0)
+            return;
+
         //TODO: make batches as indices are not always enough
+        quadCount = std::min<uint32_t>(MAX_QUAD_COUNT, quadCount);
         device.SetIndices(indices.indices);
-        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVertexIndex, 0, QuadCount * 4, quadBaseIndex, QuadCount * 2);
+        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVertexIndex, 0, quadCount * 4, quadBaseIndex, quadCount * 2);
     }
 }

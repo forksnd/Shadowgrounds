@@ -213,9 +213,6 @@
     <ClCompile Include="Storm3D_ParticleSystem.cpp">
       <Filter>Source Files\particle</Filter>
     </ClCompile>
-    <ClCompile Include="Storm3D_ParticleSystem_PMH.cpp">
-      <Filter>Source Files\particle</Filter>
-    </ClCompile>
     <ClCompile Include="Storm3D_ProceduralManager.cpp">
       <Filter>Source Files\misc</Filter>
     </ClCompile>

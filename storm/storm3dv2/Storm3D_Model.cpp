@@ -2284,12 +2284,12 @@ void Storm3D_Model::GetVolume(VC3 &min_, VC3 &max_)
 			setValues = true;
 			VC3 pos = tm.GetTransformedVector(vertexBuffer[i].position);
 
-			min_.x = min(min_.x, pos.x);
-			min_.y = min(min_.y, pos.y);
-			min_.z = min(min_.z, pos.z);
-			max_.x = max(max_.x, pos.x);
-			max_.y = max(max_.y, pos.y);
-			max_.z = max(max_.z, pos.z);
+			min_.x = std::min(min_.x, pos.x);
+			min_.y = std::min(min_.y, pos.y);
+			min_.z = std::min(min_.z, pos.z);
+			max_.x = std::max(max_.x, pos.x);
+			max_.y = std::max(max_.y, pos.y);
+			max_.z = std::max(max_.z, pos.z);
 		}
 	}
 
@@ -2344,12 +2344,12 @@ void Storm3D_Model::GetVolumeApproximation(VC3 &min_, VC3 &max_)
 				position -= oobb.axes[2] * oobb.extents.z;
 
 			tm.TransformVector(position);
-			min_.x = min(min_.x, position.x);
-			min_.y = min(min_.y, position.y);
-			min_.z = min(min_.z, position.z);
-			max_.x = max(max_.x, position.x);
-			max_.y = max(max_.y, position.y);
-			max_.z = max(max_.z, position.z);
+			min_.x = std::min(min_.x, position.x);
+			min_.y = std::min(min_.y, position.y);
+			min_.z = std::min(min_.z, position.z);
+			max_.x = std::max(max_.x, position.x);
+			max_.y = std::max(max_.y, position.y);
+			max_.z = std::max(max_.z, position.z);
 		}
 
 		setValues = true;
@@ -2661,8 +2661,8 @@ void Storm3D_Model::SetScale(const VC3 &_scale)
 	// Set update flag
 	mx_update=true;
 
-	max_scale = max(scale.x, scale.y);
-	max_scale = max(max_scale, scale.z);
+	max_scale = std::max(scale.x, scale.y);
+	max_scale = std::max(max_scale, scale.z);
 }
 
 void Storm3D_Model::ResetObjectLights() 
@@ -3948,12 +3948,12 @@ const AABB &Storm3D_Model::GetBoundingBox() const
 			{
 				tm.TransformVector(v[i]);
 
-				bounding_box.mmin.x = min(bounding_box.mmin.x, v[i].x);
-				bounding_box.mmin.y = min(bounding_box.mmin.y, v[i].y);
-				bounding_box.mmin.z = min(bounding_box.mmin.z, v[i].z);
-				bounding_box.mmax.x = max(bounding_box.mmax.x, v[i].x);
-				bounding_box.mmax.y = max(bounding_box.mmax.y, v[i].y);
-				bounding_box.mmax.z = max(bounding_box.mmax.z, v[i].z);
+				bounding_box.mmin.x = std::min(bounding_box.mmin.x, v[i].x);
+				bounding_box.mmin.y = std::min(bounding_box.mmin.y, v[i].y);
+				bounding_box.mmin.z = std::min(bounding_box.mmin.z, v[i].z);
+				bounding_box.mmax.x = std::max(bounding_box.mmax.x, v[i].x);
+				bounding_box.mmax.y = std::max(bounding_box.mmax.y, v[i].y);
+				bounding_box.mmax.z = std::max(bounding_box.mmax.z, v[i].z);
 			}
 		}
 

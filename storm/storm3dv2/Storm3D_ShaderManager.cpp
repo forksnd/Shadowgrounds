@@ -583,20 +583,20 @@ void Storm3D_ShaderManager::SetShaders(
         ambient += model_ambient_color + ambient_force_color;
         //ambient += object_ambient_color;
 
-        ambient.x = max(ambient.x, object_ambient_color.x);
-        ambient.y = max(ambient.y, object_ambient_color.y);
-        ambient.z = max(ambient.z, object_ambient_color.z);
+        ambient.x = std::max(ambient.x, object_ambient_color.x);
+        ambient.y = std::max(ambient.y, object_ambient_color.y);
+        ambient.z = std::max(ambient.z, object_ambient_color.z);
 
 #ifdef HACKY_SG_AMBIENT_LIGHT_FIX
         // EVIL HAX around too dark characters etc.
         const float MIN_AMBIENT_LIGHT = 0.05f;
-        ambient.x = max(ambient.x, MIN_AMBIENT_LIGHT);
-        ambient.y = max(ambient.y, MIN_AMBIENT_LIGHT);
-        ambient.z = max(ambient.z, MIN_AMBIENT_LIGHT);
+        ambient.x = std::max(ambient.x, MIN_AMBIENT_LIGHT);
+        ambient.y = std::max(ambient.y, MIN_AMBIENT_LIGHT);
+        ambient.z = std::max(ambient.z, MIN_AMBIENT_LIGHT);
 
-        ambient.x = min(ambient.x, 1.0f);
-        ambient.y = min(ambient.y, 1.0f);
-        ambient.z = min(ambient.z, 1.0f);
+        ambient.x = std::min(ambient.x, 1.0f);
+        ambient.y = std::min(ambient.y, 1.0f);
+        ambient.z = std::min(ambient.z, 1.0f);
 #else
         if (ambient.x > 1.f)
             ambient.x = 1.f;

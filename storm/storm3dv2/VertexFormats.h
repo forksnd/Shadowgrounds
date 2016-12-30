@@ -3,6 +3,7 @@
 #pragma once
 
 #include <d3d9.h>
+#include <stdint.h>
 #include <DatatypeDef.h>
 
 enum FVF //Fixed Vertex Format

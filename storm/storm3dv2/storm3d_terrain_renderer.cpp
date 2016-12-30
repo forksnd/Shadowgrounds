@@ -1211,8 +1211,8 @@ t->Apply(4);
 		renderSize.x = screen.width;
 		renderSize.y = screen.height;
 		glowSize = renderSize / 2;
-		glowSize.x = min(512, glowSize.x);
-		glowSize.y = min(384, glowSize.y);
+		glowSize.x = std::min(512, glowSize.x);
+		glowSize.y = std::min(384, glowSize.y);
 
 		fakeSize = renderSize / 2;
 
@@ -2002,7 +2002,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 			// this renders bullet trails, fire etc.
 			if(data->particleSystem && data->renderParticles)
 			{
-				data->particleSystem->RenderImp(&scene, false);
+				data->particleSystem->Render(&scene, false);
 				frozenbyte::storm::setCulling(device, D3DCULL_CCW);
 			}
 
@@ -2319,7 +2319,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 				if(data->renderModels)
 					data->models.renderDistortion(scene);
 
-				data->particleSystem->RenderImp(&scene, true);
+				data->particleSystem->Render(&scene, true);
 				frozenbyte::storm::setCulling(device, D3DCULL_CCW);
 			}
 

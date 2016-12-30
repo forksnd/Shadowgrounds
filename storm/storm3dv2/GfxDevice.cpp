@@ -454,8 +454,8 @@ namespace gfx
 
         memcpy(vertex_consts + StartRegister, pConstantData, 4 * sizeof(float)*Vector4fCount);
 
-        vconsts_range_min = min(vconsts_range_min, StartRegister);
-        vconsts_range_max = max(vconsts_range_max, StartRegister + Vector4fCount);
+        vconsts_range_min = std::min(vconsts_range_min, StartRegister);
+        vconsts_range_max = std::max(vconsts_range_max, StartRegister + Vector4fCount);
 
         return S_OK;
     }
@@ -530,8 +530,8 @@ namespace gfx
 
         memcpy(pixel_consts + StartRegister, pConstantData, 4 * sizeof(float)*Vector4fCount);
 
-        pconsts_range_min = min(pconsts_range_min, StartRegister);
-        pconsts_range_max = max(pconsts_range_max, StartRegister + Vector4fCount);
+        pconsts_range_min = std::min(pconsts_range_min, StartRegister);
+        pconsts_range_max = std::max(pconsts_range_max, StartRegister + Vector4fCount);
 
         return S_OK;
     }

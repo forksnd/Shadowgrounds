@@ -707,7 +707,8 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored)
     if (terrains.empty())
     {
         GFX_TRACE_SCOPE("Particle system render");
-        particlesystem->Render(this);
+        particlesystem->Render(this, false);
+        particlesystem->Clear();
     }
     device.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 
@@ -1397,13 +1398,11 @@ void Storm3D_Scene::SetFogParameters(bool _fog_active,const COL &color,float fog
 //------------------------------------------------------------------
 void Storm3D_Scene::ReleaseDynamicDXBuffers()
 {
-	particlesystem->ReleaseDynamicDXBuffers();
 }
 
 
 void Storm3D_Scene::ReCreateDynamicDXBuffers()
 {
-	particlesystem->ReCreateDynamicDXBuffers();
 }
 
 

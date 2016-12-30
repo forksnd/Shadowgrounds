@@ -154,10 +154,10 @@ void Storm3D_SpotlightShared::updateMatricesOffCenter(const D3DXMATRIX &cameraVi
 		float d3 = p3.GetLength();
 		float d4 = p4.GetLength();
 		float maxRange = 0.0f;
-		maxRange = MAX( maxRange, d1 );
-		maxRange = MAX( maxRange, d2 );
-		maxRange = MAX( maxRange, d3 );
-		maxRange = MAX( maxRange, d4 );
+		maxRange = std::max( maxRange, d1 );
+		maxRange = std::max( maxRange, d2 );
+		maxRange = std::max( maxRange, d3 );
+		maxRange = std::max( maxRange, d4 );
 		//maxRange = sqrtf(maxRange);
 
 		// Calculate FOV of the camera.
@@ -169,10 +169,10 @@ void Storm3D_SpotlightShared::updateMatricesOffCenter(const D3DXMATRIX &cameraVi
 		float t2 = camVec.GetDotWith( p2 ) / d2;
 		float t3 = camVec.GetDotWith( p3 ) / d3;
 		float t4 = camVec.GetDotWith( p4 ) / d4;
-		minDot = MIN( minDot, t1 );
-		minDot = MIN( minDot, t2 );
-		minDot = MIN( minDot, t3 );
-		minDot = MIN( minDot, t4 );
+		minDot = std::min( minDot, t1 );
+		minDot = std::min( minDot, t2 );
+		minDot = std::min( minDot, t3 );
+		minDot = std::min( minDot, t4 );
 		float maxAngle = acosf( minDot );
 
 		// Place camera to light position
@@ -358,10 +358,10 @@ namespace {
 			int x = int(result.x * screenSize.x);
 			int y = int(result.y * screenSize.y);
 
-			maxX = max(x, maxX);
-			maxY = max(y, maxY);
-			minX = min(x, minX);
-			minY = min(y, minY);
+			maxX = std::max(x, maxX);
+			maxY = std::max(y, maxY);
+			minX = std::min(x, minX);
+			minY = std::min(y, minY);
 		}
 	}
 
@@ -599,15 +599,15 @@ bool Storm3D_SpotlightShared::setScissorRect(Storm3D_Camera &camera, const VC2I 
 			//if(y < -1 || x > screenSize.y)
 			//	continue;
 
-			x = max(x, 0);
-			y = max(y, 0);
-			x = min(x, screenSize.x - 1);
-			y = min(y, screenSize.y - 1);
+			x = std::max(x, 0);
+			y = std::max(y, 0);
+			x = std::min(x, screenSize.x - 1);
+			y = std::min(y, screenSize.y - 1);
 
-			maxX = max(x, maxX);
-			maxY = max(y, maxY);
-			minX = min(x, minX);
-			minY = min(y, minY);
+			maxX = std::max(x, maxX);
+			maxY = std::max(y, maxY);
+			minX = std::min(x, minX);
+			minY = std::min(y, minY);
 
 			/*
 			// Visualize clipped polygons

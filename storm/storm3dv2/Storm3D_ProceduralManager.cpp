@@ -234,7 +234,9 @@ struct Storm3D_ProceduralManager::Data
 
 	void init(CComPtr<IDirect3DTexture9> target_, CComPtr<IDirect3DTexture9> offsetTarget_)
 	{
-		gfx::Device &device = storm.GetD3DDevice();
+        gfx::Renderer& renderer = storm.renderer;
+		gfx::Device& device = renderer.device;
+
 		target = target_;
 		offsetTarget = offsetTarget_;
 
