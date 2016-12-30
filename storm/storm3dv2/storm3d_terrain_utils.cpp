@@ -13,8 +13,6 @@
 #include "storm3d_texture.h"
 #include "IStorm3D_Logger.h"
 
-extern int storm3d_dip_calls;
-
 #include "../../filesystem/input_stream.h"
 #include "../../filesystem/file_package_manager.h"
 #include "../../util/Debug_MemoryManager.h"
@@ -820,8 +818,6 @@ void IndexBuffer::render(gfx::Device& device, int faceAmount, int maxIndex, int 
 	device.SetIndices(buffer);
 	
 	device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, vertexOffset, 0, maxIndex, startIndex, faceAmount);
-
-	++storm3d_dip_calls;
 }
 
 IndexBuffer::operator bool() const

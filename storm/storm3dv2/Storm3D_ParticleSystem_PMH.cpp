@@ -17,8 +17,6 @@
 #include "../../util/Debug_MemoryManager.h"
 #include <d3dx9.h>
 
-extern int storm3d_dip_calls;
-
 void Storm3D_ParticleSystem::PointArray::init(Storm3D* Storm3D2) 
 {
 }
@@ -434,16 +432,14 @@ void Storm3D_ParticleSystem::QuadArray::render(gfx::Renderer& renderer, Storm3D_
 
 	// Render the buffer
     programManager.setStdProgram(device, gfx::ProgramManager::SSF_COLOR|gfx::ProgramManager::SSF_TEXTURE);
-	renderer.SetFVF(FVF_P3DUV2);
+	renderer.setFVF(FVF_P3DUV2);
 	
 	device.SetStreamSource(0,m_vb,0,stride);
 	device.SetIndices(m_ib);
 	
 	// Render as indexed primitive
 	device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST,0,0,m_numParts * 4,0,m_numParts * 2);
-	scene->AddPolyCounter(m_numParts * 2);
 
-	++storm3d_dip_calls;
 	device.SetTransform(D3DTS_VIEW,&mv);
 }
 
@@ -864,14 +860,12 @@ void Storm3D_ParticleSystem::LineArray::render(gfx::Renderer& renderer, Storm3D_
 
     // Render the buffer
     programManager.setStdProgram(device, gfx::ProgramManager::SSF_COLOR | gfx::ProgramManager::SSF_TEXTURE);
-    renderer.SetFVF(FVF_P3DUV2);
+    renderer.setFVF(FVF_P3DUV2);
 
 	device.SetStreamSource(0,m_vb,0,stride);
 	device.SetIndices(m_ib);
 	
 	// Render as indexed primitive
 	device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST,0,0,m_numParts * 4,0,m_numParts * 2);
-	scene->AddPolyCounter(m_numParts * 2);
-	++storm3d_dip_calls;
 }
 

@@ -482,25 +482,19 @@ void Storm3D_TerrainLod::render(Storm3D_Scene &scene, int subMask, float range, 
     gfx::IndexStorage16& indices = data->storm.renderer.getIndexStorage16();
     device.SetIndices(indices.indices);
 
-	// Render as whole
-	if(subMask == -1)
-	{
-		LodIndexBuffer &indexBuffer = data->lodBuffers[lod].fullBuffers[index];
+    // Render as whole
+    if (subMask == -1)
+    {
+        LodIndexBuffer &indexBuffer = data->lodBuffers[lod].fullBuffers[index];
         assert(indexBuffer.faceAmount);
         device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, data->maxVertex, indexBuffer.baseIndex, indexBuffer.faceAmount);
-
-		scene.AddPolyCounter(indexBuffer.faceAmount);
-	}
-	else
-	{
-		LodIndexBuffer &indexBuffer = data->lodBuffers[lod].centerBuffers[subMask];
+    }
+    else
+    {
+        LodIndexBuffer &indexBuffer = data->lodBuffers[lod].centerBuffers[subMask];
         device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, data->maxVertex, indexBuffer.baseIndex, indexBuffer.faceAmount);
 
-		scene.AddPolyCounter(indexBuffer.faceAmount);
-
-		LodIndexBuffer &linkBuffer = data->lodBuffers[lod].linkBuffers[index];
+        LodIndexBuffer &linkBuffer = data->lodBuffers[lod].linkBuffers[index];
         device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, data->maxVertex, linkBuffer.baseIndex, linkBuffer.faceAmount);
-
-		scene.AddPolyCounter(linkBuffer.faceAmount);
-	}
+    }
 }

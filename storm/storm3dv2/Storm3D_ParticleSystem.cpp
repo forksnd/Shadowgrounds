@@ -178,11 +178,10 @@ void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion)
 	}
 
 	vertexBuffer[index].apply(device, 0);
-    renderer.setQuadIndices();
 
     programManager.setStdProgram(device, gfx::ProgramManager::SSF_COLOR|gfx::ProgramManager::SSF_TEXTURE);
     programManager.setProjectionMatrix(scene->camera.GetProjectionMatrix());
-    renderer.SetFVF(FVF_P3DUV2);
+    renderer.setFVF(FVF_P3DUV2);
 
 	// Render arrays
 	{
@@ -203,10 +202,8 @@ void Storm3D_ParticleSystem::RenderImp(Storm3D_Scene *scene, bool distortion)
 					if(particleAmount >= allocateIndexAmount / 6)
 						particleAmount = allocateIndexAmount / 6 - 1;
 
-                    device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, vertexOffset + oldVertexBufferOffset, 0, particleAmount * 4, Storm3D2->renderer.baseQuadIndex(), particleAmount * 2);
+                    renderer.drawQuads(vertexOffset + oldVertexBufferOffset, particleAmount);
 				}
-
-				scene->AddPolyCounter(particleAmount);
 			}
 		}
 	}

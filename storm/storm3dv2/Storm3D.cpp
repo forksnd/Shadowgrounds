@@ -54,7 +54,6 @@ extern int storm3d_mesh_allocs;
 extern int storm3d_material_allocs;
 extern int storm3d_bone_allocs;
 extern int storm3d_texture_allocs;
-extern int storm3d_dip_calls;
 extern int storm3d_model_objects_tested;
 extern int storm3d_model_objects_rough_passed;
 extern int storm3d_model_objects_passed;
@@ -1008,7 +1007,7 @@ char *Storm3D::GetPrintableStatusInfo()
 	  sprintf(buf, "Storm3D status info follows:\nModel allocation amounts mismatch, internal error.\n");
 	} else {
 		sprintf(buf, "Models allocated: %d\nModel meshes allocated: %d\nModel loads so far: %d\nBone loads so far: %d\nBone animations allocated: %d\nModel objects allocated: %d\nMeshes allocated: %d\nMaterials allocated: %d\nBones allocated: %d\nTextures allocated: %d\nDIP calls %d\nObjects tested %d\nObjects rough passed %d\nObjects passed %d\n\n",
-			allocated_models, allocated_meshes, storm3d_model_loads, storm3d_model_bone_loads, storm3d_model_boneanimation_allocs, storm3d_model_objects_created, storm3d_mesh_allocs, storm3d_material_allocs, storm3d_bone_allocs, storm3d_texture_allocs, storm3d_dip_calls, storm3d_model_objects_tested, storm3d_model_objects_rough_passed, storm3d_model_objects_passed);
+			allocated_models, allocated_meshes, storm3d_model_loads, storm3d_model_bone_loads, storm3d_model_boneanimation_allocs, storm3d_model_objects_created, storm3d_mesh_allocs, storm3d_material_allocs, storm3d_bone_allocs, storm3d_texture_allocs, renderer.device.stats.numDraws, storm3d_model_objects_tested, storm3d_model_objects_rough_passed, storm3d_model_objects_passed);
 	}
 
   return buf;

@@ -193,10 +193,9 @@ void Storm3D_Scene_PicList_Font::Render()
 
                     // Render it
                     programManager.setStdProgram(device, gfx::ProgramManager::SSF_2D_POS | gfx::ProgramManager::SSF_COLOR | gfx::ProgramManager::SSF_TEXTURE);
-                    renderer.SetFVF(FVF_P2DUV);
+                    renderer.setFVF(FVF_P2DUV);
 
-                    renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vx, sizeof(Vertex_P2DUV));
-                    scene->AddPolyCounter(2);
+                    renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vx, sizeof(Vertex_P2DUV));
 				}
 			}
 

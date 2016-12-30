@@ -89,7 +89,7 @@ LPD3DVERTEXELEMENT9 vertexFormatDescs[FVF_COUNT] = {
 
 namespace gfx
 {
-    bool Renderer::init(UINT adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params)
+    bool Renderer::init(uint32_t adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params)
     {
         if (!device.init(adapter, hWnd, params))
         {
@@ -174,6 +174,8 @@ namespace gfx
             *buffer++ = base + 3;
         }
         indices.unlock();
+
+        quadBaseIndex = indices.baseIndex(quadIdxAlloc);
     }
 
     void Renderer::destroyPersistantResources()
@@ -246,14 +248,14 @@ namespace gfx
         frameIB16BytesUsed = 0;
     }
 
-    void Renderer::SetDynIdx16Buffer()
+    void Renderer::setDynIdx16Buffer()
     {
         device.SetIndices(frameIB16[frameNumber]);
     }
 
-    bool Renderer::lockDynIdx16(UINT count, uint16_t** ptr, UINT* baseIndex)
+    bool Renderer::lockDynIdx16(uint32_t count, uint16_t** ptr, uint32_t* baseIndex)
     {
-        UINT sz = count * sizeof(uint16_t);
+        uint32_t sz = count * sizeof(uint16_t);
 
         assert(frameIB16BytesUsed % sizeof(uint16_t) == 0);
 
@@ -278,15 +280,15 @@ namespace gfx
         frameIB16[frameNumber]->Unlock();
     }
 
-    void Renderer::SetDynVtxBuffer(UINT Stride)
+    void Renderer::setDynVtxBuffer(uint32_t Stride)
     {
         device.SetStreamSource(0, frameVB[frameNumber], 0, Stride);
     }
 
-    bool Renderer::lockDynVtx(UINT count, UINT stride, void** ptr, UINT* baseVertex)
+    bool Renderer::lockDynVtx(uint32_t count, uint32_t stride, void** ptr, uint32_t* baseVertex)
     {
-        UINT sz = count*stride;
-        UINT rem;
+        uint32_t sz = count*stride;
+        uint32_t rem;
 
         rem = frameVBBytesUsed % stride;
         rem = rem == 0 ? 0 : stride - rem;
@@ -314,26 +316,16 @@ namespace gfx
         frameVB[frameNumber]->Unlock();
     }
 
-    void Renderer::SetFVF(FVF vtxFmt)
+    void Renderer::setFVF(FVF vtxFmt)
     {
         device.SetVertexDeclaration(vertexFormats[vtxFmt]);
     }
 
-    void Renderer::setQuadIndices()
-    {
-        device.SetIndices(indices.indices);
-    }
-
-    uint32_t Renderer::baseQuadIndex()
-    {
-        return indices.baseIndex(quadIdxAlloc);
-    }
-
-    void Renderer::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT PrimitiveCount, CONST void* vertexData, UINT Stride)
+    void Renderer::drawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, uint32_t PrimitiveCount, const void* vertexData, uint32_t Stride)
     {
         void* vertices = NULL;
-        UINT  baseVertex = 0;
-        UINT  VertexCount = 0;
+        uint32_t  baseVertex = 0;
+        uint32_t  VertexCount = 0;
 
         switch (PrimitiveType)
         {
@@ -351,7 +343,14 @@ namespace gfx
         memcpy(vertices, vertexData, Stride*VertexCount);
         unlockDynVtx();
 
-        SetDynVtxBuffer(Stride);
+        setDynVtxBuffer(Stride);
         device.DrawPrimitive(PrimitiveType, baseVertex, PrimitiveCount);
+    }
+
+    void Renderer::drawQuads(uint32_t baseVertexIndex, uint32_t QuadCount)
+    {
+        //TODO: make batches as indices are not always enough
+        device.SetIndices(indices.indices);
+        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVertexIndex, 0, QuadCount * 4, quadBaseIndex, QuadCount * 2);
     }
 }

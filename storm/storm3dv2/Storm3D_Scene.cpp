@@ -38,10 +38,6 @@
 #undef min
 #undef max
 
-extern int storm3d_dip_calls;
-
-
-
 //------------------------------------------------------------------
 // Storm3D_Scene::Storm3D_Scene
 //------------------------------------------------------------------
@@ -117,7 +113,6 @@ void Storm3D_Scene::RenderSceneWithParams(bool flip,bool disable_hsr, bool updat
 {
     GFX_TRACE_SCOPE("Storm3D_Scene::RenderSceneWithParams");
     gfx::Device& device = Storm3D2->GetD3DDevice();
-    storm3d_dip_calls = 0;
 
 	// Restore D3D-device if lost
 	if (!Storm3D2->RestoreDeviceIfLost()) 
@@ -827,8 +822,8 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored)
         renderer.unlockDynVtx();
 
         programManager.setStdProgram(device, gfx::ProgramManager::SSF_COLOR);
-        renderer.SetFVF(FVF_P3D);
-        renderer.SetDynVtxBuffer<Vertex_P3D>();
+        renderer.setFVF(FVF_P3D);
+        renderer.setDynVtxBuffer<Vertex_P3D>();
 
         device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
         device.SetRenderState(D3DRS_LIGHTING, FALSE);
@@ -849,9 +844,9 @@ void Storm3D_Scene::renderRealScene(bool flip, bool render_mirrored)
     //-- psd
     if(draw_bones)
     {
-        renderer.SetDynVtxBuffer<Vertex_P3D>();
         programManager.setStdProgram(device, gfx::ProgramManager::SSF_COLOR);
-        renderer.SetFVF(FVF_P3D);
+        renderer.setDynVtxBuffer<Vertex_P3D>();
+        renderer.setFVF(FVF_P3D);
 
         device.SetRenderState(D3DRS_ZENABLE, FALSE);
 
@@ -1421,10 +1416,10 @@ extern float reflection_height;
 //------------------------------------------------------------------
 int Storm3D_Scene::RenderScene(bool present)
 {
+    gfx::Device &device = Storm3D2->GetD3DDevice();
+
     GFX_TRACE_SCOPE("RenderScene");
 	// Reset polygon counter
-	poly_counter = 0;
-	
 	{
 		static int haxValue = 0;
 		++haxValue;
@@ -1438,7 +1433,6 @@ int Storm3D_Scene::RenderScene(bool present)
 			frozenbyte::storm::setInverseCulling(true);
 			active_visibility = 1;
 
-			gfx::Device &device = Storm3D2->GetD3DDevice();
 			Storm3D_Camera camback = camera;
 			camback.Apply();
 
@@ -1560,7 +1554,7 @@ int Storm3D_Scene::RenderScene(bool present)
 	RenderSceneWithParams(present, false);
 
 	// Return polygon count
-	return poly_counter;
+	return device.stats.numTriangles;
 }
 
 int Storm3D_Scene::RenderSceneToDynamicTexture(IStorm3D_Texture *target,int face)
@@ -1573,9 +1567,6 @@ int Storm3D_Scene::RenderSceneToDynamicTexture(IStorm3D_Texture *target,int face
 	//enableLocalReflection = true;
 	//frozenbyte::storm::setInverseCulling(true);
 	//active_visibility = 1;
-
-	// Reset polygon counter
-	poly_counter=0;
 
 	//IStorm3D_Texture * oldTarget = Storm3D2->getRenderTarget( face );
 
@@ -1630,7 +1621,7 @@ int Storm3D_Scene::RenderSceneToDynamicTexture(IStorm3D_Texture *target,int face
 
 	// Set rendertarget back to backbuffer
 	Storm3D2->SetRenderTarget( NULL );
-	return poly_counter;
+	return Storm3D2->renderer.device.stats.numTriangles;
 }
 
 

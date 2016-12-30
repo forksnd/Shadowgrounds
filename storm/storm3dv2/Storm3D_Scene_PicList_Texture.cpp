@@ -93,7 +93,7 @@ void Storm3D_Scene_PicList_Picture::Render()
 
 	// Render it
     programManager.setStdProgram(device, gfx::ProgramManager::SSF_2D_POS | gfx::ProgramManager::SSF_COLOR | gfx::ProgramManager::SSF_TEXTURE);
-    renderer.SetFVF(FVF_P2DUV);
+    renderer.setFVF(FVF_P2DUV);
 
     Storm3D_SurfaceInfo& si = Storm3D2->GetScreenSize();
     VC2 pixsz = VC2(2.0f/si.width, 2.0f/si.height);
@@ -117,8 +117,7 @@ void Storm3D_Scene_PicList_Picture::Render()
             customShape->vertices[i].p.x = frozenbyte::storm::convX_SCtoDS(customShape->vertices[i].p.x-0.5f, pixsz.x);
             customShape->vertices[i].p.y = frozenbyte::storm::convY_SCtoDS(customShape->vertices[i].p.y-0.5f, pixsz.y);
         }
-		renderer.DrawPrimitiveUP(D3DPT_TRIANGLELIST,customShape->numVertices/3,customShape->vertices,sizeof(Vertex_P2DUV));
-		scene->AddPolyCounter(customShape->numVertices/3);
+		renderer.drawPrimitiveUP(D3DPT_TRIANGLELIST,customShape->numVertices/3,customShape->vertices,sizeof(Vertex_P2DUV));
 	}
 	// render quad
 	else
@@ -161,8 +160,7 @@ void Storm3D_Scene_PicList_Picture::Render()
             vx[i].p.y = frozenbyte::storm::convY_SCtoDS(vx[i].p.y-0.5f, pixsz.y);
         }
 
-		renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(Vertex_P2DUV));
-		scene->AddPolyCounter(2);
+		renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(Vertex_P2DUV));
 	}
 
 	if(material)
@@ -252,10 +250,9 @@ void Storm3D_Scene_PicList_Picture3D::Render()
             // Render it (with Z buffer read)
 			device.SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 			programManager.setStdProgram(device, gfx::ProgramManager::SSF_2D_POS|gfx::ProgramManager::SSF_COLOR|gfx::ProgramManager::SSF_TEXTURE);
-			renderer.SetFVF(FVF_P2DUV);
+			renderer.setFVF(FVF_P2DUV);
 
-			renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(Vertex_P2DUV));
-			scene->AddPolyCounter(2);
+			renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,vx,sizeof(Vertex_P2DUV));
 			device.SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 		}
 	}

@@ -11,7 +11,7 @@ namespace gfx
         Device device;
         ProgramManager programManager;
 
-        bool init(UINT adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
+        bool init(uint32_t adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
         void fini();
 
         bool reset(D3DPRESENT_PARAMETERS& params);
@@ -19,23 +19,23 @@ namespace gfx
         void beginFrame();
         void endFrame();
 
-        void SetDynIdx16Buffer();
-        bool lockDynIdx16(UINT count, uint16_t** ptr, UINT* baseIndex);
+        void setDynIdx16Buffer();
+        bool lockDynIdx16(uint32_t count, uint16_t** ptr, uint32_t* baseIndex);
         void unlockDynIdx16();
 
 
-        void SetDynVtxBuffer(UINT Stride);
-        bool lockDynVtx(UINT count, UINT stride, void** ptr, UINT* baseVertex);
+        void setDynVtxBuffer(uint32_t Stride);
+        bool lockDynVtx(uint32_t count, uint32_t stride, void** ptr, uint32_t* baseVertex);
         void unlockDynVtx();
 
         template<typename T>
-        void SetDynVtxBuffer()
+        void setDynVtxBuffer()
         {
-            SetDynVtxBuffer(sizeof(T));
+            setDynVtxBuffer(sizeof(T));
         }
 
         template<typename T>
-        bool lockDynVtx(UINT count, T** ptr, UINT* baseVertex)
+        bool lockDynVtx(uint32_t count, T** ptr, uint32_t* baseVertex)
         {
             return lockDynVtx(count, sizeof(T), (void**)ptr, baseVertex);
         }
@@ -43,11 +43,10 @@ namespace gfx
         IndexStorage16& getIndexStorage16() { return indices; }
         VertexStorage&  getVertexStorage() { return vertices; }
 
-        void setQuadIndices();
-        uint32_t baseQuadIndex();
+        void setFVF(FVF vtxFmt);
 
-        void SetFVF(FVF vtxFmt);
-        void DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT PrimitiveCount, CONST void* vertexData, UINT Stride);
+        void drawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, uint32_t PrimitiveCount, const void* vertexData, uint32_t Stride);
+        void drawQuads(uint32_t baseVertexIndex, uint32_t QuadCount);
 
     private:
         void createPersistantResources();
@@ -61,17 +60,18 @@ namespace gfx
 
         // frame sync
         LPDIRECT3DQUERY9 frameSyncQueries[NUM_FRAMES_DELAY] = { 0 };
-        size_t           frameNumber = 0;
+        uint32_t         frameNumber = 0;
 
         LPDIRECT3DVERTEXBUFFER9 frameVB[NUM_FRAMES_DELAY] = { 0 };
-        UINT                    frameVBBytesUsed = 0;
+        uint32_t                frameVBBytesUsed = 0;
 
         LPDIRECT3DINDEXBUFFER9 frameIB16[NUM_FRAMES_DELAY] = { 0 };
-        UINT                   frameIB16BytesUsed = 0;
+        uint32_t               frameIB16BytesUsed = 0;
 
         IndexStorage16  indices;
         VertexStorage   vertices;
 
         uint16_t quadIdxAlloc = 0;
+        uint32_t quadBaseIndex = 0;
     };
 }

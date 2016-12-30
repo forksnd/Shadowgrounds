@@ -994,7 +994,7 @@ t->Apply(4);
 
             frozenbyte::storm::enableMipFiltering(device, 0, 4, false);
 
-            storm.renderer.SetFVF(FVF_P3UV);
+            storm.renderer.setFVF(FVF_P3UV);
             //TODO: remove later - hack to ensure constants are set
             Storm3D_ShaderManager::GetSingleton()->setFakeShadowShaders();
             Storm3D_ShaderManager::GetSingleton()->SetShaders(
@@ -1828,7 +1828,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
                 device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 
                 programManager.setStdProgram(device, gfx::ProgramManager::SSF_2D_POS | gfx::ProgramManager::SSF_COLOR | gfx::ProgramManager::SSF_TEXTURE);
-                renderer.SetFVF(FVF_P2DUV);
+                renderer.setFVF(FVF_P2DUV);
 
                 VC2 pixsz = VC2(2.0f / data->fakeSize.x, 2.0f / data->fakeSize.y);
                 float scalex = data->fakeSize.x * pixsz.x;
@@ -1853,7 +1853,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
                     };
 
                     lightTexture.texture->Apply(0);
-                    data->storm.renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P2DUV));
+                    data->storm.renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P2DUV));
                 }
 
                 device.SetTexture(0, 0);
@@ -2090,7 +2090,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
                     device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
                     device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 
-                    data->storm.renderer.SetFVF(FVF_P4DUV);
+                    data->storm.renderer.setFVF(FVF_P4DUV);
                     int c = (unsigned char)(data->glowFactor * 255.f);
                     if (c > 255)
                         c = 255;
@@ -2112,7 +2112,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
                     device.SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
                     device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-                    data->storm.renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
+                    data->storm.renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
                     device.SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
                 }
                 else
@@ -2230,7 +2230,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 
                         device.SetTexture(0, data->glowTexture2);
-                        data->storm.renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer3, sizeof(float) * 20);
+                        renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer3, sizeof(float) * 20);
                     }
 
                     // Blur to final
@@ -2263,7 +2263,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
                         device.SetTexture(0, data->glowTexture1);
 
-                        data->storm.renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer3, sizeof(float) * 20);
+                        renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer3, sizeof(float) * 20);
                     }
 
                     for (int i = 0; i < stages; ++i)
@@ -2388,7 +2388,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 			device.SetPixelShader(0);
 			device.SetVertexShader(0);
-            data->storm.renderer.SetFVF(FVF_P4UV);
+            renderer.setFVF(FVF_P4UV);
 
 			// Transparency
 			if(data->glowTransparencyFactor > 0.001f)
@@ -2403,7 +2403,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 				device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_BLENDFACTOR);
 				device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVBLENDFACTOR);
-                data->storm.renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, glowTex1, sizeof(float) *  6);
+                renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, glowTex1, sizeof(float) *  6);
 			}
 
 			// Additive
@@ -2426,7 +2426,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 				device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVDESTCOLOR);
 				device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-                data->storm.renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, glowTex1, sizeof(float) *  6);
+                renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, glowTex1, sizeof(float) *  6);
 			}
 
 			device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
@@ -2458,7 +2458,8 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderBase");
-	gfx::Device& device = data->storm.GetD3DDevice();
+    gfx::Renderer& renderer = data->storm.renderer;
+	gfx::Device& device = renderer.device;
 
 	Storm3D_Camera &camera = static_cast<Storm3D_Camera &> (*scene.GetCamera());
 	camera.Apply();
@@ -2544,7 +2545,7 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 	device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 	device.SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 	device.SetVertexShader(0);
-    data->storm.renderer.SetFVF(FVF_P4UV);
+    renderer.setFVF(FVF_P4UV);
 
 	Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
 
@@ -2659,9 +2660,9 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 
         device.SetVertexDeclaration(data->VtxFmt_P3UV3);
 
-        data->storm.renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, bufferTex, sizeof(float) *  10);
+        renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, bufferTex, sizeof(float) *  10);
 
-        data->storm.renderer.SetFVF(FVF_P4UV);
+        renderer.setFVF(FVF_P4UV);
 		device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
 		device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 		device.SetSamplerState(1, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
@@ -2730,8 +2731,8 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 		buffer[1] = {VC4( 0,  0, 1.f, 1.f), color, VC2(0.f, 0.f)};
 		buffer[2] = {VC4(x2, y2, 1.f, 1.f), color, VC2(1.f, 1.f)};
 		buffer[3] = {VC4(x2,  0, 1.f, 1.f), color, VC2(1.f, 0.f)};
-		data->storm.renderer.SetFVF(FVF_P4DUV);
-		data->storm.renderer.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
+		renderer.setFVF(FVF_P4DUV);
+		renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
 
 		state->Apply();
 	}

@@ -114,6 +114,28 @@ namespace gfx
 
     bool Device::cached = true;
 
+    void Device::clearStats()
+    {
+        stats = Stats{0};
+    }
+
+    void Device::addDrawStats(D3DPRIMITIVETYPE primitiveType, uint32_t primitiveCount)
+    {
+        switch (primitiveType)
+        {
+        case D3DPT_POINTLIST:
+        case D3DPT_LINELIST:
+        case D3DPT_LINESTRIP:
+            break;
+        case D3DPT_TRIANGLELIST:
+        case D3DPT_TRIANGLESTRIP:
+        case D3DPT_TRIANGLEFAN:
+            stats.numTriangles += primitiveCount;
+            break;
+        }
+        ++stats.numDraws;
+    }
+
     void Device::resetCache()
     {
         bitset32_clear(rs_valid);
@@ -127,9 +149,9 @@ namespace gfx
         pconsts_range_max = 0;
     }
 
-    bool Device::init(UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params)
+    bool Device::init(UINT adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params)
     {
-        if (FAILED(D3D->CreateDevice(Adapter, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &device)))
+        if (FAILED(D3D->CreateDevice(adapter, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &device)))
             return false;
 
         return true;
@@ -293,6 +315,7 @@ namespace gfx
     HRESULT Device::BeginScene()
     {
         resetCache();
+        clearStats();
 
         return device->BeginScene();
     }
@@ -378,14 +401,16 @@ namespace gfx
 
     HRESULT Device::DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT StartVertex, UINT PrimitiveCount)
     {
+        addDrawStats(PrimitiveType, PrimitiveCount);
         applyShaderConsts();
         return device->DrawPrimitive(PrimitiveType, StartVertex, PrimitiveCount);
     }
 
-    HRESULT Device::DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT startIndex, UINT primCount)
+    HRESULT Device::DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT StartIndex, UINT PrimitiveCount)
     {
+        addDrawStats(PrimitiveType, PrimitiveCount);
         applyShaderConsts();
-        return device->DrawIndexedPrimitive(PrimitiveType, BaseVertexIndex, MinVertexIndex, NumVertices, startIndex, primCount);
+        return device->DrawIndexedPrimitive(PrimitiveType, BaseVertexIndex, MinVertexIndex, NumVertices, StartIndex, PrimitiveCount);
     }
 
     HRESULT Device::CreateVertexDeclaration(CONST D3DVERTEXELEMENT9* pVertexElements, IDirect3DVertexDeclaration9** ppDecl)

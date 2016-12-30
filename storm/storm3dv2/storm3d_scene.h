@@ -57,9 +57,6 @@ class Storm3D_Scene : public IStorm3D_Scene
 
 	// Time in seconds (0.0 at start)
 	float time;	
-	
-	// Polygon counter (v3)
-	int poly_counter;
 
 	// State
 	bool scene_paused;
@@ -98,9 +95,6 @@ class Storm3D_Scene : public IStorm3D_Scene
 public:
 
 	inline IStorm3D * getStorm() { return (IStorm3D*) Storm3D2; };
-
-	// Polygon counter add (v3)
-	void AddPolyCounter(int amount) {poly_counter+=amount;}
 
 	// Get stuff (v3)
 	float GetTime() {return time;}

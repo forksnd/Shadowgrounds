@@ -12,7 +12,7 @@
 
 #define MAX_CONSTS 224
 
-//#define USE_PIX_MARKERS
+#define USE_PIX_MARKERS
 
 namespace gfx
 {
@@ -26,9 +26,15 @@ namespace gfx
 
     struct Device
     {
+        struct Stats
+        {
+            uint32_t numTriangles;
+            uint32_t numDraws;
+        } stats;
+
         LPDIRECT3DDEVICE9 device = nullptr;
 
-        bool init(UINT Adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
+        bool init(UINT adapter, HWND hWnd, D3DPRESENT_PARAMETERS& params);
         void fini();
 
         bool reset(D3DPRESENT_PARAMETERS& params);
@@ -72,7 +78,7 @@ namespace gfx
         HRESULT SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value);
         HRESULT SetScissorRect(CONST RECT* pRect);
         HRESULT DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT StartVertex, UINT PrimitiveCount);
-        HRESULT DrawIndexedPrimitive(D3DPRIMITIVETYPE, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT startIndex, UINT primCount);
+        HRESULT DrawIndexedPrimitive(D3DPRIMITIVETYPE, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT StartIndex, UINT PrimitiveCount);
         HRESULT CreateVertexDeclaration(CONST D3DVERTEXELEMENT9* pVertexElements, IDirect3DVertexDeclaration9** ppDecl);
         HRESULT SetVertexDeclaration(IDirect3DVertexDeclaration9* pDecl);
         HRESULT CreateVertexShader(CONST DWORD* pFunction, IDirect3DVertexShader9** ppShader);
@@ -93,6 +99,8 @@ namespace gfx
         HRESULT Present(CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
 
     private:
+        void clearStats();
+        void addDrawStats(D3DPRIMITIVETYPE primitiveType, uint32_t primitiveCount);
         void resetCache();
         void applyShaderConsts();
 

@@ -22,7 +22,6 @@
 #include "../../util/Debug_MemoryManager.h"
 
 int storm3d_mesh_allocs = 0;
-int storm3d_dip_calls = 0;
 
 //------------------------------------------------------------------
 // Storm3D_Mesh::Storm3D_Mesh
@@ -380,7 +379,7 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
     gfx::VertexStorage& vtxStorage = Storm3D2->renderer.getVertexStorage();
     gfx::IndexStorage16& idxStorage = Storm3D2->renderer.getIndexStorage16();
 
-    Storm3D2->renderer.SetFVF(vbuf_fvf);
+    Storm3D2->renderer.setFVF(vbuf_fvf);
     device.SetStreamSource(0, vtxStorage.vertices, 0, vbuf_vsize);
     device.SetIndices(idxStorage.indices);
 
@@ -397,8 +396,6 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
                 bone_chunks[lod][i].base_vertex, 0, bone_chunks[lod][i].vertex_count,
                 bone_chunks[lod][i].base_index, bone_chunks[lod][i].index_count
             );
-
-            ++storm3d_dip_calls;
         }
     }
     else
@@ -408,8 +405,6 @@ void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
             base_vertex, 0, render_vertex_amount,
             base_index[lod], render_face_amount[lod]
         );
-
-        ++storm3d_dip_calls;
     }
 }
 
@@ -453,7 +448,6 @@ void Storm3D_Mesh::Render(Storm3D_Scene *scene,bool mirrored,Storm3D_Model_Objec
 
 	// Render vertex buffers
 	RenderBuffers(object);
-	scene->AddPolyCounter(face_amount[lod]);
 }
 
 
@@ -487,7 +481,6 @@ void Storm3D_Mesh::RenderWithoutMaterial(Storm3D_Scene *scene,bool mirrored,Stor
 
 	// Render vertex buffers
 	RenderBuffers(object);
-	scene->AddPolyCounter(face_amount[0]);
 }
 
 
@@ -515,7 +508,6 @@ void Storm3D_Mesh::RenderToBackground(Storm3D_Scene *scene,Storm3D_Model_Object 
 
 	// Render vertex buffers
 	RenderBuffers(object);
-	scene->AddPolyCounter(face_amount[0]);
 
 	// Return states
 	device.SetRenderState(D3DRS_ZENABLE,TRUE);

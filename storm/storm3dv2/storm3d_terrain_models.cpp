@@ -1870,9 +1870,6 @@ struct Storm3D_TerrainModelsData : public DataBase
 		mesh->RenderBuffers(object);
 
 //frozenbyte::storm::setCulling(device, D3DCULL_CCW);
-
-		if(scene)
-			scene->AddPolyCounter(mesh->GetRenderFaceCount());
 	}
 };
 

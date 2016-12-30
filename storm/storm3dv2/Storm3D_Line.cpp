@@ -12,8 +12,6 @@
 #include "VertexFormats.h"
 #include "../../util/Debug_MemoryManager.h"
 
-extern int storm3d_dip_calls;
-
 Storm3D_Line::Storm3D_Line(Storm3D *storm_)
 :	storm(storm_)
 {
@@ -84,7 +82,7 @@ void Storm3D_Line::Render(gfx::Renderer& renderer)
 	rebuild_indices = false;
 
     renderer.programManager.setStdProgram(renderer.device, gfx::ProgramManager::SSF_COLOR);
-    renderer.SetFVF(FVF_P3D);
+    renderer.setFVF(FVF_P3D);
 
     // Render
     if (!pixel_line)
@@ -152,10 +150,9 @@ void Storm3D_Line::Render(gfx::Renderer& renderer)
         }
         renderer.unlockDynVtx();
 
-        renderer.SetDynVtxBuffer<Vertex_P3D>();
-        renderer.SetDynIdx16Buffer();
+        renderer.setDynVtxBuffer<Vertex_P3D>();
+        renderer.setDynIdx16Buffer();
         renderer.device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVtx, 0, vertices, baseIdx, faces);
-        ++storm3d_dip_calls;
     }
     else
     {
@@ -170,9 +167,8 @@ void Storm3D_Line::Render(gfx::Renderer& renderer)
         }
         renderer.unlockDynVtx();
 
-        renderer.SetDynVtxBuffer<Vertex_P3D>();
+        renderer.setDynVtxBuffer<Vertex_P3D>();
         renderer.device.DrawPrimitive(D3DPT_LINELIST, baseVtx, points.size() / 2);
-        ++storm3d_dip_calls;
     }
 }
 
