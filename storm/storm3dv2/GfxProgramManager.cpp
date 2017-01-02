@@ -181,14 +181,29 @@ namespace gfx
         compileShaderSet(device, "Data\\shaders\\std.vs", defines, vertexShaders);
         compileShaderSet(device, "Data\\shaders\\std.ps", defines, pixelShaders);
 
+        std::string shader_source;
+
+        frozenbyte::storm::readFile(shader_source, "Data\\shaders\\procedural_texture.vs");
+        createShader(&vertexShaders[VS_OFFSET_SCALE_2UV], device, shader_source.length(), shader_source.c_str(), nullptr);
+
+        frozenbyte::storm::readFile(shader_source, "Data\\shaders\\procedural_texture.ps");
+        createShader(&pixelShaders[PS_PROCEDURAL], device, shader_source.length(), shader_source.c_str(), nullptr);
+
+        frozenbyte::storm::readFile(shader_source, "Data\\shaders\\procedural_texture_distortion.ps");
+        createShader(&pixelShaders[PS_PROCEDURAL_DISTORSION], device, shader_source.length(), shader_source.c_str(), nullptr);
+
         return true;
     }
 
     void ProgramManager::fini()
     {
-        for (size_t i = 0; i < SHADER_COUNT; ++i)
+        for (size_t i = 0; i < VS_SHADER_COUNT; ++i)
         {
             if (vertexShaders[i]) vertexShaders[i]->Release();
+        }
+
+        for (size_t i = 0; i < PS_SHADER_COUNT; ++i)
+        {
             if (pixelShaders[i]) pixelShaders[i]->Release();
         }
     }
@@ -217,10 +232,10 @@ namespace gfx
 
     void ProgramManager::setStdProgram(gfx::Device& device, size_t id)
     {
-        assert(id < SHADER_COUNT);
+        assert(id < PROGRAM_COUNT);
 
-        device.SetVertexShader(vertexShaders[id]);
-        device.SetPixelShader(pixelShaders[id]);
+        device.SetVertexShader(vertexShaders[programs[id].vs]);
+        device.SetPixelShader(pixelShaders[programs[id].ps]);
     }
 
     void ProgramManager::commitConstants(gfx::Device& device)

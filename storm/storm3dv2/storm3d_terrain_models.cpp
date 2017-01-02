@@ -622,7 +622,7 @@ struct Storm3D_TerrainModelsData : public DataBase
 
 		float timeDelta = timeDelta_ / 1000.f;
 		std::string activeEffect;
-		float closestEffect = 100000000000000000.f;
+		float closestEffect = FLT_MAX;
 
 		VC3 cameraPosition = camera.GetPosition();
 		bool forceCulling = false;

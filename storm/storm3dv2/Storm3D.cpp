@@ -197,14 +197,11 @@ void Storm3D::createTargets()
 		//device.CreateTexture(xs, ys, 1, D3DUSAGE_RENDERTARGET | D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A1R5G5B5, D3DPOOL_DEFAULT, &proceduralTarget, 0);
         renderer.device.CreateTexture(xs, ys, 1, D3DUSAGE_RENDERTARGET | D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &proceduralTarget, 0);
 
-		if(adapters[active_adapter].caps&Storm3D_Adapter::CAPS_PS20)
-		{
-			if(proceduralOffsetTarget)
-				proceduralOffsetTarget.Release();
+		if(proceduralOffsetTarget)
+			proceduralOffsetTarget.Release();
 			
-            renderer.device.CreateTexture(xs / 2, ys / 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &proceduralOffsetTarget, 0);
-			//device.CreateTexture(xs / 2, ys / 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &proceduralOffsetTarget, 0);
-		}
+        renderer.device.CreateTexture(xs / 2, ys / 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &proceduralOffsetTarget, 0);
+		//device.CreateTexture(xs / 2, ys / 2, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &proceduralOffsetTarget, 0);
 
 		if(proceduralTarget)
 			proceduralManager.setTarget(proceduralTarget, proceduralOffsetTarget);

@@ -692,7 +692,7 @@ void Storm3D_FakeSpotlight::debugRender()
 
 	data->device.SetPixelShader(0);
 	data->device.SetVertexShader(0);
-    data->storm.renderer.setFVF(FVF_P4UV);
+    data->storm.renderer.setFVF(FVF_PT4UV);
 
     data->storm.renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) *  6);
 

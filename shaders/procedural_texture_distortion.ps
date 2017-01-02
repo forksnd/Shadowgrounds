@@ -1,0 +1,41 @@
+sampler samTexture0 : register(s0);
+sampler samTexture2 : register(s2);
+
+struct PS_IN
+{
+    float2 uv0 : TEXCOORD0;
+    float2 uv1 : TEXCOORD1;
+    float2 uv2 : TEXCOORD2;
+    float2 uv3 : TEXCOORD3;
+};
+
+float4 uScale : register(c0);
+
+float4 main(PS_IN ps_in):COLOR
+{
+    float4 color = 0.0f;
+
+    //def c1, 0.5f, 0.5f, 0.5f, 0.5f
+    //
+    //dcl_pp t0.xy
+    //dcl_pp t2.xy
+    //dcl_2d s0
+    //dcl_2d s2
+    //
+    //texld r0, t0, s0 ; Offset1
+    //texld r2, t2, s2 ; Offset2
+    //
+    //lrp r0.rgb, 0.5f, r0, r2
+    //mov r0.a, 0.5f
+    //mad r0, r0, c2, r0.a
+    //
+    //mov oC0, r0
+    
+    float4 col0 = tex2D(samTexture0, ps_in.uv0);
+    float4 col1 = tex2D(samTexture2, ps_in.uv2);
+    color.rgb = lerp(col0, col1, 0.5).rgb;
+    color.a = 0.5;
+    color = color * uScale +0.5;
+
+    return color;
+}

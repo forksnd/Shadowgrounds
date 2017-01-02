@@ -2090,7 +2090,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
                     device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
                     device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 
-                    data->storm.renderer.setFVF(FVF_P4DUV);
+                    data->storm.renderer.setFVF(FVF_PT4DUV);
                     int c = (unsigned char)(data->glowFactor * 255.f);
                     if (c > 255)
                         c = 255;
@@ -2388,7 +2388,7 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 			device.SetPixelShader(0);
 			device.SetVertexShader(0);
-            renderer.setFVF(FVF_P4UV);
+            renderer.setFVF(FVF_PT4UV);
 
 			// Transparency
 			if(data->glowTransparencyFactor > 0.001f)
@@ -2545,7 +2545,7 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 	device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 	device.SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 	device.SetVertexShader(0);
-    renderer.setFVF(FVF_P4UV);
+    renderer.setFVF(FVF_PT4UV);
 
 	Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
 
@@ -2662,7 +2662,7 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 
         renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, bufferTex, sizeof(float) *  10);
 
-        renderer.setFVF(FVF_P4UV);
+        renderer.setFVF(FVF_PT4UV);
 		device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
 		device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 		device.SetSamplerState(1, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
@@ -2731,7 +2731,7 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 		buffer[1] = {VC4( 0,  0, 1.f, 1.f), color, VC2(0.f, 0.f)};
 		buffer[2] = {VC4(x2, y2, 1.f, 1.f), color, VC2(1.f, 1.f)};
 		buffer[3] = {VC4(x2,  0, 1.f, 1.f), color, VC2(1.f, 0.f)};
-		renderer.setFVF(FVF_P4DUV);
+		renderer.setFVF(FVF_PT4DUV);
 		renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
 
 		state->Apply();

@@ -21,7 +21,6 @@ public:
 	Storm3D_ProceduralManager(Storm3D &storm);
 	~Storm3D_ProceduralManager();
 
-	void setLogger(IStorm3D_Logger *logger);
 	void setTarget(CComPtr<IDirect3DTexture9> &target, CComPtr<IDirect3DTexture9> &offsetTarget);
 	void addEffect(const std::string &name, const Effect &effect);
 	void enableDistortionMode(bool enable);

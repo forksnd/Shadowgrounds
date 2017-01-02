@@ -13,173 +13,122 @@
 #include <IStorm3D_Logger.h>
 #include <d3d9.h>
 
-	struct NullDeleter
-	{
-		void operator() (const void *) const
-		{
-		}
-	};
+struct TexCoord
+{
+	VC2 baseFactor;
+	VC2 baseOffset;
 
-	struct TexCoord
-	{
-		VC2 baseFactor;
-		VC2 baseOffset;
+	VC2 offsetFactor;
+	VC2 offsetOffset;
 
-		VC2 offsetFactor;
-		VC2 offsetOffset;
+	float timeValue = 0.0f;
+};
 
-		float timeValue;
+void clamp(float &value)
+{
+	float intval = floorf(value);
+	if(fabsf(intval) > 1.f)
+		value = fmodf(value, intval);
 
-		TexCoord()
-		:	timeValue(0)
-		{
-		}
-	};
-
-	void clamp(float &value)
+	/*
+	if(value > 0)
 	{
 		float intval = floorf(value);
-		if(fabsf(intval) > 1.f)
+		if(intval > 1.f)
 			value = fmodf(value, intval);
+	}
+	else
+	{
+		float intval = floorf(value);
+		if(intval < -1.f)
+			value = fmodf(value, intval);
+	}
+	*/
+}
 
-		/*
-		if(value > 0)
+void animateSource(TexCoord &coord, const Storm3D_ProceduralManager::Source &source, float timeFactor)
+{
+	coord.timeValue += timeFactor;
+	coord.baseFactor.x = 1.f / source.texture.scale.x;
+	coord.baseFactor.y = 1.f / source.texture.scale.y;
+	coord.offsetFactor.x = coord.baseFactor.x;
+	coord.offsetFactor.y = coord.baseFactor.y;
+
+	coord.baseOffset.x += timeFactor * source.texture.speed.x;
+	coord.baseOffset.y += timeFactor * source.texture.speed.y;
+	coord.offsetOffset.x = source.radius.x * sinf(coord.timeValue * source.offset.speed.x);
+	coord.offsetOffset.y = source.radius.y * cosf(coord.timeValue * source.offset.speed.y);
+	coord.offsetOffset.x += source.linearSpeed.x * coord.timeValue;
+	coord.offsetOffset.y += source.linearSpeed.y * coord.timeValue;
+
+	clamp(coord.baseOffset.x);
+	clamp(coord.baseOffset.y);
+	clamp(coord.offsetOffset.x);
+	clamp(coord.offsetOffset.y);
+}
+
+typedef std::shared_ptr<Storm3D_Texture> ManagedTexture;
+ManagedTexture createManagedTexture(Storm3D &storm, const std::string& name)
+{
+    ManagedTexture mangedTexture;
+
+    if (!name.empty())
+    {
+        Storm3D_Texture *texture = static_cast<Storm3D_Texture*>(storm.CreateNewTexture(name.c_str()));
+        if (texture)
+        {
+            texture->setAutoRelease(false);
+            mangedTexture.reset(texture, [](Storm3D_Texture* tex) { tex->Release(); });
+        }
+    }
+
+    return mangedTexture;
+}
+
+struct ProceduralEffect
+{
+	Storm3D_ProceduralManager::Effect effect;
+	ManagedTexture texture1;
+	ManagedTexture texture2;
+	ManagedTexture offset1;
+	ManagedTexture offset2;
+	ManagedTexture distortion1;
+	ManagedTexture distortion2;
+	ManagedTexture fallback;
+
+	TexCoord coord1;
+	TexCoord coord2;
+	TexCoord displaceCoord1;
+	TexCoord displaceCoord2;
+
+	void init(Storm3D& storm)
+	{
+        texture1 = createManagedTexture(storm, effect.source1.texture.texture);
+        texture2 = createManagedTexture(storm, effect.source2.texture.texture);
+        offset1 = createManagedTexture(storm, effect.source1.offset.texture);
+        offset2 = createManagedTexture(storm, effect.source2.offset.texture);
+        distortion1 = createManagedTexture(storm, effect.distortion1.offset.texture);
+        distortion2 = createManagedTexture(storm, effect.distortion2.offset.texture);
+        fallback = createManagedTexture(storm, effect.fallback);
+
+		if (effect.fallback.empty())
 		{
-			float intval = floorf(value);
-			if(intval > 1.f)
-				value = fmodf(value, intval);
+			storm.getLogger()->warning("ProceduralEffect::init - effect has no fallback texture.");
 		}
-		else
-		{
-			float intval = floorf(value);
-			if(intval < -1.f)
-				value = fmodf(value, intval);
-		}
-		*/
 	}
 
-	void animateSource(TexCoord &coord, const Storm3D_ProceduralManager::Source &source, float timeFactor)
+	void animate(int ms)
 	{
-		coord.timeValue += timeFactor;
-		coord.baseFactor.x = 1.f / source.texture.scale.x;
-		coord.baseFactor.y = 1.f / source.texture.scale.y;
-		coord.offsetFactor.x = coord.baseFactor.x;
-		coord.offsetFactor.y = coord.baseFactor.y;
+		float timeFactor = ms / 1000.f;
+		animateSource(coord1, effect.source1, timeFactor);
+		animateSource(coord2, effect.source2, timeFactor);
 
-		coord.baseOffset.x += timeFactor * source.texture.speed.x;
-		coord.baseOffset.y += timeFactor * source.texture.speed.y;
-		coord.offsetOffset.x = source.radius.x * sinf(coord.timeValue * source.offset.speed.x);
-		coord.offsetOffset.y = source.radius.y * cosf(coord.timeValue * source.offset.speed.y);
-		coord.offsetOffset.x += source.linearSpeed.x * coord.timeValue;
-		coord.offsetOffset.y += source.linearSpeed.y * coord.timeValue;
-
-		clamp(coord.baseOffset.x);
-		clamp(coord.baseOffset.y);
-		clamp(coord.offsetOffset.x);
-		clamp(coord.offsetOffset.y);
+		animateSource(displaceCoord1, effect.distortion1, timeFactor);
+		animateSource(displaceCoord2, effect.distortion2, timeFactor);
 	}
+};
 
-	struct ProceduralEffect
-	{
-		Storm3D_ProceduralManager::Effect effect;
-		std::shared_ptr<Storm3D_Texture> texture1;
-		std::shared_ptr<Storm3D_Texture> texture2;
-		std::shared_ptr<Storm3D_Texture> offset1;
-		std::shared_ptr<Storm3D_Texture> offset2;
-		std::shared_ptr<Storm3D_Texture> distortion1;
-		std::shared_ptr<Storm3D_Texture> distortion2;
-		std::shared_ptr<Storm3D_Texture> fallback;
-
-		TexCoord coord1;
-		TexCoord coord2;
-		TexCoord displaceCoord1;
-		TexCoord displaceCoord2;
-
-		void init(Storm3D &storm)
-		{
-			if (!effect.source1.texture.texture.empty())
-			{
-				Storm3D_Texture *t1 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.source1.texture.texture.c_str()));
-				if(t1)
-				{
-					texture1.reset(t1, [](Storm3D_Texture* tex) {tex->Release();});
-					texture1->setAutoRelease(false);
-				}
-			}
-			if (!effect.source2.texture.texture.empty())
-			{
-				Storm3D_Texture *t2 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.source2.texture.texture.c_str()));
-				if(t2)
-				{
-					texture2.reset(t2, [](Storm3D_Texture* tex) {tex->Release();});
-					texture2->setAutoRelease(false);
-				}
-			}
-
-			if (!effect.source1.offset.texture.empty())
-			{
-				Storm3D_Texture *t3 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.source1.offset.texture.c_str()));
-				if(t3)
-				{
-					offset1.reset(t3, [](Storm3D_Texture* tex) {tex->Release();});
-					offset1->setAutoRelease(false);
-				}
-			}
-
-			if (!effect.source2.offset.texture.empty())
-			{
-				Storm3D_Texture *t4 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.source2.offset.texture.c_str()));
-				if(t4)
-				{
-					offset2.reset(t4, [](Storm3D_Texture* tex) {tex->Release();});
-					offset2->setAutoRelease(false);
-				}
-			}
-
-			if (!effect.distortion1.offset.texture.empty())
-			{
-				Storm3D_Texture *t5 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.distortion1.offset.texture.c_str()));
-				if(t5)
-				{
-					distortion1.reset(t5, [](Storm3D_Texture* tex) {tex->Release();});
-					distortion1->setAutoRelease(false);
-				}
-			}
-			if (!effect.distortion2.offset.texture.empty())
-			{
-				Storm3D_Texture *t6 = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.distortion2.offset.texture.c_str()));
-				if(t6)
-				{
-					distortion2.reset(t6, [](Storm3D_Texture* tex) {tex->Release();});
-					distortion2->setAutoRelease(false);
-				}
-			}
-
-			if (!effect.fallback.empty())
-			{
-				Storm3D_Texture *f = static_cast<Storm3D_Texture *> (storm.CreateNewTexture(effect.fallback.c_str()));
-				if(f)
-				{
-					fallback.reset(f, [](Storm3D_Texture* tex) {tex->Release();});
-					fallback->setAutoRelease(false);
-				}
-			} else {
-				storm.getLogger()->warning("ProceduralEffect::init - effect has no fallback texture.");
-			}
-		}
-
-		void animate(int ms)
-		{
-			float timeFactor = ms / 1000.f;
-			animateSource(coord1, effect.source1, timeFactor);
-			animateSource(coord2, effect.source2, timeFactor);
-
-			animateSource(displaceCoord1, effect.distortion1, timeFactor);
-			animateSource(displaceCoord2, effect.distortion2, timeFactor);
-		}
-	};
-
-	typedef std::map<std::string, ProceduralEffect> ProceduralEffectList;
+typedef std::map<std::string, ProceduralEffect> ProceduralEffectList;
 
 struct Storm3D_ProceduralManager::Data
 {
@@ -190,22 +139,14 @@ struct Storm3D_ProceduralManager::Data
 	ProceduralEffectList effects;
 	std::string active;
 
-	IStorm3D_Logger *logger;
-	std::unique_ptr<frozenbyte::storm::VertexShader> vshader;
-	std::unique_ptr<frozenbyte::storm::PixelShader> pshader;
-	std::unique_ptr<frozenbyte::storm::PixelShader> poffsetShader;
-	std::unique_ptr<frozenbyte::storm::VertexBuffer> vbuffer;
-	std::unique_ptr<frozenbyte::storm::IndexBuffer> ibuffer;
-
 	bool distortionMode;
 	bool hasDistortion;
 
 	bool useFallback;
-	std::shared_ptr<Storm3D_Texture> fallback;
+    ManagedTexture fallback;
 
 	Data(Storm3D &storm_)
 	:	storm(storm_),
-		logger(0),
 		distortionMode(false),
 		hasDistortion(false),
 		//useFallback(true)
@@ -219,181 +160,112 @@ struct Storm3D_ProceduralManager::Data
 		result.effect = effect;
 		result.init(storm);
 
-		if(result.texture1 && result.texture2)
-			effects[name] = result;
-		else if(logger)
+        if (result.texture1 && result.texture2)
+        {
+            effects[name] = result;
+        }
+		else
 		{
 			std::string message = "Cannot find both textures for procedural effect: ";
 			message += name;
-			logger->error(message.c_str());
-
-			logger->info(result.effect.source1.texture.texture.c_str());
-			logger->info(result.effect.source2.texture.texture.c_str());
+			storm.getLogger()->error(message.c_str());
+			storm.getLogger()->info(result.effect.source1.texture.texture.c_str());
+			storm.getLogger()->info(result.effect.source2.texture.texture.c_str());
 		}
 	}
 
 	void init(CComPtr<IDirect3DTexture9> target_, CComPtr<IDirect3DTexture9> offsetTarget_)
 	{
-        gfx::Renderer& renderer = storm.renderer;
-		gfx::Device& device = renderer.device;
-
 		target = target_;
 		offsetTarget = offsetTarget_;
-
-		if(!target)
-			return;
-
-		vshader.reset(new frozenbyte::storm::VertexShader(device));
-		vshader->createProceduralShader();
-		pshader.reset(new frozenbyte::storm::PixelShader(device));
-		pshader->createProceduralShader();
-
-		if(offsetTarget)
-		{
-			poffsetShader.reset(new frozenbyte::storm::PixelShader(device));
-			poffsetShader->createProceduralOffsetShader();
-		}
-
-		{
-			vbuffer.reset(new frozenbyte::storm::VertexBuffer());
-			vbuffer->create(device, 4, 8 * sizeof(float), false);
-			float *ptr = reinterpret_cast<float *> (vbuffer->lock());
-			if(ptr)
-			{
-				float width = 1.f;
-				float height = 1.f;
-
-				float buffer[] = 
-				{
-					-width, height,   1.f, 1.f,   0.f, 1.f, 0.f, 1.f,
-					-width, -height,  1.f, 1.f,   0.f, 0.f, 0.f, 0.f,
-					width, height,    1.f, 1.f,   1.f, 1.f, 1.f, 1.f,
-					width, -height,   1.f, 1.f,   1.f, 0.f, 1.f, 0.f
-				};
-
-				memcpy(ptr, buffer, 8 * 4 * sizeof(float));
-				vbuffer->unlock();
-			}
-		}
-		{
-			ibuffer.reset(new frozenbyte::storm::IndexBuffer());
-			ibuffer->create(device, 2, false);
-
-			unsigned short *ptr = ibuffer->lock();
-			if(ptr)
-			{
-				*ptr++ = 0;
-				*ptr++ = 2;
-				*ptr++ = 1;
-
-				*ptr++ = 1;
-				*ptr++ = 2;
-				*ptr++ = 3;
-
-				ibuffer->unlock();
-			}
-		}
 	}
 
-	void setActive(const std::string &name)
-	{
-		if(name.empty())
-		{
-			active = name;
-			return;
-		}
+    void setActive(const std::string &name)
+    {
+        if (name.empty())
+        {
+            active = name;
+            return;
+        }
 
-		ProceduralEffectList::iterator it = effects.find(name);
-		if(it == effects.end())
-			return;
+        ProceduralEffectList::iterator it = effects.find(name);
+        if (it == effects.end())
+            return;
 
-		fallback = it->second.fallback;
-		active = name;
-	}
+        fallback = it->second.fallback;
+        active = name;
+    }
 
-	void render(const ProceduralEffect &e, float width, float height, bool offsetTarget)
-	{
+    void render(const ProceduralEffect &e, float width, float height, bool offsetTarget)
+    {
         GFX_TRACE_SCOPE("Storm3D_ProceduralManager::render");
-		gfx::Device& device = storm.GetD3DDevice();
-		
-		if(e.texture1)
-			e.texture1->Apply(1);
-		if(e.texture2)
-			e.texture2->Apply(3);
+        gfx::Renderer& renderer = storm.renderer;
+        gfx::Device& device = renderer.device;
+        gfx::ProgramManager& programManager = renderer.programManager;
 
-		if(offsetTarget)
-		{
-			if(e.distortion1)
-				e.distortion1->Apply(0);
-			if(e.distortion2)
-				e.distortion2->Apply(2);
+        if (e.texture1)
+            e.texture1->Apply(1);
+        if (e.texture2)
+            e.texture2->Apply(3);
 
-			if(!e.distortion1 || !e.distortion2 || !e.effect.enableDistortion)
-				return;
-		}
-		else
-		{
-			if(e.offset1)
-				e.offset1->Apply(0);
-			if(e.offset2)
-				e.offset2->Apply(2);
-		}
+        if (offsetTarget)
+        {
+            if (e.distortion1)
+                e.distortion1->Apply(0);
+            if (e.distortion2)
+                e.distortion2->Apply(2);
 
-		assert(vshader && pshader);
-		vshader->apply();
+            if (!e.distortion1 || !e.distortion2 || !e.effect.enableDistortion)
+                return;
+        }
+        else
+        {
+            if (e.offset1)
+                e.offset1->Apply(0);
+            if (e.offset2)
+                e.offset2->Apply(2);
+        }
 
-		float constants[8 * 4];
-		const TexCoord &c1 = (offsetTarget) ? e.displaceCoord1 : e.coord1;
-		const TexCoord &c2 = (offsetTarget) ? e.displaceCoord2 : e.coord2;
+        const TexCoord &c1 = (offsetTarget) ? e.displaceCoord1 : e.coord1;
+        const TexCoord &c2 = (offsetTarget) ? e.displaceCoord2 : e.coord2;
 
-		constants[0 + 0] = c1.offsetFactor.x;
-		constants[0 + 1] = c1.offsetFactor.y;
-		constants[4 + 0] = c1.offsetOffset.x;
-		constants[4 + 1] = c1.offsetOffset.y;
-		constants[8 + 0] = c1.baseFactor.x;
-		constants[8 + 1] = c1.baseFactor.y;
-		constants[12 + 0] = c1.baseOffset.x;
-		constants[12 + 1] = c1.baseOffset.y;
-		constants[16 + 0] = c2.offsetFactor.x;
-		constants[16 + 1] = c2.offsetFactor.y;
-		constants[20 + 0] = c2.offsetOffset.x;
-		constants[20 + 1] = c2.offsetOffset.y;
-		constants[24 + 0] = c2.baseFactor.x;
-		constants[24 + 1] = c2.baseFactor.y;
-		constants[28 + 0] = c2.baseOffset.x;
-		constants[28 + 1] = c2.baseOffset.y;
+        float uvScaleBias[4 * 4] = {
+            c1.offsetFactor.x, c1.offsetFactor.y, c1.offsetOffset.x, c1.offsetOffset.y,
+            c1.baseFactor.x, c1.baseFactor.y, c1.baseOffset.x, c1.baseOffset.y,
+            c2.offsetFactor.x, c2.offsetFactor.y, c2.offsetOffset.x, c2.offsetOffset.y,
+            c2.baseFactor.x, c2.baseFactor.y, c2.baseOffset.x, c2.baseOffset.y
+        };
 
-		device.SetVertexShaderConstantF(0, constants, 8);
+        device.SetVertexShaderConstantF(0, uvScaleBias, 4);
 
-		float scale1 = (offsetTarget) ? e.effect.distortion1.offset.scale.x : e.effect.source1.offset.scale.x;
-		float scale2 = (offsetTarget) ? e.effect.distortion2.offset.scale.x : e.effect.source2.offset.scale.x;
-		device.SetTextureStageState(1, D3DTSS_BUMPENVMAT00, F2DW(scale1));
-		device.SetTextureStageState(1, D3DTSS_BUMPENVMAT01, F2DW(0.f));
-		device.SetTextureStageState(1, D3DTSS_BUMPENVMAT10, F2DW(0.f));
-		device.SetTextureStageState(1, D3DTSS_BUMPENVMAT11, F2DW(scale1));
-		device.SetTextureStageState(3, D3DTSS_BUMPENVMAT00, F2DW(scale2));
-		device.SetTextureStageState(3, D3DTSS_BUMPENVMAT01, F2DW(0.f));
-		device.SetTextureStageState(3, D3DTSS_BUMPENVMAT10, F2DW(0.f));
-		device.SetTextureStageState(3, D3DTSS_BUMPENVMAT11, F2DW(scale2));
+        float scale1 = (offsetTarget) ? e.effect.distortion1.offset.scale.x : e.effect.source1.offset.scale.x;
+        float scale2 = (offsetTarget) ? e.effect.distortion2.offset.scale.x : e.effect.source2.offset.scale.x;
 
-		if(offsetTarget)
-		{
-			float scale = (scale1 + scale2) * .25f;
-			float c2[4] = { scale, scale, scale, scale };
-			device.SetPixelShaderConstantF(2, c2, 1);
+        if (offsetTarget)
+        {
+            float scale = (scale1 + scale2) * .25f;
+            float psUniforms[4 * 3] = {
+                scale, scale, scale, scale,
+            };
+            device.SetPixelShaderConstantF(0, psUniforms, 1);
 
-			poffsetShader->apply();
-		}
-		else
-		{
-			pshader->apply();
-		}
-	
-		vbuffer->apply(device, 0);
-		ibuffer->render(device, 2, 4, 0);
+            programManager.setStdProgram(device, gfx::ProgramManager::PROCEDURAL_DISTORTION);
+        }
+        else
+        {
+            float psUniforms[4 * 2] = {
+                scale1, 0.0f, 0.0f, scale1,
+                scale2, 0.0f, 0.0f, scale2,
+            };
+            device.SetPixelShaderConstantF(0, psUniforms, 2);
 
-		device.SetPixelShader(0);
-	}
+            programManager.setStdProgram(device, gfx::ProgramManager::PROCEDURAL);
+        }
+
+        renderer.drawFullScreenQuad();
+
+        device.SetPixelShader(0);
+    }
 
 	void update(int ms)
 	{
@@ -402,7 +274,7 @@ struct Storm3D_ProceduralManager::Data
 			return;
 
 		gfx::Device &device = storm.GetD3DDevice();
-		if(active.empty() || !target)
+		if(active.empty() || !target || !offsetTarget)
 			return;
 
 		ProceduralEffect &e = effects[active];
@@ -414,33 +286,29 @@ struct Storm3D_ProceduralManager::Data
 		if(!renderSurface)
 			return;
 
-		device.SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+		device.SetRenderState(D3DRS_ZENABLE, FALSE);
 		device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 		device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 		device.GetRenderTarget(0, &originalSurface);
-		device.SetRenderTarget(0, renderSurface);
-		//device.Clear(0, 0, D3DCLEAR_TARGET, 0xFFFFFFFF, 1, 0);
 
 		D3DSURFACE_DESC desc;
 		renderSurface->GetDesc(&desc);
-		render(e, float(desc.Width), float(desc.Height), false);
 
-		if(distortionMode && offsetTarget)
+        device.SetRenderTarget(0, renderSurface);
+        //device.Clear(0, 0, D3DCLEAR_TARGET, 0xFFFFFFFF, 1, 0);
+        render(e, float(desc.Width), float(desc.Height), false);
+
+        hasDistortion = distortionMode && e.distortion1 && e.distortion2 && e.effect.enableDistortion;
+        if (hasDistortion)
 		{
 			CComPtr<IDirect3DSurface9> renderSurface;
 			offsetTarget->GetSurfaceLevel(0, &renderSurface);
 
 			device.SetRenderTarget(0, renderSurface);
-			if(e.distortion1 && e.distortion2 && e.effect.enableDistortion)
-			{
-				render(e, float(desc.Width / 2), float(desc.Height / 2), true);
-				hasDistortion = true;
-			}
-			else
-				hasDistortion = false;
+			render(e, float(desc.Width / 2), float(desc.Height / 2), true);
 		}
 
-		device.SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		device.SetRenderState(D3DRS_ZENABLE, TRUE);
 		device.SetRenderTarget(0, originalSurface);
 
 		target->GenerateMipSubLevels();
@@ -459,11 +327,6 @@ struct Storm3D_ProceduralManager::Data
 			target.Release();
 		if(offsetTarget)
 			offsetTarget.Release();
-
-		vbuffer.reset();
-		ibuffer.reset();
-		vshader.reset();
-		pshader.reset();
 	}
 };
 
@@ -476,11 +339,6 @@ Storm3D_ProceduralManager::~Storm3D_ProceduralManager()
 {
     assert(data);
     delete data;
-}
-
-void Storm3D_ProceduralManager::setLogger(IStorm3D_Logger *logger)
-{
-	data->logger = logger;
 }
 
 void Storm3D_ProceduralManager::setTarget(CComPtr<IDirect3DTexture9> &target, CComPtr<IDirect3DTexture9> &offsetTarget)

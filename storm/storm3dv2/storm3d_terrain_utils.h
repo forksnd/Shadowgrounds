@@ -54,7 +54,6 @@ public:
 	void createDecalPointShader();
 	void createDecalDirShader();
 	void createDecalFlatShader();
-	void createProceduralShader();
 
 	void applyDeclaration() const;
 	void apply() const;
@@ -88,9 +87,6 @@ public:
 	void createColorEffectPixelShader();
 	void createColorEffectOffsetPixelShader();
 	void createColorEffectOffsetPixelShader_NoGamma();
-	void createProceduralShader();
-	void createProceduralOffsetShader();
-	void createProceduralOffsetBaseShader();
 	void createBlackWhiteShader();
 	void createOffsetBlendShader();
 

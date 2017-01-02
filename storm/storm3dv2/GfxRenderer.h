@@ -52,6 +52,7 @@ namespace gfx
 
         void drawPrimitiveUP(D3DPRIMITIVETYPE primitiveType, uint32_t primitiveCount, const void* vertexData, uint32_t stride);
         void drawQuads(uint32_t baseVertexIndex, uint32_t quadCount);
+        void drawFullScreenQuad();
 
     private:
         void createPersistantResources();
@@ -78,5 +79,8 @@ namespace gfx
 
         uint16_t quadIdxAlloc = 0;
         uint32_t quadBaseIndex = 0;
+
+        uint16_t fullscreenQuadVtxAlloc;
+        uint32_t fullscreenQuadBaseVertex;
     };
 }

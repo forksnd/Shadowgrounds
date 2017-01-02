@@ -1,0 +1,46 @@
+sampler samTexture0 : register(s0);
+sampler samTexture1 : register(s1);
+sampler samTexture2 : register(s2);
+sampler samTexture3 : register(s3);
+
+struct PS_IN
+{
+    float2 uv0 : TEXCOORD0;
+    float2 uv1 : TEXCOORD1;
+    float2 uv2 : TEXCOORD2;
+    float2 uv3 : TEXCOORD3;
+};
+
+float4 uBumpMap1 : register(c0);
+float4 uBumpMap3 : register(c1);
+
+float4 sampleBumpMap(sampler2D samOffset, sampler2D samTexture, float2 uv0, float2 uv1, float4 bumpTransform, float2 lumScaleOffset)
+{
+    float4 color;
+    float2 offset;
+
+    offset = tex2D(samOffset, uv0).xy;
+    offset = offset.x * bumpTransform.xy + offset.y * bumpTransform.zw;
+    color = tex2D(samTexture, uv1 + offset);
+
+    return color * lumScaleOffset.x + lumScaleOffset.y;
+}
+
+float4 main(PS_IN ps_in):COLOR
+{
+    float4 color = 0.0f;
+
+    //ps.1.1
+    //
+    //tex t0 ; Offset1
+    //texbem t1, t0 ; Source1
+    //tex t2 ; Offset2
+    //texbem t3, t2 ; Source2
+    //
+    //mul r0, t1, t3
+
+    color = sampleBumpMap(samTexture0, samTexture1, ps_in.uv0, ps_in.uv1, uBumpMap1, float2(1, 0));
+    color *= sampleBumpMap(samTexture2, samTexture3, ps_in.uv2, ps_in.uv3, uBumpMap3, float2(1, 0));
+
+    return color;
+}

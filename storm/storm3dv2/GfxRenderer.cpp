@@ -4,8 +4,8 @@ enum
 {
     DYNAMIC_VB_FRAME_SIZE = 10 * (1 << 20),
     DYNAMIC_IB16_FRAME_SIZE = 1 * (1 << 20),
-    INDEX_STORAGE_SIZE = 20 * (1 << 20),
-    VERTEX_STORAGE_SIZE = 80 * (1 << 20),
+    INDEX_STORAGE_SIZE = 30 * (1 << 20),
+    VERTEX_STORAGE_SIZE = 100 * (1 << 20),
     MAX_QUAD_COUNT = 0x4000,
 };
 
@@ -49,15 +49,21 @@ D3DVERTEXELEMENT9 VertexFormatDesc_P3UV[] = {
     D3DDECL_END()
 };
 
-D3DVERTEXELEMENT9 VertexFormatDesc_P4DUV[] = {
+D3DVERTEXELEMENT9 VertexFormatDesc_PT4DUV[] = {
     { 0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0 }, //TODO: use D3DDECLUSAGE_POSITION when port to shaders
     { 0, 16, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,     0 },
     { 0, 20, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0 },
     D3DDECL_END()
 };
 
-D3DVERTEXELEMENT9 VertexFormatDesc_P4UV[] = {
+D3DVERTEXELEMENT9 VertexFormatDesc_PT4UV[] = {
     { 0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0 }, //TODO: use D3DDECLUSAGE_POSITION when port to shaders
+    { 0, 16, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0 },
+    D3DDECL_END()
+};
+
+D3DVERTEXELEMENT9 VertexFormatDesc_P4UV[] = {
+    { 0,  0, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 }, //TODO: use D3DDECLUSAGE_POSITION when port to shaders
     { 0, 16, D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  0 },
     D3DDECL_END()
 };
@@ -81,7 +87,8 @@ LPD3DVERTEXELEMENT9 vertexFormatDescs[FVF_COUNT] = {
     VertexFormatDesc_P3D,
     VertexFormatDesc_P3DUV2,
     VertexFormatDesc_P3UV,
-    VertexFormatDesc_P4DUV,
+    VertexFormatDesc_PT4DUV,
+    VertexFormatDesc_PT4UV,
     VertexFormatDesc_P4UV,
     VertexFormatDesc_P2DUV,
     VertexFormatDesc_P2UV
@@ -160,7 +167,6 @@ namespace gfx
         //Create quad indices
         quadIdxAlloc = indices.alloc(MAX_QUAD_COUNT * 6);
         assert(quadIdxAlloc);
-
         uint16_t* buffer = indices.lock(quadIdxAlloc);
         for (uint16_t i = 0; i < MAX_QUAD_COUNT; ++i)
         {
@@ -174,8 +180,18 @@ namespace gfx
             *buffer++ = base + 3;
         }
         indices.unlock();
-
         quadBaseIndex = indices.baseIndex(quadIdxAlloc);
+
+        // Create fullscreen quad geometry
+        fullscreenQuadVtxAlloc = vertices.alloc<Vertex_P4UV>(4);
+        assert(fullscreenQuadVtxAlloc);
+        Vertex_P4UV *v = vertices.lock<Vertex_P4UV>(fullscreenQuadVtxAlloc);
+        *v++ = { { -1.0f,  1.0f, 1.f, 1.f },{ 0.f, 1.f } };
+        *v++ = { { -1.0f, -1.0f, 1.f, 1.f },{ 0.f, 0.f } };
+        *v++ = { { 1.0f,  1.0f, 1.f, 1.f },{ 1.f, 1.f } };
+        *v++ = { { 1.0f, -1.0f, 1.f, 1.f },{ 1.f, 0.f } };
+        vertices.unlock();
+        fullscreenQuadBaseVertex = vertices.baseVertex<Vertex_P4UV>(fullscreenQuadVtxAlloc);
     }
 
     void Renderer::destroyPersistantResources()
@@ -356,5 +372,13 @@ namespace gfx
         quadCount = std::min<uint32_t>(MAX_QUAD_COUNT, quadCount);
         device.SetIndices(indices.indices);
         device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVertexIndex, 0, quadCount * 4, quadBaseIndex, quadCount * 2);
+    }
+
+    void Renderer::drawFullScreenQuad()
+    {
+        device.SetVertexDeclaration(vertexFormats[FVF_P4UV]);
+        device.SetStreamSource(0, vertices.vertices, 0, sizeof(Vertex_P4UV));
+        device.SetIndices(indices.indices);
+        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, fullscreenQuadBaseVertex, 0, 4, quadBaseIndex, 2);
     }
 }

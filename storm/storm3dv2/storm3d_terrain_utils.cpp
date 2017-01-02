@@ -433,23 +433,6 @@ void VertexShader::createConeStencilShader()
 	device.CreateVertexDeclaration(&elements[0], &declaration);
 }
 
-void VertexShader::createProceduralShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT4, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 4*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(0, 6*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\procedural_vertex_shader.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\procedural_vertex_shader.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
 void VertexShader::applyDeclaration() const
 {
 	device.SetVertexDeclaration(declaration);
@@ -546,21 +529,6 @@ void PixelShader::createColorEffectOffsetPixelShader_NoGamma()
 	handle = createPixelShader(device, "Data\\Shaders\\color_effect_offset_pixel_shader_nogamma.txt");
 }
 
-void PixelShader::createProceduralShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\procedural_pixel_shader.txt");
-}
-
-void PixelShader::createProceduralOffsetShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\procedural_offset_pixel_shader.txt");
-}
-
-void PixelShader::createProceduralOffsetBaseShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\procedural_offset_base_pixel_shader.txt");
-}
-
 void PixelShader::createBlackWhiteShader()
 {
 	handle = createPixelShader(device, "Data\\Shaders\\black_white_effect_pixel_shader.txt");
@@ -625,21 +593,6 @@ void PixelShader::createColorEffectOffsetPixelShader()
 void PixelShader::createColorEffectOffsetPixelShader_NoGamma()
 {
 	handle = createPixelShader(device, "data\\shader\\color_effect_offset_pixel_shader_nogamma.fps");
-}
-
-void PixelShader::createProceduralShader()
-{
-	handle = createPixelShader(device, "data\\shader\\procedural_pixel_shader.fps");
-}
-
-void PixelShader::createProceduralOffsetShader()
-{
-	handle = createPixelShader(device, "data\\shader\\procedural_offset_pixel_shader.fps");
-}
-
-void PixelShader::createProceduralOffsetBaseShader()
-{
-	handle = createPixelShader(device, "data\\shader\\procedural_offset_base_pixel_shader.fps");
 }
 
 void PixelShader::createBlackWhiteShader()
