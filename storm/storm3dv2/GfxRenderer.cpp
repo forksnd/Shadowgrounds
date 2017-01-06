@@ -138,6 +138,7 @@ namespace gfx
         assert(frameNumber >= 0);
         assert(frameNumber < NUM_FRAMES_DELAY);
 
+        programManager.update(device);
         while (frameSyncQueries[frameNumber]->GetData(NULL, 0, D3DGETDATA_FLUSH) == S_FALSE);
 
         frameVBBytesUsed = 0;

@@ -122,8 +122,8 @@ public:
     void SetPixelShader(uint32_t pixelShader);
 
 private:
-    LPDIRECT3DVERTEXSHADER9 meshVS[MESH_VS_SHADER_COUNT];
-    LPDIRECT3DPIXELSHADER9  meshPS[MESH_PS_SHADER_COUNT];
+    LPDIRECT3DVERTEXSHADER9 meshVS[MESH_VS_SHADER_COUNT] = { 0 };
+    LPDIRECT3DPIXELSHADER9  meshPS[MESH_PS_SHADER_COUNT] = { 0 };
 
     uint32_t currentVertexShader = 0;
     uint32_t currentPixelShader = 0;

@@ -35,6 +35,88 @@ D3DXMATRIX clip_matrix;
 const int Storm3D_ShaderManager::BONE_INDEX_START = 42;
 const int Storm3D_ShaderManager::BONE_INDICES = 48;
 
+template <typename IShaderType>
+bool compileShaderSet(
+    gfx::Device& device,
+    size_t path_len, const char* path,
+    size_t define_count, const char** defines,
+    size_t shader_count, IShaderType** shader_set
+)
+{
+    assert(define_count<32);
+
+    const size_t generated_shader_count = 1 << define_count;
+    assert(shader_count >= generated_shader_count);
+
+    bool success = true;
+
+    std::string shader_source;
+    frozenbyte::storm::readFile(shader_source, path);
+
+    //TODO: replace with safer variant
+    D3D_SHADER_MACRO* macros = (D3D_SHADER_MACRO*)alloca(sizeof(D3D_SHADER_MACRO)*(define_count + 1));
+    for (size_t i = 0; i<generated_shader_count; ++i)
+    {
+        size_t active_define_count = 0;
+
+        for (size_t j = 0; j<define_count; ++j)
+        {
+            const size_t bit = 1 << j;
+            if (i&bit)
+            {
+                macros[active_define_count].Name = defines[j];
+                macros[active_define_count].Definition = "";
+                ++active_define_count;
+            }
+        }
+
+        macros[active_define_count].Definition = 0;
+        macros[active_define_count].Name = 0;
+
+        shader_set[i] = 0;
+
+        success &= createShader(
+            &shader_set[i],
+            device,
+            shader_source.length(),
+            shader_source.c_str(),
+            macros
+        );
+    }
+
+    return success;
+}
+
+bool compileShaderSet(
+    gfx::Device& device,
+    size_t path_len, const char* path,
+    size_t define_count, const char** defines,
+    size_t shader_count, IDirect3DVertexShader9** shader_set
+)
+{
+    return compileShaderSet<IDirect3DVertexShader9>(
+        device,
+        path_len, path,
+        define_count, defines,
+        shader_count, shader_set
+        );
+}
+
+bool compileShaderSet(
+    gfx::Device& device,
+    size_t path_len, const char* path,
+    size_t define_count, const char** defines,
+    size_t shader_count, IDirect3DPixelShader9** shader_set
+)
+{
+    return compileShaderSet<IDirect3DPixelShader9>(
+        device,
+        path_len, path,
+        define_count, defines,
+        shader_count, shader_set
+        );
+}
+
 Storm3D_ShaderManager::Storm3D_ShaderManager(gfx::Device& device)
 :	ambient_color(.7f,.7f,.7f,0),
 	ambient_force_color(0,0,0,0),

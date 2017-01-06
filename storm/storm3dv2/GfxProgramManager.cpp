@@ -1,8 +1,5 @@
 #include "GfxProgramManager.h"
-//TODO: remove
-#include <string>
-//TODO: remove
-#include "storm3d_terrain_utils.h"
+#include <memory>
 
 enum ShaderProfile
 {
@@ -10,6 +7,38 @@ enum ShaderProfile
     PIXEL_SHADER_3_0,
     SHADER_PROFILE_COUNT
 };
+
+typedef std::unique_ptr<char[]> char_array_t;
+
+char_array_t readNewerFile(const char* fileName, uint32_t& size, uint64_t& timestamp)
+{
+    union { FILETIME ft; uint64_t ts; } writeTime;
+    HANDLE hFile;
+    DWORD upperSize, bytesRead;
+    char* buffer = nullptr;
+
+    hFile = CreateFile(fileName, GENERIC_READ, FILE_SHARE_READ, NULL,
+        OPEN_EXISTING, 0, NULL);
+
+    if (hFile == INVALID_HANDLE_VALUE)
+    {
+        return 0;
+    }
+
+    GetFileTime(hFile, nullptr, nullptr, &writeTime.ft);
+    size = GetFileSize(hFile, &upperSize);
+
+    if ((!timestamp || writeTime.ts > timestamp) && !upperSize)
+    {
+        buffer = new char[size];
+        ReadFile(hFile, buffer, size, &bytesRead, nullptr);
+        timestamp = writeTime.ts;
+    }
+
+    CloseHandle(hFile);
+
+    return char_array_t(buffer);
+}
 
 ID3DBlob* compileShader(ShaderProfile profile, size_t source_len, const char* source, D3D_SHADER_MACRO* defines)
 {
@@ -61,9 +90,20 @@ bool createShader(
 
     if (!vscode) return false;
 
-    HRESULT hr = device.CreateVertexShader((const DWORD*)vscode->GetBufferPointer(), shader);
+    IDirect3DVertexShader9* shader_copy;
+    HRESULT hr = device.CreateVertexShader((const DWORD*)vscode->GetBufferPointer(), &shader_copy);
 
-    return SUCCEEDED(hr);
+    if (SUCCEEDED(hr))
+    {
+        if (*shader)
+        {
+            (*shader)->Release();
+        }
+        *shader = shader_copy;
+        return true;
+    }
+
+    return false;
 }
 
 bool createShader(
@@ -80,117 +120,140 @@ bool createShader(
 
     if (!pscode) return false;
 
-    HRESULT hr = device.CreatePixelShader((const DWORD*)pscode->GetBufferPointer(), shader);
+    IDirect3DPixelShader9* shader_copy;
+    HRESULT hr = device.CreatePixelShader((const DWORD*)pscode->GetBufferPointer(), &shader_copy);
 
-    return SUCCEEDED(hr);
-}
-
-
-template <typename IShaderType>
-bool compileShaderSet(
-    gfx::Device& device,
-    size_t path_len, const char* path,
-    size_t define_count, const char** defines,
-    size_t shader_count, IShaderType** shader_set
-)
-{
-    assert(define_count<32);
-
-    const size_t generated_shader_count = 1 << define_count;
-    assert(shader_count >= generated_shader_count);
-
-    bool success = true;
-
-    std::string shader_source;
-    frozenbyte::storm::readFile(shader_source, path);
-
-    //TODO: replace with safer variant
-    D3D_SHADER_MACRO* macros = (D3D_SHADER_MACRO*)alloca(sizeof(D3D_SHADER_MACRO)*(define_count + 1));
-    for (size_t i = 0; i<generated_shader_count; ++i)
+    if (SUCCEEDED(hr))
     {
-        size_t active_define_count = 0;
-
-        for (size_t j = 0; j<define_count; ++j)
+        if (*shader)
         {
-            const size_t bit = 1 << j;
-            if (i&bit)
-            {
-                macros[active_define_count].Name = defines[j];
-                macros[active_define_count].Definition = "";
-                ++active_define_count;
-            }
+            (*shader)->Release();
         }
-
-        macros[active_define_count].Definition = 0;
-        macros[active_define_count].Name = 0;
-
-        shader_set[i] = 0;
-
-        success &= createShader(
-            &shader_set[i],
-            device,
-            shader_source.length(),
-            shader_source.c_str(),
-            macros
-        );
+        *shader = shader_copy;
+        return true;
     }
 
-    return success;
-}
-
-bool compileShaderSet(
-    gfx::Device& device,
-    size_t path_len, const char* path,
-    size_t define_count, const char** defines,
-    size_t shader_count, IDirect3DVertexShader9** shader_set
-)
-{
-    return compileShaderSet<IDirect3DVertexShader9>(
-        device,
-        path_len, path,
-        define_count, defines,
-        shader_count, shader_set
-        );
-}
-
-bool compileShaderSet(
-    gfx::Device& device,
-    size_t path_len, const char* path,
-    size_t define_count, const char** defines,
-    size_t shader_count, IDirect3DPixelShader9** shader_set
-)
-{
-    return compileShaderSet<IDirect3DPixelShader9>(
-        device,
-        path_len, path,
-        define_count, defines,
-        shader_count, shader_set
-        );
+    return false;
 }
 
 namespace gfx
 {
+    D3D_SHADER_MACRO defines[] =
+    {
+        // 0, 1
+        { nullptr, nullptr },
+        // 1, 2
+        { "VS_2D_POS", "" },
+        { nullptr, nullptr },
+        // 3, 3
+        { "VS_2D_POS", "" },
+        { "ENABLE_COLOR", "" },
+        { nullptr, nullptr },
+        // 6, 3
+        { "VS_2D_POS", "" },
+        { "ENABLE_TEXTURE", "" },
+        { nullptr, nullptr },
+        // 9, 4
+        { "VS_2D_POS", "" },
+        { "ENABLE_COLOR", "" },
+        { "ENABLE_TEXTURE", "" },
+        { nullptr, nullptr },
+        // 13, ?
+        //------------------
+        //------------------
+        //------------------
+    };
+
+    struct ShaderDesc
+    {
+        uint16_t id;
+        uint16_t defineStart;
+    };
+
+    struct ShaderSource
+    {
+        const char* path;
+        uint64_t timestamp;
+        uint16_t firstShader;
+        uint16_t lastShader;
+    };
+
+    ShaderDesc vsShaderDescs[] =
+    {
+        { 0, 0 },
+        { 1, 1 },
+        { 2, 4 },
+        { 3, 3 },
+        { 4, 7 },
+        { 5, 6 },
+        { 6, 10 },
+        { 7, 9 },
+        { 8, 0 },
+    };
+
+    ShaderSource vsShaderSources[] = 
+    {
+        { "Data\\shaders\\std.vs", 0, 0, 8 },
+        { "Data\\shaders\\procedural_texture.vs", 0, 8, 9},
+    };
+
+    ShaderDesc psShaderDescs[] =
+    {
+        { 0, 0 },
+        { 1, 1 },
+        { 2, 4 },
+        { 3, 3 },
+        { 4, 7 },
+        { 5, 6 },
+        { 6, 10 },
+        { 7, 9 },
+        { 8, 0 },
+        { 9, 0 },
+    };
+
+    ShaderSource psShaderSources[] =
+    {
+        { "Data\\shaders\\std.ps", 0, 0, 8 },
+        { "Data\\shaders\\procedural_texture.ps", 0, 8, 9 },
+        { "Data\\shaders\\procedural_texture_distortion.ps", 0, 9, 10 },
+    };
+
+    template<typename ShaderType, size_t NUM_SHADERS, size_t NUM_DESCS>
+    void compileShaderSource(gfx::Device& device, ShaderType (&shaders)[NUM_SHADERS], ShaderSource& source, ShaderDesc (&descs)[NUM_DESCS])
+    {
+        uint32_t size;
+        char_array_t source_array = readNewerFile(source.path, size, source.timestamp);
+        
+        if (!source_array) return;
+
+        for (size_t i = source.firstShader; i < source.lastShader; ++i)
+        {
+            assert(i < NUM_DESCS);
+            ShaderDesc& desc = descs[i];
+            assert(desc.id < NUM_SHADERS);
+            createShader(
+                &shaders[desc.id],
+                device,
+                size,
+                source_array.get( ),
+                defines + desc.defineStart
+            );
+        }
+    }
+
+    template<typename ShaderType, size_t NUM_SHADERS, size_t NUM_SOURCES, size_t NUM_DESCS>
+    void compileShaders(gfx::Device& device, ShaderType (&shaders)[NUM_SHADERS], ShaderSource (&sources)[NUM_SOURCES], ShaderDesc (&descs)[NUM_DESCS])
+    {
+        for (auto& source : sources)
+        {
+            compileShaderSource(device, shaders, source, descs);
+        }
+    }
+
     bool ProgramManager::init(gfx::Device& device)
     {
-        const char* defines[] = {
-            "VS_2D_POS",
-            "ENABLE_COLOR",
-            "ENABLE_TEXTURE"
-        };
-
-        compileShaderSet(device, "Data\\shaders\\std.vs", defines, vertexShaders);
-        compileShaderSet(device, "Data\\shaders\\std.ps", defines, pixelShaders);
-
-        std::string shader_source;
-
-        frozenbyte::storm::readFile(shader_source, "Data\\shaders\\procedural_texture.vs");
-        createShader(&vertexShaders[VS_OFFSET_SCALE_2UV], device, shader_source.length(), shader_source.c_str(), nullptr);
-
-        frozenbyte::storm::readFile(shader_source, "Data\\shaders\\procedural_texture.ps");
-        createShader(&pixelShaders[PS_PROCEDURAL], device, shader_source.length(), shader_source.c_str(), nullptr);
-
-        frozenbyte::storm::readFile(shader_source, "Data\\shaders\\procedural_texture_distortion.ps");
-        createShader(&pixelShaders[PS_PROCEDURAL_DISTORSION], device, shader_source.length(), shader_source.c_str(), nullptr);
+        compileShaders(device, vertexShaders, vsShaderSources, vsShaderDescs);
+        compileShaders(device, pixelShaders, psShaderSources, psShaderDescs);
 
         return true;
     }
@@ -199,13 +262,27 @@ namespace gfx
     {
         for (size_t i = 0; i < VS_SHADER_COUNT; ++i)
         {
-            if (vertexShaders[i]) vertexShaders[i]->Release();
+            if (vertexShaders[i])
+            {
+                vertexShaders[i]->Release();
+                vertexShaders[i] = nullptr;
+            }
         }
 
         for (size_t i = 0; i < PS_SHADER_COUNT; ++i)
         {
-            if (pixelShaders[i]) pixelShaders[i]->Release();
+            if (pixelShaders[i])
+            {
+                pixelShaders[i]->Release();
+                pixelShaders[i] = nullptr;
+            }
         }
+    }
+
+    void ProgramManager::update(gfx::Device& device)
+    {
+        compileShaders(device, vertexShaders, vsShaderSources, vsShaderDescs);
+        compileShaders(device, pixelShaders, psShaderSources, psShaderDescs);
     }
 
     void ProgramManager::resetUniforms()

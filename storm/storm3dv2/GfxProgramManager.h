@@ -66,6 +66,8 @@ namespace gfx
         bool init(gfx::Device& device);
         void fini();
 
+        void update(gfx::Device& device);
+
         void resetUniforms();
 
         void setWorldMatrix(const D3DXMATRIX& world);
@@ -89,8 +91,8 @@ namespace gfx
             PS_SHADER_COUNT
         };
 
-        LPDIRECT3DVERTEXSHADER9 vertexShaders[VS_SHADER_COUNT];
-        LPDIRECT3DPIXELSHADER9  pixelShaders[PS_SHADER_COUNT];
+        LPDIRECT3DVERTEXSHADER9 vertexShaders[VS_SHADER_COUNT] = { 0 };
+        LPDIRECT3DPIXELSHADER9  pixelShaders[PS_SHADER_COUNT] = { 0 };
 
         const struct { uint16_t vs, ps; } programs[PROGRAM_COUNT] =
         {
