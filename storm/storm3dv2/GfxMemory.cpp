@@ -6,7 +6,7 @@ namespace gfx
     {
         device.CreateIndexBuffer(size, D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_MANAGED, &indices, NULL);
         allocator = etlsf_create(size, max_allocs);
-        locked = 0;
+        locked = ETLSF_INVALID_ID;
     }
 
     void IndexStorage16::fini()
@@ -14,30 +14,30 @@ namespace gfx
         etlsf_destroy(allocator);
         indices->Release();
 
-        locked = 0;
+        locked = ETLSF_INVALID_ID;
         indices = 0;
         allocator = 0;
     }
 
-    uint16_t IndexStorage16::alloc(uint32_t numIndices)
+    etlsf_alloc_t IndexStorage16::alloc(uint32_t numIndices)
     {
-        return etlsf_alloc(allocator, numIndices * sizeof(uint16_t));
+        return etlsf_alloc_range(allocator, numIndices * sizeof(uint16_t));
     }
 
-    void IndexStorage16::free(uint16_t id)
+    void IndexStorage16::free(etlsf_alloc_t id)
     {
-        etlsf_free(allocator, id);
+        etlsf_free_range(allocator, id);
     }
 
-    uint16_t* IndexStorage16::lock(uint16_t id)
+    uint16_t* IndexStorage16::lock(etlsf_alloc_t id)
     {
-        assert(locked == 0);
-        assert(etlsf_is_block_valid(allocator, id));
+        assert(!etlsf_alloc_is_valid(allocator, locked));
+        assert(etlsf_alloc_is_valid(allocator, id));
 
         locked = id;
 
-        uint32_t offset = etlsf_block_offset(allocator, id);
-        uint32_t size = etlsf_block_size(allocator, id);
+        uint32_t offset = etlsf_alloc_offset(allocator, id);
+        uint32_t size = etlsf_alloc_size(allocator, id);
 
         void* ptr = 0;
         indices->Lock(offset, size, &ptr, 0);
@@ -47,16 +47,16 @@ namespace gfx
 
     void IndexStorage16::unlock()
     {
-        assert(locked != 0);
+        assert(etlsf_alloc_is_valid(allocator, locked));
 
         indices->Unlock();
 
-        locked = 0;
+        locked = ETLSF_INVALID_ID;
     }
 
-    uint32_t IndexStorage16::baseIndex(uint16_t id)
+    uint32_t IndexStorage16::baseIndex(etlsf_alloc_t id)
     {
-        return etlsf_block_offset(allocator, id) / sizeof(uint16_t);
+        return etlsf_alloc_offset(allocator, id) / sizeof(uint16_t);
     }
 
 
@@ -65,7 +65,7 @@ namespace gfx
     {
         device.CreateVertexBuffer(size, D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &vertices, NULL);
         allocator = etlsf_create(size, max_allocs);
-        locked = 0;
+        locked = ETLSF_INVALID_ID;
     }
 
     void VertexStorage::fini()
@@ -73,30 +73,30 @@ namespace gfx
         etlsf_destroy(allocator);
         vertices->Release();
 
-        locked = 0;
+        locked = ETLSF_INVALID_ID;
         vertices = 0;
         allocator = 0;
     }
 
-    uint16_t VertexStorage::alloc(uint32_t numVertices, uint32_t stride)
+    etlsf_alloc_t VertexStorage::alloc(uint32_t numVertices, uint32_t stride)
     {
-        return etlsf_alloc(allocator, numVertices * stride + stride);
+        return etlsf_alloc_range(allocator, numVertices * stride + stride);
     }
 
-    void VertexStorage::free(uint16_t id)
+    void VertexStorage::free(etlsf_alloc_t id)
     {
-        etlsf_free(allocator, id);
+        etlsf_free_range(allocator, id);
     }
 
-    void* VertexStorage::lock(uint16_t id, uint32_t stride)
+    void* VertexStorage::lock(etlsf_alloc_t id, uint32_t stride)
     {
-        assert(locked == 0);
-        assert(etlsf_is_block_valid(allocator, id));
+        assert(!etlsf_alloc_is_valid(allocator, locked));
+        assert(etlsf_alloc_is_valid(allocator, id));
 
         locked = id;
 
-        uint32_t offset = etlsf_block_offset(allocator, id);
-        uint32_t size = etlsf_block_size(allocator, id);
+        uint32_t offset = etlsf_alloc_offset(allocator, id);
+        uint32_t size = etlsf_alloc_size(allocator, id);
         uint32_t rem = offset % stride;
 
         uint8_t* ptr = 0;
@@ -107,21 +107,21 @@ namespace gfx
 
     void VertexStorage::unlock()
     {
-        assert(locked != 0);
+        assert(etlsf_alloc_is_valid(allocator, locked));
 
         vertices->Unlock();
 
-        locked = 0;
+        locked = ETLSF_INVALID_ID;
     }
 
-    uint32_t VertexStorage::baseVertex(uint16_t id, uint32_t stride)
+    uint32_t VertexStorage::baseVertex(etlsf_alloc_t id, uint32_t stride)
     {
         return offset(id, stride) / stride;
     }
 
-    uint32_t VertexStorage::offset(uint16_t id, uint32_t stride)
+    uint32_t VertexStorage::offset(etlsf_alloc_t id, uint32_t stride)
     {
-        uint32_t offset = etlsf_block_offset(allocator, id);
+        uint32_t offset = etlsf_alloc_offset(allocator, id);
 
         uint32_t rem = offset % stride;
         offset += (rem == 0) ? 0 : stride - rem;

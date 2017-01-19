@@ -35,7 +35,6 @@ Storm3D_Mesh::Storm3D_Mesh(Storm3D *s2, Storm3D_ResourceManager &resourceManager
 	hasLods(false),
 	vertexes(NULL),
 	bone_weights(NULL),
-	vertices_id(0),
 	radius(0),
 	sq_radius(0),
 	radius2d(0),
@@ -53,7 +52,6 @@ Storm3D_Mesh::Storm3D_Mesh(Storm3D *s2, Storm3D_ResourceManager &resourceManager
 		render_face_amount[i] = 0;
 		face_amount[i] = 0;
 		faces[i] = 0;
-		indices_id[i] = 0;
 	}
 	storm3d_mesh_allocs++;
 }
@@ -418,8 +416,8 @@ void Storm3D_Mesh::Render(Storm3D_Scene *scene,bool mirrored,Storm3D_Model_Objec
 	PrepareForRender(scene,object);
 
 	// Test
-	if (vertices_id==NULL) return;
-	if (indices_id[0]==NULL) return;
+	if (vertices_id.value==NULL) return;
+	if (indices_id[0].value==NULL) return;
 
 	// Prepare material for rendering (v3)
 	PrepareMaterialForRender(scene,object);
@@ -461,8 +459,8 @@ void Storm3D_Mesh::RenderWithoutMaterial(Storm3D_Scene *scene,bool mirrored,Stor
 	PrepareForRender(scene,object);
 
 	// Test
-	if (vertices_id==NULL) return;
-	if (indices_id[0]==NULL) return;
+	if (vertices_id.value==NULL) return;
+	if (indices_id[0].value ==NULL) return;
 
 	// Reverse culling if mirrored
 	if (mirrored)
@@ -495,8 +493,8 @@ void Storm3D_Mesh::RenderToBackground(Storm3D_Scene *scene,Storm3D_Model_Object 
 	PrepareForRender(scene,object);
 
 	// Test
-	if (vertices_id==NULL) return;
-	if (indices_id[0]==NULL) return;
+	if (vertices_id.value ==NULL) return;
+	if (indices_id[0].value ==NULL) return;
 
 	// Prepare material for rendering (v3)
 	PrepareMaterialForRender(scene,object);

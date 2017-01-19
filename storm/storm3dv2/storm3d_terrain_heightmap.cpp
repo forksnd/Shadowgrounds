@@ -87,7 +87,7 @@
 
 	struct TerrainBlock
 	{
-        uint16_t heights_id = 0;
+        etlsf_alloc_t heights_id = ETLSF_INVALID_ID;
 		int positionX;
 		int positionY;
 
@@ -263,7 +263,7 @@ struct Storm3D_TerrainHeightmapData
 	frozenbyte::storm::VertexShader nvShadowShaderPoint;
 	frozenbyte::storm::VertexShader nvShadowShaderFlat;
 
-    uint16_t vertices_id = 0;
+    etlsf_alloc_t vertices_id = ETLSF_INVALID_ID;
 
 	std::vector<TerrainBlock> blocks;
 	std::shared_ptr<Storm3D_TerrainLod> indexBuffer;

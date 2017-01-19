@@ -77,10 +77,10 @@ namespace gfx
         IndexStorage16  indices;
         VertexStorage   vertices;
 
-        uint16_t quadIdxAlloc = 0;
-        uint32_t quadBaseIndex = 0;
+        etlsf_alloc_t quadIdxAlloc = ETLSF_INVALID_ID;
+        uint32_t      quadBaseIndex = 0;
 
-        uint16_t fullscreenQuadVtxAlloc;
-        uint32_t fullscreenQuadBaseVertex;
+        etlsf_alloc_t fullscreenQuadVtxAlloc = ETLSF_INVALID_ID;
+        uint32_t      fullscreenQuadBaseVertex;
     };
 }

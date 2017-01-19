@@ -7,6 +7,7 @@
 // Includes
 //------------------------------------------------------------------
 #include "GfxDevice.h"
+#include "GfxMemory.h"
 #include "storm3d_common_imp.h"
 #include "IStorm3D_Mesh.h"
 #include "storm3d_mesh_collisiontable.h"
@@ -34,9 +35,7 @@ struct Storm3D_Weight
 
 struct Storm3D_BoneChunk
 {
-    Storm3D_BoneChunk()
-      : idx_id(0),
-        vtx_id(0),
+    Storm3D_BoneChunk():
         base_index(0),
         base_vertex(0),
         index_count(0),
@@ -45,8 +44,8 @@ struct Storm3D_BoneChunk
     }
 
     std::vector<int> bone_indices;
-    uint16_t idx_id;
-    uint16_t vtx_id;
+    etlsf_alloc_t idx_id = ETLSF_INVALID_ID;
+    etlsf_alloc_t vtx_id = ETLSF_INVALID_ID;
     int base_index;
     int index_count;
     int base_vertex;
@@ -84,8 +83,8 @@ class Storm3D_Mesh : public IStorm3D_Mesh
 	std::vector<Storm3D_BoneChunk> bone_chunks[LOD_AMOUNT];
 
 	// DirectX Buffers (temporary)
-    uint16_t vertices_id;
-    uint16_t indices_id[LOD_AMOUNT];
+    etlsf_alloc_t vertices_id = ETLSF_INVALID_ID;
+    etlsf_alloc_t indices_id[LOD_AMOUNT] = { ETLSF_INVALID_ID , ETLSF_INVALID_ID, ETLSF_INVALID_ID };
 
 	int vbuf_vsize;
 	FVF vbuf_fvf;

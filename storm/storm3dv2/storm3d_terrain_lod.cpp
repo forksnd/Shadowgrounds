@@ -25,7 +25,7 @@ static_assert(CENTER_BLOCK_SIZE == 2, "ASSERT FAILED: CENTER_BLOCK_SIZE == 2");
 
 struct LodIndexBuffer
 {
-    uint16_t allocId;
+    etlsf_alloc_t allocId = ETLSF_INVALID_ID;
     int faceAmount;
     int lodFactor;
     int baseIndex;
@@ -40,7 +40,6 @@ struct LodIndexBuffer
     LodIndexBuffer():
         lodFactor(1),
         faceAmount(0),
-        allocId(0),
         baseIndex(0)
     {
     }
@@ -58,7 +57,7 @@ struct LodIndexBuffer
         int idxCount = (resolution - 1) * (resolution - 1) * 6;
 
         allocId = storage.alloc(idxCount);
-        if (!allocId)
+        if (!allocId.value)
             return;
 
         uint16_t* indices = storage.lock(allocId);
@@ -82,7 +81,7 @@ struct LodIndexBuffer
         int idxCount = (resolution - lodFactor) * (resolution - lodFactor);
 
         allocId = storage.alloc(idxCount);
-        if (!allocId)
+        if (!allocId.value)
             return;
 
         uint16_t* buffer = storage.lock(allocId);

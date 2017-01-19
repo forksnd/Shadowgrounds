@@ -167,7 +167,7 @@ namespace gfx
 
         //Create quad indices
         quadIdxAlloc = indices.alloc(MAX_QUAD_COUNT * 6);
-        assert(quadIdxAlloc);
+        assert(quadIdxAlloc.value);
         uint16_t* buffer = indices.lock(quadIdxAlloc);
         for (uint16_t i = 0; i < MAX_QUAD_COUNT; ++i)
         {
@@ -185,7 +185,7 @@ namespace gfx
 
         // Create fullscreen quad geometry
         fullscreenQuadVtxAlloc = vertices.alloc<Vertex_P4UV>(4);
-        assert(fullscreenQuadVtxAlloc);
+        assert(fullscreenQuadVtxAlloc.value);
         Vertex_P4UV *v = vertices.lock<Vertex_P4UV>(fullscreenQuadVtxAlloc);
         *v++ = { { -1.0f,  1.0f, 1.f, 1.f },{ 0.f, 1.f } };
         *v++ = { { -1.0f, -1.0f, 1.f, 1.f },{ 0.f, 0.f } };
