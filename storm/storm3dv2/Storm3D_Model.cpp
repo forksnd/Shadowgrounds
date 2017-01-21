@@ -1548,7 +1548,7 @@ bool Storm3D_Model::LoadS3D(const char *filename)
 			Storm3D_Vertex *temp_vxs=new Storm3D_Vertex[tmesh->vertex_amount];
 
 			// Read vertexes from disk
-			for (int vn=0;vn<tmesh->vertex_amount;vn++)
+			for (uint32_t vn=0;vn<tmesh->vertex_amount;vn++)
 			{
 				S3D_VERTEX vertex;
 				filesystem::fb_fread(&vertex,sizeof(S3D_VERTEX),1,f);

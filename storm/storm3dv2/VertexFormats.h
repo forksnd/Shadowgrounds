@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <DatatypeDef.h>
 
-enum FVF //Fixed Vertex Format
+enum FVF: uint16_t //Fixed Vertex Format
 {
     FVF_P3NUV2,
     FVF_P3NUV2BW,
@@ -25,6 +25,8 @@ enum FVF //Fixed Vertex Format
 
 struct Vertex_P3NUV2
 {
+    static const FVF fvf = FVF_P3NUV2;
+
     VC3 p;
     VC3 n;
     VC2 uv0;
@@ -33,6 +35,8 @@ struct Vertex_P3NUV2
 
 struct Vertex_P3NUV2BW
 {
+    static const FVF fvf = FVF_P3NUV2BW;
+
     VC3 p;
     VC3 n;
     VC2 uv0;
@@ -42,12 +46,16 @@ struct Vertex_P3NUV2BW
 
 struct Vertex_P3D
 {
+    static const FVF fvf = FVF_P3D;
+
     VC3      p;
     uint32_t d;
 };
 
 struct Vertex_P3DUV2
 {
+    static const FVF fvf = FVF_P3DUV2;
+
     VC3      p;
     uint32_t d;
     VC2      uv0;
@@ -56,6 +64,9 @@ struct Vertex_P3DUV2
 
 struct Vertex_P4DUV
 {
+    //TODO: fix fvf!!!!
+    static const FVF fvf = FVF_PT4DUV;
+
     VC4      p;
     uint32_t d;
     VC2      uv;
@@ -63,12 +74,16 @@ struct Vertex_P4DUV
 
 struct Vertex_P4UV
 {
+    static const FVF fvf = FVF_P4UV;
+
     VC4      p;
     VC2      uv;
 };
 
 struct Vertex_P2DUV
 {
+    static const FVF fvf = FVF_P2DUV;
+
     VC2      p;
     uint32_t d;
     VC2      uv;

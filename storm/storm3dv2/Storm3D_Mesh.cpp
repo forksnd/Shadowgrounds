@@ -31,7 +31,6 @@ Storm3D_Mesh::Storm3D_Mesh(Storm3D *s2, Storm3D_ResourceManager &resourceManager
 	resourceManager(resourceManager_),
 	material(NULL),
 	vertex_amount(0),
-	render_vertex_amount(0),
 	hasLods(false),
 	vertexes(NULL),
 	bone_weights(NULL),
@@ -49,7 +48,6 @@ Storm3D_Mesh::Storm3D_Mesh(Storm3D *s2, Storm3D_ResourceManager &resourceManager
 {
 	for(int i = 0; i < LOD_AMOUNT; ++i)
 	{
-		render_face_amount[i] = 0;
 		face_amount[i] = 0;
 		faces[i] = 0;
 	}
@@ -63,7 +61,7 @@ const Sphere &Storm3D_Mesh::getBoundingSphere() const
 		VC3 minSize(1000000.f, 1000000.f, 1000000.f);
 		VC3 maxSize(-1000000.f, -1000000.f, -1000000.f);
 
-		for(int i = 0; i < vertex_amount; ++i)
+		for(uint32_t i = 0; i < vertex_amount; ++i)
 		{
 			const VC3 &v = vertexes[i].position;
 			if(v.x < minSize.x)
@@ -99,7 +97,7 @@ const AABB &Storm3D_Mesh::getBoundingBox() const
 		VC3 minSize(1000000.f, 1000000.f, 1000000.f);
 		VC3 maxSize(-1000000.f, -1000000.f, -1000000.f);
 
-		for(int i = 0; i < vertex_amount; ++i)
+		for(uint32_t i = 0; i < vertex_amount; ++i)
 		{
 			const VC3 &v = vertexes[i].position;
 			if(v.x < minSize.x)
@@ -132,8 +130,6 @@ Storm3D_Mesh::~Storm3D_Mesh()
 {
 	storm3d_mesh_allocs--;
 
-    clearBoneChunks();
-
 	// Remove from Storm3D's list
 	Storm3D2->Remove(this, 0);
 
@@ -145,17 +141,12 @@ Storm3D_Mesh::~Storm3D_Mesh()
 
 	// Release buffers
     
-    gfx::VertexStorage&  vtxStorage = Storm3D2->renderer.getVertexStorage();
-    gfx::IndexStorage16& idxStorage = Storm3D2->renderer.getIndexStorage16();
-
-    vtxStorage.free(vertices_id);
-
 	for(int i = 0; i < LOD_AMOUNT; ++i)
 	{
 		delete[] faces[i];
-		
-        idxStorage.free(indices_id[i]);
 	}
+
+    gfx::mesh_destroy(Storm3D2->renderer, mesh);
 
 	if(material)
 		resourceManager.removeUser(material, this);
@@ -183,7 +174,7 @@ IStorm3D_Mesh *Storm3D_Mesh::CreateNewClone()
 	if (vertexes)
 	{
 		ret->vertexes = new Storm3D_Vertex[vertex_amount];
-		for (int i = 0; i < vertex_amount; i++)
+		for (uint32_t i = 0; i < vertex_amount; i++)
 		{
 			ret->vertexes[i] = this->vertexes[i];
 		}
@@ -196,7 +187,7 @@ IStorm3D_Mesh *Storm3D_Mesh::CreateNewClone()
 		if(faces[i])
 		{
 			ret->faces[i] = new Storm3D_Face[face_amount[i]];
-			for (int j = 0; j < face_amount[i]; j++)
+			for (uint32_t j = 0; j < face_amount[i]; j++)
 				ret->faces[i][j] = this->faces[i][j];
 		}
 	}
@@ -204,7 +195,7 @@ IStorm3D_Mesh *Storm3D_Mesh::CreateNewClone()
 	if(bone_weights)
 	{
 		ret->bone_weights = new Storm3D_Weight[vertex_amount];
-		for(int i = 0; i < vertex_amount; ++i)
+		for(uint32_t i = 0; i < vertex_amount; ++i)
 			ret->bone_weights[i] = bone_weights[i];
 	}
 
@@ -218,75 +209,6 @@ IStorm3D_Mesh *Storm3D_Mesh::CreateNewClone()
 // You can set scene=NULL, object=NULL if you dont need animation
 void Storm3D_Mesh::PrepareForRender(Storm3D_Scene *scene,Storm3D_Model_Object *object)
 {
-	// Check if material is changed in a way that forces object
-	// buffers to be rebuilt.
-	if(bone_weights)
-	{
-		if (vbuf_fvf!=FVF_P3NUV2BW)
-		{
-			update_vx=true;
-			update_vx_amount=true;
-		}
-	}	
-	else if (vbuf_fvf!=FVF_P3NUV2)
-	{
-		update_vx=true;
-		update_vx_amount=true;
-	}
-
-	/*
-	else if (material)
-	{
-		if (material->GetBumpType()==Storm3D_Material::BUMPTYPE_DOT3)	// DOT3 only
-		{
-			if (vbuf_fvf!=FVF_P3NUV2)
-			{
-				update_vx=true;
-				update_vx_amount=true;
-			}
-		} 
-		else
-		if ((material->GetMultiTextureType()==Storm3D_Material::MTYPE_TEX_EMBM_REF)
-			||(material->GetMultiTextureType()==Storm3D_Material::MTYPE_DUALTEX_EMBM_REF))	// TEX_EMBM_REF only
-		{
-			if (vbuf_fvf!=FVF_P3NUV2)
-			{
-				update_vx=true;
-				update_vx_amount=true;
-			}
-		} 
-		else	// Other than DOT3 or TEX_EMBM_REF
-		{
-			if (material->GetTextureCoordinateSetCount()==0)
-			{
-				if (vbuf_fvf!=FVF_P3NUV2)
-				{
-					update_vx=true;
-					update_vx_amount=true;
-				}
-			}
-			else
-			{
-				if (vbuf_fvf!=FVF_P3NUV2)
-				{
-					update_vx=true;
-					update_vx_amount=true;
-				}
-			}
-		}
-	}
-	else	// No material
-	{
-		// If material was removed, it usually means rebuild. (but not always)
-		if (vbuf_fvf!=FVF_P3NUV2)
-		{
-			update_vx=true;
-			update_vx_amount=true;
-		}
-	}
-	*/
-
-	// If rebuild is needed: do it!
 	ReBuild();
 }
 
@@ -305,7 +227,7 @@ void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_O
 		float mxx[16];
 		object->GetMXG().GetAsD3DCompatible4x4(mxx);
 
-		if (material) material->Apply(scene,0,vbuf_fvf,(D3DMATRIX*)mxx);
+		if (material) material->Apply(scene,0,(D3DMATRIX*)mxx);
 		else
 		{
 			// No material
@@ -369,41 +291,34 @@ void Storm3D_Mesh::PrepareMaterialForRender(Storm3D_Scene *scene,Storm3D_Model_O
 //------------------------------------------------------------------
 void Storm3D_Mesh::RenderBuffers(Storm3D_Model_Object *object)
 {
-    gfx::Device& device = Storm3D2->GetD3DDevice();
-    int lod = object->parent_model->lodLevel;
-    if (!hasLods)
-        lod = 0;
+    assert(mesh);
 
-    gfx::VertexStorage& vtxStorage = Storm3D2->renderer.getVertexStorage();
-    gfx::IndexStorage16& idxStorage = Storm3D2->renderer.getIndexStorage16();
+    gfx::Renderer& renderer = Storm3D2->renderer;
+    gfx::Device& device = renderer.device;
 
-    Storm3D2->renderer.setFVF(vbuf_fvf);
-    device.SetStreamSource(0, vtxStorage.vertices, 0, vbuf_vsize);
+    uint16_t lod = hasLods ? object->parent_model->lodLevel : 0;
+
+    gfx::Mesh::SubMesh& submesh = mesh_get_submesh_array(mesh)[0];
+    gfx::Mesh::Subset& subset = mesh_get_subset_array(mesh)[lod];
+
+    gfx::VertexStorage& vtxStorage = renderer.getVertexStorage();
+    gfx::IndexStorage16& idxStorage = renderer.getIndexStorage16();
+
+    renderer.setFVF(submesh.fvf);
+    device.SetStreamSource(0, vtxStorage.vertices, 0, submesh.stride);
     device.SetIndices(idxStorage.indices);
 
     if (bone_weights)
     {
-        for (unsigned int i = 0; i < bone_chunks[lod].size(); ++i)
-        {
-            Storm3D_ShaderManager *manager = Storm3D_ShaderManager::GetSingleton();
-            manager->SetShader(device, bone_chunks[lod][i].bone_indices);
-
-
-            device.DrawIndexedPrimitive(
-                D3DPT_TRIANGLELIST,
-                bone_chunks[lod][i].base_vertex, 0, bone_chunks[lod][i].vertex_count,
-                bone_chunks[lod][i].base_index, bone_chunks[lod][i].index_count
-            );
-        }
+        Storm3D_ShaderManager *manager = Storm3D_ShaderManager::GetSingleton();
+        manager->SetShader(device, bone_indices);
     }
-    else
-    {
-        device.DrawIndexedPrimitive(
-            D3DPT_TRIANGLELIST,
-            base_vertex, 0, render_vertex_amount,
-            base_index[lod], render_face_amount[lod]
-        );
-    }
+
+    device.DrawIndexedPrimitive(
+        D3DPT_TRIANGLELIST,
+        submesh.base_vertex, 0, submesh.vertex_count,
+        subset.base_index, subset.index_count / 3
+    );
 }
 
 
@@ -415,9 +330,7 @@ void Storm3D_Mesh::Render(Storm3D_Scene *scene,bool mirrored,Storm3D_Model_Objec
 	// Prepare for rendering (v3)
 	PrepareForRender(scene,object);
 
-	// Test
-	if (vertices_id.value==NULL) return;
-	if (indices_id[0].value==NULL) return;
+    if (!mesh) return;
 
 	// Prepare material for rendering (v3)
 	PrepareMaterialForRender(scene,object);
@@ -458,9 +371,7 @@ void Storm3D_Mesh::RenderWithoutMaterial(Storm3D_Scene *scene,bool mirrored,Stor
 	// Prepare for rendering (v3)
 	PrepareForRender(scene,object);
 
-	// Test
-	if (vertices_id.value==NULL) return;
-	if (indices_id[0].value ==NULL) return;
+    if (!mesh) return;
 
 	// Reverse culling if mirrored
 	if (mirrored)
@@ -482,7 +393,6 @@ void Storm3D_Mesh::RenderWithoutMaterial(Storm3D_Scene *scene,bool mirrored,Stor
 }
 
 
-
 //------------------------------------------------------------------
 // Storm3D_Mesh::RenderToBackground
 //------------------------------------------------------------------
@@ -492,9 +402,7 @@ void Storm3D_Mesh::RenderToBackground(Storm3D_Scene *scene,Storm3D_Model_Object 
     // Prepare for rendering (v3)
 	PrepareForRender(scene,object);
 
-	// Test
-	if (vertices_id.value ==NULL) return;
-	if (indices_id[0].value ==NULL) return;
+	if (!mesh) return;
 
 	// Prepare material for rendering (v3)
 	PrepareMaterialForRender(scene,object);
@@ -511,346 +419,130 @@ void Storm3D_Mesh::RenderToBackground(Storm3D_Scene *scene,Storm3D_Model_Object 
 	device.SetRenderState(D3DRS_ZENABLE,TRUE);
 }
 
-void Storm3D_Mesh::clearBoneChunks()
-{
-    int lodLevels = hasLods ? LOD_AMOUNT : 1;
-    gfx::IndexStorage16& idxStorage = Storm3D2->renderer.getIndexStorage16();
-    gfx::VertexStorage&  vtxStorage = Storm3D2->renderer.getVertexStorage();
-
-    for(int lod = 0; lod < lodLevels; ++lod)
-    {
-        for (unsigned int i = 0; i < bone_chunks[lod].size(); ++i)
-        {
-            auto chunk = bone_chunks[lod][i];
-            idxStorage.free(chunk.idx_id);
-            vtxStorage.free(chunk.vtx_id);
-        }
-
-        bone_chunks[lod].clear();
-    }
-}
-
 //------------------------------------------------------------------
 // Storm3D_Mesh::ReBuild
 //------------------------------------------------------------------
 void Storm3D_Mesh::ReBuild()
 {
-    // Test if rebuilding is needed
-    if ((!update_vx) && (!update_vx_amount) &&
-        (!update_fc) && (!update_fc_amount)) return;
+    if (mesh) return;
 
     // Test array sizes
     if ((face_amount[0] < 1)/*&&(facestrip_length<3)*/) return;
     if (vertex_amount < 1) return;
 
-    // Select format for vertexbuffer
+    uint16_t lodLevels = hasLods ? LOD_AMOUNT : 1;
+
+    std::vector<uint16_t> hw_indices;
+    gfx::Mesh::Subset subsets[LOD_AMOUNT];
+
+    uint32_t base_index_offset = 0;
+    for (uint32_t i = 0; i < lodLevels; ++i)
+    {
+        uint16_t index_count = face_amount[i] * 3;
+
+        subsets[i].base_index = base_index_offset;
+        subsets[i].index_count = index_count;
+
+        base_index_offset += index_count;
+    }
+
+    for (uint32_t i = 0; i < lodLevels; ++i)
+    {
+        // Copy data to indexbuffer
+        for (uint32_t j = 0; j < face_amount[i]; j++)
+        {
+            hw_indices.push_back(faces[i][j].vertex_index[0]);
+            hw_indices.push_back(faces[i][j].vertex_index[1]);
+            hw_indices.push_back(faces[i][j].vertex_index[2]);
+        }
+    }
+
+    // Build bone chunks
     if (bone_weights)
     {
-        vbuf_vsize = sizeof(Vertex_P3NUV2BW);
-        vbuf_fvf = FVF_P3NUV2BW;
+        // Find all used weights
+        bone_indices.clear();
+        for (uint32_t i = 0; i < vertex_amount; ++i)
+        {
+            int bone_index = bone_weights[i].index1;
+            if (bone_index >= 0)
+            {
+                if (std::find(bone_indices.begin(), bone_indices.end(), bone_index) == bone_indices.end())
+                    bone_indices.push_back(bone_index);
+            }
+
+            bone_index = bone_weights[i].index2;
+            if (bone_index >= 0)
+            {
+                if (std::find(bone_indices.begin(), bone_indices.end(), bone_index) == bone_indices.end())
+                    bone_indices.push_back(bone_index);
+            }
+        }
+
+        assert(bone_indices.size() <= Storm3D_ShaderManager::BONE_INDICES);
+        std::sort(bone_indices.begin(), bone_indices.end());
+
+        // Create vertex buffer
+        std::vector<Vertex_P3NUV2BW> hw_vertices;
+        for (uint32_t i = 0; i < vertex_amount; ++i)
+        {
+            int index1 = bone_weights[i].index1;
+            if (index1 != -1)
+            {
+                auto it = std::find(bone_indices.begin(), bone_indices.end(), index1);
+                if (it != bone_indices.end())
+                    index1 = std::distance(bone_indices.begin(), it);
+            }
+
+            int index2 = bone_weights[i].index2;
+            if (index2 != -1)
+            {
+                auto it = std::find(bone_indices.begin(), bone_indices.end(), index2);
+                if (it != bone_indices.end())
+                    index2 = std::distance(bone_indices.begin(), it);
+            }
+
+            float bone_i0 = (float)index1;
+            float bone_w0 = (index1 >= 0) ? bone_weights[i].weight1 / 100.f : 0.0f;
+
+            float bone_i1 = (float)index2;
+            float bone_w1 = (index2 >= 0) ? bone_weights[i].weight2 / 100.f : 0.0f;
+
+            hw_vertices.push_back({
+                vertexes[i].position,
+                vertexes[i].normal,
+                vertexes[i].texturecoordinates,
+                vertexes[i].texturecoordinates2,
+                VC4(bone_i0, bone_w0, bone_i1, bone_w1)
+            });
+        }
+
+        mesh = mesh_create_simple(
+            Storm3D2->renderer,
+            &hw_vertices[0], hw_vertices.size(),
+            &hw_indices[0], hw_indices.size(),
+            subsets, lodLevels
+        );
     }
     else
     {
-        vbuf_vsize = sizeof(Vertex_P3NUV2);
-        vbuf_fvf = FVF_P3NUV2;
-    }
-
-    gfx::IndexStorage16& idxStorage = Storm3D2->renderer.getIndexStorage16();
-    gfx::VertexStorage&  vtxStorage = Storm3D2->renderer.getVertexStorage();
-
-    int lodLevels = hasLods ? LOD_AMOUNT : 1;
-
-    // Build bone chunks
-    if ((bone_weights) && ((update_vx) || (update_fc)))
-    {
-        clearBoneChunks();
-
-        for (int lod = 0; lod < lodLevels; ++lod)
+        std::vector<Vertex_P3NUV2> hw_vertices;
+        for (uint32_t i = 0; i < vertex_amount; i++)
         {
-            // Find used bones indices
-            std::vector<int> bone_indices;
-            int max_bone_index = 0;
-
-            std::vector<std::vector<int> > chunk_faces;
-
-            for (int v = 0; v < vertex_amount; ++v)
-            {
-                int index = bone_weights[v].index1;
-                if (index == -1)
-                    continue;
-
-                if (index > max_bone_index)
-                    max_bone_index = index;
-                if (std::find(bone_indices.begin(), bone_indices.end(), index) == bone_indices.end())
-                    bone_indices.push_back(index);
-
-                index = bone_weights[v].index2;
-                if (index == -1)
-                    continue;
-
-                if (index > max_bone_index)
-                    max_bone_index = index;
-                if (find(bone_indices.begin(), bone_indices.end(), index) == bone_indices.end())
-                    bone_indices.push_back(index);
-            }
-
-            std::sort(bone_indices.begin(), bone_indices.end());
-
-            for (int i = 0; i < face_amount[lod]; ++i)
-            {
-                // Find all used weights
-                const Storm3D_Face &f = faces[lod][i];
-                int weights[6] = { -1, -1, -1, -1, -1, -1 };
-                int weight_index = 0;
-
-                for (int k = 0; k < 3; ++k)
-                {
-                    int vindex = f.vertex_index[k];
-
-                    int bone_index = bone_weights[vindex].index1;
-                    if (bone_index >= 0)
-                    {
-                        if (std::find(&weights[0], &weights[6], bone_index) == &weights[6])
-                            weights[weight_index++] = bone_index;
-                    }
-
-                    bone_index = bone_weights[vindex].index2;
-                    if (bone_index >= 0)
-                    {
-                        if (std::find(&weights[0], &weights[6], bone_index) == &weights[6])
-                            weights[weight_index++] = bone_index;
-                    }
-                }
-
-                // If some chunk (index) already contains needed bones or contains enough spaces for them (could_insert_chunk)
-                int index = -1;
-                int could_insert_chunk = -1;
-
-                for (unsigned int j = 0; j < bone_chunks[lod].size(); ++j)
-                {
-                    Storm3D_BoneChunk &chunk = bone_chunks[lod][j];
-
-                    int bones_found = 0;
-                    for (int k = 0; k < weight_index; ++k)
-                    {
-                        for (unsigned int l = 0; l < chunk.bone_indices.size(); ++l)
-                        {
-                            if (weights[k] == chunk.bone_indices[l])
-                                ++bones_found;
-                        }
-                    }
-
-                    if (int(chunk.bone_indices.size() + weight_index - bones_found) < Storm3D_ShaderManager::BONE_INDICES)
-                        could_insert_chunk = j;
-
-                    if (bones_found == weight_index)
-                        index = j;
-                }
-
-                // Create new chunk if needed
-                if (index == -1)
-                {
-                    index = could_insert_chunk;
-                    if (index == -1)
-                    {
-                        index = bone_chunks[lod].size();
-                        bone_chunks[lod].resize(index + 1);
-                    }
-
-                    Storm3D_BoneChunk &insert_chunk = bone_chunks[lod][index];
-                    for (int k = 0; k < weight_index; ++k)
-                    {
-                        if (find(insert_chunk.bone_indices.begin(), insert_chunk.bone_indices.end(), weights[k]) != insert_chunk.bone_indices.end())
-                            continue;
-
-                        int new_index = weights[k];
-                        insert_chunk.bone_indices.push_back(new_index);
-                    }
-                }
-
-                if (int(chunk_faces.size()) <= index)
-                    chunk_faces.resize(index + 1);
-
-                chunk_faces[index].push_back(i);
-            }
-
-            // Ok, we now have chunks with bone lists and faces attached on them
-            int bone_chunk_amount = bone_chunks[lod].size();
-            for (int i = 0; i < bone_chunk_amount; ++i)
-            {
-                const std::vector<int> &chunk_face_list = chunk_faces[i];
-                Storm3D_BoneChunk &chunk = bone_chunks[lod][i];
-
-                std::vector<int> vertex_list;
-                std::vector<int> vertex_convert_list(vertex_amount, -1);
-
-                // Create index buffer
-                {
-                    idxStorage.free(chunk.idx_id);
-
-                    chunk.idx_id = idxStorage.alloc(chunk_face_list.size() * 3);
-
-                    uint16_t *ip = idxStorage.lock(chunk.idx_id);
-                    if (ip)
-                    {
-                        for (unsigned int j = 0; j < chunk_face_list.size(); ++j)
-                        {
-                            const Storm3D_Face &f = faces[lod][chunk_face_list[j]];
-                            for (int k = 0; k < 3; ++k)
-                            {
-                                int vertex_index = f.vertex_index[k];
-                                if (vertex_convert_list[vertex_index] == -1)
-                                {
-                                    vertex_convert_list[vertex_index] = vertex_list.size();
-                                    vertex_list.push_back(vertex_index);
-                                }
-
-                                *ip++ = vertex_convert_list[vertex_index];
-                            }
-                        }
-
-                        idxStorage.unlock();
-                        chunk.index_count = chunk_face_list.size();
-                        chunk.base_index = idxStorage.baseIndex(chunk.idx_id);
-                    }
-                }
-
-                // Create vertex buffer
-                {
-                    assert(vbuf_vsize==sizeof(Vertex_P3NUV2BW));
-
-                    vtxStorage.free(chunk.vtx_id);
-
-                    chunk.vtx_id = vtxStorage.alloc<Vertex_P3NUV2BW>(vertex_list.size());
-
-                    Vertex_P3NUV2BW *v = vtxStorage.lock<Vertex_P3NUV2BW>(chunk.vtx_id);
-                    float weight[4] = { 0 };
-
-                    for (unsigned int i = 0; i < vertex_list.size(); ++i)
-                    {
-                        int vertex_index = vertex_list[i];
-                        int index1 = bone_weights[vertex_index].index1;
-                        int index2 = bone_weights[vertex_index].index2;
-
-                        if (index1 != -1)
-                        {
-                            for (unsigned int j = 0; j < chunk.bone_indices.size(); ++j)
-                            {
-                                if (index1 == chunk.bone_indices[j])
-                                {
-                                    index1 = j;
-                                    break;
-                                }
-                            }
-
-                            assert(index1 >= 0 && index1 <= Storm3D_ShaderManager::BONE_INDICES);
-                        }
-                        if (index2 != -1)
-                        {
-                            for (unsigned int j = 0; j < chunk.bone_indices.size(); ++j)
-                            {
-                                if (index2 == chunk.bone_indices[j])
-                                {
-                                    index2 = j;
-                                    break;
-                                }
-                            }
-
-                            assert(index1 >= 0 && index1 <= Storm3D_ShaderManager::BONE_INDICES);
-                        }
-
-                        weight[0] = float((index1)* 3);
-                        weight[0] += Storm3D_ShaderManager::BONE_INDEX_START;
-                        //weight[1] = 1;
-                        weight[1] = bone_weights[vertex_index].weight1 / 100.f;
-
-                        weight[2] = float(Storm3D_ShaderManager::BONE_INDEX_START);
-                        weight[3] = 0;
-
-//weight[1] = fabsf(weight[1]);
-
-                        if (index2 >= 0)
-                        {
-                            //weight[1] = bone_weights[vertex_index].weight1 / 100.f;
-                            weight[2] = float((index2) * 3);
-                            weight[2] += Storm3D_ShaderManager::BONE_INDEX_START;
-                            weight[3] = bone_weights[vertex_index].weight2 / 100.f;
-                        }
-
-                        v[i] = {
-                            vertexes[vertex_index].position,
-                            vertexes[vertex_index].normal,
-                            vertexes[vertex_index].texturecoordinates,
-                            vertexes[vertex_index].texturecoordinates2,
-                            VC4(weight[0], weight[1], weight[2], weight[3])
-                        };
-                    }
-
-                    vtxStorage.unlock();
-                    chunk.vertex_count = vertex_list.size();
-                    chunk.base_vertex = vtxStorage.baseVertex<Vertex_P3NUV2BW>(chunk.vtx_id);
-                }
-            }
-        }
-    }
-
-    for (int i = 0; i < lodLevels; ++i)
-    {
-        if (!faces[i])
-            continue;
-
-        if (update_fc_amount)
-        {
-            // Create new indexbuffer (and delete old)
-            idxStorage.free(indices_id[i]);
-
-            indices_id[i] = idxStorage.alloc(face_amount[i] * 3);
-            base_index[i] = idxStorage.baseIndex(indices_id[i]);
-
-            //update_fc_amount = false;
-        }
-
-        if (update_fc)
-        {
-            // Copy data to indexbuffer
-            uint16_t *ip = idxStorage.lock(indices_id[i]);
-            if (ip)
-            {
-                for (int j = 0; j < face_amount[i]; j++)
-                {
-                    *ip++ = faces[i][j].vertex_index[0];
-                    *ip++ = faces[i][j].vertex_index[1];
-                    *ip++ = faces[i][j].vertex_index[2];
-                }
-            }
-            idxStorage.unlock();
-
-            //update_fc = false;
-            //update_fc_amount = false;
-        }
-    }
-
-    if ((update_vx) && (!bone_weights))
-    {
-        assert(vbuf_vsize==sizeof(Vertex_P3NUV2));
-
-        vtxStorage.free(vertices_id);
-
-        vertices_id = vtxStorage.alloc<Vertex_P3NUV2>(vertex_amount);
-
-        Vertex_P3NUV2 *v = vtxStorage.lock<Vertex_P3NUV2>(vertices_id);
-        for(int i=0;i<vertex_amount;i++)
-        {
-            v[i] = {
+            hw_vertices.push_back({
                 vertexes[i].position,
                 vertexes[i].normal,
                 vertexes[i].texturecoordinates,
                 vertexes[i].texturecoordinates2
-            };
+            });
         }
-        vtxStorage.unlock();
 
-        base_vertex = vtxStorage.baseVertex<Vertex_P3NUV2>(vertices_id);
+        mesh = mesh_create_simple(
+            Storm3D2->renderer,
+            &hw_vertices[0], hw_vertices.size(),
+            &hw_indices[0], hw_indices.size(),
+            subsets, lodLevels
+        );
     }
 
     // Crear the markers
@@ -858,14 +550,6 @@ void Storm3D_Mesh::ReBuild()
     update_vx_amount = false;
     update_fc = false;
     update_fc_amount = false;
-    /*
-    delete[] vertexes;
-    delete[] faces[0];
-    face_amount[0] = 0;
-    vertexes = 0;
-    */
-    render_face_amount[0] = face_amount[0];
-    render_vertex_amount = vertex_amount;
 }
 
 
@@ -1091,7 +775,7 @@ void Storm3D_Mesh::CalculateRadiusAndBox()
 	//box.pmin=vertexes[0].position;
 
 	// Loop through all vertexes
-	for (int vx=0;vx<vertex_amount;vx++)
+	for (uint32_t vx=0;vx<vertex_amount;vx++)
 	{
 		// Update sq_radius
 		const VC3 &pos = vertexes[vx].position;

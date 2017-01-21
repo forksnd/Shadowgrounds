@@ -56,11 +56,11 @@ float4   uDiffuse   : register(c8);
     float4x4 uFakeLightMatrix : register(c14);
 #endif
 #if TEXTURE_SOURCE == TEXSRC_LOCAL_REFLECTION
-    float uReflMatrix : register(c27);
+    float4x4 uReflMatrix : register(c27);
 #endif
 #if ENABLE_SKELETAL_ANIMATION
     // Skeleton bones
-    float3x4 uBoneXF[48] : register(c42);
+    float3x4 uBoneXF[56] : register(c42);
 #endif
 
 #if ENABLE_FOG
@@ -115,9 +115,6 @@ float3 calcLighting(float3 world_pos, float3 normal)
 
 #endif
 
-//TODO: Remove!!! UGLY HACK!!!
-static const float hack_base_index = 42;
-
 VS_OUT main(VS_IN vs_in)
 {
     VS_OUT vs_out = (VS_OUT)0;
@@ -132,13 +129,11 @@ VS_OUT main(VS_IN vs_in)
     pos = vs_in.p.xyz;
 
 #if ENABLE_SKELETAL_ANIMATION
-    //FIXME: Should be copy!!! UGLY HACK!!!
-    index0      = (vs_in.uv2.x - hack_base_index) / 3;
+    index0      = vs_in.uv2.x;
     weight0     = vs_in.uv2.y;
     weightedPos = weight0 * mul(uBoneXF[index0], float4(pos, 1.0));
 
-    //FIXME: Should be copy!!! UGLY HACK!!!
-    index1       = (vs_in.uv2.z - hack_base_index) / 3;
+    index1       = vs_in.uv2.z;
     weight1      = vs_in.uv2.w;
     weightedPos += weight1 * mul(uBoneXF[index1], float4(pos, 1.0));
 

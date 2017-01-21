@@ -247,8 +247,8 @@ public:
 	void SetWorldTransform(gfx::Device& device, const D3DXMATRIX &tm, bool forceTextureTm = false, bool terrain = false);
 
 	// Public constants
-	static const int BONE_INDEX_START; // First is identity
-	static const int BONE_INDICES;
+	static const uint32_t BONE_INDEX_START; // First is identity
+	static const uint32_t BONE_INDICES;
 
 private:
 	SpotType spot_type;

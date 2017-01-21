@@ -6,8 +6,8 @@
 //------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------
-#include "GfxDevice.h"
-#include "GfxMemory.h"
+#include "GfxRenderer.h"
+#include "GfxMesh.h"
 #include "storm3d_common_imp.h"
 #include "IStorm3D_Mesh.h"
 #include "storm3d_mesh_collisiontable.h"
@@ -28,30 +28,9 @@ struct Storm3D_Weight
 
 	int index1;
 	int index2;
-	signed char weight1;
-	signed char weight2;
+	uint8_t weight1;
+	uint8_t weight2;
 };
-
-
-struct Storm3D_BoneChunk
-{
-    Storm3D_BoneChunk():
-        base_index(0),
-        base_vertex(0),
-        index_count(0),
-        vertex_count(0)
-    {
-    }
-
-    std::vector<int> bone_indices;
-    etlsf_alloc_t idx_id = ETLSF_INVALID_ID;
-    etlsf_alloc_t vtx_id = ETLSF_INVALID_ID;
-    int base_index;
-    int index_count;
-    int base_vertex;
-    int vertex_count;
-};
-
 
 //------------------------------------------------------------------
 // Storm3D_Mesh
@@ -66,29 +45,18 @@ class Storm3D_Mesh : public IStorm3D_Mesh
 	Storm3D_Material *material;
 
 	// Vertex/face data (temporary)
-	int face_amount[LOD_AMOUNT];
-    int base_index[LOD_AMOUNT];
-	int vertex_amount;
-    int base_vertex;
-	int render_face_amount[LOD_AMOUNT];
-	int render_vertex_amount;
-	bool hasLods;
+    bool hasLods;
+    uint32_t vertex_amount;
+    uint32_t face_amount[LOD_AMOUNT];
 
-	Storm3D_Vertex		*vertexes;
-	Storm3D_Face		*faces[LOD_AMOUNT];
+    Storm3D_Vertex* vertexes;
+    Storm3D_Weight* bone_weights;
+    Storm3D_Face*   faces[LOD_AMOUNT];
 
-	// Weight data
-	Storm3D_Weight *bone_weights;
-	// Split data
-	std::vector<Storm3D_BoneChunk> bone_chunks[LOD_AMOUNT];
+    std::vector<int> bone_indices;
 
-	// DirectX Buffers (temporary)
-    etlsf_alloc_t vertices_id = ETLSF_INVALID_ID;
-    etlsf_alloc_t indices_id[LOD_AMOUNT] = { ETLSF_INVALID_ID , ETLSF_INVALID_ID, ETLSF_INVALID_ID };
+    gfx::Mesh* mesh = nullptr;
 
-	int vbuf_vsize;
-	FVF vbuf_fvf;
-	
 	// Collision table
 	Storm3D_Mesh_CollisionTable collision;
 
@@ -117,13 +85,10 @@ class Storm3D_Mesh : public IStorm3D_Mesh
 	mutable bool sphere_ok;
 	mutable bool box_ok;
 
-    void clearBoneChunks();
-
 public:
 	const Sphere &getBoundingSphere() const;
 	const AABB &getBoundingBox() const;
 	
-	DWORD GetFVF() const { return vbuf_fvf; }
 	// When vertexes/faces are changed, buffers in videomemory must be rebuided.
 	void ReBuild();
 
@@ -163,7 +128,6 @@ public:
 	const Storm3D_Face *GetFaceBufferReadOnly(int lodIndex);
 	const Storm3D_Vertex *GetVertexBufferReadOnly();
 	int GetFaceCount();
-	int GetRenderFaceCount() const { return render_face_amount[0]; };
 	int GetFaceCount(int lodIndex);
 	int GetVertexCount();
 	void ChangeFaceCount(int new_face_count);

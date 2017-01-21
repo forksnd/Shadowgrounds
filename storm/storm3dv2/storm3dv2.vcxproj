@@ -502,6 +502,7 @@
     <ClInclude Include="GfxDevice.h" />
     <ClInclude Include="DatatypeDef.h" />
     <ClInclude Include="GfxMemory.h" />
+    <ClInclude Include="GfxMesh.h" />
     <ClInclude Include="GfxProgramManager.h" />
     <ClInclude Include="GfxRenderer.h" />
     <ClInclude Include="Iterator.h" />

@@ -761,7 +761,7 @@ void Storm3D_Material::UpdateAlphaType()
 // false = this was last pass
 // true = new pass must be rendered
 //------------------------------------------------------------------
-bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *mtx)
+bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,D3DMATRIX *mtx)
 {
 	/*
 	Basic config:
@@ -1118,10 +1118,7 @@ bool Storm3D_Material::Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *
 
 	// Use this material
 	device.SetMaterial(&mat);
-/* PSD
-	// Apply shader
-	if (!ApplyShaderIfAvailable(scene,mtx)) device.SetVertexShader(fvf);
-*/
+
 	// Set active material
 	Storm3D2->active_material=this;
 
@@ -1286,7 +1283,7 @@ void Storm3D_Material::ApplyBaseTextureExtOnly()
 // Applies material base texture, alpha and shader. Used on terrain
 // (without alpha sorting).
 //------------------------------------------------------------------
-void Storm3D_Material::ApplyBaseTextureExtOnly_NoAlphaSort(Storm3D_Scene *scene,DWORD fvf,D3DMATRIX *mtx)
+void Storm3D_Material::ApplyBaseTextureExtOnly_NoAlphaSort(Storm3D_Scene *scene,D3DMATRIX *mtx)
 {
     gfx::Device& device = Storm3D2->GetD3DDevice();
     if (texture_base)
@@ -1358,10 +1355,7 @@ void Storm3D_Material::ApplyBaseTextureExtOnly_NoAlphaSort(Storm3D_Scene *scene,
 
 	// Use this material
 	device.SetMaterial(&mat);
-/*
-	// Apply shader
-	if (!ApplyShaderIfAvailable(scene,mtx)) device.SetVertexShader(fvf);
-*/
+
 	// Set active material
 	Storm3D2->active_material=this;
 }

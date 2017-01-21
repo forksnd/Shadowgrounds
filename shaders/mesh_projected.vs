@@ -39,11 +39,8 @@ float4   uDiffuse     : register(c17);
 
 #if ENABLE_SKELETAL_ANIMATION
     // Skeleton bones
-    float3x4 uBoneXF[48] : register(c42);
+    float3x4 uBoneXF[56] : register(c42);
 #endif
-
-//TODO: Remove!!! UGLY HACK!!!
-static const float hack_base_index = 42;
 
 VS_OUT main(VS_IN vs_in)
 {
@@ -53,10 +50,9 @@ VS_OUT main(VS_IN vs_in)
     float3 normal;
 
 #if ENABLE_SKELETAL_ANIMATION
-    //FIXME: Should be copy!!! UGLY HACK!!!
-    float index0  = (vs_in.uv2.x - hack_base_index) / 3;
+    float index0  = vs_in.uv2.x;
     float weight0 = vs_in.uv2.y;
-    float index1  = (vs_in.uv2.z - hack_base_index) / 3;
+    float index1  = vs_in.uv2.z;
     float weight1 = vs_in.uv2.w;
     float weight2 = 1.0 - weight0 - weight1;
 

@@ -118,11 +118,11 @@ public:
 	void UpdateAlphaType();
 
 	// Apply
-	bool Apply(Storm3D_Scene *scene,int pass,DWORD fvf,D3DMATRIX *mat);
+	bool Apply(Storm3D_Scene *scene,int pass,D3DMATRIX *mat);
 	void ApplyBaseTextureOnly();
 	void ApplyBase2TextureOnly();
 	void ApplyBaseTextureExtOnly();
-	void ApplyBaseTextureExtOnly_NoAlphaSort(Storm3D_Scene *scene,DWORD fvf,D3DMATRIX *mat);
+	void ApplyBaseTextureExtOnly_NoAlphaSort(Storm3D_Scene *scene,D3DMATRIX *mat);
 
 	// Name stuff
 	const char *GetName();

@@ -32,8 +32,8 @@ D3DXMATRIX clip_matrix;
 // 111 = 26
 
 // 21, 25
-const int Storm3D_ShaderManager::BONE_INDEX_START = 42;
-const int Storm3D_ShaderManager::BONE_INDICES = 48;
+const uint32_t Storm3D_ShaderManager::BONE_INDEX_START = 42;
+const uint32_t Storm3D_ShaderManager::BONE_INDICES = 56;
 
 template <typename IShaderType>
 bool compileShaderSet(

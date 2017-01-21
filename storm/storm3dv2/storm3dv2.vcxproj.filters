@@ -491,6 +491,9 @@
     <ClInclude Include="GfxProgramManager.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="GfxMesh.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\Snapshot\storm.txt">
