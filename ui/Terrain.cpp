@@ -2102,8 +2102,6 @@ static util::ObjectDurabilityParser durp;
 		}
 
 		{
-			std::vector<DWORD> weights(BLOCK_SIZE * BLOCK_SIZE);
-
 			std::map<int, std::vector<BlendPass> >::iterator it = blendings.begin();
 			for(; it != blendings.end(); ++it)
 			{

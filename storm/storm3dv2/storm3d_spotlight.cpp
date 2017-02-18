@@ -813,33 +813,41 @@ QUAT Storm3D_Spotlight::getOrientation() const
 
 bool Storm3D_Spotlight::setAsRenderTarget(const float *cameraView)
 {
-	data->updateMatrices(cameraView);
+    gfx::Renderer& renderer = data->storm.renderer;
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
 
-	if(data->shadowMap && data->shadowMap->hasInitialized())
-	{
-		if(data->shadowMap->set())
-		{
-			D3DXMATRIX dm;
-			D3DXMatrixIdentity(&dm);
+    data->updateMatrices(cameraView);
 
-			data->device.SetTransform(D3DTS_WORLD, &dm);
-			data->device.SetTransform(D3DTS_VIEW, &data->properties.lightView[1]);
+    if (data->shadowMap && data->shadowMap->hasInitialized())
+    {
+        if (data->shadowMap->set())
+        {
+            D3DXMATRIX dm;
+            D3DXMatrixIdentity(&dm);
 
-			data->device.SetTransform(D3DTS_PROJECTION, &data->properties.lightProjection);
-			Storm3D_ShaderManager::GetSingleton()->SetViewProjectionMatrix(data->properties.lightViewProjection[1], data->properties.lightViewProjection[1]);
-			Storm3D_ShaderManager::GetSingleton()->setSpot(data->properties.color, data->properties.position, data->properties.direction, data->properties.range, .1f);
+            //TODO: remove
+            data->device.SetTransform(D3DTS_WORLD, &dm);
+            data->device.SetTransform(D3DTS_VIEW, &data->properties.lightView[1]);
+            data->device.SetTransform(D3DTS_PROJECTION, &data->properties.lightProjection);
 
-			return true;
-		}
+            programManager.setViewMatrix(dm);
+            programManager.setProjectionMatrix(data->properties.lightViewProjection[1]); //HACK: combined view projection
+            
+            Storm3D_ShaderManager::GetSingleton()->SetViewProjectionMatrix(data->properties.lightViewProjection[1], data->properties.lightViewProjection[1]);
+            Storm3D_ShaderManager::GetSingleton()->setSpot(data->properties.color, data->properties.position, data->properties.direction, data->properties.range, .1f);
 
-		IStorm3D_Logger *logger = data->storm.logger;
-		if(logger)
-		{
-			logger->error("Failed to set render target");
-		}
-	}
+            return true;
+        }
 
-	return false;
+        IStorm3D_Logger *logger = data->storm.logger;
+        if (logger)
+        {
+            logger->error("Failed to set render target");
+        }
+    }
+
+    return false;
 }
 
 Storm3D_Camera &Storm3D_Spotlight::getCamera()
@@ -883,7 +891,9 @@ void Storm3D_Spotlight::renderStencilCone(Storm3D_Camera &camera)
 
 void Storm3D_Spotlight::applyTextures(const float *cameraView, const float *cameraViewProjection, Storm3D &storm, bool renderShadows)
 {
-	data->updateMatrices(cameraView);
+    gfx::ProgramManager& programManager = data->storm.renderer.programManager;
+
+    data->updateMatrices(cameraView);
 
 	int projection = 0;
 	int shadow = 1;
@@ -898,17 +908,6 @@ void Storm3D_Spotlight::applyTextures(const float *cameraView, const float *came
 		data->shadowMap->apply(shadow);
 
     data->shadowActive = data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized();
-	if(data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized())
-	{
-		if(data->smoothing)
-			data->nvSmoothShadowPixelShader->apply();
-		else
-			data->nvShadowPixelShader->apply();
-	}
-	else
-		data->nvNoShadowPixelShader->apply();
-
-	data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
 
 	Storm3D_ShaderManager::GetSingleton()->setSpot(data->properties.color, data->properties.position, data->properties.direction, data->properties.range, .1f);
 	if(shadow == 1)
@@ -922,6 +921,22 @@ void Storm3D_Spotlight::applyTextures(const float *cameraView, const float *came
 		Storm3D_ShaderManager::GetSingleton()->setSpotTarget(data->properties.shaderProjection[0]);
 	}
 
+    D3DXMATRIX matTerrainProjectedTexture;
+    D3DXMATRIX matTerrainShadowTexture;
+    D3DXMatrixTranspose(&matTerrainProjectedTexture, &data->properties.shaderProjection[0]);
+    D3DXMatrixTranspose(&matTerrainShadowTexture, &data->properties.targetProjection);
+    programManager.setTextureMatrix(0, matTerrainProjectedTexture);
+    programManager.setTextureMatrix(1, matTerrainShadowTexture);
+
+    if (data->light_type == Directional)
+    {
+        programManager.setPointLight(-data->properties.direction, data->properties.range);
+    }
+    else if (data->light_type == Point)
+    {
+        programManager.setPointLight(data->properties.position, data->properties.range);
+    }
+
 	if(data->light_type == Directional)
 		Storm3D_ShaderManager::GetSingleton()->setSpotType(Storm3D_ShaderManager::Directional);
 	if(data->light_type == Point)
@@ -929,55 +944,44 @@ void Storm3D_Spotlight::applyTextures(const float *cameraView, const float *came
 	if(data->light_type == Flat)
 		Storm3D_ShaderManager::GetSingleton()->setSpotType(Storm3D_ShaderManager::Flat);
 
-	//const COL &color = data->properties.color;
-	//float c[4] = { color.r, color.g, color.b, 1.f };
-	//data->device.SetVertexShaderConstantF(17, c, 1);
-
 	frozenbyte::storm::enableMinMagFiltering(data->device, shadow, shadow, true);
 	frozenbyte::storm::enableMinMagFiltering(data->device, projection, projection, true);
-
-	if(data->smoothing)
-	{
-		float c[8][4] = 
-		{
-			{ -2.5f,   3.f, 0, 0 },
-			{  -1.f,   1.f, 0, 0 },
-			{ -0.5f,   4.f, 0, 0 },
-			{  2.5f,   2.f, 0, 0 },
-			{ -1.5f,  -2.f, 0, 0 },
-			{ -0.5f,  -4.f, 0, 0 },
-			{  0.5f, -0.5f, 0, 0 },
-			{  1.5f,  -3.f, 0, 0 }
-		};
-
-		for(int i = 0; i < 8; ++i)
-		{
-			c[i][0] *= data->smoothness * 0.0009765625f;
-			//c[i][1] *= data->smoothness * 0.0013020833f;
-			c[i][1] *= data->smoothness * 1.5f * 0.0013020833f;
-		}
-
-		data->device.SetPixelShaderConstantF(5, &c[0][0], 8);
-	}
 }
 
 void Storm3D_Spotlight::applyTerrainShader(bool renderShadows)
 {
-	if (data->shadowActive)
-	{
-		if (data->smoothing)
-			data->nvSmoothShadowPixelShader->apply();
-		else
-			data->nvShadowPixelShader->apply();
-	}
-	else
-		data->nvNoShadowPixelShader->apply();
+    gfx::ProgramManager& programManager = data->storm.renderer.programManager;
 
-    const COL &color = data->properties.color;
-	float c[4] = { color.r, color.g, color.b, 1.f };
-	data->device.SetVertexShaderConstantF(17, c, 1);
+    bool hasShadow = data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized();
 
-	data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
+    switch (data->light_type)
+    {
+        case Directional:
+            programManager.setProgram(
+                hasShadow
+                    ? gfx::ProgramManager::TERRAIN_PROJECTION_DIRECT_SHADOW
+                    : gfx::ProgramManager::TERRAIN_PROJECTION_DIRECT_NOSHADOW
+            );
+            break;
+        case Point:
+            programManager.setProgram(
+                hasShadow
+                ? gfx::ProgramManager::TERRAIN_PROJECTION_POINT_SHADOW
+                : gfx::ProgramManager::TERRAIN_PROJECTION_POINT_NOSHADOW
+            );
+            break;
+        case Flat:
+            programManager.setProgram(
+                hasShadow
+                ? gfx::ProgramManager::TERRAIN_PROJECTION_FLAT_SHADOW
+                : gfx::ProgramManager::TERRAIN_PROJECTION_FLAT_NOSHADOW
+            );
+            break;
+        default:
+            assert(0);
+    }
+
+    programManager.setDiffuse(data->properties.color);
 }
 
 void Storm3D_Spotlight::applySolidShader(bool renderShadows)

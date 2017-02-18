@@ -5,6 +5,7 @@
 bool createShader(
     IDirect3DVertexShader9** shader,
     gfx::Device& device,
+    const char* source_name,
     size_t source_len,
     const char* source,
     D3D_SHADER_MACRO* defines
@@ -13,53 +14,33 @@ bool createShader(
 bool createShader(
     IDirect3DPixelShader9** shader,
     gfx::Device& device,
+    const char* source_name,
     size_t source_len,
     const char* source,
     D3D_SHADER_MACRO* defines
 );
 
-bool compileShaderSet(
-    gfx::Device& device,
-    size_t path_len, const char* path,
-    size_t define_count, const char** defines,
-    size_t shader_count, IDirect3DVertexShader9** shader_set
-);
-
-bool compileShaderSet(
-    gfx::Device& device,
-    size_t path_len, const char* path,
-    size_t define_count, const char** defines,
-    size_t shader_count, IDirect3DPixelShader9** shader_set
-);
-
-template <typename IShaderType, size_t path_len, size_t define_count, size_t shader_count>
-bool compileShaderSet(
-    gfx::Device& device,
-    const char(&path)[path_len],
-    const char* (&defines)[define_count],
-    IShaderType(&shader_set)[shader_count]
-)
-{
-    return compileShaderSet(
-        device,
-        path_len, path,
-        define_count, defines,
-        shader_count, shader_set
-    );
-}
-
 namespace gfx
 {
     struct ProgramManager
     {
-        enum
+        enum : uint16_t
         {
+            SSF_DEFAULT = 0,
             SSF_2D_POS = (1 << 0),
             SSF_COLOR = (1 << 1),
             SSF_TEXTURE = (1 << 2),
             SSF_PROGRAM_COUNT = 8,
             PROCEDURAL = SSF_PROGRAM_COUNT,
             PROCEDURAL_DISTORTION,
+            TERRAIN_TEXTURES_BLEND,
+            TERRAIN_LIGHTING,
+            TERRAIN_PROJECTION_FLAT_SHADOW,
+            TERRAIN_PROJECTION_POINT_SHADOW,
+            TERRAIN_PROJECTION_DIRECT_SHADOW,
+            TERRAIN_PROJECTION_FLAT_NOSHADOW,
+            TERRAIN_PROJECTION_POINT_NOSHADOW,
+            TERRAIN_PROJECTION_DIRECT_NOSHADOW,
             PROGRAM_COUNT
         };
 
@@ -74,13 +55,33 @@ namespace gfx
         void setViewMatrix(const D3DXMATRIX& view);
         void setProjectionMatrix(const D3DXMATRIX& proj);
 
-        void setStdProgram(gfx::Device& device, size_t id);
-        void commitConstants(gfx::Device& device);
+        //TODO: obsolete, remove!!!
+        void setStdProgram(gfx::Device& device, uint16_t id); //setProgram
+        //TODO: obsolete, remove!!!
+        void commitConstants(gfx::Device& device); //applyToDevice
+
+        void setProgram(uint16_t id);
+        void applyState(gfx::Device& device);
+
+        void setTextureMatrix(uint32_t index, const D3DXMATRIX& matrix);
+
+        void setAmbient(const COL& color);
+        void setDiffuse(const COL& color);
+        void setFog(float start, float end);
+        void setFogColor(const COL& color);
+        void setLightmapColor(const COL& color);
+        void setDirectLight(const VC3& dir, float strength);
+        void setPointLight(const VC3& pos, float range);
 
     private:
         enum
         {
             VS_OFFSET_SCALE_2UV = SSF_PROGRAM_COUNT,
+            VS_TERRAIN_BLEND,
+            VS_TERRAIN_LIGHTING,
+            VS_TERRAIN_PROJECTION_FLAT,
+            VS_TERRAIN_PROJECTION_POINT,
+            VS_TERRAIN_PROJECTION_DIRECT,
             VS_SHADER_COUNT
         };
 
@@ -88,7 +89,16 @@ namespace gfx
         {
             PS_PROCEDURAL = SSF_PROGRAM_COUNT,
             PS_PROCEDURAL_DISTORSION,
+            PS_TERRAIN_BLEND,
+            PS_TERRAIN_LIGHTING,
+            PS_SHADOW,
+            PS_NOSHADOW,
             PS_SHADER_COUNT
+        };
+
+        enum
+        {
+            MAX_TEXTURE_MATRICES = 4,
         };
 
         LPDIRECT3DVERTEXSHADER9 vertexShaders[VS_SHADER_COUNT] = { 0 };
@@ -106,10 +116,28 @@ namespace gfx
             { 7, 7 },
             { VS_OFFSET_SCALE_2UV, PS_PROCEDURAL },
             { VS_OFFSET_SCALE_2UV, PS_PROCEDURAL_DISTORSION },
-        };
+            { VS_TERRAIN_BLEND, PS_TERRAIN_BLEND },
+            { VS_TERRAIN_LIGHTING, PS_TERRAIN_LIGHTING },
+            { VS_TERRAIN_PROJECTION_FLAT, PS_SHADOW },
+            { VS_TERRAIN_PROJECTION_POINT, PS_SHADOW },
+            { VS_TERRAIN_PROJECTION_DIRECT, PS_SHADOW },
+            { VS_TERRAIN_PROJECTION_FLAT, PS_NOSHADOW },
+            { VS_TERRAIN_PROJECTION_POINT, PS_NOSHADOW },
+            { VS_TERRAIN_PROJECTION_DIRECT, PS_NOSHADOW }, };
+
+        uint16_t activeProgram = 0;
+
+        D3DXVECTOR4 diffuse;
+        D3DXVECTOR4 ambient;
+        D3DXVECTOR4 fogParams;
+        D3DXVECTOR4 lightSourceParams;
 
         D3DXMATRIX worldMatrix;
         D3DXMATRIX viewMatrix;
         D3DXMATRIX projMatrix;
+        D3DXMATRIX textureMatrices[MAX_TEXTURE_MATRICES];
+
+        D3DXVECTOR4 fogColor;
+        D3DXVECTOR4 lightmapColor;
     };
 }

@@ -253,16 +253,6 @@ struct Storm3D_TerrainHeightmapData
 	VC2 positionDelta;
 	float textureDetail;
 
-	frozenbyte::storm::PixelShader pixelShader;
-	frozenbyte::storm::PixelShader lightPixelShader;
-
-	frozenbyte::storm::VertexShader atiDepthShader;
-	frozenbyte::storm::VertexShader nvDefaultShader;
-	frozenbyte::storm::VertexShader nvLightingShader;
-	frozenbyte::storm::VertexShader nvShadowShaderDirectional;
-	frozenbyte::storm::VertexShader nvShadowShaderPoint;
-	frozenbyte::storm::VertexShader nvShadowShaderFlat;
-
     etlsf_alloc_t vertices_id = ETLSF_INVALID_ID;
 
 	std::vector<TerrainBlock> blocks;
@@ -287,15 +277,6 @@ struct Storm3D_TerrainHeightmapData
 		device(storm.GetD3DDevice()),
 		textureDetail(0),
 
-		pixelShader(device),
-		lightPixelShader(device),
-		atiDepthShader(device),
-		nvDefaultShader(device),
-		nvLightingShader(device),
-		nvShadowShaderDirectional(device),
-		nvShadowShaderPoint(device),
-		nvShadowShaderFlat(device),
-
 		indexBuffer(new Storm3D_TerrainLod(storm)),
 		obstacleHeightmap(0),
 		areaMap(0),
@@ -305,16 +286,6 @@ struct Storm3D_TerrainHeightmapData
 		heightmapShiftMult(0),
 		radius(0)
 	{
-		lightPixelShader.createTerrainLightShader();
-
-		pixelShader.createTerrainShader();
-			
-		atiDepthShader.createAtiDepthTerrainShader();
-		nvDefaultShader.createNvTerrainShader();
-		nvLightingShader.createNvLightingShader();
-		nvShadowShaderDirectional.createNvTerrainShadowShaderDirectional();
-		nvShadowShaderPoint.createNvTerrainShadowShaderPoint();
-		nvShadowShaderFlat.createNvTerrainShadowShaderFlat();
 	}
 
     ~Storm3D_TerrainHeightmapData()
@@ -1067,19 +1038,21 @@ void Storm3D_TerrainHeightmap::calculateVisibility(Storm3D_Scene &scene)
 void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainHeightmap::renderTextures");
-	gfx::Device& device = data->device;
+    gfx::Renderer& renderer = data->storm.renderer;
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
 
 	D3DXMATRIX dm;
 	D3DXMatrixIdentity(&dm);
 
-	D3DXMATRIX tm = dm;
-	Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
+    programManager.setWorldMatrix(dm);
+    programManager.setViewMatrix(dm);
+    programManager.setProjectionMatrix(scene.camera.GetVP()); //HACK: combined view projection
+    programManager.commitConstants(device);
+    programManager.setStdProgram(device, gfx::ProgramManager::TERRAIN_TEXTURES_BLEND);
+    renderer.setFVF(FVF_TERRAIN);
 
-	data->nvDefaultShader.apply();
-
-	data->pixelShader.apply();
-
-    gfx::VertexStorage& vtxStorage = data->storm.renderer.getVertexStorage();
+    gfx::VertexStorage& vtxStorage = renderer.getVertexStorage();
 
     device.SetStreamSource(1, vtxStorage.vertices, vtxStorage.offset(data->vertices_id, STREAM_1_SIZE), STREAM_1_SIZE);
 	std::vector<RenderBlock> &visibleBlocks = data->visibleBlocks;
@@ -1164,88 +1137,54 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene)
 void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera *camera, RenderMode mode, IStorm3D_Spotlight::Type spot_type, Storm3D_Spotlight *spot)
 {
     GFX_TRACE_SCOPE("Storm3D_TerrainHeightmap::renderDepth");
-	gfx::Device& device = data->device;
-	std::vector<RenderBlock> &visibleBlocks = data->visibleBlocks;
+
+    gfx::Renderer& renderer = data->storm.renderer;
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
+    
+    std::vector<RenderBlock> &visibleBlocks = data->visibleBlocks;
 
 	Frustum *frustum1 = 0;
 	Frustum realFrustum1;
 	Frustum *frustum2 = 0;
 	Frustum realFrustum2;
 
-	if(mode == Projection)
-	{
-		D3DXMATRIX dm;
-		D3DXMatrixIdentity(&dm);
+    renderer.setFVF(FVF_TERRAIN);
+    
+    D3DXMATRIX dm;
+    D3DXMatrixIdentity(&dm);
 
-		D3DXMATRIX tm = dm;
-		Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm, false, true);
+    if (mode == Projection)
+    {
+        if (camera)
+        {
+            realFrustum1 = static_cast<Storm3D_Camera *> (scene.GetCamera())->getFrustum();
+            frustum1 = &realFrustum1;
+        }
+        if (spot)
+        {
+            realFrustum2 = spot->getCamera().getFrustum();
+            frustum2 = &realFrustum2;
+        }
+    }
+    else if (mode == Lighting)
+    {
+        if (camera)
+        {
+            realFrustum1 = static_cast<Storm3D_Camera *> (scene.GetCamera())->getFrustum();
+            frustum1 = &realFrustum1;
+        }
+    }
+    else
+    {
+        if (spot)
+        {
+            realFrustum1 = spot->getCamera().getFrustum();
+            frustum1 = &realFrustum1;
+        }
+    }
 
-		if(camera)
-		{
-			realFrustum1 = static_cast<Storm3D_Camera *> (scene.GetCamera())->getFrustum();
-			frustum1 = &realFrustum1;
-		}
-		if(spot)
-		{
-			realFrustum2 = spot->getCamera().getFrustum();
-			frustum2 = &realFrustum2;
-		}
-
-		if(spot_type == IStorm3D_Spotlight::Directional)
-			data->nvShadowShaderDirectional.apply();
-		if(spot_type == IStorm3D_Spotlight::Point)
-			data->nvShadowShaderPoint.apply();
-		if(spot_type == IStorm3D_Spotlight::Flat)
-			data->nvShadowShaderFlat.apply();
-		if(spot_type == -1)
-			data->nvDefaultShader.apply();
-	}
-	else if(mode == Lighting)
-	{
-		if(camera)
-		{
-			realFrustum1 = static_cast<Storm3D_Camera *> (scene.GetCamera())->getFrustum();
-			frustum1 = &realFrustum1;
-		}
-
-		D3DXMATRIX dm;
-		D3DXMatrixIdentity(&dm);
-
-		D3DXMATRIX tm = dm;
-		Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm, false, true);
-		Storm3D_ShaderManager::GetSingleton()->ApplyForceAmbient(device);
-
-		data->nvLightingShader.apply();
-
-		data->lightPixelShader.apply();
-
-		device.SetSamplerState(3, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-		device.SetSamplerState(3, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-	}
-	else
-	{
-		if(spot)
-		{
-			realFrustum1 = spot->getCamera().getFrustum();
-			frustum1 = &realFrustum1;
-		}
-
-		D3DXMATRIX dm;
-		D3DXMatrixIdentity(&dm);
-
-		D3DXMATRIX tm = dm;
-		Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm, false, true);
-
-		data->atiDepthShader.apply();
-	}
-
-	if(spot_type == -1)
-	{
-		device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-		device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-	}
-
-    gfx::VertexStorage& vtxStorage = data->storm.renderer.getVertexStorage();
+    gfx::VertexStorage& vtxStorage = renderer.getVertexStorage();
 
     device.SetStreamSource(1, vtxStorage.vertices, vtxStorage.offset(data->vertices_id, STREAM_1_SIZE), STREAM_1_SIZE);
 	device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
@@ -1319,20 +1258,7 @@ void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera 
 		block.indexBuffer->render(scene, -1, renderBlock.range, range1, range2, range3, range4);
 	}
 
-	//if(mode != Projection)
-	//	device.SetPixelShader(0);
-
 	device.SetStreamSource(1, 0, 0, 0);
-	//device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-
-	if(spot_type == -1)
-	{
-		device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-		device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-
-		device.SetSamplerState(3, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-		device.SetSamplerState(3, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-	}
 }
 
 int Storm3D_TerrainHeightmap::addTerrainTexture(Storm3D_Texture &texture)

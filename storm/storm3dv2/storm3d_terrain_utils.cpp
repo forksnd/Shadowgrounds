@@ -210,120 +210,6 @@ void VertexShader::createTerrainShader()
 	device.CreateVertexDeclaration(&elements[0], &declaration);
 }
 
-void VertexShader::createNvTerrainShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(1, 0, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(1, 2*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(createElement(1, 4*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 2));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\nv_terrain_vertex_shader.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\nv_terrain_vertex_shader.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
-void VertexShader::createNvLightingShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(1, 0, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(1, 2*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(createElement(1, 4*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 2));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\nv_terrain_lighting_vertex_shader.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\nv_terrain_lighting_vertex_shader.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
-void VertexShader::createAtiDepthTerrainShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(1, 0, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(1, 2*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(createElement(1, 4*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 2));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\ati_depth_default_vertex_shader.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\ati_depth_default_vertex_shader.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
-void VertexShader::createNvTerrainShadowShaderDirectional()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(1, 0, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(1, 2*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(createElement(1, 4*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 2));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\nv_shadow_terrain_vertex_shader_dir.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\nv_shadow_terrain_vertex_shader_dir.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
-void VertexShader::createNvTerrainShadowShaderPoint()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(1, 0, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(1, 2*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(createElement(1, 4*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 2));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\nv_shadow_terrain_vertex_shader_point.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\nv_shadow_terrain_vertex_shader_point.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
-void VertexShader::createNvTerrainShadowShaderFlat()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(1, 0, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(1, 2*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(createElement(1, 4*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 2));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\nv_shadow_terrain_vertex_shader_flat.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\nv_shadow_terrain_vertex_shader_flat.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
 void VertexShader::createNvConeShader()
 {
 	elements.clear();
@@ -464,16 +350,6 @@ PixelShader::~PixelShader()
 
 #ifdef LEGACY_FILES
 
-void PixelShader::createTerrainShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\terrain_pixel_shader.txt");
-}
-
-void PixelShader::createTerrainLightShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\terrain_lighting_pixel_shader.txt");
-}
-
 void PixelShader::createGlowTex8Shader()
 {
 	handle = createPixelShader(device, "Data\\Shaders\\glow_8tex_pixel_shader.txt");
@@ -542,18 +418,6 @@ void PixelShader::createOffsetBlendShader()
 
 
 #else
-
-
-
-void PixelShader::createTerrainShader()
-{
-	handle = createPixelShader(device, "data\\shader\\terrain_pixel_shader.fps");
-}
-
-void PixelShader::createTerrainLightShader()
-{
-	handle = createPixelShader(device, "data\\shader\\terrain_lighting_pixel_shader.fps");
-}
 
 void PixelShader::createGlowTex8Shader()
 {

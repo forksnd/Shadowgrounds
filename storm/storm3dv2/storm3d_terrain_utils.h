@@ -40,13 +40,6 @@ public:
 	~VertexShader();
 
 	void createTerrainShader();
-	void createNvTerrainShader();
-	void createNvLightingShader();
-
-	void createAtiDepthTerrainShader();
-	void createNvTerrainShadowShaderDirectional();
-	void createNvTerrainShadowShaderPoint();
-	void createNvTerrainShadowShaderFlat();
 
 	void createNvConeShader();
 	void createConeStencilShader();
@@ -73,8 +66,6 @@ public:
 	PixelShader(gfx::Device &device);
 	~PixelShader();
 
-	void createTerrainShader();
-	void createTerrainLightShader();
 	void createGlowTex8Shader();
 	void createLightShader();
 	void createNvShadowShader();

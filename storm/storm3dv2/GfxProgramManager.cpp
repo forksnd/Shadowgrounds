@@ -40,7 +40,7 @@ char_array_t readNewerFile(const char* fileName, uint32_t& size, uint64_t& times
     return char_array_t(buffer);
 }
 
-ID3DBlob* compileShader(ShaderProfile profile, size_t source_len, const char* source, D3D_SHADER_MACRO* defines)
+ID3DBlob* compileShader(ShaderProfile profile, const char* source_name, size_t source_len, const char* source, D3D_SHADER_MACRO* defines)
 {
     assert(profile < SHADER_PROFILE_COUNT);
 
@@ -54,7 +54,7 @@ ID3DBlob* compileShader(ShaderProfile profile, size_t source_len, const char* so
 
     HRESULT hr = D3DCompile(
         source, source_len,
-        NULL, defines, NULL,
+        source_name, defines, NULL,
         "main", profile_id_string[profile],
 #ifdef _DEBUG
         D3DCOMPILE_PACK_MATRIX_ROW_MAJOR | D3DCOMPILE_OPTIMIZATION_LEVEL3 | D3DCOMPILE_DEBUG,
@@ -67,7 +67,9 @@ ID3DBlob* compileShader(ShaderProfile profile, size_t source_len, const char* so
     if (FAILED(hr))
     {
         char* report = (char *)msgs->GetBufferPointer();
+        OutputDebugString("\n--------------------------\nShader compilation failed!\n");
         OutputDebugString(report);
+        OutputDebugString("--------------------------\n\n");
         MessageBox(NULL, "D3DCompile failed!", "Error!!!", MB_OK);
     }
 
@@ -79,13 +81,14 @@ ID3DBlob* compileShader(ShaderProfile profile, size_t source_len, const char* so
 bool createShader(
     IDirect3DVertexShader9** shader,
     gfx::Device& device,
+    const char* source_name,
     size_t source_len,
     const char* source,
     D3D_SHADER_MACRO* defines
 )
 {
     ID3DBlob* vscode = compileShader(
-        VERTEX_SHADER_3_0, source_len, source, defines
+        VERTEX_SHADER_3_0, source_name, source_len, source, defines
     );
 
     if (!vscode) return false;
@@ -109,13 +112,14 @@ bool createShader(
 bool createShader(
     IDirect3DPixelShader9** shader,
     gfx::Device& device,
+    const char* source_name,
     size_t source_len,
     const char* source,
     D3D_SHADER_MACRO* defines
 )
 {
     ID3DBlob* pscode = compileShader(
-        PIXEL_SHADER_3_0, source_len, source, defines
+        PIXEL_SHADER_3_0, source_name, source_len, source, defines
     );
 
     if (!pscode) return false;
@@ -158,7 +162,26 @@ namespace gfx
         { "ENABLE_COLOR", "" },
         { "ENABLE_TEXTURE", "" },
         { nullptr, nullptr },
-        // 13, ?
+        // 13, 3
+        { "MESH_TYPE", "2" },
+        { "LIGHT_TYPE", "0" },
+        { nullptr, nullptr },
+        // 16, 3
+        { "MESH_TYPE", "2" },
+        { "LIGHT_TYPE", "1" },
+        { nullptr, nullptr },
+        // 19, 3
+        { "MESH_TYPE", "2" },
+        { "LIGHT_TYPE", "2" },
+        { nullptr, nullptr },
+        // 22, 3
+        { "TERRAIN_TEXTURE", "1" },
+        { "ENABLE_SHADOW", "1" },
+        { nullptr, nullptr },
+        // 25, 3
+        { "TERRAIN_TEXTURE", "1" },
+        { "ENABLE_SHADOW", "0" },
+        { nullptr, nullptr },
         //------------------
         //------------------
         //------------------
@@ -189,12 +212,20 @@ namespace gfx
         { 6, 10 },
         { 7, 9 },
         { 8, 0 },
+        { 9, 0 },
+        { 10, 0 },
+        { 11, 13 },
+        { 12, 16 },
+        { 13, 19 },
     };
 
     ShaderSource vsShaderSources[] = 
     {
         { "Data\\shaders\\std.vs", 0, 0, 8 },
         { "Data\\shaders\\procedural_texture.vs", 0, 8, 9},
+        { "Data\\shaders\\terrain_blend.vs", 0, 9, 10 },
+        { "Data\\shaders\\terrain_lighting.vs", 0, 10, 11 },
+        { "Data\\shaders\\light_source.vs", 0, 11, 14 },
     };
 
     ShaderDesc psShaderDescs[] =
@@ -209,6 +240,10 @@ namespace gfx
         { 7, 9 },
         { 8, 0 },
         { 9, 0 },
+        { 10, 0 },
+        { 11, 0 },
+        { 12, 22 },
+        { 13, 25 },
     };
 
     ShaderSource psShaderSources[] =
@@ -216,6 +251,9 @@ namespace gfx
         { "Data\\shaders\\std.ps", 0, 0, 8 },
         { "Data\\shaders\\procedural_texture.ps", 0, 8, 9 },
         { "Data\\shaders\\procedural_texture_distortion.ps", 0, 9, 10 },
+        { "Data\\shaders\\terrain_blend.ps", 0, 10, 11 },
+        { "Data\\shaders\\terrain_lighting.ps", 0, 11, 12 },
+        { "Data\\shaders\\shadow.ps", 0, 12, 14 },
     };
 
     template<typename ShaderType, size_t NUM_SHADERS, size_t NUM_DESCS>
@@ -234,6 +272,7 @@ namespace gfx
             createShader(
                 &shaders[desc.id],
                 device,
+                source.path,
                 size,
                 source_array.get( ),
                 defines + desc.defineStart
@@ -307,12 +346,64 @@ namespace gfx
         projMatrix = proj;
     }
 
-    void ProgramManager::setStdProgram(gfx::Device& device, size_t id)
+    void ProgramManager::setTextureMatrix(uint32_t index, const D3DXMATRIX& matrix)
+    {
+        assert(index < MAX_TEXTURE_MATRICES);
+
+        textureMatrices[index] = matrix;
+    }
+
+    void ProgramManager::setAmbient(const COL& color)
+    {
+        ambient = D3DXVECTOR4(color.r, color.g, color.b, 1.0f);
+    }
+
+    void ProgramManager::setDiffuse(const COL& color)
+    {
+        diffuse = D3DXVECTOR4(color.r, color.g, color.b, 1.0f);
+    }
+
+    void ProgramManager::setFog(float start, float end)
+    {
+        float range = start - end;
+        fogParams = D3DXVECTOR4(end, 1.0f / range, 0.0f, 0.0f);
+    }
+
+    void ProgramManager::setFogColor(const COL& color)
+    {
+        fogColor = D3DXVECTOR4(color.r, color.g, color.b, 1.0f);
+    }
+
+    void ProgramManager::setLightmapColor(const COL& color)
+    {
+        lightmapColor = D3DXVECTOR4(color.r, color.g, color.b, 1.0f);
+    }
+
+    void ProgramManager::setDirectLight(const VC3& dir, float strength)
+    {
+        lightSourceParams = D3DXVECTOR4(dir.x, dir.y, dir.z, strength);
+    }
+
+    void ProgramManager::setPointLight(const VC3& pos, float range)
+    {
+        lightSourceParams = D3DXVECTOR4(pos.x, pos.y, pos.z, 1.0f / range);
+    }
+
+    void ProgramManager::setStdProgram(gfx::Device& device, uint16_t id)
     {
         assert(id < PROGRAM_COUNT);
 
-        device.SetVertexShader(vertexShaders[programs[id].vs]);
-        device.SetPixelShader(pixelShaders[programs[id].ps]);
+        activeProgram = id;
+
+        device.SetVertexShader(vertexShaders[programs[activeProgram].vs]);
+        device.SetPixelShader(pixelShaders[programs[activeProgram].ps]);
+    }
+
+    void ProgramManager::setProgram(uint16_t id)
+    {
+        assert(id < PROGRAM_COUNT);
+
+        activeProgram = id;
     }
 
     void ProgramManager::commitConstants(gfx::Device& device)
@@ -324,5 +415,48 @@ namespace gfx
         D3DXMatrixTranspose(&MVP, &MVP);
 
         device.SetVertexShaderConstantF(0, MVP, 4);
+    }
+
+    void ProgramManager::applyState(gfx::Device& device)
+    {
+        D3DXMATRIX MVP;
+
+        device.SetVertexShader(vertexShaders[programs[activeProgram].vs]);
+        device.SetPixelShader(pixelShaders[programs[activeProgram].ps]);
+
+        D3DXMatrixMultiply(&MVP, &viewMatrix, &projMatrix);
+        D3DXMatrixMultiply(&MVP, &worldMatrix, &MVP);
+        D3DXMatrixTranspose(&MVP, &MVP);
+
+        device.SetVertexShaderConstantF(0, MVP, 4);
+
+        if (activeProgram == TERRAIN_LIGHTING)
+        {
+            device.SetVertexShaderConstantF(0, MVP, 4);
+            device.SetVertexShaderConstantF(12, textureMatrices[1], 4);
+            device.SetVertexShaderConstantF(16, textureMatrices[2], 4);
+            device.SetVertexShaderConstantF(20, fogParams, 1);
+            device.SetVertexShaderConstantF(21, diffuse, 1);
+            device.SetVertexShaderConstantF(22, ambient, 1);
+            device.SetVertexShaderConstantF(23, lightSourceParams, 1);
+
+            device.SetPixelShaderConstantF(0, lightmapColor, 1);
+            device.SetPixelShaderConstantF(1, fogColor, 1);
+        }
+        else if (activeProgram == TERRAIN_PROJECTION_FLAT_SHADOW ||
+            activeProgram == TERRAIN_PROJECTION_POINT_SHADOW ||
+            activeProgram == TERRAIN_PROJECTION_DIRECT_SHADOW ||
+            activeProgram == TERRAIN_PROJECTION_FLAT_SHADOW ||
+            activeProgram == TERRAIN_PROJECTION_POINT_SHADOW ||
+            activeProgram == TERRAIN_PROJECTION_DIRECT_SHADOW)
+        {
+            device.SetVertexShaderConstantF(0, MVP, 4);
+            device.SetVertexShaderConstantF(4, worldMatrix, 3);
+            device.SetVertexShaderConstantF(8, textureMatrices[0], 4);
+            device.SetVertexShaderConstantF(12, textureMatrices[1], 4);
+            device.SetVertexShaderConstantF(16, textureMatrices[2], 4);
+            device.SetVertexShaderConstantF(21, diffuse, 1);
+            device.SetVertexShaderConstantF(23, lightSourceParams, 1);
+        }
     }
 }

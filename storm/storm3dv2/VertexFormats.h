@@ -20,6 +20,7 @@ enum FVF: uint16_t //Fixed Vertex Format
     FVF_P4UV,
     FVF_P2DUV,
     FVF_P2UV,
+    FVF_TERRAIN,
     FVF_COUNT
 };
 

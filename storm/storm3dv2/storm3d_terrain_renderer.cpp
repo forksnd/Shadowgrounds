@@ -688,7 +688,10 @@ struct Storm3D_TerrainRendererData
     void renderLightTargets(Storm3D_Scene &scene)
     {
         GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderProjectedRenderTargets");
-        gfx::Device &device = storm.GetD3DDevice();
+        gfx::Renderer& renderer = storm.renderer;
+        gfx::Device& device = renderer.device;
+        gfx::ProgramManager& programManager = renderer.programManager;
+
         Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
 
         //renderSpotBuffers(scene, renderSpotShadows);
@@ -722,7 +725,15 @@ struct Storm3D_TerrainRendererData
                     models.renderDepth(scene, camera, *spot, spot->getNoShadowModel());
 
                 if (renderHeightmap)
+                {
+                    D3DXMATRIX dm;
+                    D3DXMatrixIdentity(&dm);
+
+                    programManager.setWorldMatrix(dm);
+                    programManager.setStdProgram(device, gfx::ProgramManager::SSF_DEFAULT);
+                    programManager.applyState(device);
                     heightMap.renderDepth(scene, &camera, Storm3D_TerrainHeightmap::Depth, spot->getType(), spot);
+                }
 
             }
 
@@ -800,7 +811,10 @@ struct Storm3D_TerrainRendererData
 	{
 		Storm3D_ShaderManager::GetSingleton()->setLightingShaders();
 
-		gfx::Device& device = storm.GetD3DDevice();
+        gfx::Renderer& renderer = storm.renderer;
+        gfx::Device& device = renderer.device;
+        gfx::ProgramManager& programManager = renderer.programManager;
+
 		D3DXMATRIX dm;
 		D3DXMatrixIdentity(&dm);
 
@@ -834,61 +848,66 @@ t->Apply(4);
 		{
 
             GFX_TRACE_SCOPE("Solid pass");
-			if(renderHeightmap)
-			{
+            if (renderHeightmap)
+            {
                 GFX_TRACE_SCOPE("Render heightmap");
-				// fakeTexture contains lights
-				device.SetTexture(2, fakeTexture);
-				// terrainTexture contains terrain textures
-				device.SetTexture(3, terrainTexture);
 
-				const COL  &c = outdoorLightmapMultiplier;
-				float mult[4] = { c.r, c.g, c.b, 1.f };
-				device.SetPixelShaderConstantF(0, mult, 1);
+                device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+                device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+                // fakeTexture contains lights
+                device.SetTexture(2, fakeTexture);
+                device.SetSamplerState(2, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+                device.SetSamplerState(2, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+                // terrainTexture contains terrain textures
+                device.SetTexture(3, terrainTexture);
+                device.SetSamplerState(3, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+                device.SetSamplerState(3, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 
-				Storm3D_TerrainHeightmap::RenderMode mode = Storm3D_TerrainHeightmap::Lighting;
+                D3DXMATRIX dm;
+                D3DXMatrixIdentity(&dm);
 
-				D3DXMATRIX tm;
-				D3DXMatrixIdentity(&tm);
-				Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
+                programManager.setWorldMatrix(dm);
 
-				device.SetVertexShaderConstantF(14, fakeTextureProjection, 4);
-				device.SetVertexShaderConstantF(18, terrainTextureProjection, 4);
-				device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
-				//device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
-				device.SetSamplerState(2, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-				device.SetSamplerState(2, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-				device.SetSamplerState(3, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-				device.SetSamplerState(3, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+                programManager.setTextureMatrix(1, terrainTextureProjection);
+                programManager.setTextureMatrix(2, fakeTextureProjection);
+                programManager.setAmbient(ambient);
+                programManager.setDiffuse(COL(1.f, 1.f, 1.f));
+                programManager.setLightmapColor(outdoorLightmapMultiplier);
 
-                //device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
-                device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
+                if (forcedDirectionalLightEnabled)
+                {
+                    VC3 sunDir = forcedDirectionalLightDirection;
+                    float sunStrength = (forcedDirectionalLightColor.r + forcedDirectionalLightColor.g + forcedDirectionalLightColor.b) / 3.f;
+                    sunDir *= sunStrength;
 
-				if(forcedDirectionalLightEnabled)
-				{
-					VC3 sunDir = forcedDirectionalLightDirection;
-					float sunStrength = (forcedDirectionalLightColor.r + forcedDirectionalLightColor.g + forcedDirectionalLightColor.b) / 3.f;
-					sunDir *= sunStrength;
+                    Storm3D_ShaderManager::GetSingleton()->SetSun(sunDir, sunStrength);
+                    programManager.setDirectLight(sunDir, sunStrength);
+                }
+                else
+                {
+                    Storm3D_ShaderManager::GetSingleton()->SetSun(VC3(), 0.f);
+                    programManager.setDirectLight(VC3(), 0.f);
+                }
 
-					Storm3D_ShaderManager::GetSingleton()->SetSun(sunDir, sunStrength);
-				}
-				else
-					Storm3D_ShaderManager::GetSingleton()->SetSun(VC3(), 0.f);
+                programManager.setProgram(gfx::ProgramManager::TERRAIN_LIGHTING);
+                programManager.applyState(device);
 
-				frozenbyte::storm::enableMipFiltering(device, 2, 3, false);
-				heightMap.renderDepth(scene, 0, mode, IStorm3D_Spotlight::None, 0);
-				frozenbyte::storm::enableMipFiltering(device, 2, 3, true);
+                frozenbyte::storm::enableMipFiltering(device, 2, 3, false);
+                heightMap.renderDepth(scene, 0, Storm3D_TerrainHeightmap::Lighting, IStorm3D_Spotlight::None, 0);
+                frozenbyte::storm::enableMipFiltering(device, 2, 3, true);
 
-				Storm3D_ShaderManager::GetSingleton()->SetSun(VC3(), 0.f);
+                programManager.setProgram(0);
 
-				device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
-				device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
-				device.SetSamplerState(2, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-				device.SetSamplerState(2, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-				device.SetSamplerState(3, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-				device.SetSamplerState(3, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-				device.SetTexture(3, 0);
-			}
+                device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+                device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+
+                device.SetSamplerState(2, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+                device.SetSamplerState(2, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+
+                device.SetTexture(3, 0);
+                device.SetSamplerState(3, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+                device.SetSamplerState(3, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+            }
 
 			if(renderModels)
 			{
@@ -1051,7 +1070,10 @@ t->Apply(4);
 
         // this renders spotlight light & shadows
         //setTracing(true);
-        gfx::Device &device = storm.GetD3DDevice();
+        gfx::Renderer& renderer = storm.renderer;
+        gfx::Device& device = renderer.device;
+        gfx::ProgramManager& programManager = renderer.programManager;
+
         Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
 
         Storm3D_ShaderManager::GetSingleton()->setProjectedShaders();
@@ -1117,21 +1139,26 @@ t->Apply(4);
 
                 // removing this breaks spotlight shadows
                 spot->applySolidShader(renderSpotShadows);
-
                 if (renderModels)
                     models.renderProjection(Storm3D_TerrainModels::SolidOnly, scene, *spot);
 
                 spot->applyTerrainShader(renderSpotShadows);
                 if (renderHeightmap)
                 {
-                    Storm3D_TerrainHeightmap::RenderMode mode = Storm3D_TerrainHeightmap::Projection;
+                    D3DXMATRIX dm;
+                    D3DXMatrixIdentity(&dm);
 
-                    Storm3D_ShaderManager::GetSingleton()->SetObjectDiffuse(COL(1.f, 1.f, 1.f));
+                    programManager.setWorldMatrix(dm);
+
                     device.SetTexture(2, terrainTexture);
-                    device.SetVertexShaderConstantF(18, terrainTextureProjection, 4);
+                    programManager.setTextureMatrix(2, terrainTextureProjection);
 
                     frozenbyte::storm::enableMipFiltering(device, 2, 2, false);
-                    heightMap.renderDepth(scene, &spotCamera, mode, spot->getType(), spot);
+                    programManager.applyState(device);
+                    heightMap.renderDepth(
+                        scene, &spotCamera,
+                        Storm3D_TerrainHeightmap::Projection,
+                        spot->getType(), spot);
                     frozenbyte::storm::enableMipFiltering(device, 2, 2, true);
                 }
             }
@@ -1699,6 +1726,8 @@ void Storm3D_TerrainRenderer::setFog(bool enable, float startHeight, float endHe
 		data->fogEnd = -100001.f;
 	}
 
+    data->storm.renderer.programManager.setFog(data->fogStart, data->fogEnd);
+    data->storm.renderer.programManager.setFogColor(color);
 	Storm3D_ShaderManager::GetSingleton()->SetFog(data->fogStart, data->fogStart - data->fogEnd);
 	data->decalSystem.setFog(data->fogEnd, data->fogStart - data->fogEnd);
 }
@@ -1924,7 +1953,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 			device.SetScissorRect(&data->scissorRect);
 			device.SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
 
-			device.SetTransform(D3DTS_WORLD, &dm);
 			// this draws terrain textures (snow etc.)
 			// (not rocks etc.)
 			if(data->renderHeightmap && data->renderTerrainTextures)
