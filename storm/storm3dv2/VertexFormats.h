@@ -11,6 +11,7 @@ enum FVF: uint16_t //Fixed Vertex Format
     FVF_P3NUV2,
     FVF_P3NUV2BW,
     FVF_P3D,
+    FVF_P3DUV,
     FVF_P3DUV2,
     FVF_P3UV,
     //TODO: remove
@@ -51,6 +52,13 @@ struct Vertex_P3D
 
     VC3      p;
     uint32_t d;
+};
+
+struct Vertex_P3DUV
+{
+    VC3      p;
+    uint32_t d;
+    VC2      uv;
 };
 
 struct Vertex_P3DUV2

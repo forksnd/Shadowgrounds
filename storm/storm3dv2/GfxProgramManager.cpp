@@ -244,6 +244,7 @@ namespace gfx
         { 11, 0 },
         { 12, 22 },
         { 13, 25 },
+        { 14, 0 },
     };
 
     ShaderSource psShaderSources[] =
@@ -254,6 +255,7 @@ namespace gfx
         { "Data\\shaders\\terrain_blend.ps", 0, 10, 11 },
         { "Data\\shaders\\terrain_lighting.ps", 0, 11, 12 },
         { "Data\\shaders\\shadow.ps", 0, 12, 14 },
+        { "Data\\shaders\\decal_shadow.ps", 0, 14, 15 },
     };
 
     template<typename ShaderType, size_t NUM_SHADERS, size_t NUM_DESCS>

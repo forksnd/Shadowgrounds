@@ -41,6 +41,7 @@ namespace gfx
             TERRAIN_PROJECTION_FLAT_NOSHADOW,
             TERRAIN_PROJECTION_POINT_NOSHADOW,
             TERRAIN_PROJECTION_DIRECT_NOSHADOW,
+            DECAL_SHADOW,
             PROGRAM_COUNT
         };
 
@@ -93,6 +94,7 @@ namespace gfx
             PS_TERRAIN_LIGHTING,
             PS_SHADOW,
             PS_NOSHADOW,
+            PS_DECAL_SHADOW,
             PS_SHADER_COUNT
         };
 
@@ -123,7 +125,9 @@ namespace gfx
             { VS_TERRAIN_PROJECTION_DIRECT, PS_SHADOW },
             { VS_TERRAIN_PROJECTION_FLAT, PS_NOSHADOW },
             { VS_TERRAIN_PROJECTION_POINT, PS_NOSHADOW },
-            { VS_TERRAIN_PROJECTION_DIRECT, PS_NOSHADOW }, };
+            { VS_TERRAIN_PROJECTION_DIRECT, PS_NOSHADOW },
+            { SSF_COLOR| SSF_TEXTURE, PS_DECAL_SHADOW },
+        };
 
         uint16_t activeProgram = 0;
 

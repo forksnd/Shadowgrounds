@@ -192,6 +192,28 @@ namespace {
 			buffer->texcoords2 = special;
 		}
 
+        void insert(Vertex_P3DUV *buffer) const
+        {
+            buffer->p = vertices[0];
+            buffer->d = vertexColor;
+            buffer->uv = VC2(0.f, 0.f);
+
+            ++buffer;
+            buffer->p = vertices[1];
+            buffer->d = vertexColor;
+            buffer->uv = VC2(0.f, 1.f);
+
+            ++buffer;
+            buffer->p = vertices[2];
+            buffer->d = vertexColor;
+            buffer->uv = VC2(1.f, 0.f);
+
+            ++buffer;
+            buffer->p = vertices[3];
+            buffer->d = vertexColor;
+            buffer->uv = VC2(1.f, 1.f);
+        }
+
 		bool fits(const AABB &area) const
 		{
 			if(!contains2D(area, vertices[0]))
@@ -647,6 +669,7 @@ struct Storm3D_TerrainDecalSystem::Data
     {
         gfx::Renderer& renderer = storm.renderer;
         gfx::Device& device = renderer.device;
+        gfx::ProgramManager& programManager = renderer.programManager;
 
         if (shadowDecals.empty() || !shadowMaterial)
             return;
@@ -658,8 +681,8 @@ struct Storm3D_TerrainDecalSystem::Data
         Frustum frustum = stormCamera->getFrustum();
 
         UINT baseVertex = 0;
-        Vertex_DECAL *buffer = 0;;
-        renderer.lockDynVtx<Vertex_DECAL>(shadowDecals.size() * 4, &buffer, &baseVertex);
+        Vertex_P3DUV *buffer = 0;;
+        renderer.lockDynVtx<Vertex_P3DUV>(shadowDecals.size() * 4, &buffer, &baseVertex);
 
         float inverseRange = 1.f / fogRange;
         for (unsigned int i = 0; i < shadowDecals.size() && renderAmount < MAX_DECAL_AMOUNT; ++i)
@@ -670,10 +693,8 @@ struct Storm3D_TerrainDecalSystem::Data
             {
                 float factor = decal.position.y - fogEnd;
                 factor *= inverseRange;
-                if (factor < 0.f)
-                    factor = 0.f;
-                if (factor > 1.f)
-                    factor = 1.f;
+                factor = std::max(0.0f, factor);
+                factor = std::min(1.0f, factor);
                 factor = 1.f - factor;
 
                 COL color = decal.light;
@@ -710,32 +731,20 @@ struct Storm3D_TerrainDecalSystem::Data
         D3DXMATRIX tm;
         D3DXMatrixIdentity(&tm);
 
-        //Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
-
-        device.SetVertexShader(0);
-        device.SetPixelShader(0);
-        device.SetTransform(D3DTS_WORLD, &tm);
-
-        //vertexShader.applyDeclaration();
-        device.SetVertexDeclaration(VtxFmt_DECAL);
-        device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-        device.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-        device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_ADD);
-        device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-        device.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-        device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-        device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+        programManager.setProgram( gfx::ProgramManager::DECAL_SHADOW);
+        programManager.setWorldMatrix(tm);
+        programManager.applyState(device);
 
         device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
         device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
         device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
         device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
         device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
-        device.SetRenderState(D3DRS_LIGHTING, FALSE);
 
         shadowMaterial->applyShadow(device);
 
-        renderer.setDynVtxBuffer<Vertex_DECAL>();
+        renderer.setFVF(FVF_P3DUV);
+        renderer.setDynVtxBuffer<Vertex_P3DUV>();
         renderer.drawQuads(baseVertex, renderAmount);
 
         device.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
