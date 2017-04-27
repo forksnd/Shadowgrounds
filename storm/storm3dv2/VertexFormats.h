@@ -56,6 +56,8 @@ struct Vertex_P3D
 
 struct Vertex_P3DUV
 {
+    static const FVF fvf = FVF_P3DUV;
+
     VC3      p;
     uint32_t d;
     VC2      uv;

@@ -43,7 +43,6 @@ public:
 
 	void createNvConeShader();
 	void createConeStencilShader();
-	void createDecalShader();
 	void createDecalPointShader();
 	void createDecalDirShader();
 	void createDecalFlatShader();
@@ -74,7 +73,6 @@ public:
 	void createNvConeShader_Texture();
 	void createNvConeShader_NoTexture();
 
-	void createDecalPixelShader();
 	void createColorEffectPixelShader();
 	void createColorEffectOffsetPixelShader();
 	void createColorEffectOffsetPixelShader_NoGamma();

@@ -217,6 +217,7 @@ namespace gfx
         { 11, 13 },
         { 12, 16 },
         { 13, 19 },
+        { 14, 0 },
     };
 
     ShaderSource vsShaderSources[] = 
@@ -226,6 +227,7 @@ namespace gfx
         { "Data\\shaders\\terrain_blend.vs", 0, 9, 10 },
         { "Data\\shaders\\terrain_lighting.vs", 0, 10, 11 },
         { "Data\\shaders\\light_source.vs", 0, 11, 14 },
+        { "Data\\shaders\\decal_lighting.vs", 0, 14, 15 },
     };
 
     ShaderDesc psShaderDescs[] =
@@ -245,6 +247,7 @@ namespace gfx
         { 12, 22 },
         { 13, 25 },
         { 14, 0 },
+        { 15, 0 },
     };
 
     ShaderSource psShaderSources[] =
@@ -256,6 +259,7 @@ namespace gfx
         { "Data\\shaders\\terrain_lighting.ps", 0, 11, 12 },
         { "Data\\shaders\\shadow.ps", 0, 12, 14 },
         { "Data\\shaders\\decal_shadow.ps", 0, 14, 15 },
+        { "Data\\shaders\\decal_lighting.ps", 0, 15, 16 },
     };
 
     template<typename ShaderType, size_t NUM_SHADERS, size_t NUM_DESCS>
@@ -434,7 +438,6 @@ namespace gfx
 
         if (activeProgram == TERRAIN_LIGHTING)
         {
-            device.SetVertexShaderConstantF(0, MVP, 4);
             device.SetVertexShaderConstantF(12, textureMatrices[1], 4);
             device.SetVertexShaderConstantF(16, textureMatrices[2], 4);
             device.SetVertexShaderConstantF(20, fogParams, 1);
@@ -452,13 +455,21 @@ namespace gfx
             activeProgram == TERRAIN_PROJECTION_POINT_SHADOW ||
             activeProgram == TERRAIN_PROJECTION_DIRECT_SHADOW)
         {
-            device.SetVertexShaderConstantF(0, MVP, 4);
             device.SetVertexShaderConstantF(4, worldMatrix, 3);
             device.SetVertexShaderConstantF(8, textureMatrices[0], 4);
             device.SetVertexShaderConstantF(12, textureMatrices[1], 4);
             device.SetVertexShaderConstantF(16, textureMatrices[2], 4);
             device.SetVertexShaderConstantF(21, diffuse, 1);
             device.SetVertexShaderConstantF(23, lightSourceParams, 1);
+        }
+        else if (activeProgram == DECAL_LIGHTING)
+        {
+            device.SetVertexShaderConstantF(4, worldMatrix, 3);
+            device.SetVertexShaderConstantF(16, textureMatrices[2], 4);
+            device.SetVertexShaderConstantF(20, fogParams, 1);
+            device.SetVertexShaderConstantF(21, diffuse, 1);
+
+            device.SetPixelShaderConstantF(1, fogColor, 1);
         }
     }
 }

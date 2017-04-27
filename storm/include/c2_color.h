@@ -31,6 +31,16 @@ public:
 		return ((DWORD)((((255)&0xff)<<24)|((((int)(b*255.0f))&0xff)<<16)|((((int)(g*255.0f))&0xff)<<8)|(((int)(r*255.0f))&0xff)));
 	}
 
+    uint32_t as_u32_D3D_ARGB(uint8_t alpha = 255) const
+    {
+        uint32_t color = alpha;
+        color = (color << 8) | static_cast<uint8_t>(b*255.0f);
+        color = (color << 8) | static_cast<uint8_t>(g*255.0f);
+        color = (color << 8) | static_cast<uint8_t>(r*255.0f);
+
+        return color;
+    }
+
 	TColor GetClamped() const			// Forces all colors in range [0,1]	
 	{
 		TColor nc(r,g,b);

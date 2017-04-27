@@ -228,25 +228,6 @@ void VertexShader::createNvConeShader()
 	device.CreateVertexDeclaration(&elements[0], &declaration);
 }
 
-void VertexShader::createDecalShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(0, 6*4, D3DDECLTYPE_D3DCOLOR, D3DDECLUSAGE_COLOR));
-	elements.push_back(createElement(0, 7*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(0, 9*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\decal_vertex_shader.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\decal_vertex_shader.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
 void VertexShader::createDecalPointShader()
 {
 	elements.clear();
@@ -385,11 +366,6 @@ void PixelShader::createNvConeShader_NoTexture()
 	handle = createPixelShader(device, "Data\\Shaders\\nv_cone_pixel_shader_notexture.txt");
 }
 
-void PixelShader::createDecalPixelShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\decal_pixel_shader.txt");
-}
-
 void PixelShader::createColorEffectPixelShader()
 {
 	handle = createPixelShader(device, "Data\\Shaders\\color_effect_pixel_shader.txt");
@@ -437,11 +413,6 @@ void PixelShader::createNvConeShader_Texture()
 void PixelShader::createNvConeShader_NoTexture()
 {
 	handle = createPixelShader(device, "data\\shader\\nv_cone_pixel_shader_notexture.fps");
-}
-
-void PixelShader::createDecalPixelShader()
-{
-	handle = createPixelShader(device, "data\\shader\\decal_pixel_shader.fps");
 }
 
 void PixelShader::createColorEffectPixelShader()

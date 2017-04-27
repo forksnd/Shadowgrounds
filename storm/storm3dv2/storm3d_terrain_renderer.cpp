@@ -936,27 +936,25 @@ t->Apply(4);
 		else if(pass == Alpha)
 		{
             GFX_TRACE_SCOPE("Alpha pass");
-			device.SetTexture(0, fakeTexture);
-			device.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
-			device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-			device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+			device.SetTexture(2, fakeTexture);
+			device.SetSamplerState(2, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+			device.SetSamplerState(2, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 			device.SetVertexShaderConstantF(14, fakeTextureProjection, 4);
+
+            programManager.setTextureMatrix(2, fakeTextureProjection);
 
 			if(renderDecals)
 			{
                 GFX_TRACE_SCOPE("Render decals");
 				frozenbyte::storm::enableMipFiltering(device, 0, 0, false);
 
-				device.SetRenderState(D3DRS_FOGENABLE, TRUE);
 				decalSystem.renderTextures(scene);
-				device.SetRenderState(D3DRS_FOGENABLE, FALSE);
 
 				frozenbyte::storm::enableMipFiltering(device, 0, 0, true);
 			}
 
-			device.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
-			device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-			device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+			device.SetSamplerState(2, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+			device.SetSamplerState(2, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 
 			Storm3D_ShaderManager::GetSingleton()->SetAmbient(ambient);
 			Storm3D_ShaderManager::GetSingleton()->SetObjectDiffuse(COL(1.f, 1.f, 1.f));
