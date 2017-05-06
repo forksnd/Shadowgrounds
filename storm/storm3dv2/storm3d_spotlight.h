@@ -60,7 +60,6 @@ public:
 	bool setAsRenderTarget(const float *cameraView);
 	Storm3D_Camera &getCamera();
 
-	void renderStencilCone(Storm3D_Camera &camera);
 	void applyTextures(const float *cameraView, const float *cameraViewProjection, Storm3D &storm, bool renderShadows);
 	void applyTerrainShader(bool renderShadows);
 	void applySolidShader(bool renderShadows);

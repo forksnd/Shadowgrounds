@@ -43,6 +43,12 @@ namespace gfx
             TERRAIN_PROJECTION_DIRECT_NOSHADOW,
             DECAL_SHADOW,
             DECAL_LIGHTING,
+            MESH_STATIC_PROJECTION_FLAT_SHADOW,
+            MESH_STATIC_PROJECTION_POINT_SHADOW,
+            MESH_STATIC_PROJECTION_DIRECT_SHADOW,
+            MESH_STATIC_PROJECTION_FLAT_NOSHADOW,
+            MESH_STATIC_PROJECTION_POINT_NOSHADOW,
+            MESH_STATIC_PROJECTION_DIRECT_NOSHADOW,
             PROGRAM_COUNT
         };
 
@@ -68,7 +74,8 @@ namespace gfx
         void setTextureMatrix(uint32_t index, const D3DXMATRIX& matrix);
 
         void setAmbient(const COL& color);
-        void setDiffuse(const COL& color);
+        void setTextureOffset(const VC2& offset);
+        void setDiffuse(const COL& color, float alpha = 1.0f);
         void setFog(float start, float end);
         void setFogColor(const COL& color);
         void setLightmapColor(const COL& color);
@@ -85,6 +92,9 @@ namespace gfx
             VS_TERRAIN_PROJECTION_POINT,
             VS_TERRAIN_PROJECTION_DIRECT,
             VS_DECAL_LIGHTING,
+            VS_STATIC_MESH_PROJECTION_FLAT,
+            VS_STATIC_MESH_PROJECTION_POINT,
+            VS_STATIC_MESH_PROJECTION_DIRECT,
             VS_SHADER_COUNT
         };
 
@@ -131,9 +141,16 @@ namespace gfx
             { VS_TERRAIN_PROJECTION_DIRECT, PS_NOSHADOW },
             { SSF_COLOR | SSF_TEXTURE, PS_DECAL_SHADOW },
             { VS_DECAL_LIGHTING, PS_DECAL_LIGHTING },
-        };
+            { VS_STATIC_MESH_PROJECTION_FLAT, PS_SHADOW },
+            { VS_STATIC_MESH_PROJECTION_POINT, PS_SHADOW },
+            { VS_STATIC_MESH_PROJECTION_DIRECT, PS_SHADOW },
+            { VS_STATIC_MESH_PROJECTION_FLAT, PS_NOSHADOW },
+            { VS_STATIC_MESH_PROJECTION_POINT, PS_NOSHADOW },
+            { VS_STATIC_MESH_PROJECTION_DIRECT, PS_NOSHADOW }, };
 
         uint16_t activeProgram = 0;
+
+        D3DXVECTOR4 textureOffset;
 
         D3DXVECTOR4 diffuse;
         D3DXVECTOR4 ambient;

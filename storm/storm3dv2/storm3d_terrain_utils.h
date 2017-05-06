@@ -39,13 +39,7 @@ public:
 	VertexShader(gfx::Device& device);
 	~VertexShader();
 
-	void createTerrainShader();
-
 	void createNvConeShader();
-	void createConeStencilShader();
-	void createDecalPointShader();
-	void createDecalDirShader();
-	void createDecalFlatShader();
 
 	void applyDeclaration() const;
 	void apply() const;
@@ -66,10 +60,7 @@ public:
 	~PixelShader();
 
 	void createGlowTex8Shader();
-	void createLightShader();
-	void createNvShadowShader();
-	void createNvSmoothShadowShader();
-	void createNvNoShadowShader();
+
 	void createNvConeShader_Texture();
 	void createNvConeShader_NoTexture();
 

@@ -195,21 +195,6 @@ VertexShader::~VertexShader()
 {
 }
 
-void VertexShader::createTerrainShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(1, 0, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(1, 2*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(createElement(1, 4*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 2));
-	elements.push_back(end);
-
-	//handle = createVertexShader(device, "");
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
 void VertexShader::createNvConeShader()
 {
 	elements.clear();
@@ -223,78 +208,6 @@ void VertexShader::createNvConeShader()
 	handle = createVertexShader(device, "Data\\Shaders\\cone_vertex_shader_nv.txt");
 #else
 	handle = createVertexShader(device, "data\\shader\\cone_vertex_shader_nv.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
-void VertexShader::createDecalPointShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(0, 6*4, D3DDECLTYPE_D3DCOLOR, D3DDECLUSAGE_COLOR));
-	elements.push_back(createElement(0, 7*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(0, 9*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\decal_projection_vertex_shader_point.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\decal_projection_vertex_shader_point.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
-void VertexShader::createDecalDirShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(0, 6*4, D3DDECLTYPE_D3DCOLOR, D3DDECLUSAGE_COLOR));
-	elements.push_back(createElement(0, 7*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(0, 9*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\decal_projection_vertex_shader_dir.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\decal_projection_vertex_shader_dir.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
-void VertexShader::createDecalFlatShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(0, 6*4, D3DDECLTYPE_D3DCOLOR, D3DDECLUSAGE_COLOR));
-	elements.push_back(createElement(0, 7*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(createElement(0, 9*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 1));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\decal_projection_vertex_shader_flat.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\decal_projection_vertex_shader_flat.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
-void VertexShader::createConeStencilShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\cone_stencil_vertex_shader.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\cone_stencil_vertex_shader.fvs");
 #endif
 	declaration = 0;
 	device.CreateVertexDeclaration(&elements[0], &declaration);
@@ -334,26 +247,6 @@ PixelShader::~PixelShader()
 void PixelShader::createGlowTex8Shader()
 {
 	handle = createPixelShader(device, "Data\\Shaders\\glow_8tex_pixel_shader.txt");
-}
-
-void PixelShader::createLightShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\lightmap_pixel_shader.txt");
-}
-
-void PixelShader::createNvShadowShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\nv_shadow_pixel_shader.txt");
-}
-
-void PixelShader::createNvSmoothShadowShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\nv_shadow_pixel_shader_smooth.txt");
-}
-
-void PixelShader::createNvNoShadowShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\nv_noshadow_pixel_shader.txt");
 }
 
 void PixelShader::createNvConeShader_Texture()
@@ -398,11 +291,6 @@ void PixelShader::createOffsetBlendShader()
 void PixelShader::createGlowTex8Shader()
 {
 	handle = createPixelShader(device, "data\\shader\\glow_8tex_pixel_shader.fps");
-}
-
-void PixelShader::createLightShader()
-{
-	handle = createPixelShader(device, "data\\shader\\lightmap_pixel_shader.fps");
 }
 
 void PixelShader::createNvConeShader_Texture()

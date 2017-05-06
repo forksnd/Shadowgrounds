@@ -182,6 +182,18 @@ namespace gfx
         { "TERRAIN_TEXTURE", "1" },
         { "ENABLE_SHADOW", "0" },
         { nullptr, nullptr },
+        // 28, 3
+        { "MESH_TYPE", "0" },
+        { "LIGHT_TYPE", "0" },
+        { nullptr, nullptr },
+        // 31, 3
+        { "MESH_TYPE", "0" },
+        { "LIGHT_TYPE", "1" },
+        { nullptr, nullptr },
+        // 34, 3
+        { "MESH_TYPE", "0" },
+        { "LIGHT_TYPE", "2" },
+        { nullptr, nullptr },
         //------------------
         //------------------
         //------------------
@@ -218,6 +230,9 @@ namespace gfx
         { 12, 16 },
         { 13, 19 },
         { 14, 0 },
+        { 15, 28 },
+        { 16, 31 },
+        { 17, 34 },
     };
 
     ShaderSource vsShaderSources[] = 
@@ -228,6 +243,7 @@ namespace gfx
         { "Data\\shaders\\terrain_lighting.vs", 0, 10, 11 },
         { "Data\\shaders\\light_source.vs", 0, 11, 14 },
         { "Data\\shaders\\decal_lighting.vs", 0, 14, 15 },
+        { "Data\\shaders\\light_source.vs", 0, 15, 18 },
     };
 
     ShaderDesc psShaderDescs[] =
@@ -359,14 +375,19 @@ namespace gfx
         textureMatrices[index] = matrix;
     }
 
+    void ProgramManager::setTextureOffset(const VC2& offset)
+    {
+        textureOffset = D3DXVECTOR4(offset.x, offset.y, 0.0f, 0.0f);
+    }
+
     void ProgramManager::setAmbient(const COL& color)
     {
         ambient = D3DXVECTOR4(color.r, color.g, color.b, 1.0f);
     }
 
-    void ProgramManager::setDiffuse(const COL& color)
+    void ProgramManager::setDiffuse(const COL& color, float alpha)
     {
-        diffuse = D3DXVECTOR4(color.r, color.g, color.b, 1.0f);
+        diffuse = D3DXVECTOR4(color.r, color.g, color.b, alpha);
     }
 
     void ProgramManager::setFog(float start, float end)
@@ -459,6 +480,20 @@ namespace gfx
             device.SetVertexShaderConstantF(8, textureMatrices[0], 4);
             device.SetVertexShaderConstantF(12, textureMatrices[1], 4);
             device.SetVertexShaderConstantF(16, textureMatrices[2], 4);
+            device.SetVertexShaderConstantF(21, diffuse, 1);
+            device.SetVertexShaderConstantF(23, lightSourceParams, 1);
+        }
+        else if (activeProgram == MESH_STATIC_PROJECTION_FLAT_SHADOW ||
+            activeProgram == MESH_STATIC_PROJECTION_POINT_SHADOW ||
+            activeProgram == MESH_STATIC_PROJECTION_DIRECT_SHADOW ||
+            activeProgram == MESH_STATIC_PROJECTION_FLAT_SHADOW ||
+            activeProgram == MESH_STATIC_PROJECTION_POINT_SHADOW ||
+            activeProgram == MESH_STATIC_PROJECTION_DIRECT_SHADOW)
+        {
+            device.SetVertexShaderConstantF(4, worldMatrix, 3);
+            device.SetVertexShaderConstantF(8, textureMatrices[0], 4);
+            device.SetVertexShaderConstantF(12, textureMatrices[1], 4);
+            device.SetVertexShaderConstantF(16, textureOffset, 1);
             device.SetVertexShaderConstantF(21, diffuse, 1);
             device.SetVertexShaderConstantF(23, lightSourceParams, 1);
         }

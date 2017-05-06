@@ -29,8 +29,6 @@ struct Material;
 typedef std::deque<Decal> DecalList;
 typedef std::vector<Material> MaterialList;
 
-// position + normal + texcoord + color 
-static const int VERTEX_SIZE = 3*4 + 3*4 + 4*4 + 1*4;
 static const int MAX_DECAL_AMOUNT = 10000;
 
 namespace {
@@ -130,6 +128,32 @@ namespace {
 			if(entity)
 				entity->setRadius(getRadius());
 		}
+
+        void insert(Vertex_P3NDUV *buffer, uint32_t vertexColor) const
+        {
+            buffer->p = vertices[0];
+            buffer->n = normal;
+            buffer->d = vertexColor;
+            buffer->uv = VC2(0.f, 0.f);
+
+            ++buffer;
+            buffer->p = vertices[1];
+            buffer->n = normal;
+            buffer->d = vertexColor;
+            buffer->uv = VC2(0.f, 1.f);
+
+            ++buffer;
+            buffer->p = vertices[2];
+            buffer->n = normal;
+            buffer->d = vertexColor;
+            buffer->uv = VC2(1.f, 0.f);
+
+            ++buffer;
+            buffer->p = vertices[3];
+            buffer->n = normal;
+            buffer->d = vertexColor;
+            buffer->uv = VC2(1.f, 1.f);
+        }
 
         void insert(Vertex_P3DUV *buffer, uint32_t vertexColor) const
         {
@@ -261,23 +285,6 @@ namespace {
 			Decal &decal = decals[index];
 			decal.calculateValues();
 		}
-
-		void applyProjection(gfx::Device &device, const COL &spotColor)
-		{
-			if(baseTexture)
-				baseTexture->Apply(2);
-
-			//float factor = .55f;
-			float factor = 1.f;
-			D3DXVECTOR4 diffuse(diffuseColor.r * factor * spotColor.r, diffuseColor.g * factor * spotColor.g, diffuseColor.b * factor * spotColor.b, 1.f);
-			device.SetVertexShaderConstantF(17, diffuse, 1);
-		}
-
-		void applyShadow(gfx::Device &device)
-		{
-			if(baseTexture)
-				baseTexture->Apply(0);
-		}
 	};
 
 	Material createMaterial(Storm3D_Material *material, Tree *tree)
@@ -336,10 +343,6 @@ struct Storm3D_TerrainDecalSystem::Data
 	MaterialList materials;
 	VC2I blockAmount;
 
-	VertexShader pointVertexShader;
-	VertexShader dirVertexShader;
-	VertexShader flatVertexShader;
-
     UINT baseDecalVertex;
 
 	std::unique_ptr<Tree> tree;
@@ -356,18 +359,12 @@ struct Storm3D_TerrainDecalSystem::Data
 
 	Data(Storm3D &storm_)
 	:	storm(storm_),
-		pointVertexShader(storm.GetD3DDevice()),
-		dirVertexShader(storm.GetD3DDevice()),
-		flatVertexShader(storm.GetD3DDevice()),
 		tree(),
 		outFactor(1.f, 1.f, 1.f),
 		inFactor(1.f, 1.f, 1.f),
 		fogEnd(-1000000000000.f),
 		fogRange(10.f)
 	{
-		pointVertexShader.createDecalPointShader();
-		dirVertexShader.createDecalDirShader();
-		flatVertexShader.createDecalFlatShader();
 	}
 
     ~Data()
@@ -517,8 +514,8 @@ struct Storm3D_TerrainDecalSystem::Data
         if (decals.empty())
             return;
 
-        Vertex_P3DUV *buffer = 0;
-        renderer.lockDynVtx<Vertex_P3DUV>(decals.size() * 4, &buffer, &baseDecalVertex);
+        Vertex_P3NDUV *buffer = 0;
+        renderer.lockDynVtx<Vertex_P3NDUV>(decals.size() * 4, &buffer, &baseDecalVertex);
         for (unsigned int i = 0; i < decals.size(); ++i)
         {
             Decal& decal = *decals[i];
@@ -546,8 +543,8 @@ struct Storm3D_TerrainDecalSystem::Data
             programManager.setWorldMatrix(tm);
             programManager.setProgram(gfx::ProgramManager::DECAL_LIGHTING);
 
-            renderer.setDynVtxBuffer<Vertex_P3DUV>();
-            renderer.setFVF(FVF_P3DUV);
+            renderer.setDynVtxBuffer<Vertex_P3NDUV>();
+            renderer.setFVF(FVF_P3NDUV);
 
             int materialIndex = 0;
             int startIndex = 0;
@@ -648,7 +645,8 @@ struct Storm3D_TerrainDecalSystem::Data
         device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
         device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
 
-        shadowMaterial->applyShadow(device);
+        if (shadowMaterial->baseTexture)
+            shadowMaterial->baseTexture->Apply(0);
 
         renderer.setFVF(FVF_P3DUV);
         renderer.setDynVtxBuffer<Vertex_P3DUV>();
@@ -664,8 +662,7 @@ struct Storm3D_TerrainDecalSystem::Data
 	{
         gfx::Renderer& renderer = storm.renderer;
         gfx::Device& device = renderer.device;
-
-		device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+        gfx::ProgramManager& programManager = renderer.programManager;
 
 		if(!decals.empty())
 		{
@@ -678,31 +675,30 @@ struct Storm3D_TerrainDecalSystem::Data
 			//device.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 			//device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
-			D3DXMATRIX tm;
+            D3DXMATRIX tm;
             D3DXMatrixIdentity(&tm);
 
-			Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(device, tm);
+            programManager.setWorldMatrix(tm);
+            programManager.setTextureOffset(VC2(0, 0));
 
-            renderer.setDynVtxBuffer<Vertex_P3DUV>();
-            renderer.setFVF(FVF_P3DUV);
+            renderer.setDynVtxBuffer<Vertex_P3NDUV>();
+            renderer.setFVF(FVF_P3NDUV);
 
 			int materialIndex = 0;
 			int startIndex = 0;
 			int endIndex = 0;
 
-			if(spot->getType() == IStorm3D_Spotlight::Point)
-				pointVertexShader.apply();
-			else if(spot->getType() == IStorm3D_Spotlight::Directional)
-				dirVertexShader.apply();
-			else if(spot->getType() == IStorm3D_Spotlight::Flat)
-				flatVertexShader.apply();
-
-			Storm3D_ShaderManager::GetSingleton()->SetTransparencyFactor(0.75f);
-
 			for(;;)
 			{
 				materialIndex = decals[startIndex]->materialIndex;
-				materials[materialIndex].applyProjection(device, spot->getColorMultiplier());
+                if (materials[materialIndex].baseTexture)
+                    materials[materialIndex].baseTexture->Apply(2);
+
+                //float factor = .55f;
+                float factor = 1.f;
+                COL diffuse = spot->getColorMultiplier() * materials[materialIndex].diffuseColor * factor;
+                programManager.setDiffuse(diffuse, 0.75f);
+                programManager.applyState(device);
 
 				int decalAmount = decals.size();
 				for(int i = startIndex + 1; i < decalAmount; ++i)
@@ -729,8 +725,6 @@ struct Storm3D_TerrainDecalSystem::Data
 			device.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 			device.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		}
-
-		device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 	}
 };
 

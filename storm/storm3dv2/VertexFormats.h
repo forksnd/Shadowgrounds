@@ -8,6 +8,7 @@
 
 enum FVF: uint16_t //Fixed Vertex Format
 {
+    FVF_P3NDUV,
     FVF_P3NUV2,
     FVF_P3NUV2BW,
     FVF_P3D,
@@ -23,6 +24,16 @@ enum FVF: uint16_t //Fixed Vertex Format
     FVF_P2UV,
     FVF_TERRAIN,
     FVF_COUNT
+};
+
+struct Vertex_P3NDUV
+{
+    static const FVF fvf = FVF_P3NDUV;
+
+    VC3 p;
+    VC3 n;
+    uint32_t d;
+    VC2 uv;
 };
 
 struct Vertex_P3NUV2

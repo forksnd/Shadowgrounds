@@ -148,7 +148,6 @@ struct Storm3D_TerrainRendererData
 	frozenbyte::storm::VertexShader coneNvVertexShader;
 
     frozenbyte::storm::PixelShader glowPs2Shader;
-	frozenbyte::storm::PixelShader lightShader;
 	frozenbyte::storm::PixelShader colorEffectShader;
 	frozenbyte::storm::PixelShader colorEffectOffsetShader;
 	frozenbyte::storm::PixelShader colorEffectOffsetShader_NoGamma;
@@ -239,7 +238,6 @@ struct Storm3D_TerrainRendererData
 		outdoorLightmapMultiplier(1.f, 1.f, 1.f),
 		skyBox(0),
 		glowPs2Shader(storm.GetD3DDevice()),
-		lightShader(storm.GetD3DDevice()),
 		colorEffectShader(storm.GetD3DDevice()),
 		colorEffectOffsetShader(storm.GetD3DDevice()),
 		colorEffectOffsetShader_NoGamma(storm.GetD3DDevice()),
@@ -304,7 +302,6 @@ struct Storm3D_TerrainRendererData
 		forcedDirectionalLightEnabled(false)
 	{
 		gfx::Device &device = storm.GetD3DDevice();
-		lightShader.createLightShader();
 		colorEffectShader.createColorEffectPixelShader();
 		blackWhiteShader.createBlackWhiteShader();
 
@@ -1164,10 +1161,12 @@ t->Apply(4);
             {
                 //renderer.render(IStorm3D_TerrainRendererBase::SpotProjectionDecal, scene, spot);
                 //renderer.render(IStorm3D_TerrainRendererBase::SpotProjectionAlpha, scene, spot);
-                spot->applyNormalShader(renderSpotShadows);
                 if (renderDecals)
+                {
+                    spot->applyNormalShader(renderSpotShadows);
                     decalSystem.renderProjection(scene, spot);
-                spot->applyNormalShader(renderSpotShadows);
+                }
+
                 if (renderModels)
                     models.renderProjection(Storm3D_TerrainModels::AlphaOnly, scene, *spot);
             }

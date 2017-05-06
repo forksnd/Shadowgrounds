@@ -302,9 +302,6 @@ struct Storm3D_SpotlightData
 	bool updateCone;
 	bool scissorRect;
 
-	frozenbyte::storm::VertexBuffer coneStencilVertexBuffer;
-	frozenbyte::storm::IndexBuffer coneStencilIndexBuffer;
-
 	const IStorm3D_Model *noShadowModel;
 	IStorm3D_Spotlight::Type light_type;
 
@@ -314,9 +311,6 @@ struct Storm3D_SpotlightData
 
 	bool spotlightAlwaysVisible;
 
-	static frozenbyte::storm::PixelShader *nvShadowPixelShader;
-	static frozenbyte::storm::PixelShader *nvSmoothShadowPixelShader;
-	static frozenbyte::storm::PixelShader *nvNoShadowPixelShader;
 	static frozenbyte::storm::PixelShader *coneNvPixelShader_Texture;
 	static frozenbyte::storm::PixelShader *coneNvPixelShader_NoTexture;
 	static frozenbyte::storm::VertexShader *coneStencilVertexShader;
@@ -513,72 +507,6 @@ struct Storm3D_SpotlightData
 		}
 	}
 
-	void createStencilCone()
-	{
-		// Vertices
-		{
-			// Uh oh. Undefined casting etc, should clean up sometime
-			// -- psd
-			struct VertexType
-			{
-				float position[3];
-
-				void setPosition(float x, float y, float z)
-				{
-					position[0] = x;
-					position[1] = y;
-					position[2] = z;
-				}
-			};
-
-			coneStencilVertexBuffer.create(device, CONE_VERTICES, 3 * sizeof(float), false);
-			VertexType *buffer = reinterpret_cast<VertexType *> (coneStencilVertexBuffer.lock());
-
-			for(int i = 0; i < CONE_BASE_VERTICES; ++i)
-			{
-				buffer->setPosition(0, 0, 0.1f);
-				++buffer;
-			}
-
-			float coneRange = properties.range;
-			float farMul = tanf(D3DXToRadian(properties.fov / 2)) * coneRange * .9f;
-
-			// Create circle
-			for(int i = 0; i < CONE_CIRCLE_VERTICES; ++i)
-			{
-				float angle = (float(i) / (CONE_CIRCLE_VERTICES)) * PI * 2.f;
-				float x = sinf(angle);
-				float y = cosf(angle);
-				float z = coneRange;
-
-				buffer->setPosition(x * farMul, y * farMul, z);
-				++buffer;
-			}
-
-			coneStencilVertexBuffer.unlock();
-		}
-
-		// Faces
-		{
-			coneStencilIndexBuffer.create(device, CONE_FACES, false);
-			unsigned short *indexBuffer = coneStencilIndexBuffer.lock();
-
-			for(int i = 0; i < CONE_CIRCLE_VERTICES; ++i)
-			{
-				int base = CONE_BASE_VERTICES;
-				int last = i - 1;
-				if(i == 0)
-					last = CONE_CIRCLE_VERTICES - 1;
-
-				*indexBuffer++ = i + base;
-				*indexBuffer++ = i;
-				*indexBuffer++ = last + base;
-			}
-
-			coneStencilIndexBuffer.unlock();
-		}
-	}
-
 	void updateBuffer()
 	{
 		if(!hasShadows || !enabled)
@@ -589,12 +517,8 @@ struct Storm3D_SpotlightData
 	}
 };
 
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::nvShadowPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::nvSmoothShadowPixelShader = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::nvNoShadowPixelShader = 0;
 frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneNvPixelShader_Texture = 0;
 frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneNvPixelShader_NoTexture = 0;
-frozenbyte::storm::VertexShader *Storm3D_SpotlightData::coneStencilVertexShader = 0;
 
 Storm3D_Spotlight::Storm3D_Spotlight(Storm3D &storm, gfx::Device &device)
 {
@@ -860,35 +784,6 @@ Storm3D_Camera &Storm3D_Spotlight::getCamera()
 	return data->camera;
 }
 
-void Storm3D_Spotlight::renderStencilCone(Storm3D_Camera &camera)
-{
-	data->createStencilCone();
-
-	D3DXVECTOR3 lightPosition(data->properties.position.x, data->properties.position.y, data->properties.position.z);
-	D3DXVECTOR3 up(0, 1.f, 0);
-	D3DXVECTOR3 lookAt = lightPosition;
-	lookAt += D3DXVECTOR3(data->properties.direction.x, data->properties.direction.y, data->properties.direction.z);
-
-	D3DXMATRIX tm;
-	D3DXMatrixLookAtLH(&tm, &lightPosition, &lookAt, &up);
-
-	/*
-	VC3 cameraDir = camera.GetDirection();
-	cameraDir.Normalize();
-	D3DXVECTOR3 direction(cameraDir.x, cameraDir.y, cameraDir.z);
-	D3DXVec3TransformNormal(&direction, &direction, &tm);
-	*/
-
-	float det = D3DXMatrixDeterminant(&tm);
-	D3DXMatrixInverse(&tm, &det, &tm);
-	Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(data->device, tm, true);
-
-	data->coneStencilVertexShader->apply();
-	data->coneStencilVertexBuffer.apply(data->device, 0);
-	data->coneStencilIndexBuffer.render(data->device, CONE_FACES, CONE_VERTICES);
-}
-
-
 void Storm3D_Spotlight::applyTextures(const float *cameraView, const float *cameraViewProjection, Storm3D &storm, bool renderShadows)
 {
     gfx::ProgramManager& programManager = data->storm.renderer.programManager;
@@ -990,16 +885,36 @@ void Storm3D_Spotlight::applySolidShader(bool renderShadows)
 
 void Storm3D_Spotlight::applyNormalShader(bool renderShadows)
 {
-	if (data->shadowActive)
-	{
-		if (data->smoothing)
-			data->nvSmoothShadowPixelShader->apply();
-		else
-			data->nvShadowPixelShader->apply();
-	}
-	else
-		data->nvNoShadowPixelShader->apply();
-    data->device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, 0);
+    gfx::ProgramManager& programManager = data->storm.renderer.programManager;
+
+    bool hasShadow = data->hasShadows && renderShadows && data->shadowMap && data->shadowMap->hasInitialized();
+
+    switch (data->light_type)
+    {
+    case Directional:
+        programManager.setProgram(
+            hasShadow
+            ? gfx::ProgramManager::MESH_STATIC_PROJECTION_DIRECT_SHADOW
+            : gfx::ProgramManager::MESH_STATIC_PROJECTION_DIRECT_NOSHADOW
+        );
+        break;
+    case Point:
+        programManager.setProgram(
+            hasShadow
+            ? gfx::ProgramManager::MESH_STATIC_PROJECTION_POINT_SHADOW
+            : gfx::ProgramManager::MESH_STATIC_PROJECTION_POINT_NOSHADOW
+        );
+        break;
+    case Flat:
+        programManager.setProgram(
+            hasShadow
+            ? gfx::ProgramManager::MESH_STATIC_PROJECTION_FLAT_SHADOW
+            : gfx::ProgramManager::MESH_STATIC_PROJECTION_FLAT_NOSHADOW
+        );
+        break;
+    default:
+        assert(0);
+    }
 }
 
 void Storm3D_Spotlight::renderCone(Storm3D_Camera &camera, float timeFactor, bool renderGlows)
@@ -1181,34 +1096,16 @@ void Storm3D_Spotlight::createShadowBuffers(Storm3D &storm, gfx::Device &device,
 	if(logger && !staticBuffers.buffers[0]->hasInitialized())
 		logger->warning("Failed creating light's shadow depth rendertargets - shadows disabled!");
 
-
-	Storm3D_SpotlightData::nvSmoothShadowPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::nvSmoothShadowPixelShader->createNvSmoothShadowShader();
-
-	Storm3D_SpotlightData::nvShadowPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::nvShadowPixelShader->createNvShadowShader();
-	Storm3D_SpotlightData::nvNoShadowPixelShader = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::nvNoShadowPixelShader->createNvNoShadowShader();
-
 	Storm3D_SpotlightData::coneNvPixelShader_Texture = new frozenbyte::storm::PixelShader(device);
 	Storm3D_SpotlightData::coneNvPixelShader_Texture->createNvConeShader_Texture();
 	Storm3D_SpotlightData::coneNvPixelShader_NoTexture = new frozenbyte::storm::PixelShader(device);
 	Storm3D_SpotlightData::coneNvPixelShader_NoTexture->createNvConeShader_NoTexture();
-
-	Storm3D_SpotlightData::coneStencilVertexShader = new frozenbyte::storm::VertexShader(device);
-	Storm3D_SpotlightData::coneStencilVertexShader->createConeStencilShader();
 }
 
 void Storm3D_Spotlight::freeShadowBuffers()
 {
-	delete Storm3D_SpotlightData::nvShadowPixelShader; Storm3D_SpotlightData::nvShadowPixelShader = 0;
-	delete Storm3D_SpotlightData::nvSmoothShadowPixelShader; Storm3D_SpotlightData::nvSmoothShadowPixelShader = 0;
-	delete Storm3D_SpotlightData::nvNoShadowPixelShader; Storm3D_SpotlightData::nvNoShadowPixelShader = 0;
-
 	delete Storm3D_SpotlightData::coneNvPixelShader_Texture; Storm3D_SpotlightData::coneNvPixelShader_Texture = 0;
 	delete Storm3D_SpotlightData::coneNvPixelShader_NoTexture; Storm3D_SpotlightData::coneNvPixelShader_NoTexture = 0;
-
-	delete Storm3D_SpotlightData::coneStencilVertexShader; Storm3D_SpotlightData::coneStencilVertexShader = 0;
 
 	staticBuffers.freeAll();
 }
