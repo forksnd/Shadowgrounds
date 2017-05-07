@@ -619,7 +619,7 @@ struct Storm3D_TerrainDecalSystem::Data
                 color.g += factor * (1.f - color.g);
                 color.b += factor * (1.f - color.b);
 
-                uint32_t vertexColor = color.as_u32_D3D_ARGB(0);
+                uint32_t vertexColor = color.as_u32_D3D_ARGB(decal.alpha);
                 decal.insert(buffer, vertexColor);
 
                 buffer += 4;
