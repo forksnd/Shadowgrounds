@@ -2,10 +2,12 @@
 
 enum
 {
-    DYNAMIC_VB_FRAME_SIZE = 10 * (1 << 20),
-    DYNAMIC_IB16_FRAME_SIZE = 1 * (1 << 20),
-    INDEX_STORAGE_SIZE = 20 * (1 << 20),
-    VERTEX_STORAGE_SIZE = 80 * (1 << 20),
+    kB = (1 << 10),
+    MB = (1 << 20),
+    DYNAMIC_VB_FRAME_SIZE = 1 * MB,
+    DYNAMIC_IB16_FRAME_SIZE = 64 * kB,
+    INDEX_STORAGE_SIZE = 20 * MB,
+    VERTEX_STORAGE_SIZE = 80 * MB,
     MAX_QUAD_COUNT = 0x4000,
 };
 
