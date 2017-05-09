@@ -10,7 +10,6 @@
 #include "storm3d_terrain_utils.h"
 #include "storm3d.h"
 #include "storm3d_scene.h"
-#include <atlbase.h>
 #include <d3d9.h>
 
 #include "../../util/Debug_MemoryManager.h"
@@ -27,18 +26,9 @@ struct LodIndexBuffer
 {
     etlsf_alloc_t allocId = ETLSF_INVALID_ID;
     int faceAmount;
-    int lodFactor;
     int baseIndex;
 
-    enum Type
-    {
-        FullBuffer,
-        CenterBuffer,
-        LinkBuffer
-    };
-
     LodIndexBuffer():
-        lodFactor(1),
         faceAmount(0),
         baseIndex(0)
     {
@@ -49,10 +39,9 @@ struct LodIndexBuffer
         storage.free(allocId);
     }
 
-    void generate(gfx::IndexStorage16& storage, Type type, int resolution, int lodFactor_, bool leftLod, bool rightLod, bool upLod, bool downLod, unsigned char *clipBuffer)
+    void generate(gfx::IndexStorage16& storage, int resolution, int lodFactor, bool leftLod, bool rightLod, bool upLod, bool downLod, uint8_t* clipBuffer)
     {
         faceAmount = 0;
-        lodFactor = lodFactor_;
 
         int idxCount = (resolution - 1) * (resolution - 1) * 6;
 
@@ -62,86 +51,8 @@ struct LodIndexBuffer
 
         uint16_t* indices = storage.lock(allocId);
 
-        if (type == FullBuffer)
-            generateCenter(indices, resolution, clipBuffer);
-
-        generateLink(indices, resolution, leftLod, rightLod, upLod, downLod, clipBuffer);
-
-        storage.unlock();
-
-        faceAmount /= 3;
-        baseIndex = storage.baseIndex(allocId);
-    }
-
-    void generateCenters(gfx::IndexStorage16& storage, int resolution, int lodFactor_, int mask, unsigned char *clipBuffer)
-    {
-        faceAmount = 0;
-        lodFactor = lodFactor_;
-
-        int idxCount = (resolution - lodFactor) * (resolution - lodFactor);
-
-        allocId = storage.alloc(idxCount);
-        if (!allocId.value)
-            return;
-
-        uint16_t* buffer = storage.lock(allocId);
-
-        int startVertex = 1;
-        int endVertex = resolution - 1;
-        int delta = (endVertex - startVertex) / lodFactor;
-
-        // ToDo: general version
-        assert(mask >= 0);
-        assert(mask <= CENTER_BLOCK_AMOUNT);
-
-        if (mask & 1)
-        {
-            int x = 0;
-            int y = 0;
-
-            int x1 = (startVertex + x * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int y1 = (startVertex + y * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int x2 = (startVertex + (x + 1) * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int y2 = (startVertex + (y + 1) * delta) / CENTER_BLOCK_SIZE * lodFactor;
-
-            generateTriangles(buffer, resolution, x1, y1, x2, y2, clipBuffer);
-        }
-        if (mask & 2)
-        {
-            int x = 1;
-            int y = 0;
-
-            int x1 = (startVertex + x * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int y1 = (startVertex + y * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int x2 = (startVertex + (x + 1) * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int y2 = (startVertex + (y + 1) * delta) / CENTER_BLOCK_SIZE * lodFactor;
-
-            generateTriangles(buffer, resolution, x1, y1, x2, y2, clipBuffer);
-        }
-        if (mask & 4)
-        {
-            int x = 0;
-            int y = 1;
-
-            int x1 = (startVertex + x * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int y1 = (startVertex + y * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int x2 = (startVertex + (x + 1) * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int y2 = (startVertex + (y + 1) * delta) / CENTER_BLOCK_SIZE * lodFactor;
-
-            generateTriangles(buffer, resolution, x1, y1, x2, y2, clipBuffer);
-        }
-        if (mask & 8)
-        {
-            int x = 1;
-            int y = 1;
-
-            int x1 = (startVertex + x * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int y1 = (startVertex + y * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int x2 = (startVertex + (x + 1) * delta) / CENTER_BLOCK_SIZE * lodFactor;
-            int y2 = (startVertex + (y + 1) * delta) / CENTER_BLOCK_SIZE * lodFactor;
-
-            generateTriangles(buffer, resolution, x1, y1, x2, y2, clipBuffer);
-        }
+        generateCenter(indices, resolution, lodFactor, clipBuffer);
+        generateLink(indices, resolution, lodFactor, leftLod, rightLod, upLod, downLod, clipBuffer);
 
         storage.unlock();
 
@@ -150,22 +61,22 @@ struct LodIndexBuffer
     }
 
 private:
-    void generateCenter(unsigned short *buffer, int resolution, unsigned char *clipBuffer)
+    void generateCenter(unsigned short *buffer, int resolution, int lodFactor, uint8_t* clipBuffer)
     {
         int startVertex = lodFactor;
         int endVertex = resolution - lodFactor - 1;
 
-        generateTriangles(buffer, resolution, startVertex, startVertex, endVertex, endVertex, clipBuffer);
+        generateTriangles(buffer, resolution, lodFactor, startVertex, startVertex, endVertex, endVertex, clipBuffer);
     }
 
-    void generateLink(unsigned short *buffer, int resolution, bool leftLod, bool rightLod, bool upLod, bool downLod, unsigned char *clipBuffer)
+    void generateLink(unsigned short *buffer, int resolution, int lodFactor, bool leftLod, bool rightLod, bool upLod, bool downLod, uint8_t* clipBuffer)
     {
         int startVertex = lodFactor;
         int endVertex = resolution - lodFactor - 1;
 
         if (!leftLod)
         {
-            generateTriangles(buffer, resolution, 0, startVertex, startVertex, endVertex, clipBuffer);
+            generateTriangles(buffer, resolution, lodFactor, 0, startVertex, startVertex, endVertex, clipBuffer);
 
             createFace(buffer, -1, 0, lodFactor * resolution, lodFactor * resolution + lodFactor, clipBuffer);
             createFace(buffer, -1, (resolution - 1 - lodFactor) * resolution, (resolution - 1) * resolution, (resolution - 1 - lodFactor) * resolution + lodFactor, clipBuffer);
@@ -174,11 +85,11 @@ private:
             //createFace(buffer, -1, (resolution - 1 - lodFactor) * resolution, (resolution - 1 ) * resolution, (resolution - 1 - lodFactor) * resolution + lodFactor);
         }
         else
-            generateHorizontal(buffer, resolution, startVertex, -lodFactor, clipBuffer);
+            generateHorizontal(buffer, resolution, lodFactor, startVertex, -lodFactor, clipBuffer);
 
         if (!rightLod)
         {
-            generateTriangles(buffer, resolution, endVertex, startVertex, resolution - 1, endVertex, clipBuffer);
+            generateTriangles(buffer, resolution, lodFactor, endVertex, startVertex, resolution - 1, endVertex, clipBuffer);
 
             createFace(buffer, -1, resolution - 1, resolution * lodFactor + resolution - 1 - lodFactor, resolution * lodFactor + resolution - 1, clipBuffer);
             createFace(buffer, -1, (resolution - 1 - lodFactor) * resolution + resolution - 1 - lodFactor, (resolution - 1) * resolution + resolution - 1, (resolution - 1 - lodFactor) * resolution + resolution - 1, clipBuffer);
@@ -187,11 +98,11 @@ private:
             //createFace(buffer, -1, (resolution - 1) * resolution + resolution - 1 - lodFactor, (resolution - 1) * resolution + resolution - 1, (resolution - 1 - lodFactor) * resolution + resolution - 1);
         }
         else
-            generateHorizontal(buffer, resolution, endVertex, lodFactor, clipBuffer);
+            generateHorizontal(buffer, resolution, lodFactor, endVertex, lodFactor, clipBuffer);
 
         if (!upLod)
         {
-            generateTriangles(buffer, resolution, startVertex, 0, endVertex, startVertex, clipBuffer);
+            generateTriangles(buffer, resolution, lodFactor, startVertex, 0, endVertex, startVertex, clipBuffer);
 
             createFace(buffer, -1, 0, resolution * lodFactor + lodFactor, lodFactor, clipBuffer);
             createFace(buffer, -1, resolution - 1, endVertex, lodFactor * resolution + endVertex, clipBuffer);
@@ -200,11 +111,11 @@ private:
             //createFace(buffer, -1, resolution - 1, endVertex, lodFactor * resolution + endVertex);
         }
         else
-            generateVertical(buffer, resolution, startVertex, -lodFactor, clipBuffer);
+            generateVertical(buffer, resolution, lodFactor, startVertex, -lodFactor, clipBuffer);
 
         if (!downLod)
         {
-            generateTriangles(buffer, resolution, startVertex, endVertex, endVertex, resolution - 1, clipBuffer);
+            generateTriangles(buffer, resolution, lodFactor, startVertex, endVertex, endVertex, resolution - 1, clipBuffer);
 
             createFace(buffer, -1, (resolution - 1) * resolution, (resolution - 1) * resolution + lodFactor, (resolution - 1 - lodFactor) * resolution + lodFactor, clipBuffer);
             createFace(buffer, -1, (resolution - 1) * resolution + resolution - 1 - lodFactor, (resolution - 1) * resolution + resolution - 1, (resolution - 1 - lodFactor) * resolution + resolution - 1 - lodFactor, clipBuffer);
@@ -213,10 +124,10 @@ private:
             //createFace(buffer, -1, (resolution - 1) * resolution + resolution - 1 - lodFactor, (resolution - 1 - lodFactor) * resolution + resolution - 1, (resolution - 1 - lodFactor) * resolution + resolution - 1 - lodFactor);
         }
         else
-            generateVertical(buffer, resolution, endVertex, lodFactor, clipBuffer);
+            generateVertical(buffer, resolution, lodFactor, endVertex, lodFactor, clipBuffer);
     }
 
-    void generateTriangles(unsigned short *buffer, int resolution, int x1, int y1, int x2, int y2, unsigned char *clipBuffer)
+    void generateTriangles(unsigned short *buffer, int resolution, int lodFactor, int x1, int y1, int x2, int y2, uint8_t* clipBuffer)
     {
         for (int y = y1; y < y2; y += lodFactor)
             for (int x = x1; x < x2; x += lodFactor)
@@ -251,7 +162,7 @@ private:
             }
     }
 
-    void generateHorizontal(unsigned short *buffer, int resolution, int column, int direction, unsigned char *clipBuffer)
+    void generateHorizontal(unsigned short *buffer, int resolution, int lodFactor, int column, int direction, uint8_t* clipBuffer)
     {
         for (int y = lodFactor; y < resolution - lodFactor; y += 2 * lodFactor)
         {
@@ -283,7 +194,7 @@ private:
         }
     }
 
-    void generateVertical(unsigned short *buffer, int resolution, int row, int direction, unsigned char *clipBuffer)
+    void generateVertical(unsigned short *buffer, int resolution, int lodFactor, int row, int direction, uint8_t* clipBuffer)
     {
         for (int x = lodFactor; x < resolution - lodFactor; x += 2 * lodFactor)
         {
@@ -315,7 +226,7 @@ private:
         }
     }
 
-    static bool clipped(int f1, int f2, int f3, unsigned char *clipBuffer)
+    static bool clipped(int f1, int f2, int f3, uint8_t* clipBuffer)
     {
         if (!clipBuffer) return false;
 
@@ -326,7 +237,7 @@ private:
         return f1Clip && f2Clip && f3Clip;
     }
 
-    void createFace(unsigned short *buffer, int direction, int f1, int f2, int f3, unsigned char *clipBuffer)
+    void createFace(unsigned short *buffer, int direction, int f1, int f2, int f3, uint8_t* clipBuffer)
     {
         if (clipped(f1, f2, f3, clipBuffer))
             return;
@@ -352,13 +263,8 @@ struct LOD
 
 	// Center + links
 	LodIndexBuffer fullBuffers[16];
-	// Links only
-	LodIndexBuffer linkBuffers[16];
 
-	// Center in 16 pieces (2x2 chunks, same ordering)
-	LodIndexBuffer centerBuffers[16];
-
-	void generate(gfx::IndexStorage16& storage, int resolution, int lod, unsigned char *clipBuffer)
+	void generate(gfx::IndexStorage16& storage, int resolution, int lod, uint8_t* clipBuffer)
 	{
 		for(int l = 0; l < 2; ++l)
 		for(int r = 0; r < 2; ++r)
@@ -372,19 +278,13 @@ struct LOD
 
 			int index = l + r*2 + u*4 + d*8;
 				
-			fullBuffers[index].generate(storage, LodIndexBuffer::FullBuffer, resolution, lod, leftLod, rightLod, upLod, downLod, clipBuffer);
-			linkBuffers[index].generate(storage, LodIndexBuffer::LinkBuffer, resolution, lod, leftLod, rightLod, upLod, downLod, clipBuffer);
+			fullBuffers[index].generate(storage, resolution, lod, leftLod, rightLod, upLod, downLod, clipBuffer);
 		}
-
-		for(int i = 0; i < CENTER_BLOCK_AMOUNT; ++i)
-			centerBuffers[i].generateCenters(storage, resolution, lod,  i, clipBuffer);
 	}
 
     void cleanup(gfx::IndexStorage16& storage)
     {
         for (auto& buf: fullBuffers)   buf.cleanup(storage);
-        for (auto& buf: linkBuffers)   buf.cleanup(storage);
-        for (auto& buf: centerBuffers) buf.cleanup(storage);
     }
 };
 
@@ -441,7 +341,7 @@ Storm3D_TerrainLod::~Storm3D_TerrainLod()
     delete data;
 }
 
-void Storm3D_TerrainLod::generate(int resolution, unsigned char *clipBuffer)
+void Storm3D_TerrainLod::generate(int resolution, uint8_t* clipBuffer)
 {
     gfx::IndexStorage16& storage = data->storm.renderer.getIndexStorage16();
 	data->maxVertex = (resolution * resolution);
@@ -457,7 +357,7 @@ void Storm3D_TerrainLod::setBlockRadius(float size)
 	data->blockSize = size;
 }
 
-void Storm3D_TerrainLod::render(Storm3D_Scene &scene, int subMask, float range, float rangeX1, float rangeY1, float rangeX2, float rangeY2)
+void Storm3D_TerrainLod::render(float range, float rangeX1, float rangeY1, float rangeX2, float rangeY2)
 {
 	gfx::Device &device = data->storm.GetD3DDevice();
 
@@ -482,18 +382,7 @@ void Storm3D_TerrainLod::render(Storm3D_Scene &scene, int subMask, float range, 
     device.SetIndices(indices.indices);
 
     // Render as whole
-    if (subMask == -1)
-    {
-        LodIndexBuffer &indexBuffer = data->lodBuffers[lod].fullBuffers[index];
-        assert(indexBuffer.faceAmount);
-        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, data->maxVertex, indexBuffer.baseIndex, indexBuffer.faceAmount);
-    }
-    else
-    {
-        LodIndexBuffer &indexBuffer = data->lodBuffers[lod].centerBuffers[subMask];
-        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, data->maxVertex, indexBuffer.baseIndex, indexBuffer.faceAmount);
-
-        LodIndexBuffer &linkBuffer = data->lodBuffers[lod].linkBuffers[index];
-        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, data->maxVertex, linkBuffer.baseIndex, linkBuffer.faceAmount);
-    }
+    LodIndexBuffer &indexBuffer = data->lodBuffers[lod].fullBuffers[index];
+    assert(indexBuffer.faceAmount);
+    device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, data->maxVertex, indexBuffer.baseIndex, indexBuffer.faceAmount);
 }

@@ -55,7 +55,6 @@ public:
 	void removeTerrainTextures();
 
 	void setBlendMap(int blockIndex, Storm3D_Texture &blend, int textureA, int textureB);
-	void setPartialBlendMap(int blockIndex, int subMask, Storm3D_Texture &blend, int textureA, int textureB);
 	void resetBlends(int blockIndex);
 	void setLightMap(int blockIndex, Storm3D_Texture &map);
 

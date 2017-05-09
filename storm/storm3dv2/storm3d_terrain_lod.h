@@ -20,7 +20,7 @@ public:
 	void generate(int resolution, unsigned char *clipBuffer = 0);
 	void setBlockRadius(float size);
 
-	void render(Storm3D_Scene &scene, int subMask, float range, float rangeX1, float rangeY1, float rangeX2, float rangeY2);
+	void render(float range, float rangeX1, float rangeY1, float rangeX2, float rangeY2);
 };
 
 #endif

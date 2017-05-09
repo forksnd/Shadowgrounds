@@ -46,14 +46,10 @@
 		int textureA;
 		int textureB;
 
-		int subMask;
-
-		TexturePass(std::shared_ptr<Storm3D_Texture> weights_, int textureA_, int textureB_, int subMask_ = -1)
+		TexturePass(std::shared_ptr<Storm3D_Texture> weights_, int textureA_, int textureB_)
 		:	weights(weights_),
 			textureA(textureA_),
-			textureB(textureB_),
-
-			subMask(subMask_)
+			textureB(textureB_)
 		{
 		}
 	};
@@ -64,10 +60,7 @@
 		if(a.textureA != b.textureA)
 			return a.textureA < b.textureA;
 
-		if(a.textureB != b.textureB)
-			return a.textureB < b.textureB;
-
-		return a.subMask < b.subMask;
+		return a.textureB < b.textureB;
 	}
 
 	void getPosition(VC3 &result, int xIndex, int yIndex, const unsigned short *buffer, const VC3 &size, const VC2I &resolution, const VC3 &scale)
@@ -1113,7 +1106,7 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene)
 			float range4 = data->getRange(scene, renderBlock.indexX, renderBlock.indexY + 1);
 
 			//data->indexBuffer.render(scene, p.subMask, renderBlock.range, range1, range2, range3, range4);
-			block.indexBuffer->render(scene, p.subMask, renderBlock.range, range1, range2, range3, range4);
+			block.indexBuffer->render(renderBlock.range, range1, range2, range3, range4);
 		}
 	}
 
@@ -1141,7 +1134,7 @@ void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera 
     gfx::Renderer& renderer = data->storm.renderer;
     gfx::Device& device = renderer.device;
     gfx::ProgramManager& programManager = renderer.programManager;
-    
+
     std::vector<RenderBlock> &visibleBlocks = data->visibleBlocks;
 
 	Frustum *frustum1 = 0;
@@ -1255,7 +1248,7 @@ void Storm3D_TerrainHeightmap::renderDepth(Storm3D_Scene &scene, Storm3D_Camera 
 		float range3 = data->getRange(scene, renderBlock.indexX + 1, renderBlock.indexY);
 		float range4 = data->getRange(scene, renderBlock.indexX, renderBlock.indexY + 1);
 
-		block.indexBuffer->render(scene, -1, renderBlock.range, range1, range2, range3, range4);
+		block.indexBuffer->render(renderBlock.range, range1, range2, range3, range4);
 	}
 
 	device.SetStreamSource(1, 0, 0, 0);
@@ -1282,20 +1275,6 @@ void Storm3D_TerrainHeightmap::setBlendMap(int blockIndex, Storm3D_Texture &blen
 	std::vector<TexturePass> &passes = data->blocks[blockIndex].passes;
 	
 	passes.push_back(TexturePass(frozenbyte::storm::createSharedTexture(&blend), textureA, textureB));
-	std::sort(passes.begin(), passes.end());	
-}
-
-void Storm3D_TerrainHeightmap::setPartialBlendMap(int blockIndex, int subMask, Storm3D_Texture &blend, int textureA, int textureB)
-{
-	assert(!data->blocks.empty());
-	assert(blockIndex >= 0 && blockIndex < int(data->blocks.size())); 
-	assert(subMask > 0 && subMask < 16);
-	assert(textureA >= 0 && textureA < int(data->textures.size()));
-	assert(textureB >= 0 && textureB < int(data->textures.size()));
-
-	std::vector<TexturePass> &passes = data->blocks[blockIndex].passes;
-	
-	passes.push_back(TexturePass(frozenbyte::storm::createSharedTexture(&blend), textureA, textureB, subMask));
 	std::sort(passes.begin(), passes.end());	
 }
 
