@@ -55,7 +55,7 @@ public:
 
 	static void querySizes(Storm3D &storm, int shadowQuality);
 	static void createBuffers(Storm3D &storm, gfx::Device &device, int shadowQuality);
-	static void freeBuffers();
+	static void freeBuffers(Storm3D &storm);
 	static void clearCache();
 };
 

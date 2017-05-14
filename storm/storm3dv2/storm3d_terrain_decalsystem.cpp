@@ -597,7 +597,7 @@ struct Storm3D_TerrainDecalSystem::Data
         Storm3D_Camera *stormCamera = reinterpret_cast<Storm3D_Camera *> (camera);
         Frustum frustum = stormCamera->getFrustum();
 
-        UINT baseVertex = 0;
+        uint32_t baseVertex = 0;
         Vertex_P3DUV *buffer = 0;;
         renderer.lockDynVtx<Vertex_P3DUV>(shadowDecals.size() * 4, &buffer, &baseVertex);
 

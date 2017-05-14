@@ -94,6 +94,14 @@ struct Vertex_P4DUV
     VC2      uv;
 };
 
+struct Vertex_P3UV
+{
+    static const FVF fvf = FVF_P3UV;
+
+    VC3      p;
+    VC2      uv;
+};
+
 struct Vertex_P4UV
 {
     static const FVF fvf = FVF_P4UV;

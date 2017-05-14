@@ -297,8 +297,12 @@ struct Storm3D_SpotlightData
 	bool visible;
 	bool coneUpdated;
 
-	frozenbyte::storm::VertexBuffer coneVertexBuffer;
-	frozenbyte::storm::IndexBuffer coneIndexBuffer;
+    etlsf_alloc_t coneVerticesAllocId = ETLSF_INVALID_ID;
+    uint32_t coneBaseVertex = 0;
+
+    etlsf_alloc_t coneIndicesAllocId = ETLSF_INVALID_ID;
+    uint32_t coneBaseIndex = 0;
+
 	bool updateCone;
 	bool scissorRect;
 
@@ -347,6 +351,15 @@ struct Storm3D_SpotlightData
 		speed[1] = -0.11f;
 	}
 
+    ~Storm3D_SpotlightData()
+    {
+        gfx::VertexStorage& vtxStorage = storm.renderer.getVertexStorage();
+        vtxStorage.free(coneVerticesAllocId);
+
+        gfx::IndexStorage16& idxStorage = storm.renderer.getIndexStorage16();
+        idxStorage.free(coneIndicesAllocId);
+    }
+
 	float getBias() const
 	{
 		return 0.9989f;
@@ -393,119 +406,97 @@ struct Storm3D_SpotlightData
 		properties.setClipPlanes(cameraView);
 	}
 
-	void createCone()
-	{
-		if(!hasCone || !updateCone)
-			return;
+    //TODO: Optimize - make shared version, use scaling to adapt
+    void createCone()
+    {
+        if (!hasCone || !updateCone)
+            return;
 
-		// Vertices
-		{
-			// Uh oh. Undefined casting etc, should clean up sometime
-			// -- psd
-			struct VertexType
-			{
-				float position[3];
-				float normal[3];
-				unsigned int color;
-				float uv[2];
+        // Vertices
+        {
+            gfx::VertexStorage&  vtxStorage = storm.renderer.getVertexStorage();
 
-				void setPosition(float x, float y, float z)
-				{
-					position[0] = x;
-					position[1] = y;
-					position[2] = z;
-				}
+            vtxStorage.free(coneVerticesAllocId);
+            coneVerticesAllocId = vtxStorage.alloc<Vertex_P3NDUV>(CONE_VERTICES);
+            coneBaseVertex = vtxStorage.baseVertex<Vertex_P3NDUV>(coneVerticesAllocId);
+            
+            Vertex_P3NDUV* buffer = vtxStorage.lock<Vertex_P3NDUV>(coneVerticesAllocId);
 
-				void setNormal(float x, float y, float z)
-				{
-					normal[0] = x;
-					normal[1] = y;
-					normal[2] = z;
-				}
+            //static const uint8_t color = 96;
+            static const uint8_t color = 255;
 
-				void setColor(unsigned int color_)
-				{
-					color = color_;
-				}
+            for (int i = 0; i < CONE_BASE_VERTICES; ++i)
+            {
+                float angle = (float(i) / (CONE_BASE_VERTICES)) * PI * 2.f;
 
-				void setUv(float u, float v)
-				{
-					uv[0] = u;
-					uv[1] = v;
-				}
-			};
+                float nx = sinf(angle);
+                float ny = cosf(angle);
+                float nz = 0;
+                float u = .5f;
+                float v = .5f;
 
-			//static const unsigned char color = 96;
-			static const unsigned char color = 255;
-			coneVertexBuffer.create(device, CONE_VERTICES, 3 * sizeof(float) + 3 * sizeof(float) + sizeof(unsigned int) + 2 * sizeof(float), false);
-			VertexType *buffer = reinterpret_cast<VertexType *> (coneVertexBuffer.lock());
+                *buffer++ = {
+                    VC3(0, 0, 0),
+                    VC3(nx, ny, nz),
+                    D3DCOLOR_RGBA(color, color, color, color),
+                    VC2(u, v)
+                };
+            }
 
-			for(int i = 0; i < CONE_BASE_VERTICES; ++i)
-			{
-				float angle = (float(i) / (CONE_BASE_VERTICES)) * PI * 2.f;
+            float coneRange = properties.range * .5f;
+            float farMul = tanf(D3DXToRadian(coneFov / 2)) * coneRange * .9f;
 
-				float nx = sinf(angle);
-				float ny = cosf(angle);
-				float nz = 0;
-				float u = .5f;
-				float v = .5f;
+            // Create circle
+            for (int i = 0; i < CONE_CIRCLE_VERTICES; ++i)
+            {
+                float angle = (float(i) / (CONE_CIRCLE_VERTICES)) * PI * 2.f;
+                float x = sinf(angle);
+                float y = cosf(angle);
+                float z = coneRange;
 
-				buffer->setPosition(0, 0, 0);
-				buffer->setNormal(nx, ny, nz);
-				buffer->setColor(D3DCOLOR_RGBA(color, color, color, color));
-				buffer->setUv(u, v);
-				++buffer;
-			}
+                float nx = x;
+                float ny = y;
+                float nz = 0;
 
-			float coneRange = properties.range * .5f;
-			float farMul = tanf(D3DXToRadian(coneFov / 2)) * coneRange * .9f;
+                float u = (x * .5f) + .5f;
+                float v = (y * .5f) + .5f;
 
-			// Create circle
-			for(int i = 0; i < CONE_CIRCLE_VERTICES; ++i)
-			{
-				float angle = (float(i) / (CONE_CIRCLE_VERTICES)) * PI * 2.f;
-				float x = sinf(angle);
-				float y = cosf(angle);
-				float z = coneRange;
+                *buffer++ = {
+                    VC3(x * farMul, y * farMul, z),
+                    VC3(nx, ny, nz),
+                    D3DCOLOR_RGBA(color, color, color, color),
+                    VC2(u, v)
+                };
+            }
 
-				float nx = x;
-				float ny = y;
-				float nz = 0;
+            vtxStorage.unlock();
+        }
 
-				float u = (x * .5f) + .5f;
-				float v = (y * .5f) + .5f;
+        // Faces
+        if (coneIndicesAllocId.value == 0)
+        {
+            gfx::IndexStorage16& idxStorage = storm.renderer.getIndexStorage16();
 
-				buffer->setPosition(x * farMul, y * farMul, z);
-				buffer->setNormal(nx, ny, nz);
-				buffer->setColor(D3DCOLOR_RGBA(color, color, color, color));
-				buffer->setUv(u, v);
-				++buffer;
-			}
+            coneIndicesAllocId = idxStorage.alloc(3 * CONE_FACES);
+            coneBaseIndex = idxStorage.baseIndex(coneIndicesAllocId);
 
-			coneVertexBuffer.unlock();
-		}
+            uint16_t* indexBuffer = idxStorage.lock(coneIndicesAllocId);
 
-		// Faces
-		if(!coneIndexBuffer)
-		{
-			coneIndexBuffer.create(device, CONE_FACES, false);
-			unsigned short *indexBuffer = coneIndexBuffer.lock();
+            for (int i = 0; i < CONE_CIRCLE_VERTICES; ++i)
+            {
+                int base = CONE_BASE_VERTICES;
+                int last = i - 1;
+                if (i == 0)
+                    last = CONE_CIRCLE_VERTICES - 1;
 
-			for(int i = 0; i < CONE_CIRCLE_VERTICES; ++i)
-			{
-				int base = CONE_BASE_VERTICES;
-				int last = i - 1;
-				if(i == 0)
-					last = CONE_CIRCLE_VERTICES - 1;
+                *indexBuffer++ = i + base;
+                *indexBuffer++ = i;
+                *indexBuffer++ = last + base;
+            }
 
-				*indexBuffer++ = i + base;
-				*indexBuffer++ = i;
-				*indexBuffer++ = last + base;
-			}
-
-			coneIndexBuffer.unlock();
-		}
-	}
+            idxStorage.unlock();
+        }
+    }
 
 	void updateBuffer()
 	{
@@ -1007,10 +998,16 @@ void Storm3D_Spotlight::renderCone(Storm3D_Camera &camera, float timeFactor, boo
 			data->device.SetVertexShaderConstantF(19, rot1, 3);
 	}
 
-	frozenbyte::storm::enableMipFiltering(data->device, 0, 0, false);
-	data->coneVertexBuffer.apply(data->device, 0);
-	data->coneIndexBuffer.render(data->device, CONE_FACES, CONE_VERTICES);
-	frozenbyte::storm::enableMipFiltering(data->device, 0, 0, true);
+    gfx::VertexStorage& vtxStorage = data->storm.renderer.getVertexStorage();
+    gfx::IndexStorage16& idxStorage = data->storm.renderer.getIndexStorage16();
+
+    data->storm.renderer.setFVF(FVF_P3NDUV);
+    data->device.SetStreamSource(0, vtxStorage.vertices, 0, sizeof(Vertex_P3NDUV));
+    data->device.SetIndices(idxStorage.indices);
+
+    frozenbyte::storm::enableMipFiltering(data->device, 0, 0, false);
+    data->device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, data->coneBaseVertex, 0, CONE_VERTICES, data->coneBaseIndex, CONE_FACES);
+    frozenbyte::storm::enableMipFiltering(data->device, 0, 0, true);
 }
 
 void Storm3D_Spotlight::debugRender()

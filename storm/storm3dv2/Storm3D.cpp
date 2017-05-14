@@ -726,7 +726,7 @@ Storm3D::~Storm3D()
 
 	Storm3D_TerrainRenderer::freeSecondaryRenderBuffers();
 	Storm3D_Spotlight::freeShadowBuffers();
-	Storm3D_FakeSpotlight::freeBuffers();
+	Storm3D_FakeSpotlight::freeBuffers(*this);
 	Storm3D_TerrainRenderer::freeRenderBuffers();
 
 	if(colorTarget)
@@ -2404,7 +2404,7 @@ void Storm3D::ReleaseDynamicResources()
 
 	Storm3D_TerrainRenderer::freeSecondaryRenderBuffers();
 	Storm3D_Spotlight::freeShadowBuffers();
-	Storm3D_FakeSpotlight::freeBuffers();
+	Storm3D_FakeSpotlight::freeBuffers(*this);
 	Storm3D_TerrainRenderer::freeRenderBuffers();
 
 	if(colorTarget)

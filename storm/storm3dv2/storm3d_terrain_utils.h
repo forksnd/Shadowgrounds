@@ -74,50 +74,6 @@ public:
 	bool hasShader() const;
 };
 
-class VertexBuffer
-{
-	CComPtr<IDirect3DVertexBuffer9> buffer;
-	int vertexSize;
-	int vertexAmount;
-	bool dynamic;
-
-public:
-	VertexBuffer();
-	~VertexBuffer();
-
-	void release();
-	void create(gfx::Device& device, int vertexAmount, int vertexSize, bool dynamic);
-	void *lock();
-	void *unsafeLock(int offset, int amount);
-	void unlock();
-
-	void apply(gfx::Device& device, int stream) const;
-	operator bool() const;
-};
-
-class IndexBuffer
-{
-	CComPtr<IDirect3DIndexBuffer9> buffer;
-	int faceAmount;
-	bool dynamic;
-
-	IStorm3D_Logger *logger;
-
-public:
-	IndexBuffer();
-	~IndexBuffer();
-
-	void setLogger(IStorm3D_Logger *logger);
-
-	void release();
-	void create(gfx::Device& device, int faceAmount, bool dynamic);
-	unsigned short *lock();
-	void unlock();
-
-	void render(gfx::Device& device, int faceAmount, int maxIndex, int vertexOffset = 0, int startIndex = 0) const;
-	operator bool() const;
-};
-
 inline float convX_SCtoDS(float x, float pixszx) {return x*pixszx - 1.0f;}
 inline float convY_SCtoDS(float y, float pixszy) {return 1.0f - y*pixszy;}
 

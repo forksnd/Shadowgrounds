@@ -314,8 +314,8 @@ struct Storm3D_FakeSpotlight::Data
 	COL renderedColor;
 
     //TODO: replace with dynamic and static solution
-	static frozenbyte::storm::IndexBuffer *indexBuffer;
-	frozenbyte::storm::VertexBuffer vertexBuffer;
+    static etlsf_alloc_t indicesAllocId;
+    static uint32_t baseIndex;
 
 	Data(Storm3D &storm_, gfx::Device &device_)
 	:	storm(storm_),
@@ -332,12 +332,6 @@ struct Storm3D_FakeSpotlight::Data
 			return;
 
 		properties.color = COL(.5f, .5f, .5f);
-		createVertexBuffer();	
-	}
-
-	void createVertexBuffer()
-	{
-		vertexBuffer.create(device, 5, 5 * sizeof(float), true);
 	}
 
 	void updateMatrices(const float *cameraView)
@@ -361,7 +355,8 @@ struct Storm3D_FakeSpotlight::Data
 };
 
 //TODO: make shared
-frozenbyte::storm::IndexBuffer *Storm3D_FakeSpotlight::Data::indexBuffer = 0;
+etlsf_alloc_t Storm3D_FakeSpotlight::Data::indicesAllocId = ETLSF_INVALID_ID;
+uint32_t Storm3D_FakeSpotlight::Data::baseIndex = 0;
 
 Storm3D_FakeSpotlight::Storm3D_FakeSpotlight(Storm3D &storm, gfx::Device &device)
 {
@@ -553,6 +548,8 @@ void Storm3D_FakeSpotlight::applyTextures(const D3DXMATRIX &cameraView)
 
 void Storm3D_FakeSpotlight::renderProjection()
 {
+    gfx::Renderer& renderer = data->storm.renderer;
+
 	if(BUFFER_WIDTH <= 0 || BUFFER_HEIGHT <= 0)
 		return;
 
@@ -587,18 +584,20 @@ void Storm3D_FakeSpotlight::renderProjection()
 
 	ad = bd = cd = dd = 1.f;
 
-	float buffer[] = 
+    Vertex_P3UV vertices[] =
 	{
-		a.x, a.y, a.z,  ad, .5f,
-		b.x, b.y, b.z,  bd, .5f,
-		c.x, c.y, c.z,  cd, .5f,
-		d.x, d.y, d.z,  dd, .5f,
-		e.x, e.y, e.z,  ed, .5f
+		{VC3(a.x, a.y, a.z),  VC2(ad, .5f)},
+		{VC3(b.x, b.y, b.z),  VC2(bd, .5f)},
+		{VC3(c.x, c.y, c.z),  VC2(cd, .5f)},
+		{VC3(d.x, d.y, d.z),  VC2(dd, .5f)},
+		{VC3(e.x, e.y, e.z),  VC2(ed, .5f)},
 	};
 
-	memcpy(data->vertexBuffer.lock(), buffer, 5 * 5 * sizeof(float));
-	data->vertexBuffer.unlock();
-	data->vertexBuffer.apply(data->device, 0);
+    uint32_t baseVertex = 0;
+    Vertex_P3UV* buffer = 0;;
+    renderer.lockDynVtx<Vertex_P3UV>(5 * sizeof(Vertex_P3UV), &buffer, &baseVertex);
+    memcpy(buffer, vertices, 5 * sizeof(Vertex_P3UV));
+    renderer.unlockDynVtx();
 
 	Storm3D_ShaderManager *manager = Storm3D_ShaderManager::GetSingleton();
 	manager->setTextureTm(data->properties.shaderProjection[0]);
@@ -660,7 +659,10 @@ void Storm3D_FakeSpotlight::renderProjection()
 		data->device.SetVertexShaderConstantF(8, deltas4, 1);
 	}
 
-	data->indexBuffer->render(data->device, 4, 5);
+    renderer.setFVF(FVF_P3UV);
+    renderer.setDynVtxBuffer<Vertex_P3UV>();
+    renderer.device.SetIndices(renderer.getIndexStorage16().indices);
+    renderer.device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, baseVertex, 0, 5, data->baseIndex, 4);
 }
 
 void Storm3D_FakeSpotlight::debugRender()
@@ -704,7 +706,6 @@ void Storm3D_FakeSpotlight::releaseDynamicResources()
 	if(BUFFER_WIDTH <= 0 || BUFFER_HEIGHT <= 0)
 		return;
 
-	data->vertexBuffer.release();
 	data->renderTarget.reset();
 }
 
@@ -713,7 +714,6 @@ void Storm3D_FakeSpotlight::recreateDynamicResources()
 	if(BUFFER_WIDTH <= 0 || BUFFER_HEIGHT <= 0)
 		return;
 
-	data->createVertexBuffer();
 	data->renderTarget = renderTargets.getTarget();
 }
 
@@ -778,37 +778,42 @@ void Storm3D_FakeSpotlight::createBuffers(Storm3D &storm, gfx::Device &device, i
 	if(logger && !renderTargets.targets[0]->hasInitialized())
 		logger->warning("Failed creating fakelight's shadow rendertargets - feature disabled!");
 
-	Storm3D_FakeSpotlight::Data::indexBuffer = new frozenbyte::storm::IndexBuffer();
-	{
-		Storm3D_FakeSpotlight::Data::indexBuffer->create(device, 4, false);
-		WORD *pointer = Storm3D_FakeSpotlight::Data::indexBuffer->lock();
-		
-		*pointer++ = 4;
-		*pointer++ = 0;
-		*pointer++ = 1;
+    gfx::IndexStorage16& storage = storm.renderer.getIndexStorage16();
+    {
+        etlsf_alloc_t allocId = storage.alloc(4 * 3);
+        Storm3D_FakeSpotlight::Data::indicesAllocId = allocId;
+        Storm3D_FakeSpotlight::Data::baseIndex = storage.baseIndex(allocId);
 
-		*pointer++ = 2;
-		*pointer++ = 0;
-		*pointer++ = 4;
+        uint16_t* indices = storage.lock(allocId);
 
-		*pointer++ = 4;
-		*pointer++ = 3;
-		*pointer++ = 2;
+        *indices++ = 4;
+        *indices++ = 0;
+        *indices++ = 1;
 
-		*pointer++ = 3;
-		*pointer++ = 4;
-		*pointer++ = 1;
+        *indices++ = 2;
+        *indices++ = 0;
+        *indices++ = 4;
 
-		Storm3D_FakeSpotlight::Data::indexBuffer->unlock();
-	}
+        *indices++ = 4;
+        *indices++ = 3;
+        *indices++ = 2;
+
+        *indices++ = 3;
+        *indices++ = 4;
+        *indices++ = 1;
+
+        storage.unlock();
+    }
 }
 
-void Storm3D_FakeSpotlight::freeBuffers()
+void Storm3D_FakeSpotlight::freeBuffers(Storm3D &storm)
 {
 	if(BUFFER_WIDTH <= 0 || BUFFER_HEIGHT <= 0)
 		return;
 
-	delete Storm3D_FakeSpotlight::Data::indexBuffer; Storm3D_FakeSpotlight::Data::indexBuffer = 0;
+    storm.renderer.getIndexStorage16().free(Storm3D_FakeSpotlight::Data::indicesAllocId);
+    Storm3D_FakeSpotlight::Data::indicesAllocId = ETLSF_INVALID_ID;
+    Storm3D_FakeSpotlight::Data::baseIndex = 0;
 
 	renderTargets.freeAll();
 }
