@@ -315,10 +315,6 @@ struct Storm3D_SpotlightData
 
 	bool spotlightAlwaysVisible;
 
-	static frozenbyte::storm::PixelShader *coneNvPixelShader_Texture;
-	static frozenbyte::storm::PixelShader *coneNvPixelShader_NoTexture;
-	static frozenbyte::storm::VertexShader *coneStencilVertexShader;
-
 	Storm3D_SpotlightData(Storm3D &storm_, gfx::Device &device_)
 	:	storm(storm_),
 		device(device_),
@@ -507,9 +503,6 @@ struct Storm3D_SpotlightData
 			shadowMap = staticBuffers.getShadowMap();
 	}
 };
-
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneNvPixelShader_Texture = 0;
-frozenbyte::storm::PixelShader *Storm3D_SpotlightData::coneNvPixelShader_NoTexture = 0;
 
 Storm3D_Spotlight::Storm3D_Spotlight(Storm3D &storm, gfx::Device &device)
 {
@@ -807,12 +800,13 @@ void Storm3D_Spotlight::applyTextures(const float *cameraView, const float *came
 		Storm3D_ShaderManager::GetSingleton()->setSpotTarget(data->properties.shaderProjection[0]);
 	}
 
-    D3DXMATRIX matTerrainProjectedTexture;
-    D3DXMATRIX matTerrainShadowTexture;
-    D3DXMatrixTranspose(&matTerrainProjectedTexture, &data->properties.shaderProjection[0]);
-    D3DXMatrixTranspose(&matTerrainShadowTexture, &data->properties.targetProjection);
-    programManager.setTextureMatrix(0, matTerrainProjectedTexture);
-    programManager.setTextureMatrix(1, matTerrainShadowTexture);
+    // TODO && FIXME: multiply by model-to-world matrix
+    D3DXMATRIX matProjectedTexture;
+    D3DXMATRIX matShadowTexture;
+    D3DXMatrixTranspose(&matProjectedTexture, &data->properties.shaderProjection[0]);
+    D3DXMatrixTranspose(&matShadowTexture, &data->properties.targetProjection);
+    programManager.setTextureMatrix(0, matProjectedTexture);
+    programManager.setTextureMatrix(1, matShadowTexture);
 
     if (data->light_type == Directional)
     {
@@ -910,7 +904,11 @@ void Storm3D_Spotlight::applyNormalShader(bool renderShadows)
 
 void Storm3D_Spotlight::renderCone(Storm3D_Camera &camera, float timeFactor, bool renderGlows)
 {
-	if(!data->hasCone || !data->hasShadows || !data->shadowMap)
+    gfx::Renderer& renderer = data->storm.renderer;
+    gfx::Device& device = renderer.device;
+    gfx::ProgramManager& programManager = renderer.programManager;
+
+    if(!data->hasCone || !data->hasShadows || !data->shadowMap)
 		return;
 
 	bool normalPass = !data->coneUpdated;
@@ -928,33 +926,35 @@ void Storm3D_Spotlight::renderCone(Storm3D_Camera &camera, float timeFactor, boo
 	D3DXMATRIX tm;
 	D3DXMatrixLookAtLH(&tm, &lightPosition, &lookAt, &up);
 
-	VC3 cameraDir = camera.GetDirection();
-	cameraDir.Normalize();
-	D3DXVECTOR3 direction(cameraDir.x, cameraDir.y, cameraDir.z);
-	D3DXVec3TransformNormal(&direction, &direction, &tm);
-
-	Storm3D_ShaderManager::GetSingleton()->setSpot(data->properties.color, data->properties.position, data->properties.direction, data->properties.range, .1f);
-	Storm3D_ShaderManager::GetSingleton()->setTextureTm(data->properties.shaderProjection[0]);
-	Storm3D_ShaderManager::GetSingleton()->setSpotTarget(data->properties.targetProjection);
-
 	float det = D3DXMatrixDeterminant(&tm);
 	D3DXMatrixInverse(&tm, &det, &tm);
-	Storm3D_ShaderManager::GetSingleton()->SetWorldTransform(data->device, tm, true);
+    programManager.setWorldMatrix(tm);
+
+    D3DXMATRIX matShadowTexture;
+    D3DXMatrixMultiplyTranspose(&matShadowTexture, &tm, &data->properties.targetProjection);
+    programManager.setTextureMatrix(1, matShadowTexture);
+    if (data->light_type == Directional)
+    {
+        programManager.setPointLight(-data->properties.direction, data->properties.range);
+    }
+    else if (data->light_type == Point)
+    {
+        programManager.setPointLight(data->properties.position, data->properties.range);
+    }
 
 	if(data->shadowMap && data->shadowMap->hasInitialized())
 		data->shadowMap->apply(0);
 	if(data->coneTexture)
 	{
 		data->coneTexture->AnimateVideo();
-		data->coneTexture->Apply(3);
-
 		data->coneTexture->Apply(1);
 	}
 
-	if(data->coneTexture)
-		data->coneNvPixelShader_Texture->apply();
-	else
-		data->coneNvPixelShader_NoTexture->apply();
+    programManager.setProgram(
+        data->coneTexture
+        ? gfx::ProgramManager::CONE_TEXTURE
+        : gfx::ProgramManager::CONE_NOTEXTURE
+    );
 
 	float colorMul = data->coneColorMultiplier;
 	float colorData[4] = { data->properties.color.r * colorMul, data->properties.color.g * colorMul, data->properties.color.b * colorMul, 1.f };
@@ -976,38 +976,43 @@ void Storm3D_Spotlight::renderCone(Storm3D_Camera &camera, float timeFactor, boo
 		}
 	}
 
-	data->device.SetVertexShaderConstantF(9, colorData, 1);
+    programManager.setDiffuse(colorData);
 
-	float bias = 0.005f;
-	float directionData[4] = { -direction.x, -direction.y, -direction.z, bias };
-	data->device.SetVertexShaderConstantF(10, directionData, 1);
+    const float bias = 0.005f;
+    programManager.setBias(bias);
 
-	for(int i = 0; i < 2; ++i)
-	{
-		data->angle[i] += data->speed[i] * timeFactor;
-		D3DXVECTOR3 center(0.5f, 0.5f, 0.f);
-		D3DXQUATERNION quat1;
-		D3DXQuaternionRotationYawPitchRoll(&quat1, 0, 0, data->angle[i]);
-		D3DXMATRIX rot1;
-		D3DXMatrixAffineTransformation(&rot1, 1.f, &center, &quat1, 0);
-		D3DXMatrixTranspose(&rot1, &rot1);
-		
-		if(i == 0)
-			data->device.SetVertexShaderConstantF(16, rot1, 3);
-		else
-			data->device.SetVertexShaderConstantF(19, rot1, 3);
-	}
+    for (int i = 0; i < 2; ++i)
+    {
+        data->angle[i] += data->speed[i] * timeFactor;
+        D3DXVECTOR3 center(0.5f, 0.5f, 0.f);
+        D3DXQUATERNION quat1;
+        D3DXQuaternionRotationYawPitchRoll(&quat1, 0, 0, data->angle[i]);
+        D3DXMATRIX rot1;
+        D3DXMatrixAffineTransformation(&rot1, 1.f, &center, &quat1, 0);
+        D3DXMatrixTranspose(&rot1, &rot1);
 
-    gfx::VertexStorage& vtxStorage = data->storm.renderer.getVertexStorage();
-    gfx::IndexStorage16& idxStorage = data->storm.renderer.getIndexStorage16();
+        if (i == 0)
+        {
+            programManager.setTextureMatrix(2, rot1);
+        }
+        else
+        {
+            programManager.setTextureMatrix(3, rot1);
+        }
+    }
 
-    data->storm.renderer.setFVF(FVF_P3NDUV);
-    data->device.SetStreamSource(0, vtxStorage.vertices, 0, sizeof(Vertex_P3NDUV));
-    data->device.SetIndices(idxStorage.indices);
+    programManager.applyState(device);
 
-    frozenbyte::storm::enableMipFiltering(data->device, 0, 0, false);
-    data->device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, data->coneBaseVertex, 0, CONE_VERTICES, data->coneBaseIndex, CONE_FACES);
-    frozenbyte::storm::enableMipFiltering(data->device, 0, 0, true);
+    gfx::VertexStorage& vtxStorage = renderer.getVertexStorage();
+    gfx::IndexStorage16& idxStorage = renderer.getIndexStorage16();
+
+    renderer.setFVF(FVF_P3NDUV);
+    device.SetStreamSource(0, vtxStorage.vertices, 0, sizeof(Vertex_P3NDUV));
+    device.SetIndices(idxStorage.indices);
+
+    frozenbyte::storm::enableMipFiltering(device, 0, 0, false);
+    device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, data->coneBaseVertex, 0, CONE_VERTICES, data->coneBaseIndex, CONE_FACES);
+    frozenbyte::storm::enableMipFiltering(device, 0, 0, true);
 }
 
 void Storm3D_Spotlight::debugRender()
@@ -1092,18 +1097,10 @@ void Storm3D_Spotlight::createShadowBuffers(Storm3D &storm, gfx::Device &device,
 	IStorm3D_Logger *logger = storm.getLogger();
 	if(logger && !staticBuffers.buffers[0]->hasInitialized())
 		logger->warning("Failed creating light's shadow depth rendertargets - shadows disabled!");
-
-	Storm3D_SpotlightData::coneNvPixelShader_Texture = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::coneNvPixelShader_Texture->createNvConeShader_Texture();
-	Storm3D_SpotlightData::coneNvPixelShader_NoTexture = new frozenbyte::storm::PixelShader(device);
-	Storm3D_SpotlightData::coneNvPixelShader_NoTexture->createNvConeShader_NoTexture();
 }
 
 void Storm3D_Spotlight::freeShadowBuffers()
 {
-	delete Storm3D_SpotlightData::coneNvPixelShader_Texture; Storm3D_SpotlightData::coneNvPixelShader_Texture = 0;
-	delete Storm3D_SpotlightData::coneNvPixelShader_NoTexture; Storm3D_SpotlightData::coneNvPixelShader_NoTexture = 0;
-
 	staticBuffers.freeAll();
 }
 

@@ -145,8 +145,6 @@ struct Storm3D_TerrainRendererData
 	CComPtr<IDirect3DTexture9> coneFadeTexture;
 	CComPtr<IDirect3DTexture9> noFadeTexture;
 
-	frozenbyte::storm::VertexShader coneNvVertexShader;
-
     frozenbyte::storm::PixelShader glowPs2Shader;
 	frozenbyte::storm::PixelShader colorEffectShader;
 	frozenbyte::storm::PixelShader colorEffectOffsetShader;
@@ -243,8 +241,6 @@ struct Storm3D_TerrainRendererData
 		colorEffectOffsetShader_NoGamma(storm.GetD3DDevice()),
 		blackWhiteShader(storm.GetD3DDevice()),
 
-		coneNvVertexShader(storm.GetD3DDevice()),
-
 		renderMode(IStorm3D_TerrainRenderer::Normal),
 		renderRenderTargets(true),
 		renderGlows(false),
@@ -308,8 +304,6 @@ struct Storm3D_TerrainRendererData
 		colorEffectOffsetShader.createColorEffectOffsetPixelShader();
 		colorEffectOffsetShader_NoGamma.createColorEffectOffsetPixelShader_NoGamma();
 		glowPs2Shader.createGlowTex8Shader();
-
-        coneNvVertexShader.createNvConeShader();
 
 		device.CreateTexture(2048, 1, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &depthLookupTexture, 0);
 
@@ -642,18 +636,11 @@ struct Storm3D_TerrainRendererData
 	{
         GFX_TRACE_SCOPE("Storm3D_TerrainRenderer::renderCones");
 		gfx::Device &device = storm.GetD3DDevice();
-		device.SetTexture(2, coneFadeTexture);
+		device.SetTexture(3, coneFadeTexture);
 
 		//lightManager.renderCones(scene, renderSpotShadows, glowsEnabled);
 
     	float timeFactor = float(scene.time_dif) * 0.001f;
-    		// this draws spotlight cone
-		device.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
-		device.SetPixelShader(0);
-
-        //TODO: next line unnecessary?????
-		Storm3D_ShaderManager::GetSingleton()->setProjectedShaders();
-		coneNvVertexShader.apply();
 
 		Storm3D_Camera &camera = *static_cast<Storm3D_Camera *> (scene.GetCamera());
 
@@ -674,12 +661,12 @@ struct Storm3D_TerrainRendererData
 				spot->renderCone(camera, timeFactor, renderGlows);
 		}
 
+        // TODO: remove
 		Storm3D_ShaderManager::GetSingleton()->setNormalShaders();
 		device.SetPixelShader(0);
 
 		device.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 		device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-		device.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
     }
 
     void renderLightTargets(Storm3D_Scene &scene)

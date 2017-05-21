@@ -24,27 +24,6 @@ void setTracing(bool tracing_);
 namespace frozenbyte {
 namespace storm {
 
-class VertexShader
-{
-	CComPtr<IDirect3DVertexShader9> handle;
-	CComPtr<IDirect3DVertexDeclaration9> declaration;
-	
-	gfx::Device& device;
-	std::vector<D3DVERTEXELEMENT9> elements;
-
-	std::string name;
-	CComPtr<IDirect3DVertexShader9> createVertexShader(gfx::Device& device, const std::string &fileName);
-
-public:
-	VertexShader(gfx::Device& device);
-	~VertexShader();
-
-	void createNvConeShader();
-
-	void applyDeclaration() const;
-	void apply() const;
-};
-
 class PixelShader
 {
 	CComPtr<IDirect3DPixelShader9> handle;
@@ -61,14 +40,10 @@ public:
 
 	void createGlowTex8Shader();
 
-	void createNvConeShader_Texture();
-	void createNvConeShader_NoTexture();
-
 	void createColorEffectPixelShader();
 	void createColorEffectOffsetPixelShader();
 	void createColorEffectOffsetPixelShader_NoGamma();
 	void createBlackWhiteShader();
-	void createOffsetBlendShader();
 
 	void apply() const;
 	bool hasShader() const;

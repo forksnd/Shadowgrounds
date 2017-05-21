@@ -233,6 +233,7 @@ namespace gfx
         { 15, 28 },
         { 16, 31 },
         { 17, 34 },
+        { 18, 0 },
     };
 
     ShaderSource vsShaderSources[] = 
@@ -244,6 +245,7 @@ namespace gfx
         { "Data\\shaders\\light_source.vs", 0, 11, 14 },
         { "Data\\shaders\\decal_lighting.vs", 0, 14, 15 },
         { "Data\\shaders\\light_source.vs", 0, 15, 18 },
+        { "Data\\shaders\\cone_light.vs", 0, 18, 19 },
     };
 
     ShaderDesc psShaderDescs[] =
@@ -264,6 +266,8 @@ namespace gfx
         { 13, 25 },
         { 14, 0 },
         { 15, 0 },
+        { 16, 7 },
+        { 17, 0 },
     };
 
     ShaderSource psShaderSources[] =
@@ -276,6 +280,7 @@ namespace gfx
         { "Data\\shaders\\shadow.ps", 0, 12, 14 },
         { "Data\\shaders\\decal_shadow.ps", 0, 14, 15 },
         { "Data\\shaders\\decal_lighting.ps", 0, 15, 16 },
+        { "Data\\shaders\\cone_light.ps", 0, 16, 18 },
     };
 
     template<typename ShaderType, size_t NUM_SHADERS, size_t NUM_DESCS>
@@ -416,6 +421,11 @@ namespace gfx
         lightSourceParams = D3DXVECTOR4(pos.x, pos.y, pos.z, 1.0f / range);
     }
 
+    void ProgramManager::setBias(float newBias)
+    {
+        bias = newBias;
+    }
+
     void ProgramManager::setStdProgram(gfx::Device& device, uint16_t id)
     {
         assert(id < PROGRAM_COUNT);
@@ -505,6 +515,17 @@ namespace gfx
             device.SetVertexShaderConstantF(21, diffuse, 1);
 
             device.SetPixelShaderConstantF(1, fogColor, 1);
+        }
+        else if (activeProgram == CONE_TEXTURE || activeProgram == CONE_NOTEXTURE)
+        {
+            device.SetVertexShaderConstantF(4, worldMatrix, 3);
+            device.SetVertexShaderConstantF(8, textureMatrices[1], 4);
+            device.SetVertexShaderConstantF(12, textureMatrices[2], 3);
+            device.SetVertexShaderConstantF(16, textureMatrices[3], 3);
+
+            device.SetVertexShaderConstantF(21, diffuse, 1);
+            device.SetVertexShaderConstantF(23, lightSourceParams, 1);
+            device.SetVertexShaderConstantF(24, D3DXVECTOR4(0.0f, 0.0f, bias, 0.0f), 1);
         }
     }
 }

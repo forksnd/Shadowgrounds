@@ -76,56 +76,6 @@ namespace storm {
 		*/
 	}
 
-	CComPtr<IDirect3DVertexShader9> VertexShader::createVertexShader(gfx::Device& device, const std::string &fileName)
-	{
-		std::string shaderString;
-		name = fileName;
-		readFile(shaderString, fileName);
-
-		ID3DXBuffer *assembledShader = 0;
-		ID3DXBuffer *compilationErrors = 0;
-
-		HRESULT hr = 0;
-
-		if(!fileName.empty())
-		{
-			hr = D3DXAssembleShader(shaderString.c_str(), shaderString.size(), 0, 0, 0, &assembledShader, &compilationErrors);
-			if(FAILED(hr))
-			{
-				char *foo = (char *) compilationErrors->GetBufferPointer();
-				OutputDebugString(foo);
-
-#ifdef LEGACY_FILES
-				FILE *fp = fopen("vertex_shader_dbg.txt", "w");
-#else
-				FILE *fp = fopen("logs/vertex_shader_dbg.txt", "w");
-#endif
-				if (fp != NULL)
-				{
-					fprintf(fp, "File: %s\r\n", fileName.c_str());
-					fprintf(fp, "Output: %s\r\n", foo);
-					fclose(fp);
-				}
-
-				assert(!MessageBox(NULL, "D3DXAssembleShader failed!", "Shit happens", MB_OK));
-			}
-		}
-
-		if(!assembledShader)
-			return 0;
-
-		CComPtr<IDirect3DVertexShader9> result;
-		DWORD *buffer = (assembledShader) ? (DWORD*)assembledShader->GetBufferPointer() : 0;
-
-		hr = device.CreateVertexShader(buffer, &result);
-		if(FAILED(hr))
-		{
-			assert(MessageBox(NULL, "CreateVertexShader failed!", "Shit happens", MB_OK));
-		}
-
-		return result;
-	}
-
 	CComPtr<IDirect3DPixelShader9> PixelShader::createPixelShader(gfx::Device& device, const std::string &fileName)
 	{
 		std::string shaderString;
@@ -170,66 +120,6 @@ namespace storm {
 		return result;
 	}
 
-	D3DVERTEXELEMENT9 createElement(int stream, int offset, int type, int usage, int index = 0)
-	{
-		D3DVERTEXELEMENT9 result;
-		result.Stream = stream;
-		result.Offset = offset;
-		result.Type = type;
-		result.Usage = usage;
-		result.Method = 0;
-		result.UsageIndex = index;
-
-		return result;
-	}
-
-	static D3DVERTEXELEMENT9 end = D3DDECL_END();
-
-VertexShader::VertexShader(gfx::Device& device_)
-:	handle(0),
-	device(device_)
-{
-}
-
-VertexShader::~VertexShader()
-{
-}
-
-void VertexShader::createNvConeShader()
-{
-	elements.clear();
-	elements.push_back(createElement(0, 0, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_POSITION));
-	elements.push_back(createElement(0, 3*4, D3DDECLTYPE_FLOAT3, D3DDECLUSAGE_NORMAL));
-	elements.push_back(createElement(0, 6*4, D3DDECLTYPE_D3DCOLOR, D3DDECLUSAGE_COLOR));
-	elements.push_back(createElement(0, 7*4, D3DDECLTYPE_FLOAT2, D3DDECLUSAGE_TEXCOORD, 0));
-	elements.push_back(end);
-
-#ifdef LEGACY_FILES
-	handle = createVertexShader(device, "Data\\Shaders\\cone_vertex_shader_nv.txt");
-#else
-	handle = createVertexShader(device, "data\\shader\\cone_vertex_shader_nv.fvs");
-#endif
-	declaration = 0;
-	device.CreateVertexDeclaration(&elements[0], &declaration);
-}
-
-void VertexShader::applyDeclaration() const
-{
-	device.SetVertexDeclaration(declaration);
-}
-
-void VertexShader::apply() const
-{
-#ifndef NDEBUG
-	activeVertexShader = name;
-	if (tracing) {
-		fprintf(stderr, "activated vertex shader %s\n", name.c_str());
-	}
-#endif
-	device.SetVertexDeclaration(declaration);
-	device.SetVertexShader(handle);
-}
-
 // --
 
 PixelShader::PixelShader(gfx::Device& device_)
@@ -247,16 +137,6 @@ PixelShader::~PixelShader()
 void PixelShader::createGlowTex8Shader()
 {
 	handle = createPixelShader(device, "Data\\Shaders\\glow_8tex_pixel_shader.txt");
-}
-
-void PixelShader::createNvConeShader_Texture()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\nv_cone_pixel_shader_texture.txt");
-}
-
-void PixelShader::createNvConeShader_NoTexture()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\nv_cone_pixel_shader_notexture.txt");
 }
 
 void PixelShader::createColorEffectPixelShader()
@@ -279,28 +159,12 @@ void PixelShader::createBlackWhiteShader()
 	handle = createPixelShader(device, "Data\\Shaders\\black_white_effect_pixel_shader.txt");
 }
 
-void PixelShader::createOffsetBlendShader()
-{
-	handle = createPixelShader(device, "Data\\Shaders\\offset_blend_pixel_shader.txt");
-}
-
-
 
 #else
 
 void PixelShader::createGlowTex8Shader()
 {
 	handle = createPixelShader(device, "data\\shader\\glow_8tex_pixel_shader.fps");
-}
-
-void PixelShader::createNvConeShader_Texture()
-{
-	handle = createPixelShader(device, "data\\shader\\nv_cone_pixel_shader_texture.fps");
-}
-
-void PixelShader::createNvConeShader_NoTexture()
-{
-	handle = createPixelShader(device, "data\\shader\\nv_cone_pixel_shader_notexture.fps");
 }
 
 void PixelShader::createColorEffectPixelShader()
@@ -322,12 +186,6 @@ void PixelShader::createBlackWhiteShader()
 {
 	handle = createPixelShader(device, "data\\shader\\black_white_effect_pixel_shader.fps");
 }
-
-void PixelShader::createOffsetBlendShader()
-{
-	handle = createPixelShader(device, "data\\shader\\offset_blend_pixel_shader.fps");
-}
-
 
 #endif
 

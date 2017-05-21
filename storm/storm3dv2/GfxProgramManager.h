@@ -49,6 +49,8 @@ namespace gfx
             MESH_STATIC_PROJECTION_FLAT_NOSHADOW,
             MESH_STATIC_PROJECTION_POINT_NOSHADOW,
             MESH_STATIC_PROJECTION_DIRECT_NOSHADOW,
+            CONE_TEXTURE,
+            CONE_NOTEXTURE,
             PROGRAM_COUNT
         };
 
@@ -81,6 +83,7 @@ namespace gfx
         void setLightmapColor(const COL& color);
         void setDirectLight(const VC3& dir, float strength);
         void setPointLight(const VC3& pos, float range);
+        void setBias(float newBias);
 
     private:
         enum
@@ -95,6 +98,7 @@ namespace gfx
             VS_STATIC_MESH_PROJECTION_FLAT,
             VS_STATIC_MESH_PROJECTION_POINT,
             VS_STATIC_MESH_PROJECTION_DIRECT,
+            VS_CONE,
             VS_SHADER_COUNT
         };
 
@@ -108,6 +112,8 @@ namespace gfx
             PS_NOSHADOW,
             PS_DECAL_SHADOW,
             PS_DECAL_LIGHTING,
+            PS_CONE_TEXTURE,
+            PS_CONE_NOTEXTURE,
             PS_SHADER_COUNT
         };
 
@@ -146,9 +152,14 @@ namespace gfx
             { VS_STATIC_MESH_PROJECTION_DIRECT, PS_SHADOW },
             { VS_STATIC_MESH_PROJECTION_FLAT, PS_NOSHADOW },
             { VS_STATIC_MESH_PROJECTION_POINT, PS_NOSHADOW },
-            { VS_STATIC_MESH_PROJECTION_DIRECT, PS_NOSHADOW }, };
+            { VS_STATIC_MESH_PROJECTION_DIRECT, PS_NOSHADOW },
+            { VS_CONE, PS_CONE_TEXTURE },
+            { VS_CONE, PS_CONE_NOTEXTURE },
+        };
 
         uint16_t activeProgram = 0;
+
+        float bias = 0.0f;
 
         D3DXVECTOR4 textureOffset;
 
