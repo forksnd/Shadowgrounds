@@ -1088,14 +1088,6 @@ t->Apply(4);
                 continue;
             device.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 
-            if (!false)
-            {
-                device.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
-                device.SetTextureStageState(1, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_PROJECTED);
-                device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-                device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-            }
-
             const float *cameraView = camera.GetView4x4Matrix();
             const float *cameraViewProjection = camera.GetViewProjection4x4Matrix();
             spot->applyTextures(cameraView, cameraViewProjection, storm, renderShadows);
@@ -1166,11 +1158,6 @@ t->Apply(4);
             device.SetSamplerState(i, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
         }
         //setTracing(false);
-
-        device.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-        device.SetTextureStageState(1, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-        device.SetTextureStageState(2, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-        device.SetTextureStageState(3, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
 
         device.SetTexture(1, 0);
         device.SetTexture(2, 0);

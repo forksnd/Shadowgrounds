@@ -136,27 +136,27 @@ PixelShader::~PixelShader()
 
 void PixelShader::createGlowTex8Shader()
 {
-	handle = createPixelShader(device, "Data\\Shaders\\glow_8tex_pixel_shader.txt");
+	handle = createPixelShader(device, "Data\\ShadersASM\\glow_8tex_pixel_shader.txt");
 }
 
 void PixelShader::createColorEffectPixelShader()
 {
-	handle = createPixelShader(device, "Data\\Shaders\\color_effect_pixel_shader.txt");
+	handle = createPixelShader(device, "Data\\ShadersASM\\color_effect_pixel_shader.txt");
 }
 
 void PixelShader::createColorEffectOffsetPixelShader()
 {
-	handle = createPixelShader(device, "Data\\Shaders\\color_effect_offset_pixel_shader.txt");
+	handle = createPixelShader(device, "Data\\ShadersASM\\color_effect_offset_pixel_shader.txt");
 }
 
 void PixelShader::createColorEffectOffsetPixelShader_NoGamma()
 {
-	handle = createPixelShader(device, "Data\\Shaders\\color_effect_offset_pixel_shader_nogamma.txt");
+	handle = createPixelShader(device, "Data\\ShadersASM\\color_effect_offset_pixel_shader_nogamma.txt");
 }
 
 void PixelShader::createBlackWhiteShader()
 {
-	handle = createPixelShader(device, "Data\\Shaders\\black_white_effect_pixel_shader.txt");
+	handle = createPixelShader(device, "Data\\ShadersASM\\black_white_effect_pixel_shader.txt");
 }
 
 
