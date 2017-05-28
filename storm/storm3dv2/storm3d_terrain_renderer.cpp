@@ -1768,9 +1768,6 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 	device.SetRenderState(D3DRS_AMBIENT, data->ambient.GetAsD3DCompatibleARGB());
 	frozenbyte::storm::setCulling(device, D3DCULL_CCW);
 
-	D3DXMATRIX dm;
-	D3DXMatrixIdentity(&dm);
-
 	data->models.setCollisionRendering(data->renderCollision);
 
 	// Rendertarget stuff
@@ -1910,7 +1907,14 @@ void Storm3D_TerrainRenderer::renderTargets(Storm3D_Scene &scene)
 
 		device.SetRenderState(D3DRS_FOGENABLE, FALSE);
 
-		// Terrain textures
+        D3DXMATRIX dm;
+        D3DXMatrixIdentity(&dm);
+
+        programManager.setWorldMatrix(dm);
+        programManager.setViewMatrix(dm);
+        programManager.setProjectionMatrix(scene.camera.GetVP()); //HACK: combined view projection
+
+        // Terrain textures
 		{
 			int clearFlag = D3DCLEAR_ZBUFFER;
 			if(data->storm.support_stencil)

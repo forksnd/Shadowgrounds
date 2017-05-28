@@ -1039,8 +1039,6 @@ void Storm3D_TerrainHeightmap::renderTextures(Storm3D_Scene &scene)
 	D3DXMatrixIdentity(&dm);
 
     programManager.setWorldMatrix(dm);
-    programManager.setViewMatrix(dm);
-    programManager.setProjectionMatrix(scene.camera.GetVP()); //HACK: combined view projection
     programManager.commitConstants(device);
     programManager.setStdProgram(device, gfx::ProgramManager::TERRAIN_TEXTURES_BLEND);
     renderer.setFVF(FVF_TERRAIN);
