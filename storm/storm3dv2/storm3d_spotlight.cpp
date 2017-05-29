@@ -1017,28 +1017,24 @@ void Storm3D_Spotlight::renderCone(Storm3D_Camera &camera, float timeFactor, boo
 
 void Storm3D_Spotlight::debugRender()
 {
-	float buffer[] = 
-	{
-		0.f, 300.f, 0.f, 1.f, 0.f, 1.f,
-		0.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-		300.f, 300.f, 0.f, 1.f, 1.f, 1.f,
-		300.f, 0.f, 0.f, 1.f, 1.f, 0.f
-	};
+    float buffer[] =
+    {
+        -1.0f, 0.5f, 0.f, 1.f,
+        -1.0f, 1.0f, 0.f, 0.f,
+        -0.5f, 0.5f, 1.f, 1.f,
+        -0.5f, 1.0f, 1.f, 0.f
+    };
 
-	data->device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	data->device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-	data->device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-	data->device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-	data->device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+    if (data->shadowMap)
+        data->shadowMap->applyColor(0);
 
-	if(data->shadowMap)
-		data->shadowMap->applyColor(0);
+    data->storm.renderer.programManager.setStdProgram(
+        data->storm.renderer.device,
+        gfx::ProgramManager::SSF_2D_POS | gfx::ProgramManager::SSF_TEXTURE
+    );
+    data->storm.renderer.setFVF(FVF_P2UV);
 
-	data->device.SetPixelShader(0);
-	data->device.SetVertexShader(0);
-    data->storm.renderer.setFVF(FVF_PT4UV);
-
-	data->storm.renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) *  6);
+    data->storm.renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) * 4);
 }
 
 void Storm3D_Spotlight::releaseDynamicResources()

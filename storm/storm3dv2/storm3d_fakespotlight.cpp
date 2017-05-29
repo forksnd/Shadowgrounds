@@ -667,38 +667,33 @@ void Storm3D_FakeSpotlight::renderProjection()
 
 void Storm3D_FakeSpotlight::debugRender()
 {
-	if(BUFFER_WIDTH <= 0 || BUFFER_HEIGHT <= 0)
-		return;
+    if (BUFFER_WIDTH <= 0 || BUFFER_HEIGHT <= 0)
+        return;
 
-	float buffer[] = 
-	{
-		0.f, 300.f, 0.f, 1.f, 0.f, 1.f,
-		0.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-		300.f, 300.f, 0.f, 1.f, 1.f, 1.f,
-		300.f, 0.f, 0.f, 1.f, 1.f, 0.f
-	};
+    float buffer[] =
+    {
+        -1.0f, 0.5f, 0.f, 1.f,
+        -1.0f, 1.0f, 0.f, 0.f,
+        -0.5f, 0.5f, 1.f, 1.f,
+        -0.5f, 1.0f, 1.f, 0.f
+    };
 
-	data->device.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	data->device.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-	data->device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-	data->device.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-	data->device.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	data->device.SetPixelShader(0);
+    if (data->renderTarget)
+        data->renderTarget->applyColor(0);
 
-	if(data->renderTarget)
-		data->renderTarget->applyColor(0);
+    //data->device.SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+    //data->device.SetRenderState(D3DRS_ALPHAREF, 0x50);
+    //data->device.SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 
-	//data->device.SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-	//data->device.SetRenderState(D3DRS_ALPHAREF, 0x50);
-	//data->device.SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
+    data->storm.renderer.programManager.setStdProgram(
+        data->storm.renderer.device,
+        gfx::ProgramManager::SSF_2D_POS | gfx::ProgramManager::SSF_TEXTURE
+    );
+    data->storm.renderer.setFVF(FVF_P2UV);
 
-	data->device.SetPixelShader(0);
-	data->device.SetVertexShader(0);
-    data->storm.renderer.setFVF(FVF_PT4UV);
+    data->storm.renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) *  4);
 
-    data->storm.renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) *  6);
-
-	//data->device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+    //data->device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 }
 
 void Storm3D_FakeSpotlight::releaseDynamicResources()
