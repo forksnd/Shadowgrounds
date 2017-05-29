@@ -2691,54 +2691,36 @@ void Storm3D_TerrainRenderer::renderBase(Storm3D_Scene &scene)
 	device.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 	frozenbyte::storm::setCulling(device, D3DCULL_CCW);
 
-	// debugging code
-	if (false)
-	{
-		IDirect3DStateBlock9 *state;
-		device.CreateStateBlock(D3DSBT_ALL, &state);
-		state->Capture();
+    // debugging code
+    if (false)
+    {
+        float buffer[] =
+        {
+            -1.0f, 0.5f, 0.f, 1.f,
+            -1.0f, 1.0f, 0.f, 0.f,
+            -0.5f, 0.5f, 1.f, 1.f,
+            -0.5f, 1.0f, 1.f, 0.f
+        };
 
-		D3DXMATRIX id;
-		D3DXMatrixIdentity(&id);
-		device.SetTransform(D3DTS_WORLD, &id);
-		device.SetTransform(D3DTS_VIEW, &id);
-		device.SetTransform(D3DTS_PROJECTION, &id);
+        device.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+        device.SetRenderState(D3DRS_ZENABLE, FALSE);
+        device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+        device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+        device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+        device.SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
+        device.SetRenderState(D3DRS_FOGENABLE, FALSE);
+        device.SetRenderState(D3DRS_STENCILENABLE, FALSE);
 
-		for (int i = 1; i < 8; i++) {
-			device.SetTexture(i, 0);
-			device.SetTextureStageState(i, D3DTSS_COLOROP, D3DTOP_DISABLE);
-			device.SetTextureStageState(i, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-			device.SetTextureStageState(i, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-			device.SetTextureStageState(i, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-		}
+        device.SetTexture(0, data->terrainTexture);
 
-		device.SetTexture(0, data->terrainTexture);
-		device.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+        data->storm.renderer.programManager.setStdProgram(
+            data->storm.renderer.device,
+            gfx::ProgramManager::SSF_2D_POS | gfx::ProgramManager::SSF_TEXTURE
+        );
+        data->storm.renderer.setFVF(FVF_P2UV);
 
-		device.SetPixelShader(0);
-		device.SetVertexShader(0);
-		device.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
-		device.SetRenderState(D3DRS_ZENABLE, FALSE);
-		device.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-		device.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-		device.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-		device.SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
-		device.SetRenderState(D3DRS_FOGENABLE, FALSE);
-		device.SetRenderState(D3DRS_STENCILENABLE, FALSE);
-
-
-		float x2 = 300, y2 = 300;
-		Vertex_P4DUV buffer[4];
-		DWORD color = 0xFFFFFFFF;
-		buffer[0] = {VC4( 0, y2, 1.f, 1.f), color, VC2(0.f, 1.f)};
-		buffer[1] = {VC4( 0,  0, 1.f, 1.f), color, VC2(0.f, 0.f)};
-		buffer[2] = {VC4(x2, y2, 1.f, 1.f), color, VC2(1.f, 1.f)};
-		buffer[3] = {VC4(x2,  0, 1.f, 1.f), color, VC2(1.f, 0.f)};
-		renderer.setFVF(FVF_PT4DUV);
-		renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(Vertex_P4DUV));
-
-		state->Apply();
-	}
+        renderer.drawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, buffer, sizeof(float) * 4);
+    }
 
 }
 
