@@ -1,0 +1,50 @@
+sampler samLightmap  : register(s0);
+sampler samTerrain   : register(s3);
+sampler samFakeLight : register(s2);
+
+struct PS_IN
+{
+    float4 diffuse   : COLOR0;
+    float2 uv0       : TEXCOORD0;
+    float4 uv1       : TEXCOORD1;
+    float4 uv2       : TEXCOORD2;
+    float  fogFactor : FOG;
+};
+
+float4 uLightmapColor : register(c0);
+float3 uFogColor : register(c1);
+
+float4 main(PS_IN ps_in):COLOR
+{
+    float4 color = 1.0;
+
+    float4 lightmap = tex2D(samLightmap, ps_in.uv0);
+    float4 terrain= tex2Dproj(samTerrain, ps_in.uv1);
+    float4 fakeLight= tex2Dproj(samFakeLight, ps_in.uv2);
+
+    float4 lighting = saturate(lightmap * uLightmapColor + ps_in.diffuse + fakeLight);
+    color.rgb = 2 * terrain.rgb * lighting.rgb;
+    color.rgb = lerp(uFogColor, color.rgb, ps_in.fogFactor);
+    color.a = ps_in.diffuse.a;
+
+    return color;
+}
+
+/*
+ps.1.1
+
+; Terrain pixel shader:
+
+tex t0 ; Lightmap
+tex t2 ; Fake
+tex t3 ; Terrain
+
+; c0 - lightmap multiplier
+
+mad r0, t0, c0, v0
+add_sat r0, r0, t2
+mul r0, r0, t3
+
+add r0.rgb, r0, r0
++ mov r0.a, v0
+*/

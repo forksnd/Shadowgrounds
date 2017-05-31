@@ -1,0 +1,62 @@
+//ENABLE_TEXTURE 0
+
+struct PS_IN
+{
+    float4 diffuse   : COLOR0;
+    float4 uv0       : TEXCOORD0;
+    float2 uv1       : TEXCOORD1;
+    float2 uv2       : TEXCOORD2;
+    float  uv3       : TEXCOORD3;
+};
+
+sampler samShadowTexture   : register(s0);
+sampler samConeTexture   : register(s1);
+sampler samFadeTexture   : register(s3);
+
+float4 main(PS_IN ps_in): COLOR0
+{
+    // ps.1.0
+
+    // def c3, 0.5f, 0.5f, 0.5f, 0.5f
+
+    // ; Shadow depth
+    // tex t0
+    // ; Cone texture
+    // tex t1
+    // ; Fade texture
+    // tex t2
+    // ; Cone texture
+    // tex t3
+
+    // mul r0, v0, t0
+    // mul r0, r0, t2
+    // ; Cone texture
+    // mul r1, t3, c3
+    // mad r1, t1, c3, r1
+    // mul r0, r0, r1
+
+    // ; Cone texture
+    // ;mul r1, t3, c3
+    // ;mad_sat r1.rgb, t1, c3, r1
+    // ;+ mul r0.a, t0.a, t2.a
+    // ;mul r0, r0.a, r1
+    // ;mul r0, r0, v0
+
+
+    float4 color = ps_in.diffuse;
+
+    float  occluderDepth = tex2Dproj(samShadowTexture, ps_in.uv0).x;
+    float  sampleDepth = ps_in.uv0.z / ps_in.uv0.w;
+    color.rgb *= (sampleDepth < occluderDepth) ? 1.0f : 0.0f;
+
+    float3 fade = tex1D(samFadeTexture, ps_in.uv3).rgb;
+    color.rgb *= fade;
+
+#ifdef ENABLE_TEXTURE
+    float4 coneTexture1 = tex2D(samConeTexture, ps_in.uv1);
+    float4 coneTexture2 = tex2D(samConeTexture, ps_in.uv2);
+    color *= saturate(0.5*coneTexture1 + 0.5*coneTexture2);
+#endif
+
+    return color;
+}

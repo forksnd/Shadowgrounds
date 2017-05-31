@@ -1,4 +1,5 @@
 //#define ENABLE_SHADOW 1
+//#define TERRAIN_TEXTURE 1
 
 struct PS_IN
 {
@@ -6,7 +7,11 @@ struct PS_IN
     float4 diffuse   : COLOR0;
     float4 uv0       : TEXCOORD0;
     float4 uv1       : TEXCOORD1;
+#if TERRAIN_TEXTURE
+    float4 uv2       : TEXCOORD2;
+#else
     float2 uv2       : TEXCOORD2;
+#endif
     float  uv3       : TEXCOORD3;
 };
 
@@ -24,7 +29,11 @@ float4 main(PS_IN ps_in): COLOR
     //tex t2 ; Base texture
     //tex t3 ; Fade texture
     float4 projectedColor = tex2Dproj(samProjTexture, ps_in.uv0);
+#if TERRAIN_TEXTURE
+    float4 baseColor = tex2Dproj(samBaseTexture, ps_in.uv2);
+#else
     float4 baseColor = tex2D(samBaseTexture, ps_in.uv2);
+#endif
     float3 fade = tex1D(samFadeTexture, ps_in.uv3).rgb;
 
     //mul r0, t2, v0

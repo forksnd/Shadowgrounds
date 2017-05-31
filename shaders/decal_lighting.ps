@@ -1,0 +1,37 @@
+struct PS_IN
+{
+    float4 diffuse   : COLOR0;
+    float4 lighting  : COLOR1;
+    float2 uv0       : TEXCOORD0;
+    float4 uv1       : TEXCOORD1;
+    float fogFactor  : FOG;
+};
+
+struct PS_OUT
+{
+    float4 rt0 : COLOR;
+};
+
+sampler2D samDiffuse : register(s0);
+sampler2D samFakeLight : register(s2);
+
+float3   uFogColor : register(c1);
+
+PS_OUT main(PS_IN ps_in)
+{
+    PS_OUT ps_out = (PS_OUT)0;
+
+    float4 color = float4(ps_in.diffuse.rgb, ps_in.lighting.a);
+
+    color *= tex2D(samDiffuse, ps_in.uv0);
+
+    float3 fakeLight = tex2Dproj(samFakeLight, ps_in.uv1).rgb;
+    float3 lighting = saturate(fakeLight + ps_in.lighting);
+
+    color.rgb *= 2 * lighting;//Do we need to multiply by 2?????
+    color.rgb = lerp(uFogColor, color.rgb, ps_in.fogFactor);
+
+    ps_out.rt0 = color;
+
+    return ps_out;
+}

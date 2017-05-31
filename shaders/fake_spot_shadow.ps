@@ -3,7 +3,7 @@ sampler samShadowProj1 : register(s1);
 sampler samShadowProj2 : register(s2);
 sampler samShadowProj3 : register(s3);
 
-float uFadeK;
+uniform float uFadeK : register(c0);
 
 struct PS_IN
 {
